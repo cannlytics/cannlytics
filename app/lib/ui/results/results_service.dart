@@ -100,7 +100,8 @@ final resultJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
   yield* _dataSource.streamCollection(
     path: 'users/${user.uid}/parse_coa_jobs',
     builder: (data, documentId) => data,
-    queryBuilder: (query) => query.orderBy('job_created_at', descending: true),
+    queryBuilder: (query) =>
+        query.orderBy('job_created_at', descending: true).limit(1000),
   );
 });
 
@@ -248,6 +249,36 @@ class COAParser extends AsyncNotifier<List<Map?>> {
       }
       return allData;
     });
+  }
+
+  /// Retry a job.
+  Future<void> retryJob(String uid, String jobId) async {
+    final FirestoreService firestoreService = ref.read(firestoreProvider);
+
+    // Fetch the receipt's data from Firestore using its job_id.
+    String docRef = 'users/$uid/parse_coa_jobs/$jobId';
+    Map<String, dynamic>? data =
+        await firestoreService.getDocument(path: docRef);
+    if (data == null) {
+      print('Error: Receipt data not found for job id: $jobId');
+      return;
+    }
+
+    // Delete the existing document from Firestore.
+    await deleteJob(uid, jobId);
+
+    // Recreate the document in Firestore using the fetched data.
+    DocumentReference newDocRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('parse_coa_jobs')
+        .doc();
+    data['job_id'] = newDocRef.id;
+    data['job_created_at'] = DateTime.now().toIso8601String();
+    await firestoreService.updateDocument(path: newDocRef.path, data: data);
+
+    // Optionally: Update the state if needed.
+    state = AsyncValue.data((state.value ?? [])..add(data));
   }
 
   /// Delete a job.

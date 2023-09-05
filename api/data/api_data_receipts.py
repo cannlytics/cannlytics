@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 7/2/2023
+Updated: 9/4/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -14,10 +14,12 @@ from datetime import datetime
 from json import loads
 import os
 import tempfile
+from urllib.parse import urlparse
 
 # External imports
 import google.auth
-from django.http.response import JsonResponse
+# from django.http.response import JsonResponse
+import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import pandas as pd
@@ -43,7 +45,7 @@ from website.settings import FIREBASE_API_KEY, STORAGE_BUCKET
 
 
 # Maximum number of files that can be parsed in one request.
-MAX_NUMBER_OF_FILES = 10
+MAX_NUMBER_OF_FILES = 100
 
 # Maximum file size for a single file.
 MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
@@ -53,6 +55,45 @@ FILE_TYPES = ['png', 'jpg', 'jpeg']
 
 # Maximum number of observations that can be downloaded at once.
 MAX_OBSERVATIONS_PER_FILE = 200_000
+
+
+def process_file_or_url(source, is_url=False, default_ext='jpg'):
+    """
+    If is_url is False, process a file and return the filepath.
+    If is_url is True, download a file from a URL and return the filepath.
+    """
+    # Read the file.
+    if is_url:
+        parsed_url = urlparse(source)
+        base_name = os.path.basename(parsed_url.path)
+        ext = os.path.splitext(base_name)[1].lstrip('.')
+        if not ext: ext = default_ext
+        response = requests.get(source)
+        if response.status_code != 200:
+            print(f"Failed to download {source}")
+            return None
+        file_content = response.content
+    else:
+        ext: str = source.name.split('.').pop()
+        file_content = source.read()
+
+    # TODO: Reject files that are too large.
+    # if len(file_content) >= MAX_FILE_SIZE:
+    #     message = 'File too large. The maximum number of bytes is %i.' % MAX_FILE_SIZE
+    #     response = {'error': True, 'message': message}
+    #     return JsonResponse(response, status=406)
+
+    # TODO Reject files that are not of valid types.
+    # if ext.lower() not in FILE_TYPES:
+    #     message = 'Invalid file type. Valid file types are: %s' % ', '.join(FILE_TYPES)
+    #     response = {'error': True, 'message': message}
+    #     return JsonResponse(response, status=406)
+
+    # Save the file as a temp file for parsing.
+    temp = tempfile.mkstemp(f'.{ext}')
+    with os.fdopen(temp[0], 'wb') as temp_file:
+        temp_file.write(file_content)
+    return temp[1]
 
 
 @api_view(['GET', 'POST', 'DELETE'])
@@ -167,53 +208,49 @@ def api_data_receipts(request, receipt_id=None):
         user_subscription = get_document(f'subscribers/{uid}')
         current_tokens = user_subscription.get('tokens', 0) if user_subscription else 0
         if current_tokens < 1:
-            # message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
-            # response = {'success': False, 'message': message}
-            # return Response(response, status=402)
-            print('USER HAS NO TOKENS. ALLOWING FOR TESTING.')
+            message = 'You have 0 Cannlytics AI tokens. You need 1 AI token per AI job. You can purchase more tokens at https://cannlytics.com/account/subscriptions.'
+            print(message)
+            response = {'success': False, 'message': message}
+            return Response(response, status=402)
         
         # Get any user-posted files.
         images = []
         request_files = request.FILES.getlist('file')
-        if request_files is not None:
-
-            # Log the posted files.
+        if request_files:
             print('POSTED FILES:', request_files)
-
-            # Save each file to the temporary directory.
             for image_file in request_files:
+                filepath = process_file_or_url(image_file)
+                if filepath:
+                    images.append(filepath)
 
-                # File safety check.
-                ext: str = image_file.name.split('.').pop()
+        # Get any user-posted URLs.
+        try:
+            urls = loads(request.body.decode('utf-8')).get('urls', [])
+            print('POSTED URLS IN BODY:', urls)
+        except:
+            try:
+                urls = request.data.get('urls', [])
+                print('POSTED URLS IN DATA:', urls)
+            except:
+                urls = []
 
-                # Reject files that are too large.
-                if image_file.size >= MAX_FILE_SIZE:
-                    message = 'File too large. The maximum number of bytes is %i.' % MAX_FILE_SIZE
-                    response = {'error': True, 'message': message}
-                    return JsonResponse(response, status=406)
-                
-                # Reject files that are not PDFs or ZIPs or common image types.
-                if ext.lower() not in FILE_TYPES:
-                    message = 'Invalid file type. Valid file types are: %s' % ', '.join(FILE_TYPES)
-                    response = {'error': True, 'message': message}
-                    return JsonResponse(response, status=406)
-
-                # Save the file as a temp file for parsing.
-                temp = tempfile.mkstemp(f'.{ext}')
-                temp_file = os.fdopen(temp[0], 'wb')
-                temp_file.write(image_file.read())
-                temp_file.close()
-                images.append(temp[1])
+        # Process the URLs.
+        for url in urls:
+            filepath = process_file_or_url(url, is_url=True)
+            if filepath:
+                images.append(filepath)
 
         # Return an error if no PDFs or URLs are passed.
         if not images:
             message = 'Expecting request files. Valid file types are: %s' % ', '.join(FILE_TYPES)
+            print(message)
             response = {'success': False, 'message': message}
             return Response(response, status=400)
 
         # Return an error if too many PDFs or URLs are passed.
         if len(images) > MAX_NUMBER_OF_FILES:
             message = f'Too many files, please limit your request to {MAX_NUMBER_OF_FILES} files at a time.'
+            print(message)
             response = {'success': False, 'message': message}
             return Response(response, status=400)
 
@@ -240,6 +277,7 @@ def api_data_receipts(request, receipt_id=None):
         # Return an error if OpenAI can't be initialized.
         if not openai_api_key:
             message = 'OpenAI API key not found.'
+            print(message)
             response = {'success': False, 'message': message}
             return Response(response, status=400)
 
@@ -269,7 +307,7 @@ def api_data_receipts(request, receipt_id=None):
             # Add the strain names to the receipt data.
             receipt_data['strain_names'] = strain_names
 
-            # Upload the file to Firebase Storage.
+            # Upload the temporary image file to Firebase Storage.
             ext = image.split('.').pop()
             doc_id = receipt_data['hash']
             ref = 'users/%s/receipts/%s.%s' % (uid, doc_id, ext)
@@ -408,6 +446,7 @@ def download_receipts_data(request):
     if len(data) > MAX_OBSERVATIONS_PER_FILE:
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
         response = {'success': False, 'message': message}
+        print(message)
         return Response(response, status=400)
     
     # Specify the filename.

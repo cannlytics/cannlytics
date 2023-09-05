@@ -16,10 +16,10 @@
 
 | Component | Status | Production URL |
 |---------|--------|----------|
-| [🦾 Cannlytics AI](https://github.com/cannlytics/cannlytics/tree/main/ai) | 🟡 | In Development |
+| [🦾 Cannlytics AI](https://github.com/cannlytics/cannlytics/tree/main/ai) | 🟢 | <https://data.cannlytics.com> |
 | [📡 Cannlytics API](https://github.com/cannlytics/cannlytics/tree/main/api) | 🟢 | <https://cannlytics.com/api> |
 | [📱 Cannlytics App](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟡  | In Development |
-| [📱 Cannlytics Data](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟡  | In Development |
+<!-- | [📱 Cannlytics Data](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟢  | In Development | -->
 | [🕹️ Cannlytics Console](https://github.com/cannlytics/cannlytics/tree/main/console) | 🟢 | <https://console.cannlytics.com> |
 | [📜 Cannlytics Documentation](https://github.com/cannlytics/cannlytics/tree/main/docs) | 🟡 | <https://docs.cannlytics.com> |
 | [🐍 Cannlytics Python SDK](https://github.com/cannlytics/cannlytics/tree/main/cannlytics) | 🟢 | <https://pypi.org/project/cannlytics/>|

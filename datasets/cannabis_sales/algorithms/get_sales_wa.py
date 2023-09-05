@@ -465,8 +465,8 @@ if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = 0
-    last_file = 10
+    first_file = 85
+    last_file = None
     reverse = False
 
     # Specify where your data lives.

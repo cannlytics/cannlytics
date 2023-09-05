@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/3/2023
+// Updated: 9/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -51,40 +51,40 @@ class ReceiptsParserInterface extends HookConsumerWidget {
   /// Data loaded interface.
   Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
     final asyncJobs = ref.watch(receiptJobsProvider);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _body(context, ref, child: ReceiptUpload()),
-        asyncJobs.when(
-          data: (jobs) => _parsingJobs(context, ref, items: jobs),
-          error: (err, stack) => Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.error, color: Colors.red, size: 48.0),
-                  SizedBox(height: 16),
-                  Text(
-                    'An error occurred while loading jobs.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+    return asyncJobs.when(
+      data: (jobs) => _parsingJobs(context, ref, items: jobs),
+      error: (err, stack) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.error, color: Colors.red, size: 48.0),
+              SizedBox(height: 16),
+              Text(
+                'An error occurred while loading jobs.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-          ),
-          loading: () => Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+            ],
           ),
         ),
-      ],
+      ),
+      loading: () => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
+    // return Column(
+    //   mainAxisAlignment: MainAxisAlignment.start,
+    //   crossAxisAlignment: CrossAxisAlignment.start,
+    //   mainAxisSize: MainAxisSize.min,
+    //   children: [
+    //     _body(context, ref, child: ReceiptUpload()),
+    //   ],
+    // );
   }
 
   /// No user interface.
@@ -185,21 +185,31 @@ class ReceiptsParserInterface extends HookConsumerWidget {
 
   /// Parsing jobs.
   Widget _parsingJobs(BuildContext context, WidgetRef ref, {required items}) {
-    JobConfig resultsConfig = JobConfig(
-      title: 'Result: ',
+    JobConfig receiptsConfig = JobConfig(
+      title: 'Receipt: ',
       downloadApiPath: '/api/data/receipts/download',
       deleteJobFunction: (uid, jobId) =>
           ref.read(receiptParser.notifier).deleteJob(uid, jobId),
+      retryJobFunction: (uid, jobId) =>
+          ref.read(receiptParser.notifier).retryJob(uid, jobId),
     );
+    // return Padding(
+    //   padding: const EdgeInsets.all(16.0),
+    //   child: Column(
+    //     mainAxisAlignment: MainAxisAlignment.start,
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     mainAxisSize: MainAxisSize.min,
+    //     children: <Widget>[
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
+          children: [
+            // Receipt upload.
+            _body(context, ref, child: ReceiptUpload()),
+
+            // Parsing jobs.
+            gapH16,
             Row(
               children: [
                 Text(
@@ -207,18 +217,6 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Spacer(),
-
-                // Future work: Delete all button?
-                // Deprecated: Refresh button.
-                // IconButton(
-                //   icon: Icon(
-                //     Icons.refresh,
-                //     color: Theme.of(context).textTheme.bodyMedium!.color,
-                //   ),
-                //   onPressed: () {
-                //     ref.read(coaParser.notifier).clear();
-                //   },
-                // ),
               ],
             ),
             gapH16,
@@ -230,7 +228,7 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                     shrinkWrap: true,
                     children: [
                       for (final item in items)
-                        JobItem(item: item, config: resultsConfig),
+                        JobItem(item: item, config: receiptsConfig),
                     ],
                   ),
           ],
@@ -288,70 +286,61 @@ class ReceiptsParserInterface extends HookConsumerWidget {
 
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Title.
+        Text(
+          'Parse receipts',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+
+        // COA upload actions.
+        gapH24,
+        Row(
+          children: [
+            // Subtitle.
             Text(
-              'Parse receipts',
-              style: Theme.of(context).textTheme.titleLarge,
+              'File Upload',
+              style: Theme.of(context).textTheme.labelMedium,
             ),
 
-            // COA upload actions.
-            gapH24,
-            Row(
-              children: [
-                // Subtitle.
-                Text(
-                  'File Upload',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-                // Tooltip.
-                IconButton(
-                  icon: Icon(Icons.info_outline),
-                  onPressed: () {},
-                  tooltip:
-                      'We support most image formats: .png, .jpeg, and .jpg',
-                ),
-                Spacer(),
-
-                // Upload receipts button.
-                // TODO: Make disabled when parsing.
-                PrimaryButton(
-                  text: 'Upload receipts',
-                  onPressed: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['jpg', 'jpeg', 'png'],
-                      withData: true,
-                      withReadStream: false,
-                    );
-                    if (result != null) {
-                      ref
-                          .read(receiptParser.notifier)
-                          .parseImages(result.files);
-                    } else {
-                      // User canceled the picker
-                    }
-                  },
-                ),
-              ],
+            // Tooltip.
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: () {},
+              tooltip: 'We support most image formats: .png, .jpeg, and .jpg',
             ),
+            Spacer(),
 
-            // Dynamic widget.
-            gapH4,
-            child,
-            gapH12,
+            // Upload receipts button.
+            // TODO: Make disabled when parsing.
+            PrimaryButton(
+              text: 'Upload receipts',
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['jpg', 'jpeg', 'png'],
+                  withData: true,
+                  withReadStream: false,
+                );
+                if (result != null) {
+                  ref.read(receiptParser.notifier).parseImages(result.files);
+                } else {
+                  // User canceled the picker
+                }
+              },
+            ),
           ],
         ),
-      ),
+
+        // Dynamic widget.
+        gapH4,
+        child,
+        gapH12,
+      ],
     );
   }
 }

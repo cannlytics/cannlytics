@@ -37,7 +37,7 @@ final aiModelsProvider =
   var data = await _dataSource.getCollection(
     path: 'public/ai/models',
     builder: (data, id) => data,
-    queryBuilder: (query) => query.orderBy('model_name'),
+    queryBuilder: (query) => query.orderBy('model_name', descending: true),
   );
   return data;
 });

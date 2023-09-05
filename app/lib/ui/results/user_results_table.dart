@@ -61,8 +61,8 @@ final resultsDataSourceProvider = StateNotifierProvider.family<CustomDataSource,
     },
     config: TableConfig(
       fields: [
+        'coa_parsed_at',
         'product_name',
-        'product_type',
         'producer',
         'lab',
         'date_tested',
@@ -72,7 +72,7 @@ final resultsDataSourceProvider = StateNotifierProvider.family<CustomDataSource,
       ],
       idKey: 'sample_id',
       selectedCountProvider: resultsSelectedProvider,
-      columnWidths: [160.0, 160.0, 160.0, 160.0, 160.0, 120.0, 120.0, 120.0],
+      columnWidths: [100.0, 160.0, 160.0, 160.0, 160.0, 100.0, 100.0, 100.0],
     ),
   );
 });
@@ -116,8 +116,8 @@ class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
   /// Filter logic.
   bool _itemContainsKeyword(Map? item, String keyword) {
     Map<String, dynamic> itemMap = {
+      'coa_parsed_at': item?['coa_parsed_at'],
       'product_name': item?['product_name'],
-      'product_type': item?['product_type'],
       'producer': item?['producer'],
       'lab': item?['lab'],
       'date_tested': item?['date_tested'],
@@ -215,8 +215,8 @@ class UserResultsTable extends ConsumerWidget {
 
           // Define the table headers.
           List<Map> headers = [
+            {'name': 'Parsed', 'key': 'coa_parsed_at', 'sort': true},
             {'name': 'Product Name', 'key': 'product_name', 'sort': true},
-            {'name': 'Type', 'key': 'product_type', 'sort': true},
             {'name': 'Producer', 'key': 'producer', 'sort': true},
             {'name': 'Lab', 'key': 'lab', 'sort': true},
             {'name': 'Date Tested', 'key': 'date_tested', 'sort': true},

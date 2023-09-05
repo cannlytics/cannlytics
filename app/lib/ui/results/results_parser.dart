@@ -57,39 +57,31 @@ class ResultsParserInterface extends HookConsumerWidget {
   /// Data loaded interface.
   Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
     final asyncJobs = ref.watch(resultJobsProvider);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _body(context, ref, child: CoAUpload()),
-        asyncJobs.when(
-          data: (jobs) => _parsingJobs(context, ref, items: jobs),
-          error: (err, stack) => Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.error, color: Colors.red, size: 48.0),
-                  SizedBox(height: 16),
-                  Text(
-                    'An error occurred while loading jobs.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+    return asyncJobs.when(
+      data: (jobs) => _parsingJobs(context, ref, items: jobs),
+      error: (err, stack) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.error, color: Colors.red, size: 48.0),
+              SizedBox(height: 16),
+              Text(
+                'An error occurred while loading jobs.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-          ),
-          loading: () => Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
+            ],
           ),
         ),
-      ],
+      ),
+      loading: () => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 
@@ -185,76 +177,70 @@ class ResultsParserInterface extends HookConsumerWidget {
 
   /// The main dynamic body of the screen.
   Widget _body(BuildContext context, WidgetRef ref, {required Widget child}) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Title.
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Title.
+        Text(
+          'Parse lab results',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+
+        // Parse COA URL textfield.
+        gapH12,
+        SizedBox(
+          height: 42,
+          child: COASearch(),
+        ),
+
+        // COA upload actions.
+        gapH24,
+        Row(
+          children: [
+            // Subtitle.
             Text(
-              'Parse lab results',
-              style: Theme.of(context).textTheme.titleLarge,
+              'File Upload',
+              style: Theme.of(context).textTheme.labelMedium,
             ),
 
-            // Parse COA URL textfield.
-            gapH12,
-            SizedBox(
-              height: 42,
-              child: COASearch(),
+            // Tooltip.
+            IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: () {},
+              tooltip:
+                  'We support most COA formats: .pdf, .png, .jpeg, and .jpg',
             ),
+            Spacer(),
 
-            // COA upload actions.
-            gapH24,
-            Row(
-              children: [
-                // Subtitle.
-                Text(
-                  'File Upload',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-
-                // Tooltip.
-                IconButton(
-                  icon: Icon(Icons.info_outline),
-                  onPressed: () {},
-                  tooltip:
-                      'We support most COA formats: .pdf, .png, .jpeg, and .jpg',
-                ),
-                Spacer(),
-
-                // Upload COAs button.
-                // TODO: Make disabled when parsing.
-                SecondaryButton(
-                  text: 'Upload COAs',
-                  onPressed: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-                      withData: true,
-                      withReadStream: false,
-                    );
-                    if (result != null) {
-                      // Parse COAs.
-                      ref.read(coaParser.notifier).parseCOAs(result.files);
-                    } else {
-                      // User canceled the picker
-                    }
-                  },
-                ),
-              ],
+            // Upload COAs button.
+            // TODO: Make disabled when parsing.
+            SecondaryButton(
+              text: 'Upload COAs',
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                  withData: true,
+                  withReadStream: false,
+                );
+                if (result != null) {
+                  // Parse COAs.
+                  ref.read(coaParser.notifier).parseCOAs(result.files);
+                } else {
+                  // User canceled the picker
+                }
+              },
             ),
-
-            // Dynamic widget.
-            gapH4,
-            child,
-            gapH12,
           ],
         ),
-      ),
+
+        // Dynamic widget.
+        gapH4,
+        child,
+        gapH12,
+      ],
     );
   }
 
@@ -265,6 +251,8 @@ class ResultsParserInterface extends HookConsumerWidget {
       downloadApiPath: '/api/data/coas/download',
       deleteJobFunction: (uid, jobId) =>
           ref.read(coaParser.notifier).deleteJob(uid, jobId),
+      retryJobFunction: (uid, jobId) =>
+          ref.read(coaParser.notifier).retryJob(uid, jobId),
     );
     return SingleChildScrollView(
       child: Padding(
@@ -274,7 +262,11 @@ class ResultsParserInterface extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // Title.
+            // COA upload.
+            _body(context, ref, child: CoAUpload()),
+
+            // Parsing jobs.
+            gapH16,
             Row(
               children: [
                 Text(
@@ -282,16 +274,6 @@ class ResultsParserInterface extends HookConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Spacer(),
-                // Deprecated: Refresh button.
-                // IconButton(
-                //   icon: Icon(
-                //     Icons.refresh,
-                //     color: Theme.of(context).textTheme.bodyMedium!.color,
-                //   ),
-                //   onPressed: () {
-                //     ref.read(coaParser.notifier).clear();
-                //   },
-                // ),
               ],
             ),
             gapH16,
@@ -302,7 +284,6 @@ class ResultsParserInterface extends HookConsumerWidget {
                 : ListView(
                     shrinkWrap: true,
                     children: [
-                      // for (final item in items) ResultsParserJob(item: item)
                       for (final item in items)
                         JobItem(item: item, config: resultsConfig),
                     ],

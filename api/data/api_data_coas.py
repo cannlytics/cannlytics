@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 8/31/2023
+Updated: 9/4/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -14,6 +14,7 @@ from datetime import datetime
 from json import loads
 import os
 import tempfile
+from urllib.parse import urlparse
 import uuid
 
 # External imports
@@ -22,7 +23,6 @@ import google.auth
 import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import pdfplumber
 
 # Internal imports
 from cannlytics.auth.auth import authenticate_request
@@ -44,7 +44,7 @@ from website.settings import FIREBASE_API_KEY, STORAGE_BUCKET
 
 
 # Maximum number of files that can be parsed in one request.
-MAX_NUMBER_OF_FILES = 10
+MAX_NUMBER_OF_FILES = 100
 
 # Maximum file size for a single file.
 MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
@@ -66,9 +66,11 @@ def save_file(
 
     # If the file is a URL, then download the file.
     if file.startswith('https'):
-        # FIXME: This isn't working as intended with Firebase Storage URLs.
-        # ext = file.split('.')[-1].split('?')[0].lower()
-        ext = '.pdf'
+        parsed_url = urlparse(file)
+        base_name = os.path.basename(parsed_url.path)
+        ext = os.path.splitext(base_name)[1].lstrip('.')
+        if not ext:
+            ext = 'pdf'
         response = requests.get(file)
         temp = tempfile.mkstemp(f'.{ext}')
         with os.fdopen(temp[0], 'wb') as temp_file:
@@ -90,9 +92,7 @@ def save_file(
     doc_id = str(uuid.uuid4())
 
     # Upload the file to Firebase Storage.
-    # FIXME: This isn't working as intended with Firebase Storage URLs.
-    # ext = filepath.split('.').pop()
-    ext = '.pdf'
+    ext = filepath.split('.').pop()
     ref = 'users/%s/%s/%s.%s' % (uid, collection, doc_id, ext)
     upload_file(
         destination_blob_name=ref,

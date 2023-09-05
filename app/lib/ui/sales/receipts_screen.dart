@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 4/15/2023
-// Updated: 9/3/2023
+// Updated: 9/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -132,6 +132,7 @@ class _ResultsTabsState extends State<ResultsTabs>
         Container(
           height: MediaQuery.of(context).size.height * 2,
           child: TabBarView(
+            // physics: NeverScrollableScrollPhysics(),
             controller: _tabController,
             children: [
               UserReceiptsInterface(tabController: _tabController),

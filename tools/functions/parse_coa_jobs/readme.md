@@ -33,7 +33,7 @@ If successful, additional lab result data from the parsed COA will be added to t
 
 The `parse_coa_jobs` cloud function requires a `env.yaml` file in the root directory of the function. This file should contain the following environment variables:
 
-- `CANNLYTICS_API_KEY`: The API key for the Cannlytics API, used for parsing COAs.
+- `IDENTITY_TOOLKIT_API_KEY`: The API key for the [Identity Platform](https://console.cloud.google.com/customer-identity/providers), used for authenticating users.
 
 See the `requirements.txt` file for a list of Python dependencies.
 
@@ -44,7 +44,7 @@ You can deploy the `parse_coa_jobs` cloud function using the Google Cloud SDK wi
 *Gen 1*
 
 ```shell
-gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.create" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime python311 --source=. --memory=512MB --timeout=540s
+gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.create" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime=python311 --source=. --memory=512MB --timeout=540s --env-vars-file=env.yaml
 ```
 
 *Gen 2*
@@ -55,19 +55,4 @@ gcloud functions deploy parse_coa_jobs --gen2 --runtime=python311 --source=. --e
 
 ## Local Testing
 
-The provided code contains a test block that mocks data for testing the function locally:
-
-```py
-if __name__ == '__main__':
-
-    # Mock document.
-    data = {
-        'uid': 'qXRaz2QQW8RwTlJjpP39c1I8xM03',
-        'email': 'help@cannlytics.com',
-        'job_id': 'qTgyQPGxuIob84hjoUKG',
-        'job_file_url': 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/users%2FqXRaz2QQW8RwTlJjpP39c1I8xM03%2Fparse_coa_jobs%2FqTgyQPGxuIob84hjoUKG?alt=media&token=2c91bd89-d5d7-4c03-a313-dbb19ba876c2',
-    }
-    parse_coa_jobs(data, {})
-```
-
-To test the function locally, simply run the script and ensure your environment has access to the necessary services and environment variables (like `CANNLYTICS_API_KEY`).
+The provided code contains a test block that mocks data for testing the function locally. To test the function locally, simply run the script and ensure your environment has access to the necessary services and environment variables (like `IDENTITY_TOOLKIT_API_KEY`).

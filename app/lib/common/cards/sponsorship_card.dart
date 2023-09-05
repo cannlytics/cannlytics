@@ -40,9 +40,7 @@ class SponsorshipCard extends StatelessWidget {
               children: [
                 SelectableText(
                   'Advance cannabis science!',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Theme.of(context).textTheme.titleLarge!.color),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
@@ -52,7 +50,7 @@ class SponsorshipCard extends StatelessWidget {
               width: 540,
               child: SelectableText(
                 'Cannabis data takes time to collect and statistics take time to calculate. Please consider making a contribution to help expedite the process.',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
 

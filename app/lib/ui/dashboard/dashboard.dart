@@ -52,10 +52,12 @@ class DashboardScreen extends ConsumerWidget {
     return ConsoleScreen(
       children: [
         // AI cards.
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.only(left: 28, top: 24),
-            child: Text('AI'),
+        TitleBadge(
+          text: 'AI',
+          gradient: LinearGradient(
+            colors: [Colors.blue, Colors.purple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         SliverToBoxAdapter(
@@ -82,10 +84,12 @@ class DashboardScreen extends ConsumerWidget {
         ),
 
         // Data cards.
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.only(left: 28, top: 24),
-            child: Text('Data'),
+        TitleBadge(
+          text: 'Data',
+          gradient: LinearGradient(
+            colors: [Colors.orange, Colors.pink],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         SliverToBoxAdapter(
@@ -112,10 +116,12 @@ class DashboardScreen extends ConsumerWidget {
         ),
 
         // Sponsorship
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.only(left: 28, top: 24),
-            child: Text('Sponsor'),
+        TitleBadge(
+          text: 'Sponsor',
+          gradient: LinearGradient(
+            colors: [Colors.teal[800]!, Colors.green[900]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         SliverToBoxAdapter(
@@ -140,28 +146,67 @@ class DashboardScreen extends ConsumerWidget {
           context.go(item['path']);
         },
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.network(item['image_url'],
-                  height: screenWidth < 600
-                      ? 60
-                      : screenWidth < 1120
-                          ? 92
-                          : 72),
-              gapH8,
-              Text(
-                item['title'],
-                style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      color: Theme.of(context).textTheme.titleLarge!.color,
-                    ),
+            padding: const EdgeInsets.all(8.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.network(item['image_url'],
+                      height: screenWidth < 600
+                          ? 60
+                          : screenWidth < 1120
+                              ? 92
+                              : 72),
+                  gapH8,
+                  Text(
+                    item['title'],
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).textTheme.titleLarge!.color,
+                        ),
+                  ),
+                  Text(
+                    item['description'],
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
               ),
-              Text(
-                item['description'],
-                style: Theme.of(context).textTheme.bodySmall,
+            )),
+      ),
+    );
+  }
+}
+
+/// A title badge.
+class TitleBadge extends StatelessWidget {
+  TitleBadge({
+    required this.text,
+    required this.gradient,
+  });
+
+  // Parameters.
+  final String text;
+  final LinearGradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.only(left: 28, top: 24),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
-            ],
+            ),
           ),
         ),
       ),

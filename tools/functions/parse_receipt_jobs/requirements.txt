@@ -2,4 +2,5 @@
 # package>=version
 # cloudevents
 # functions-framework==3.*
+cannlytics
 firebase_admin

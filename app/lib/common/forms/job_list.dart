@@ -4,13 +4,18 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 9/3/2023
-// Updated: 9/3/2023
+// Updated: 9/4/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+// TODO: Don't have the text "Finished At" if not finished.
+// TODO: Make the timer shorter.
+// TODO: Better error messages.
 
 // Dart imports:
 import 'dart:async';
 
 // Flutter imports:
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +25,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
-import 'package:cannlytics_data/services/download_service.dart';
+// import 'package:cannlytics_data/services/download_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
 /// API job configuration.
@@ -28,11 +33,13 @@ class JobConfig {
   final String title;
   final String downloadApiPath;
   final Function deleteJobFunction;
+  final Function retryJobFunction;
 
   JobConfig({
     required this.title,
     required this.downloadApiPath,
     required this.deleteJobFunction,
+    required this.retryJobFunction,
   });
 }
 
@@ -67,33 +74,33 @@ class JobItem extends ConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Download logic.
-    void handleDownload(BuildContext context, Map data) {
-      // Handle malformed results.
-      // var data = labResult.toMap();
-      // if (data['results'] == null) {
-      //   data['results'] = [];
-      // }
+    // // Download logic.
+    // void handleDownload(BuildContext context, Map data) {
+    //   // Handle malformed results.
+    //   // var data = labResult.toMap();
+    //   // if (data['results'] == null) {
+    //   //   data['results'] = [];
+    //   // }
 
-      // Show a downloading notification.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Preparing your download...',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          duration: Duration(seconds: 2),
-          backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
-          showCloseIcon: true,
-        ),
-      );
+    //   // Show a downloading notification.
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: Text(
+    //         'Preparing your download...',
+    //         style: Theme.of(context).textTheme.bodyMedium,
+    //       ),
+    //       duration: Duration(seconds: 2),
+    //       backgroundColor: isDark ? DarkColors.green : LightColors.lightGreen,
+    //       showCloseIcon: true,
+    //     ),
+    //   );
 
-      // Download the data.
-      DownloadService.downloadData(
-        [data],
-        config.downloadApiPath,
-      );
-    }
+    //   // Download the data.
+    //   DownloadService.downloadData(
+    //     [data],
+    //     config.downloadApiPath,
+    //   );
+    // }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,14 +123,27 @@ class JobItem extends ConsumerWidget {
 
             // Download COA data.
             Spacer(),
-            if (item['job_finished_at'] != null)
+            // if (item['job_finished_at'] != null)
+            //   IconButton(
+            //     icon: Icon(
+            //       Icons.download_sharp,
+            //       color: Theme.of(context).textTheme.bodyMedium!.color,
+            //     ),
+            //     onPressed: () {
+            //       handleDownload(context, item);
+            //     },
+            //   ),
+
+            // Retry jobs with errors.
+            if (item['job_error'] == true)
               IconButton(
                 icon: Icon(
-                  Icons.download_sharp,
+                  Icons.refresh,
                   color: Theme.of(context).textTheme.bodyMedium!.color,
                 ),
-                onPressed: () {
-                  handleDownload(context, item);
+                onPressed: () async {
+                  String uid = ref.read(userProvider).value?.uid ?? '';
+                  await config.retryJobFunction(uid, item['job_id']);
                 },
               ),
 
@@ -143,7 +163,8 @@ class JobItem extends ConsumerWidget {
                       isDark ? DarkColors.orange : LightColors.orange,
                 );
                 if (delete == true) {
-                  await config.deleteJobFunction();
+                  String uid = ref.read(userProvider).value?.uid ?? '';
+                  await config.deleteJobFunction(uid, item['job_id']);
                 }
               },
             ),
