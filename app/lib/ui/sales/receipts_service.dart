@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/3/2023
+// Updated: 9/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
 import 'dart:async';
+// import 'package:async/async.dart' show StreamGroup;
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -72,18 +73,41 @@ final receiptProvider =
 });
 
 /// Stream user's receipt parsing jobs from Firebase.
+// final receiptJobsProvider =
+//     StreamProvider.autoDispose<List<Map?>>((ref) async* {
+//   final FirestoreService _dataSource = ref.watch(firestoreProvider);
+//   final user = ref.watch(userProvider).value;
+//   yield* Stream.value(<Map<dynamic, dynamic>?>[]);
+//   if (user == null) return;
+//   yield* _dataSource.streamCollection(
+//     path: 'users/${user.uid}/parse_receipt_jobs',
+//     builder: (data, documentId) {
+//       if (data?['job_finished'] == true && data?['job_error'] == false) {
+//         return null;
+//       }
+//       return data;
+//     },
+//     queryBuilder: (query) =>
+//         query.orderBy('job_created_at', descending: true).limit(1000),
+//   );
+// });
+/// FIXME: Exclude finished jobs with queries.
 final receiptJobsProvider =
     StreamProvider.autoDispose<List<Map?>>((ref) async* {
-  final FirestoreService _dataSource = ref.watch(firestoreProvider);
   final user = ref.watch(userProvider).value;
   yield* Stream.value(<Map<dynamic, dynamic>?>[]);
   if (user == null) return;
-  yield* _dataSource.streamCollection(
-    path: 'users/${user.uid}/parse_receipt_jobs',
-    builder: (data, documentId) => data,
-    queryBuilder: (query) =>
-        query.orderBy('job_created_at', descending: true).limit(1000),
-  );
+  var query = FirebaseFirestore.instance
+      .collection('users/${user.uid}/parse_receipt_jobs')
+      .where(Filter.or(
+        Filter('job_finished', isEqualTo: false),
+        Filter('job_error', isEqualTo: true),
+      ))
+      .orderBy('job_created_at', descending: true)
+      .limit(1000);
+  yield* query
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
 });
 
 // Current receipt values.
@@ -154,6 +178,7 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
       'uid': uid,
       'job_id': jobId,
       'job_created_at': DateTime.now().toIso8601String(),
+      'job_finished': false,
       'job_finished_at': null,
       'job_error': false,
       'job_error_message': null,

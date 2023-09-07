@@ -75,7 +75,7 @@ class ReceiptsParser(object):
             self,
             default_config: Optional[str] = '--oem 3 --psm 6',
             openai_api_key: Optional[str] = None,
-            model: Optional[str] = 'gpt-4',
+            model: Optional[str] = 'gpt-4-0314',
             base_prompt: Optional[str] = RECEIPTS_PROMPT,
             instructions: Optional[str] = INSTRUCTIONAL_PROMPT,
             max_tokens: Optional[int] = MAX_PROMPT_LENGTH,
@@ -84,7 +84,7 @@ class ReceiptsParser(object):
         Args:
             default_config: The default configuration for OpenCV.
             openai_api_key: The OpenAI API key.
-            model: The OpenAI model to use, 'gpt-4' by default.
+            model: The OpenAI model to use, 'gpt-4-0314' by default.
             base_prompt: The base prompt to use for the OpenAI model.
         """
         # Parameters.
@@ -155,7 +155,7 @@ class ReceiptsParser(object):
             self,
             doc: str,
             openai_api_key: Optional[str] = None,
-            model: Optional[str] = 'gpt-4',
+            model: Optional[str] = 'gpt-4-0314',
             max_tokens: Optional[int] = None,
             temperature: Optional[float] = 0.0,
             system_prompts: Optional[List[str]] = None,
@@ -250,7 +250,7 @@ class ReceiptsParser(object):
         
     def quit(self):
         """Reset the parser and perform garbage cleaning."""
-        self.model = 'gpt-4'
+        self.model = 'gpt-4-0314'
         self.openai_api_key = None
         self.total_cost = 0
         self.img = None
@@ -260,9 +260,8 @@ class ReceiptsParser(object):
 
 
 # === Tests ===
+# [✓] Tested: 2023-09-05 by Keegan Skeate <admin@cannlytics.com>
 if __name__ == '__main__':
-
-    # Initialize a receipt parser.
 
     # Initialize OpenAI.
     from dotenv import dotenv_values
@@ -271,13 +270,14 @@ if __name__ == '__main__':
 
     # Initialize a receipt parser.
     parser = ReceiptsParser(
-        model='gpt-4',
+        model='gpt-4-0314',
         openai_api_key=openai_api_key,
     )
 
     # [✓] TEST: Parse a receipt.
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     image_file = '../../../.datasets/receipts/tests/receipt-1.jpg'
-    outfile = '../../../.datasets/receipts/tests/receipt-1.xlsx'
+    outfile = f'../../../.datasets/receipts/tests/receipt-1-{timestamp}.xlsx'
     receipt_data = parser.parse(image_file)
     print('Cost:', parser.total_cost)
     parser.save(receipt_data, outfile)

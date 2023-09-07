@@ -73,7 +73,7 @@ def test_api_parse_coa_url(api_key: str, urls: list, base=None):
 
 
 # === Tests ===
-# Performed 2023-06-12 by Keegan Skeate <admin@cannlytics.com>.
+# Performed 2023-09-05 by Keegan Skeate <admin@cannlytics.com>.
 if __name__ == '__main__':
 
     # Load a .env file with a CANNLYTICS_API_KEY.
@@ -95,7 +95,8 @@ if __name__ == '__main__':
         base=BASE,
     )
 
-    # [✓] TEST: Parse a single COA image.
+    # [ ] TEST: Parse a single COA image.
+    # FIXME: This fails in production.
     test_api_parse_coa_image(
         api_key,
         doc='../../assets/qr-codes/0dC3ZxO.png',

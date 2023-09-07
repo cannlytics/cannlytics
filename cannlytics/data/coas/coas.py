@@ -1045,6 +1045,7 @@ class CoADoc:
             standard_analytes: Optional[dict] = None,
             standard_fields: Optional[dict] = None,
             google_maps_api_key: Optional[str] = None,
+            # TODO: Allow dates to be saved to Excel.
         ) -> Any:
         """Save all CoA data, elongating results and widening values.
         That is, a Workbook is created with a "Details" worksheet that
@@ -1683,7 +1684,7 @@ class CoADoc:
             img = Image.open(outfile)
             w_percent = (width / float(img.size[0]))
             h_size = int((float(img.size[1]) * float(w_percent)))
-            img = img.resize((width, h_size), Image.ANTIALIAS)
+            img = img.resize((width, h_size), Image.Resampling.LANCZOS)
             img.save(outfile)
 
         # Read the resized image again (important) and try to decode QR codes.

@@ -96,7 +96,7 @@ def process_file_or_url(source, is_url=False, default_ext='jpg'):
     return temp[1]
 
 
-@api_view(['GET', 'POST', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE', 'OPTIONS'])
 def api_data_receipts(request, receipt_id=None):
     """Manage receipt data (public API endpoint)."""
 
@@ -255,6 +255,7 @@ def api_data_receipts(request, receipt_id=None):
             return Response(response, status=400)
 
         # Initialize OpenAI.
+        openai_api_key = None
         try:
             _, project_id = google.auth.default()
             openai_api_key = access_secret_version(
@@ -287,22 +288,29 @@ def api_data_receipts(request, receipt_id=None):
         for image in images:
 
             # Parse the receipt.
-            receipt_data = parser.parse(
-                image,
-                openai_api_key=openai_api_key,
-                verbose=True,
-                user=uid,
-            )
+            print('Parsing receipt:', image)
+            # FIXME:
+            try:
+                receipt_data = parser.parse(
+                    image,
+                    openai_api_key=openai_api_key,
+                    max_tokens=3333,
+                    verbose=True,
+                    user=uid,
+                )
+            except Exception as e:
+                print('Error parsing receipt:', e)
 
             # Extract strain names from product names.
             strain_names = []
             for name in receipt_data.get('product_names', []):
                 try:
+                    print('Identifying strain:', name)
                     names = identify_strains(name, user=uid)
                     if names:
                         strain_names.extend(names)
-                except:
-                    pass
+                except Exception as e:
+                    print('Error identifying strain:', e)
             
             # Add the strain names to the receipt data.
             receipt_data['strain_names'] = strain_names
@@ -311,6 +319,7 @@ def api_data_receipts(request, receipt_id=None):
             ext = image.split('.').pop()
             doc_id = receipt_data['hash']
             ref = 'users/%s/receipts/%s.%s' % (uid, doc_id, ext)
+            print('Uploading receipt:', doc_id)
             upload_file(
                 destination_blob_name=ref,
                 source_file_name=image,
@@ -318,7 +327,9 @@ def api_data_receipts(request, receipt_id=None):
             )
 
             # Get download and short URLs.
+            print('Getting download URL for receipt.')
             download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+            print('Getting short URL for receipt.')
             short_url = create_short_url(
                 api_key=FIREBASE_API_KEY,
                 long_url=download_url,
@@ -332,6 +343,7 @@ def api_data_receipts(request, receipt_id=None):
             data.append(receipt_data)
 
             # Debit the tokens from the user's account.
+            print('Debiting tokens from user account.')
             current_tokens -= 1
             increment_value(
                 ref=f'subscribers/{uid}',
@@ -392,6 +404,7 @@ def api_data_receipts(request, receipt_id=None):
 
         # Update the database.
         if refs:
+            print('Updating the database...')
             update_documents(refs, docs)
 
         # Return the data.

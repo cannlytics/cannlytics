@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/4/2023
+// Updated: 9/5/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -52,17 +52,21 @@ class ReceiptsParserInterface extends HookConsumerWidget {
   Widget _dataLoaded(BuildContext context, WidgetRef ref, {dynamic items}) {
     final asyncJobs = ref.watch(receiptJobsProvider);
     return asyncJobs.when(
-      data: (jobs) => _parsingJobs(context, ref, items: jobs),
+      data: (jobs) => _parsingJobs(
+        context,
+        ref,
+        items: jobs.where((job) => job != null).toList(),
+      ),
       error: (err, stack) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Icon(Icons.error, color: Colors.red, size: 48.0),
               SizedBox(height: 16),
-              Text(
-                'An error occurred while loading jobs.',
+              SelectableText(
+                'An error occurred while loading jobs: $err',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),

@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/23/2023
-Updated: 7/27/2023
+Updated: 9/6/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -23,6 +23,12 @@ from email.mime.text import MIMEText
 # External imports:
 from cannlytics import firebase
 from firebase_admin import initialize_app
+
+# Initialize Firebase.
+try:
+    initialize_app()
+except ValueError:
+    pass
 
 
 def auth_signup(data, context):
@@ -44,10 +50,6 @@ def auth_signup(data, context):
     # Add 10 trial tokens to the user's account.
     if created_at == data['metadata']['lastSignedInAt']:
         print('User signed up for the first time: %s' % created_at)
-        try:
-            initialize_app()
-        except ValueError:
-            pass
         entry = {
             'created_at': created_at,
             'support': 'free',

@@ -333,6 +333,7 @@ def api_data_coas(request, coa_id=None):
         parsed_data = []
 
         # Initialize OpenAI.
+        openai_api_key = None
         try:
             _, project_id = google.auth.default()
             openai_api_key = access_secret_version(
@@ -364,6 +365,7 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
+                print('Saving file:', doc)
                 file_data = save_file(
                     uid=uid,
                     file=doc,
@@ -390,16 +392,16 @@ def api_data_coas(request, coa_id=None):
                         continue
 
                     # Parse COA with AI.
-                    print('Parsing with AI:', doc)
+                    print('Parsing with AI:', coa_file)
                     data, prompts, cost = parser.parse_with_ai(
-                        doc,
+                        coa_file,
                         openai_api_key=openai_api_key,
                         user=uid,
-                        use_cached=True,
+                        # use_cached=True,
                         verbose=True,
                         # model='gpt-3.5-turbo',
                         max_tokens=4_000,
-                        max_prompt_length=2_750,
+                        max_prompt_length=1_000,
                     )
                     parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
@@ -415,8 +417,8 @@ def api_data_coas(request, coa_id=None):
                         )
                     except:
                         print('Failed to debit tokens from user:', uid)
-                except:
-                    print('Failed to parse:', doc)
+                except Exception as e:
+                    print('Failed to parse with AI:', e)
                     continue
 
         # Try to parse images.
@@ -424,6 +426,7 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
+                print('Saving file:', doc)
                 file_data = save_file(
                     uid=uid,
                     file=doc,
@@ -531,6 +534,7 @@ def api_data_coas(request, coa_id=None):
 
         # Update the database.
         if refs:
+            print('Updating database...')
             update_documents(refs, docs)
 
         # Return any extracted data.

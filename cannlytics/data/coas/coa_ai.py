@@ -97,7 +97,7 @@ COA_PROMPT = """Given text, extract JSON, where:
 """
 
 # Prompt used to parse results from all pages.
-RESULTS_PROMPT = """Given text, extract only results as a list of JSON objects:
+RESULTS_PROMPT = """Given text, extract JSON. Extract only `results` as a list of JSON objects, e.g.:
 
 {
     "results": [
@@ -114,7 +114,6 @@ RESULTS_PROMPT = """Given text, extract only results as a list of JSON objects:
             "status": str
         }
     ]
-
 }
 
 Where:
@@ -142,14 +141,14 @@ def parse_coa_with_ai(
         headers: Optional[dict] = DEFAULT_HEADERS,
         use_cached: Optional[bool] = False,
         openai_api_key: Optional[str] = None,
-        model: Optional[str] = 'gpt-4',
+        model: Optional[str] = 'gpt-4-0314',
         max_tokens: Optional[int] = 4_000,
         temperature: Optional[float] = 0.0,
         initial_cost: Optional[float] = 0.0,
         instructional_prompt: Optional[str] = None,
         results_prompt: Optional[str] = None,
         coa_prompt: Optional[str] = None,
-        max_prompt_length: Optional[int] = 4_000,
+        max_prompt_length: Optional[int] = 1_000,
         verbose: Optional[bool] = False,
         user: Optional[str] = None,
         retry_pause: Optional[float] = 3.33,
@@ -192,6 +191,7 @@ def parse_coa_with_ai(
     coa_url = None
     if isinstance(doc, str):
         if doc.startswith('https'):
+            # FIXME: This raises an error with Firebase Storage URLs.
             coa_url = doc
             if temp_path is None: temp_path = tempfile.gettempdir()
             if not os.path.exists(temp_path): os.makedirs(temp_path)
@@ -216,7 +216,6 @@ def parse_coa_with_ai(
         obs['coa_pdf'] = report.stream.name.replace('\\', '/').split('/')[-1]
 
     # Get the text of the PDF.
-    report = parser.open_pdf_with_ocr(doc)
     front_page_text = report.pages[0].extract_text()
     all_text = '\n\n'.join([page.extract_text() for page in report.pages])
 
@@ -333,7 +332,7 @@ def parse_coa_with_ai(
             {'role': 'system', 'content': results_prompt},
             {'role': 'system', 'content': instructional_prompt},
         ]
-        content = 'Text: ' + substring + '\n\nList of results as JSON:'
+        content = 'Text: ' + substring #  + '\n\nList of results as JSON:'
         messages.append({'role': 'user', 'content': content})
 
         # TODO: Try compression.
@@ -469,7 +468,7 @@ def parse_coa_with_ai(
 
 
 # === Tests ===
-# Performed 2023-06-12 by Keegan Skeate <admin@cannlytics.com>.
+# [✓] Tested: 2023-09-05 by Keegan Skeate <admin@cannlytics.com>
 if __name__ == '__main__':
 
     # Initialize CoADoc
@@ -480,18 +479,21 @@ if __name__ == '__main__':
     openai_api_key = config['OPENAI_API_KEY']
     
     # [✓] TEST: Parse a COA with AI.
+    # Note: Does not work with `gpt-4-0613`.
     doc = '../../../tests/assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf'
     parser = CoADoc()
     data, prompts, cost = parse_coa_with_ai(
         parser,
         doc,
         openai_api_key=openai_api_key,
+        verbose=True,
     )
     assert data is not None
     print(data)
 
     # Save the data.
     data['cost'] = cost
-    outfile = '../../../tests/assets/coas/gtl/Pineapple-XX-5-13-2129146.json'
+    timestamp = datetime.now().isoformat().replace(':', '-')
+    outfile = f'../../../tests/assets/coas/gtl/pineapple-xx-{timestamp}.json'
     with open(outfile, 'w') as f:
         json.dump(data, f, indent=4)
