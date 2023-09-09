@@ -63,7 +63,7 @@ export const auth = {
     document.getElementById('password-reset-loading-button').classList.remove('d-none');
     try {
       await sendPasswordReset();
-      window.location.href = `${window.location.origin}\\acount\\password-reset-done`;
+      window.location.href = `${window.location.origin}\\account\\password-reset-done`;
     } catch(error) {
       document.getElementById('password-reset-button').classList.remove('d-none');
       document.getElementById('password-reset-loading-button').classList.add('d-none');
@@ -93,8 +93,8 @@ export const auth = {
     /**
      * Confirm a password reset.
      */
-    const newPassword = document.getElementById('sign-in-password').value;
-    const newPasswordConfirmation = document.getElementById('sign-in-password-confirmation').value;
+    const newPassword = document.getElementById('login-password').value;
+    const newPasswordConfirmation = document.getElementById('login-password-confirmation').value;
     if (newPassword !== newPasswordConfirmation) {
       const message = 'The passwords you entered are not the same, please confirm your password.';
       showNotification('Passwords do not match', message, /* type = */ 'error');

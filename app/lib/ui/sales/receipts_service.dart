@@ -73,25 +73,6 @@ final receiptProvider =
 });
 
 /// Stream user's receipt parsing jobs from Firebase.
-// final receiptJobsProvider =
-//     StreamProvider.autoDispose<List<Map?>>((ref) async* {
-//   final FirestoreService _dataSource = ref.watch(firestoreProvider);
-//   final user = ref.watch(userProvider).value;
-//   yield* Stream.value(<Map<dynamic, dynamic>?>[]);
-//   if (user == null) return;
-//   yield* _dataSource.streamCollection(
-//     path: 'users/${user.uid}/parse_receipt_jobs',
-//     builder: (data, documentId) {
-//       if (data?['job_finished'] == true && data?['job_error'] == false) {
-//         return null;
-//       }
-//       return data;
-//     },
-//     queryBuilder: (query) =>
-//         query.orderBy('job_created_at', descending: true).limit(1000),
-//   );
-// });
-/// FIXME: Exclude finished jobs with queries.
 final receiptJobsProvider =
     StreamProvider.autoDispose<List<Map?>>((ref) async* {
   final user = ref.watch(userProvider).value;

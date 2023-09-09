@@ -39,10 +39,12 @@
   {% comment %} FIXME: Smoothly switch between dev and production. {% endcomment %}
 
   <!-- PRODUCTION: -->
-  {% comment %} <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script> {% endcomment %}
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script>
   
+  {% comment %}
   <!-- DEV: -->
   <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js' %}?v={{ now|date:"YmdHis" }}"></script>
+  {% endcomment %}
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}

@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/26/2021
-Updated: 1/10/2023
+Updated: 9/7/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Command-line examples:
@@ -45,9 +45,9 @@ def get_subscription_data():
     """Get subscription data from Firestore."""
     ref = 'public/subscriptions/subscription_plans'
     try:
-        return get_data(ref, datafile='.datasets/subscriptions.json')
+        return get_data(ref, datafile='.datasets/website/subscriptions.json')
     except FileNotFoundError:
-        return get_data(ref, datafile='../../.datasets/subscriptions.json')
+        return get_data(ref, datafile='../../.datasets/website/subscriptions.json')
 
 
 def upload_subscription_data():
@@ -55,13 +55,19 @@ def upload_subscription_data():
     ref = 'public/subscriptions/subscription_plans'
     stats_doc = 'public/subscriptions'
     try:
-        upload_data('.datasets/subscriptions.json', ref, stats_doc=stats_doc)
+        upload_data('.datasets/website/subscriptions.json', ref, stats_doc=stats_doc)
     except FileNotFoundError:
-        upload_data('../../.datasets/subscriptions.json', ref, stats_doc=stats_doc)
+        upload_data('../../.datasets/website/subscriptions.json', ref, stats_doc=stats_doc)
 
 
 # === Test ===
 if __name__ == '__main__':
 
     # Make functions available from the command line.
-    globals()[sys.argv[1]]()
+    # globals()[sys.argv[1]]()
+
+    # Upload subscription data.
+    upload_subscription_data()
+
+    # Get subscription data.
+    # subs = get_subscription_data()

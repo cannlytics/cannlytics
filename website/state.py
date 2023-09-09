@@ -139,8 +139,8 @@ material = {
                 "action": "Launch Now 🚀",
                 "url": "/subscriptions/checkout?name=enterprise",
                 "attributes": [
-                    {"title": "17,500 AI jobs", "active": True},
-                    {"title": "2.4￠ / additional job", "active": True},
+                    {"title": "2,500 AI jobs", "active": True},
+                    {"title": "20￠ / additional job", "active": True},
                     {"title": "Private API", "active": True},
                 ],
             },
@@ -152,8 +152,8 @@ material = {
                 "action": "Get Started 🏃‍♀️",
                 "url": "/subscriptions/checkout?name=pro",
                 "attributes": [
-                    {"title": "1,250 AI jobs", "active": True},
-                    {"title": "3.3￠ / additional job", "active": True},
+                    {"title": "750 AI jobs", "active": True},
+                    {"title": "33￠ / additional job", "active": True},
                     {"title": "Unthrottled API", "active": True},
                 ],
             },
@@ -165,8 +165,8 @@ material = {
                 "action": "Sign Up ✍️",
                 "url": "/subscriptions/checkout?name=premium",
                 "attributes": [
-                    {"title": "100 AI jobs", "active": True},
-                    {"title": "4.2￠ / additional job", "active": True},
+                    {"title": "50 AI jobs", "active": True},
+                    {"title": "42￠ / additional job", "active": True},
                     {"title": "Throttled API", "active": True},
                 ],
             },

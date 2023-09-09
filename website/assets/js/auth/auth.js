@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/4/2020
- * Updated: 1/7/2022
+ * Updated: 9/7/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { Modal } from 'bootstrap';
@@ -64,7 +64,7 @@ export const auth = {
     document.getElementById('password-reset-loading-button').classList.remove('d-none');
     try {
       await sendPasswordReset();
-      window.location.href = `${window.location.origin}\\acount\\password-reset-done`;
+      window.location.href = `${window.location.origin}\\account\\password-reset-done`;
     } catch(error) {
       document.getElementById('password-reset-button').classList.remove('d-none');
       document.getElementById('password-reset-loading-button').classList.add('d-none');
@@ -105,7 +105,7 @@ export const auth = {
     const code = url.searchParams.get('oobCode');
     confirmPasswordChange(code, newPassword)
       .then(() => {
-        window.location.href = '/account/password-reset-complete';
+        window.location.href = `${window.location.origin}\\account\\password-reset-change-complete`;
       })
       .catch(() => {
         const message = 'The password reset link that you used is invalid. Please request a new password reset link.';

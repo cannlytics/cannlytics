@@ -108,7 +108,7 @@
             therefore, you can have us standardize your
             archive of lab results, in whatever format they may be in, into a clean,
             well-formatted, accessible workbook for you. Our rate is
-            <strong>$500 per 10,000 lab results</strong>.
+            <strong>$500 per 2,500 lab results</strong>.
           </p>
           <p class="text-start mt-3">
             <a
@@ -164,12 +164,12 @@
   //cannlytics.payments.initializeSupport();
 
   // Get the slider and price elements.
-  const slider = document.getElementById('tokenSlider');
+  const tokenSlider = document.getElementById('tokenSlider');
   const tokenCount = document.getElementById('tokenCount');
   const tokenPrice = document.getElementById('tokenPrice');
 
   // Update the token count and price when the slider value changes.
-  slider.oninput = function() {
+  tokenSlider.oninput = function() {
     // Change the price.
     const tokens = this.value;
     const price = tokens * 0.05;

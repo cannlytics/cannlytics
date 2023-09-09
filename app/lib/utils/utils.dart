@@ -28,8 +28,6 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/utils/web_utils.dart'
     if (dart.library.io) 'package:cannlytics_data/utils/mobile_utils.dart';
 
-
-
 class PlatformChecker {
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
   bool get isIOS => !kIsWeb && Platform.isIOS;
@@ -211,11 +209,21 @@ class DataUtils {
     } else if (data is List<dynamic>) {
       return data.cast<Map<String, dynamic>>();
     } else if (data is String) {
-      return jsonDecode(data)
-          .map((item) => item as Map<String, dynamic>)
-          .toList();
+      dynamic decodedData = data;
+      int decodeAttempts = 0;
+
+      while (decodedData is String && decodeAttempts < 2) {
+        decodedData = jsonDecode(decodedData);
+        decodeAttempts++;
+      }
+
+      if (decodedData is List<dynamic>) {
+        return decodedData.map((item) => item as Map<String, dynamic>).toList();
+      } else {
+        return [];
+      }
     } else {
-      return null;
+      return [];
     }
   }
 

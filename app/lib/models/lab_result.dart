@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 6/27/2023
+// Updated: 9/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -160,7 +160,7 @@ class LabResult {
   final String? fileRef;
   final String? downloadUrl;
   final String? shortUrl;
-  final List<dynamic>? coaUrls;
+  final dynamic coaUrls;
   final String? labResultsUrl;
 
   // @override
@@ -168,23 +168,40 @@ class LabResult {
 
   // Create model.
   factory LabResult.fromMap(Map data) {
-    // Standardize results.
+// Standardize results.
     List<Result?>? results;
-    try {
-      var resultsData = jsonDecode(data['results']) as List<dynamic>;
+
+    List<dynamic>? cleanAndDecode(String resultsJson) {
+      dynamic decodedData = resultsJson;
+
+      // Try decoding up to 3 times.
+      for (int i = 0; i < 3; i++) {
+        try {
+          decodedData = jsonDecode(decodedData);
+          if (decodedData is List<dynamic>) {
+            return decodedData;
+          }
+        } catch (e) {
+          print("Error decoding at level ${i + 1}: $e");
+          break;
+        }
+      }
+
+      print("Failed to parse the data.");
+      return null;
+    }
+
+// Parse results.
+    final resultsData = cleanAndDecode(data['results']);
+    if (resultsData != null) {
       results = resultsData
           .map((result) => Result.fromMap(result as Map<String, dynamic>))
           .toList();
-    } catch (error) {
-      try {
-        var resultsData = data['results'] as List<dynamic>;
-        results = resultsData
-            .map((result) => Result.fromMap(result as Map<String, dynamic>))
-            .toList();
-      } catch (error) {
-        results = null;
-      }
+    } else {
+      print("Failed to parse the data.");
     }
+    // print('\n\nLAB RESULT DATA:');
+    // print(data);
 
     return LabResult(
       labId: data['lab_id'],
@@ -200,7 +217,7 @@ class LabResult {
       labCity: data['lab_city'],
       labCounty: data['lab_county'],
       labState: data['lab_state'],
-      labZipcode: data['lab_zipcode'],
+      labZipcode: data['lab_zipcode']?.toString(),
       labPhone: data['lab_phone'],
       labEmail: data['lab_email'],
       labWebsite: data['lab_website'],
@@ -353,8 +370,8 @@ class Result {
   final String? analysis;
   final String? key;
   final String? name;
-  final double? value;
-  final double? mg_g;
+  final dynamic value;
+  final dynamic mg_g;
   final String? units;
   final double? limit;
   final double? lod;
@@ -367,12 +384,12 @@ class Result {
       analysis: data['analysis'] as String?,
       key: data['key'] as String?,
       name: data['name'] as String?,
-      value: data['value'] as double?,
-      mg_g: data['mg_g'] as double?,
+      value: DataUtils.formatNumber(data['value']),
+      mg_g: DataUtils.formatNumber(data['mg_g']),
       units: data['units'] as String?,
-      limit: data['limit'] as double?,
-      lod: data['lod'] as double?,
-      loq: data['loq'] as double?,
+      limit: DataUtils.formatNumber(data['limit']),
+      lod: DataUtils.formatNumber(data['lod']),
+      loq: DataUtils.formatNumber(data['loq']),
       status: data['status'] as String?,
     );
   }

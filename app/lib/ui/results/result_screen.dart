@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 8/19/2023
+// Updated: 9/8/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+// import 'package:cannlytics_data/ui/results/result_coa.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -31,7 +32,7 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-import 'package:cannlytics_data/ui/results/result_history.dart';
+// import 'package:cannlytics_data/ui/results/result_history.dart';
 import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
@@ -61,7 +62,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   late PdfController? _pdfController;
   late String? _pdfUrl;
   late final TabController _tabController;
-  int _tabCount = 4;
+  int _tabCount = 2;
   Future<void>? _updateFuture;
 
   // Initialize.
@@ -103,6 +104,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.labResult != null) return _form(widget.labResult);
+    print('Getting lab result data: ${widget.labResultId}');
     final asyncData = ref.watch(labResultProvider(widget.labResultId!));
     return asyncData.when(
       // Loading UI.
@@ -112,37 +114,47 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       ),
 
       // Error UI.
-      error: (err, stack) => MainContent(
-        child: SelectableText('Error: $err'),
-      ),
+      error: (err, stack) {
+        print(stack);
+        return MainContent(
+          child: SelectableText('Error: $err'),
+        );
+      },
 
       // Data loaded UI.
       data: (labResult) {
         // Initialize the COA, if it is empty.
         // FIXME:
-        // if (labResult?.coaUrls?.isNotEmpty == true) {
-        //   _pdfUrl = labResult?.coaUrls?[0]?['url'] ?? '';
-        // } else {
-        //   _pdfUrl = labResult?.labResultsUrl ?? '';
-        // }
-        if (labResult?.downloadUrl?.isNotEmpty == true) {
-          _pdfUrl = labResult?.downloadUrl ?? '';
-        } else {
-          // _pdfUrl = labResult?.labResultsUrl ?? '';
-          _pdfUrl = null;
+        try {
+          if (labResult?.coaUrls?.isNotEmpty == true) {
+            _pdfUrl = labResult?.coaUrls?[0]?['url'] ?? '';
+            print('SET PDF URL: $_pdfUrl');
+          } else if (labResult?.labResultsUrl != null) {
+            _pdfUrl = labResult?.labResultsUrl ?? '';
+            print('SET PDF URL: $_pdfUrl');
+          } else if (labResult?.downloadUrl != null) {
+            _pdfUrl = labResult?.downloadUrl ?? '';
+            print('SET PDF URL: $_pdfUrl');
+          } else {
+            // _pdfUrl = labResult?.labResultsUrl ?? '';
+            _pdfUrl = null;
+            print('NO PDF URL');
+          }
+          if (_pdfUrl != null && _pdfUrl!.isNotEmpty) {
+            // && _pdfController.document == null
+            print('PDF URL: $_pdfUrl');
+            try {
+              _pdfController = PdfController(
+                document: PdfDocument.openData(InternetFile.get(_pdfUrl!)),
+                initialPage: _initialPage,
+              );
+            } catch (error) {
+              _pdfController = null;
+            }
+          }
+        } catch (error) {
+          print('Error loading PDF: $error');
         }
-        // if (_pdfUrl.isNotEmpty) {
-        //   // && _pdfController.document == null
-        //   print('PDF URL: $_pdfUrl');
-        //   try {
-        //     _pdfController = PdfController(
-        //       document: PdfDocument.openData(InternetFile.get(_pdfUrl)),
-        //       initialPage: _initialPage,
-        //     );
-        //   } catch (error) {
-        //     _pdfController = null;
-        //   }
-        // }
 
         // Return the form.
         return _form(labResult);
@@ -753,16 +765,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           icon: Icons.science,
           isSelected: _tabController.index == 1,
         ),
-        PillTabButton(
-          text: 'COA',
-          icon: Icons.description,
-          isSelected: _tabController.index == 2,
-        ),
-        PillTabButton(
-          text: 'History',
-          icon: Icons.history,
-          isSelected: _tabController.index == 3,
-        ),
+        // PillTabButton(
+        //   text: 'COA',
+        //   icon: Icons.description,
+        //   isSelected: _tabController.index == 2,
+        // ),
+        // PillTabButton(
+        //   text: 'History',
+        //   icon: Icons.history,
+        //   isSelected: _tabController.index == 3,
+        // ),
       ],
     );
 
@@ -835,31 +847,32 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         ),
 
         // COA tab.
-        CustomScrollView(
-          slivers: [
-            _breadcrumbs,
-            SliverToBoxAdapter(child: _actions),
-            // FIXME:
-            SliverToBoxAdapter(child: _placeholder(context, ref)),
-            // // No COA placeholder.
-            // if (_pdfUrl.isEmpty)
-            //   SliverToBoxAdapter(child: _placeholder(context, ref)),
-            // if (_pdfUrl.isNotEmpty && _pdfController != null) ...[
-            //   /// COA PDF actions.
-            //   SliverToBoxAdapter(
-            //     child: CoaPdfActions(
-            //       pdfController: _pdfController!,
-            //       pdfUrl: _pdfUrl,
-            //     ),
-            //   ),
+        // FIXME:
+        // CustomScrollView(
+        //   slivers: [
+        //     _breadcrumbs,
+        //     SliverToBoxAdapter(child: _actions),
+        //     if (_pdfUrl == null)
+        //       SliverToBoxAdapter(child: _placeholder(context, ref)),
+        //     // // No COA placeholder.
+        //     // if (_pdfUrl.isEmpty)
+        //     //   SliverToBoxAdapter(child: _placeholder(context, ref)),
+        //     if (_pdfUrl != null && _pdfController != null) ...[
+        //       /// COA PDF actions.
+        //       SliverToBoxAdapter(
+        //         child: CoaPdfActions(
+        //           pdfController: _pdfController!,
+        //           pdfUrl: _pdfUrl!,
+        //         ),
+        //       ),
 
-            //   /// COA PDF.
-            //   SliverToBoxAdapter(
-            //     child: CoaPdf(pdfController: _pdfController!),
-            //   ),
-            // ],
-          ],
-        ),
+        //       /// COA PDF.
+        //       SliverToBoxAdapter(
+        //         child: CoaPdf(pdfController: _pdfController!),
+        //       ),
+        //     ],
+        //   ],
+        // ),
         // FutureBuilder<PdfController?>(
         //   future: loadPdf(),
         //   builder: (context, snapshot) {
@@ -899,17 +912,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         // TODO: Comments tab.
 
         // History tab.
-        CustomScrollView(
-          slivers: [
-            _breadcrumbs,
-            SliverToBoxAdapter(child: _actions),
-            SliverToBoxAdapter(
-              child: ResultLogs(
-                labResultId: widget.labResultId ?? '',
-              ),
-            ),
-          ],
-        ),
+        // CustomScrollView(
+        //   slivers: [
+        //     _breadcrumbs,
+        //     SliverToBoxAdapter(child: _actions),
+        //     SliverToBoxAdapter(
+        //       child: ResultLogs(
+        //         labResultId: widget.labResultId ?? '',
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
 
