@@ -178,6 +178,7 @@ class COAParser extends AsyncNotifier<List<Map?>> {
     dynamic file,
     String? fileName,
     String? fileUrl,
+    String ext = 'pdf',
   }) async {
     // Create a job document in Firestore.
     DocumentReference docRef = FirebaseFirestore.instance
@@ -186,7 +187,7 @@ class COAParser extends AsyncNotifier<List<Map?>> {
         .collection('parse_coa_jobs')
         .doc();
     String jobId = docRef.id;
-    String fileRef = 'users/$uid/parse_coa_jobs/$jobId';
+    String fileRef = 'users/$uid/parse_coa_jobs/$jobId.$ext';
 
     // If there's a file, upload it to Firebase Storage and get the download URL.
     if (file != null) {
@@ -232,6 +233,7 @@ class COAParser extends AsyncNotifier<List<Map?>> {
   Future<void> parseCOAs(
     List<dynamic> files, {
     List<dynamic>? fileNames,
+    List<String>? extensions,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -242,10 +244,13 @@ class COAParser extends AsyncNotifier<List<Map?>> {
         var file = files[i];
         var fileName =
             fileNames != null && fileNames.length > i ? fileNames[i] : null;
+        var ext =
+            extensions != null && extensions.length > i ? extensions[i] : 'pdf';
         Map<String, dynamic> data = await _createJob(
           user.uid,
           file: file,
           fileName: fileName,
+          ext: ext,
         );
         allData.add(data);
         String docRef = 'users/${user.uid}/parse_coa_jobs/${data['job_id']}';

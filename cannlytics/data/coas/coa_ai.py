@@ -434,6 +434,8 @@ def parse_coa_with_ai(
     # - lab_latitude
     # - lab_longitude
 
+    # FIXME: Apply snake case to columns.
+
     # Standardize results.
     for i, result in enumerate(results):
         key = snake_case(result.get('name', 'Unknown'))

@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/23/2023
-// Updated: 8/24/2023
+// Updated: 9/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Project imports:
@@ -17,7 +17,17 @@ import 'package:cannlytics_data/utils/utils.dart';
 class DownloadService {
   const DownloadService._();
 
-  /// Download receipt data.
+  /// Download a file.
+  static Future<void> downloadFile(String pdfUrl, String filename) async {
+    try {
+      FileUtils.downloadUrl(pdfUrl, filename);
+    } catch (error) {
+      String? downloadUrl = await StorageService.getDownloadUrl(pdfUrl);
+      DataService.openInANewTab(downloadUrl);
+    }
+  }
+
+  /// Download data (by sending it to the API to get a datafile).
   static Future<void> downloadData(
     List<Map<dynamic, dynamic>?> data,
     String url,

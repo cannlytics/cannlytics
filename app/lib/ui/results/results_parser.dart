@@ -356,6 +356,18 @@ class CoAUpload extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
+    /// Get the file extension from the mime type.
+    String getExtensionFromMimeType(dynamic mimeType) {
+      const Map<String, String> extensionMap = {
+        'application/pdf': '.pdf',
+        'image/jpeg': '.jpg',
+        'image/png': '.png',
+        'image/tiff': '.tif',
+        'image/webp': '.webp',
+      };
+      return extensionMap[mimeType] ?? '';
+    }
+
     // Dropzone.
     _dropzone() {
       return DropzoneView(
@@ -364,20 +376,32 @@ class CoAUpload extends ConsumerWidget {
         onCreated: (ctrl) => controller = ctrl,
         onDropMultiple: (files) async {
           if (files!.isNotEmpty) {
+            // Get file data.
             var imageFilesFutures = <Future>[];
             var fileNamesFutures = <Future>[];
+            var mimeTypesFutures = <Future>[];
             for (var file in files) {
               imageFilesFutures.add(controller.getFileData(file));
               fileNamesFutures.add(controller.getFilename(file));
+              mimeTypesFutures.add(controller.getFileMIME(file));
             }
             var imageBytes = await Future.wait(imageFilesFutures);
             var fileNames = await Future.wait(fileNamesFutures);
+            var mimeTypes = await Future.wait(mimeTypesFutures);
+            List<String> extensions =
+                mimeTypes.map(getExtensionFromMimeType).toList();
+
+            // Convert files to lists of bytes.
             List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
               return item as List<int>;
             }).toList();
-            ref
-                .read(coaParser.notifier)
-                .parseCOAs(imageFiles, fileNames: fileNames);
+
+            // Parse files.
+            ref.read(coaParser.notifier).parseCOAs(
+                  imageFiles,
+                  fileNames: fileNames,
+                  extensions: extensions,
+                );
           }
         },
       );

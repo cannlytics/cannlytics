@@ -25,6 +25,8 @@ After successfully processing the COA, or if there's an error, the function upda
 - `job_finished`: Boolean indicating if the job is complete.
 - `job_duration_seconds`: How long the job took in seconds.
 
+The job will also save the `job_file_url` to the Firestore document at `users/{uid}/lab_results/{sample_id}`.
+
 If successful, additional lab result data from the parsed COA will be added to the Firestore document. If there's an error, the following fields will also be set:
 
 `job_error_message`: A message describing the error.
@@ -41,16 +43,8 @@ See the `requirements.txt` file for a list of Python dependencies.
 
 You can deploy the `parse_coa_jobs` cloud function using the Google Cloud SDK with the following command:
 
-*Gen 1*
-
 ```shell
 gcloud functions deploy parse_coa_jobs --entry-point=parse_coa_jobs --trigger-event="providers/cloud.firestore/eventTypes/document.create" --trigger-resource="projects/cannlytics/databases/(default)/documents/users/{uid}/parse_coa_jobs/{job_id}" --runtime=python311 --source=. --memory=512MB --timeout=540s --env-vars-file=env.yaml
-```
-
-*Gen 2*
-
-```shell
-gcloud functions deploy parse_coa_jobs --gen2 --runtime=python311 --source=. --entry-point=parse_coa_jobs --trigger-event-filters=type=google.cloud.firestore.document.v1.created --trigger-event-filters=database="(default)" --trigger-event-filters-path-pattern=document="users/{uid}/parse_coa_jobs/{job_id}"
 ```
 
 ## Local Testing

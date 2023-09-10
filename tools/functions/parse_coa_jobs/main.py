@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 8/25/2023
-Updated: 9/4/2023
+Updated: 9/9/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,6 +36,7 @@ if DEBUG:
 # Initialize Firebase.
 try:
     initialize_app()
+    db = firestore.client()
 except ValueError:
     pass
 
@@ -70,17 +71,6 @@ def parse_coa_jobs(event, context) -> None:
     job_id = data['fields']['job_id']['stringValue']
     print('JOB ID:', job_id)
 
-    # Gen 2: Get the necessary data.
-    # firestore_payload = firestore.DocumentEventData()
-    # firestore_payload._pb.ParseFromString(cloud_event.data)
-    # print(f"Function triggered by change to: {cloud_event['source']}")
-    # print("Value:")
-    # print(firestore_payload.value)
-    # uid = firestore_payload.value.fields['uid'].string_value
-    # job_id = firestore_payload.value.fields['job_id'].string_value
-    # print('User:', uid, 'Job:', job_id)
-    # coa_url = firestore_payload.value.fields['job_file_url'].string_value
-
     # Ensure the user passed a COA URL.
     job_file_url = data['fields']['job_file_url']['stringValue']
     print('JOB FILE URL:', job_file_url)
@@ -106,7 +96,7 @@ def parse_coa_jobs(event, context) -> None:
     except:
         id_token = os.getenv('CANNLYTICS_API_KEY')
         ref = f'subscribers/{uid}'
-        user_subscription = firebase.get_document(ref)
+        user_subscription = firebase.get_document(ref, database=db)
         current_tokens = user_subscription.get('tokens', 0) if user_subscription else 0
         if current_tokens < 1:
             raise Exception('User does not have enough tokens to perform this action.')
@@ -115,6 +105,7 @@ def parse_coa_jobs(event, context) -> None:
             ref=ref,
             field='tokens',
             amount=-1,
+            database=db,
         )
 
     # Make a request to parse the COA.
@@ -136,9 +127,20 @@ def parse_coa_jobs(event, context) -> None:
             'job_error': False,
             'job_finished': True,
             'job_duration_seconds': (end_time - start_time).seconds,
-            **lab_result_data
         }
         print('Job finished successfully.')
+
+        # Merge file data into lab result data.
+        sample_id = lab_result_data.get('sample_id')
+        if sample_id:
+            print('Saving job data to lab result with sample ID:', sample_id)
+            doc_id = f'users/{uid}/lab_results/{sample_id}'
+            coa_data = {'job_file_url': job_file_url}
+            doc = {**job_data, **coa_data}
+            firebase.update_document(doc_id, doc, database=db)
+            job_data['sample_id'] = sample_id
+
+    # If the request failed, save the error message.
     else:
         error_message = response.text
         job_data = {
@@ -151,9 +153,8 @@ def parse_coa_jobs(event, context) -> None:
         print(f'Job failed with error: {error_message}')
 
     # Save the data to Firestore.
-    db = firestore.client()
-    ref = db.collection('users').document(uid).collection('parse_coa_jobs').document(job_id)
-    ref.set(job_data, merge=True)
+    job_ref = f'users/{uid}/parse_coa_jobs/{job_id}'
+    firebase.update_document(job_ref, job_data)
 
 
 # === Test ===

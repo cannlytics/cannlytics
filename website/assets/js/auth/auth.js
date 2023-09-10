@@ -55,7 +55,7 @@ export const auth = {
     /**
      * Reset a user's password.
      */
-    const email = document.getElementById('sign-in-email').value;
+    const email = document.getElementById('password-reset-email').value;
     if (!email) {
       showNotification('Password reset error', 'Please enter your email to request a password reset.', /* type = */ 'error' );
       return;

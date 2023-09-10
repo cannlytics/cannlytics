@@ -91,6 +91,7 @@ class LabResult {
     this.shortUrl,
     this.coaUrls,
     this.labResultsUrl,
+    this.jobFileUrl,
   });
 
   // Properties.
@@ -162,6 +163,7 @@ class LabResult {
   final String? shortUrl;
   final dynamic coaUrls;
   final String? labResultsUrl;
+  final String? jobFileUrl;
 
   // @override
   // List<String?> get props => [labId];
@@ -272,6 +274,7 @@ class LabResult {
       shortUrl: data['short_url'],
       coaUrls: DataUtils.formatListOfMaps(data['coa_urls']),
       labResultsUrl: data['lab_results_url'],
+      jobFileUrl: data['job_file_url'],
     );
   }
 
@@ -346,6 +349,7 @@ class LabResult {
       'short_url': shortUrl,
       'coa_urls': coaUrls,
       'lab_results_url': labResultsUrl,
+      'job_file_url': jobFileUrl,
     };
   }
 }

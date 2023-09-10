@@ -4,11 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 9/8/2023
+// Updated: 9/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
-// import 'package:cannlytics_data/ui/results/result_coa.dart';
+import 'package:cannlytics_data/common/layout/search_placeholder.dart';
+import 'package:cannlytics_data/ui/results/result_coa.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -37,6 +38,22 @@ import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 
+/* === Logic ===*/
+
+/// PDF URL provider.
+final pdfUrlProvider = StateProvider<String>((ref) => '');
+
+/// PDF controller provider.
+final pdfControllerProvider =
+    FutureProvider.family.autoDispose<PdfController?, String>((ref, url) async {
+  // String url = ref.watch(pdfUrlProvider);
+  if (url.isEmpty) return null;
+  var data = await InternetFile.get(url);
+  return PdfController(document: PdfDocument.openData(data));
+});
+
+/* === UI ===*/
+
 /// Result screen.
 class ResultScreen extends ConsumerStatefulWidget {
   ResultScreen({
@@ -58,11 +75,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     with SingleTickerProviderStateMixin {
   // State.
   bool _isEditing = false;
-  static const int _initialPage = 1;
+  // static const int _initialPage = 1;
   late PdfController? _pdfController;
   late String? _pdfUrl;
   late final TabController _tabController;
-  int _tabCount = 2;
+  int _tabCount = 3;
   Future<void>? _updateFuture;
 
   // Initialize.
@@ -81,23 +98,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     _pdfController?.dispose();
     _tabController.dispose();
     super.dispose();
-  }
-
-  /// Load the PDF.
-  Future<PdfController?> loadPdf() async {
-    if (_pdfUrl!.isNotEmpty) {
-      print('PDF URL: $_pdfUrl');
-      try {
-        return PdfController(
-          document: PdfDocument.openData(InternetFile.get(_pdfUrl!)),
-          initialPage: _initialPage,
-        );
-      } catch (error) {
-        print('Error loading PDF: $error');
-        return null;
-      }
-    }
-    return null;
   }
 
   // Render the screen.
@@ -122,43 +122,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       },
 
       // Data loaded UI.
-      data: (labResult) {
-        // Initialize the COA, if it is empty.
-        // FIXME:
-        try {
-          if (labResult?.coaUrls?.isNotEmpty == true) {
-            _pdfUrl = labResult?.coaUrls?[0]?['url'] ?? '';
-            print('SET PDF URL: $_pdfUrl');
-          } else if (labResult?.labResultsUrl != null) {
-            _pdfUrl = labResult?.labResultsUrl ?? '';
-            print('SET PDF URL: $_pdfUrl');
-          } else if (labResult?.downloadUrl != null) {
-            _pdfUrl = labResult?.downloadUrl ?? '';
-            print('SET PDF URL: $_pdfUrl');
-          } else {
-            // _pdfUrl = labResult?.labResultsUrl ?? '';
-            _pdfUrl = null;
-            print('NO PDF URL');
-          }
-          if (_pdfUrl != null && _pdfUrl!.isNotEmpty) {
-            // && _pdfController.document == null
-            print('PDF URL: $_pdfUrl');
-            try {
-              _pdfController = PdfController(
-                document: PdfDocument.openData(InternetFile.get(_pdfUrl!)),
-                initialPage: _initialPage,
-              );
-            } catch (error) {
-              _pdfController = null;
-            }
-          }
-        } catch (error) {
-          print('Error loading PDF: $error');
-        }
-
-        // Return the form.
-        return _form(labResult);
-      },
+      data: (labResult) => _form(labResult),
     );
   }
 
@@ -765,11 +729,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           icon: Icons.science,
           isSelected: _tabController.index == 1,
         ),
-        // PillTabButton(
-        //   text: 'COA',
-        //   icon: Icons.description,
-        //   isSelected: _tabController.index == 2,
-        // ),
+        PillTabButton(
+          text: 'COA',
+          icon: Icons.description,
+          isSelected: _tabController.index == 2,
+        ),
         // PillTabButton(
         //   text: 'History',
         //   icon: Icons.history,
@@ -819,7 +783,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       downloadButton: _downloadButton,
     );
 
+    // Initialize the COA, if it is empty.
+    if (labResult.jobFileUrl != null) {
+      _pdfUrl = labResult.jobFileUrl;
+    } else {
+      _pdfUrl = null;
+    }
+
+    // TEST:
+    // _pdfUrl =
+    //     'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/users%2FqXRaz2QQW8RwTlJjpP39c1I8xM03%2Fparse_coa_jobs%2FiLv6S7sy6ewFU3qwMsSr?alt=media&token=eafb5266-f440-4bf5-ac90-51a7e5d4fc27';
+
     // Tabs.
+    final pdfFile = ref.watch(pdfControllerProvider(_pdfUrl ?? ''));
     var _tabs = TabBarView(
       controller: _tabController,
       children: [
@@ -847,67 +823,54 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         ),
 
         // COA tab.
-        // FIXME:
-        // CustomScrollView(
-        //   slivers: [
-        //     _breadcrumbs,
-        //     SliverToBoxAdapter(child: _actions),
-        //     if (_pdfUrl == null)
-        //       SliverToBoxAdapter(child: _placeholder(context, ref)),
-        //     // // No COA placeholder.
-        //     // if (_pdfUrl.isEmpty)
-        //     //   SliverToBoxAdapter(child: _placeholder(context, ref)),
-        //     if (_pdfUrl != null && _pdfController != null) ...[
-        //       /// COA PDF actions.
-        //       SliverToBoxAdapter(
-        //         child: CoaPdfActions(
-        //           pdfController: _pdfController!,
-        //           pdfUrl: _pdfUrl!,
-        //         ),
-        //       ),
+        CustomScrollView(
+          slivers: [
+            // Breadcrumbs.
+            _breadcrumbs,
+            SliverToBoxAdapter(child: _actions),
 
-        //       /// COA PDF.
-        //       SliverToBoxAdapter(
-        //         child: CoaPdf(pdfController: _pdfController!),
-        //       ),
-        //     ],
-        //   ],
-        // ),
-        // FutureBuilder<PdfController?>(
-        //   future: loadPdf(),
-        //   builder: (context, snapshot) {
-        //     if (snapshot.connectionState == ConnectionState.done) {
-        //       if (snapshot.hasError) {
-        //         return SliverToBoxAdapter(
-        //             child: Text('Error loading PDF: ${snapshot.error}'));
-        //       }
-        //       final controller = snapshot.data;
-        //       if (controller != null) {
-        //         return CustomScrollView(
-        //           slivers: [
-        //             _breadcrumbs,
-        //             SliverToBoxAdapter(child: _actions),
-        //             if (_pdfUrl!.isEmpty)
-        //               SliverToBoxAdapter(child: _placeholder(context, ref)),
-        //             SliverToBoxAdapter(
-        //               child: CoaPdfActions(
-        //                 pdfController: controller,
-        //                 pdfUrl: _pdfUrl!,
-        //               ),
-        //             ),
-        //             SliverToBoxAdapter(
-        //               child: CoaPdf(pdfController: controller),
-        //             ),
-        //           ],
-        //         );
-        //       } else {
-        //         return SliverToBoxAdapter(child: _placeholder(context, ref));
-        //       }
-        //     } else {
-        //       return SliverToBoxAdapter(child: CircularProgressIndicator());
-        //     }
-        //   },
-        // ),
+            // No PDF placeholder.
+            if (_pdfUrl == null)
+              SliverToBoxAdapter(child: _placeholder(context, ref)),
+
+            // Asynchronous PDF controller.
+            SliverToBoxAdapter(
+              child: pdfFile.when(
+                data: (controller) {
+                  if (controller != null) {
+                    return Column(
+                      children: [
+                        /// COA actions.
+                        CoaPdfActions(
+                          pdfController: controller,
+                          pdfUrl: _pdfUrl!,
+                        ),
+
+                        // COA PDF.
+                        CoaPdf(pdfController: controller),
+                      ],
+                    );
+                  } else {
+                    return SearchPlaceholder(
+                      title: 'No COA found',
+                      subtitle: '',
+                      imageUrl:
+                          'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fcertificate.png?alt=media&token=8aa0ebbd-1625-4ff4-9843-9bf9d5646490',
+                    );
+                  }
+                },
+                loading: () => Container(
+                  height: 420,
+                  child: CircularProgressIndicator(),
+                ),
+                error: (err, stack) => Container(
+                  height: 420,
+                  child: Text('Error: $err'),
+                ),
+              ),
+            ),
+          ],
+        ),
 
         // TODO: Comments tab.
 

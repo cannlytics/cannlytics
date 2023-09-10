@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 6/27/2023
+// Updated: 9/9/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/constants/design.dart';
+import 'package:cannlytics_data/services/download_service.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -24,6 +26,10 @@ class CoaPdf extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 24,
+      ),
       height: MediaQuery.of(context).size.height * 0.85,
       width: MediaQuery.of(context).size.width * 0.5,
       child: PdfView(
@@ -69,19 +75,23 @@ class CoaPdfActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // Previous page button.
-        IconButton(
-          icon: Icon(
-            Icons.navigate_before,
-            color: Theme.of(context).textTheme.bodySmall?.color,
+        Tooltip(
+          message: 'Previous page',
+          child: IconButton(
+            icon: Icon(
+              Icons.navigate_before,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+            onPressed: () {
+              pdfController.previousPage(
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 100),
+              );
+            },
           ),
-          onPressed: () {
-            pdfController.previousPage(
-              curve: Curves.ease,
-              duration: const Duration(milliseconds: 100),
-            );
-          },
         ),
 
         // Page number.
@@ -97,30 +107,54 @@ class CoaPdfActions extends StatelessWidget {
         ),
 
         // Next page button.
-        IconButton(
-          icon: Icon(
-            Icons.navigate_next,
-            color: Theme.of(context).textTheme.bodySmall?.color,
+        Tooltip(
+          message: 'Next page',
+          child: IconButton(
+            icon: Icon(
+              Icons.navigate_next,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+            onPressed: () {
+              pdfController.nextPage(
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 100),
+              );
+            },
           ),
-          onPressed: () {
-            pdfController.nextPage(
-              curve: Curves.ease,
-              duration: const Duration(milliseconds: 100),
-            );
-          },
         ),
 
-        // Open PDF button.
-        IconButton(
-          icon: Icon(
-            Icons.open_in_new,
-            color: Theme.of(context).textTheme.bodySmall?.color,
-            size: 16,
+        // Download PDF button.
+        gapW4,
+        Tooltip(
+          message: 'Download PDF',
+          child: IconButton(
+            icon: Icon(
+              Icons.cloud_download,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+              size: 16,
+            ),
+            onPressed: () {
+              DownloadService.downloadFile(pdfUrl, 'coa.pdf');
+            },
           ),
-          onPressed: () {
-            launchUrl(Uri.parse(pdfUrl));
-          },
         ),
+        gapW8,
+
+        // Open PDF button.
+        Tooltip(
+          message: 'Open in new tab',
+          child: IconButton(
+            icon: Icon(
+              Icons.open_in_new,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+              size: 16,
+            ),
+            onPressed: () {
+              launchUrl(Uri.parse(pdfUrl));
+            },
+          ),
+        ),
+        gapW12,
 
         // TODO: Implement zoom, download, and other actions.
       ],
