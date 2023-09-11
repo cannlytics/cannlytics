@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/5/2023
+// Updated: 9/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -366,21 +367,32 @@ class ReceiptUpload extends ConsumerWidget {
         onCreated: (ctrl) => controller = ctrl,
         onDropMultiple: (files) async {
           if (files!.isNotEmpty) {
+            // Get file data.
             var imageFilesFutures = <Future>[];
             var fileNamesFutures = <Future>[];
+            var mimeTypesFutures = <Future>[];
             for (var file in files) {
               imageFilesFutures.add(controller.getFileData(file));
               fileNamesFutures.add(controller.getFilename(file));
+              mimeTypesFutures.add(controller.getFileMIME(file));
             }
             var imageBytes = await Future.wait(imageFilesFutures);
             var fileNames = await Future.wait(fileNamesFutures);
-            // TODO: Pass file extensions.
+            var mimeTypes = await Future.wait(mimeTypesFutures);
+            List<String> extensions =
+                mimeTypes.map(ApiUtils.getExtensionFromMimeType).toList();
+
+            // Convert files to lists of bytes.
             List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
               return item as List<int>;
             }).toList();
-            ref
-                .read(receiptParser.notifier)
-                .parseImages(imageFiles, fileNames: fileNames);
+
+            // Parse files.
+            ref.read(receiptParser.notifier).parseImages(
+                  imageFiles,
+                  fileNames: fileNames,
+                  extensions: extensions,
+                );
           }
         },
       );

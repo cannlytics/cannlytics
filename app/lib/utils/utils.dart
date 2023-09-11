@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 2/22/2023
-// Updated: 9/1/2023
+// Updated: 9/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -48,6 +48,21 @@ PlatformFileUtils FileUtils = platformChecker.isWeb
     : (platformChecker.isAndroid || platformChecker.isIOS
         ? MobileUtils()
         : throw UnsupportedError('Unsupported platform'));
+
+/// API utility functions.
+class ApiUtils {
+  /// Get the file extension from the mime type.
+  static String getExtensionFromMimeType(dynamic mimeType) {
+    const Map<String, String> extensionMap = {
+      'application/pdf': '.pdf',
+      'image/jpeg': '.jpg',
+      'image/png': '.png',
+      'image/tiff': '.tif',
+      'image/webp': '.webp',
+    };
+    return extensionMap[mimeType] ?? '';
+  }
+}
 
 /// Utility functions for the interface.
 class InterfaceUtils {

@@ -33,10 +33,12 @@ class UserReceiptsInterface extends ConsumerWidget {
     if (user == null) return _noUser(context);
 
     // Render table of user receipts.
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(left: 16, right: 16, top: 24),
-        child: Column(children: [UserReceiptsTable()]),
+    return Scrollbar(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(left: 16, right: 16, top: 24),
+          child: Column(children: [UserReceiptsTable()]),
+        ),
       ),
     );
   }

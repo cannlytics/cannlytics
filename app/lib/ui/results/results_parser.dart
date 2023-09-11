@@ -4,10 +4,11 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 5/11/2023
-// Updated: 9/5/2023
+// Updated: 9/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -356,18 +357,6 @@ class CoAUpload extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final bool isDark = themeMode == ThemeMode.dark;
 
-    /// Get the file extension from the mime type.
-    String getExtensionFromMimeType(dynamic mimeType) {
-      const Map<String, String> extensionMap = {
-        'application/pdf': '.pdf',
-        'image/jpeg': '.jpg',
-        'image/png': '.png',
-        'image/tiff': '.tif',
-        'image/webp': '.webp',
-      };
-      return extensionMap[mimeType] ?? '';
-    }
-
     // Dropzone.
     _dropzone() {
       return DropzoneView(
@@ -389,7 +378,7 @@ class CoAUpload extends ConsumerWidget {
             var fileNames = await Future.wait(fileNamesFutures);
             var mimeTypes = await Future.wait(mimeTypesFutures);
             List<String> extensions =
-                mimeTypes.map(getExtensionFromMimeType).toList();
+                mimeTypes.map(ApiUtils.getExtensionFromMimeType).toList();
 
             // Convert files to lists of bytes.
             List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {

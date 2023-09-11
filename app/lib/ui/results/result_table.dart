@@ -45,20 +45,6 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
   int? sortColumnIndex;
   bool sortAscending = true;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _localResults = widget.results;
-  // }
-
-  // @override
-  // void didUpdateWidget(covariant AnalysisResultsTable oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   if (widget.results != oldWidget.results) {
-  //     _localResults = widget.results;
-  //   }
-  // }
-
   /// Sort the table.
   void onSort<T>(
     int columnIndex,
@@ -71,20 +57,6 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
       sortAscending = ascending;
     });
   }
-  // void onSort<T>(int columnIndex, bool ascending,
-  //     Comparable<T> Function(Result) getField) {
-  //   setState(() {
-  //     sortColumnIndex = columnIndex;
-  //     sortAscending = ascending;
-  //     _localResults!.sort((a, b) {
-  //       final aValue = getField(a!);
-  //       final bValue = getField(b!);
-  //       return ascending
-  //           ? Comparable.compare(aValue, bValue)
-  //           : Comparable.compare(bValue, aValue);
-  //     });
-  //   });
-  // }
 
   /// Change an analysis result value.
   void changeValue(key, field, value) {
@@ -321,7 +293,7 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
     ];
 
     // Rows.
-    var rows = results!.map((result) {
+    var rows = results.map((result) {
       String key = result?.key ?? '';
       return DataRow(
         cells: <DataCell>[

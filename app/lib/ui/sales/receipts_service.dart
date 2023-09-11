@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/5/2023
+// Updated: 9/10/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -138,6 +138,7 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
     dynamic file,
     String? fileName,
     String? fileUrl,
+    String ext = 'jpeg',
   }) async {
     // Create a job document in Firestore.
     DocumentReference docRef = FirebaseFirestore.instance
@@ -146,8 +147,7 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
         .collection('parse_receipt_jobs')
         .doc();
     String jobId = docRef.id;
-    // FIXME: Specify file extension.
-    String fileRef = 'users/$uid/parse_receipt_jobs/$jobId';
+    String fileRef = 'users/$uid/parse_receipt_jobs/$jobId.$ext';
 
     // If there's a file, upload it to Firebase Storage and get the download URL.
     if (file != null) {
@@ -175,16 +175,10 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
   Future<void> parseImages(
     List<dynamic> files, {
     List<dynamic>? fileNames,
+    List<String>? extensions,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      // Deprecated: API call directly to the backend.
-      // final items = await APIService.apiRequest(
-      //   '/api/data/receipts',
-      //   files: files,
-      //   fileNames: fileNames,
-      // );
-      // return items.cast<Map<dynamic, dynamic>?>();
       var allData = state.value ?? [];
       final user = ref.watch(userProvider).value;
       if (user == null) return [];
@@ -192,10 +186,14 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
         var file = files[i];
         var fileName =
             fileNames != null && fileNames.length > i ? fileNames[i] : null;
+        var ext = extensions != null && extensions.length > i
+            ? extensions[i]
+            : 'jpeg';
         Map<String, dynamic> data = await _createJob(
           user.uid,
           file: file,
           fileName: fileName,
+          ext: ext,
         );
         allData.add(data);
         String docRef =

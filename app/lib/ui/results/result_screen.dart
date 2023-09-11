@@ -801,7 +801,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       saveButton: _saveButton,
       cancelButton: _cancelButton,
       downloadButton: _downloadButton,
-      // publicButton: _publicPrivateChoice,
     );
 
     // Initialize the COA, if it is empty.

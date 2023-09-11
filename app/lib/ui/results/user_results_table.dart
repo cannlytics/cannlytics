@@ -251,12 +251,15 @@ class UserResultsTable extends ConsumerWidget {
 
         // Format the table headers, with menu at the beginning.
         List<DataColumn> tableHeader = <DataColumn>[
+          // Menu column.
           DataColumn(
             label: SizedBox(
               width: 42.0,
               child: Text(''),
             ),
           ),
+
+          // Main columns.
           for (Map header in headers)
             DataColumn(
               label: Expanded(
@@ -276,30 +279,12 @@ class UserResultsTable extends ConsumerWidget {
         ];
 
         // Get the rows per page.
-        // FIXME:
         var rowsPerPage = ref.watch(resultsRowsPerPageProvider);
         if (rowsPerPage > data.length) rowsPerPage = data.length;
         if (rowsPerPage == 0) rowsPerPage = 1;
-        // var availableRowsPerPage = <int>[
-        //   rowsPerPage,
-        //   rowsPerPage * 2,
-        //   rowsPerPage * 5,
-        //   rowsPerPage * 10,
-        // ];
-        // if (!availableRowsPerPage.contains(data.length)) {
-        //   availableRowsPerPage.add(data.length);
-        //   availableRowsPerPage.sort();
-        // }
-        // if (availableRowsPerPage.length == 1) {
-        //   availableRowsPerPage = [10, 50, 100, data.length];
-        // }
-        // print('rowsPerPage: $rowsPerPage');
-        var availableRowsPerPage = <int>[
-          10,
-          50,
-          100,
-          data.length,
-        ];
+
+        // Set the available rows per page.
+        var availableRowsPerPage = <int>[10, 50, 100, data.length];
         if (data.length < 20) {
           availableRowsPerPage = [10];
         } else if (data.length < 100) {
@@ -307,11 +292,15 @@ class UserResultsTable extends ConsumerWidget {
         } else {
           availableRowsPerPage = [10, 50, 100];
         }
+        if (!availableRowsPerPage.contains(rowsPerPage)) {
+          availableRowsPerPage.add(rowsPerPage);
+          availableRowsPerPage.sort();
+        }
         if (!availableRowsPerPage.contains(data.length)) {
           availableRowsPerPage.add(data.length);
           availableRowsPerPage.sort();
         }
-        print('avilableRowsPerPage: $availableRowsPerPage');
+        print('availableRowsPerPage: $availableRowsPerPage');
 
         // Get the sorting state.
         final sortColumnIndex = ref.watch(resultsSortColumnIndex);
@@ -555,9 +544,7 @@ class UserResultsTable extends ConsumerWidget {
     return asyncResults.when(
       loading: () => _loadingPlaceholder(),
       error: (error, stack) => _errorMessage(context),
-      data: (resultsData) {
-        return mainTable;
-      },
+      data: (resultsData) => mainTable,
     );
   }
 }
