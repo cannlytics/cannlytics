@@ -262,7 +262,7 @@ if __name__ == '__main__':
     data_dir = 'D://data/california/lab_results'
 
     # Get CA lab results.
-    # ca_results = get_glass_house_farms_lab_results(data_dir)
+    ca_results = get_glass_house_farms_lab_results(data_dir)
 
 
 # DEV: Parse all COAs in directory.

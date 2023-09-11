@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/5/2022
-Updated: 1/10/2023
+Updated: 9/11/2023
 """
 from .firebase import (
     MAX_BATCH_SIZE,
@@ -14,6 +14,7 @@ from .firebase import (
     create_custom_claims,
     create_custom_token,
     create_document,
+    create_doc_id,
     create_id,
     create_id_from_datetime,
     create_log,
@@ -64,6 +65,7 @@ __all__ = [
     create_custom_claims,
     create_custom_token,
     create_document,
+    create_doc_id,
     create_id,
     create_id_from_datetime,
     create_log,

@@ -165,9 +165,9 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
       'job_error': false,
       'job_error_message': null,
       'job_duration': 0,
+      'job_file_name': fileName,
       'job_file_ref': fileRef,
       'job_file_url': fileUrl,
-      'job_file_name': fileName,
     };
   }
 

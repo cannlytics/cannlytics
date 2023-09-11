@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 8/24/2023
+Updated: 9/11/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -400,6 +400,13 @@ def export_data(database, ref: str, data_file: str):
         output.to_csv(data_file)
     else:
         output.to_excel(data_file)
+
+
+def create_doc_id(database=None, collection='tests') -> str:
+    """Generate a unique document ID."""
+    if database is None:
+        database = firestore.client()
+    return database.collection(collection).document().id
 
 
 def create_id() -> str:
