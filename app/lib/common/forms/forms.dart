@@ -76,6 +76,7 @@ class FormActions extends StatelessWidget {
   final Widget saveButton;
   final Widget cancelButton;
   final Widget? downloadButton;
+  final Widget? publicButton;
 
   FormActions({
     required this.isMobile,
@@ -85,6 +86,7 @@ class FormActions extends StatelessWidget {
     required this.saveButton,
     required this.cancelButton,
     this.downloadButton,
+    this.publicButton,
   });
 
   @override
@@ -102,6 +104,10 @@ class FormActions extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 4),
                   child: Row(
                     children: [
+                      if (publicButton != null) ...[
+                        gapW4,
+                        publicButton!,
+                      ],
                       if (!isEditing) editButton,
                       if (isEditing) ...[
                         cancelButton,

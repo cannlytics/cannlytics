@@ -146,6 +146,7 @@ class ReceiptParser extends AsyncNotifier<List<Map?>> {
         .collection('parse_receipt_jobs')
         .doc();
     String jobId = docRef.id;
+    // FIXME: Specify file extension.
     String fileRef = 'users/$uid/parse_receipt_jobs/$jobId';
 
     // If there's a file, upload it to Firebase Storage and get the download URL.

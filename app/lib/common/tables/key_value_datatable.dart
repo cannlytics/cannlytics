@@ -39,8 +39,9 @@ class KeyValueDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var defaultFieldStyle = Theme.of(context).textTheme.bodySmall;
-    var defaultColumnStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.bold,
+    var defaultColumnStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).textTheme.titleLarge?.color,
+          fontWeight: FontWeight.w600,
         );
     return DataTable(
       headingRowHeight: headingRowHeight,

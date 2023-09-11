@@ -374,6 +374,7 @@ class ReceiptUpload extends ConsumerWidget {
             }
             var imageBytes = await Future.wait(imageFilesFutures);
             var fileNames = await Future.wait(fileNamesFutures);
+            // TODO: Pass file extensions.
             List<List<int>> imageFiles = imageBytes.map<List<int>>((item) {
               return item as List<int>;
             }).toList();

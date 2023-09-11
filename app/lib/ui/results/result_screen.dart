@@ -151,9 +151,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     /// Cancel edit.
     void _cancelEdit() {
       // Reset analysis results.
-      ref.read(analysisResults.notifier).update((state) {
-        return labResult?.results?.map((x) => x?.toMap()).toList() ?? [];
-      });
+      ref.read(analysisResults.notifier).update(labResult?.results ?? []);
 
       // Cancel editing.
       setState(() {
@@ -772,6 +770,28 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       url: '/api/data/coas/download',
     );
 
+    // Public/private choice.
+    var _publicPrivateChoice = Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: 24, right: 24, top: 8),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 129,
+          ),
+          child: PublicPrivateToggle(
+            isPublic: labResult.public ?? false,
+            onChanged: (newValue) {
+              // FIXME: Change public / private.
+              var id = widget.labResultId ?? widget.labResult?.sampleHash ?? '';
+              var update = {'public': newValue};
+              ref.read(resultService).updateResult(id, update);
+            },
+          ),
+        ),
+      ),
+    );
+
     // Actions.
     var _actions = FormActions(
       isMobile: isMobile,
@@ -781,6 +801,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       saveButton: _saveButton,
       cancelButton: _cancelButton,
       downloadButton: _downloadButton,
+      // publicButton: _publicPrivateChoice,
     );
 
     // Initialize the COA, if it is empty.
@@ -804,6 +825,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
+            SliverToBoxAdapter(child: _publicPrivateChoice),
             _isEditing ? _editForm : _viewForm,
           ],
         ),
@@ -830,8 +852,8 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
             SliverToBoxAdapter(child: _actions),
 
             // No PDF placeholder.
-            if (_pdfUrl == null)
-              SliverToBoxAdapter(child: _placeholder(context, ref)),
+            // if (_pdfUrl == null)
+            //   SliverToBoxAdapter(child: _placeholder(context, ref)),
 
             // Asynchronous PDF controller.
             SliverToBoxAdapter(
@@ -894,57 +916,57 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   }
 
   /// Message displayed when there is no COA.
-  Widget _placeholder(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image.
-            // TODO: Use downloadUrl if available as an image.
-            Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: ClipOval(
-                child: Image.network(
-                  'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_a_scroll_with_robot_arms_and_a_disguise_for_a_face_a_57549317-7365-4350-9b7b-84fd7421b103.png?alt=media&token=72631010-56c8-4981-a936-58b89294f336',
-                  width: 128,
-                  height: 128,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+  // Widget _placeholder(BuildContext context, WidgetRef ref) {
+  //   return Center(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           // Image.
+  //           // TODO: Use downloadUrl if available as an image.
+  //           Padding(
+  //             padding: EdgeInsets.only(top: 16),
+  //             child: ClipOval(
+  //               child: Image.network(
+  //                 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_a_scroll_with_robot_arms_and_a_disguise_for_a_face_a_57549317-7365-4350-9b7b-84fd7421b103.png?alt=media&token=72631010-56c8-4981-a936-58b89294f336',
+  //                 width: 128,
+  //                 height: 128,
+  //                 fit: BoxFit.cover,
+  //               ),
+  //             ),
+  //           ),
 
-            // Text.
-            Container(
-              width: 540,
-              child: Column(
-                children: <Widget>[
-                  SelectableText(
-                    'No COA available',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).textTheme.titleLarge!.color),
-                  ),
-                  SelectableText(
-                    'If you have a COA, then you can upload it to have it parsed and attached.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  gapH12,
-                  PrimaryButton(
-                    text: 'Parse results',
-                    onPressed: () => context.go('/results'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  //           // Text.
+  //           Container(
+  //             width: 540,
+  //             child: Column(
+  //               children: <Widget>[
+  //                 SelectableText(
+  //                   'No COA available',
+  //                   textAlign: TextAlign.center,
+  //                   style: TextStyle(
+  //                       fontSize: 20,
+  //                       color: Theme.of(context).textTheme.titleLarge!.color),
+  //                 ),
+  //                 SelectableText(
+  //                   'If you have a COA, then you can upload it to have it parsed and attached.',
+  //                   textAlign: TextAlign.center,
+  //                   style: Theme.of(context).textTheme.bodyMedium,
+  //                 ),
+  //                 gapH12,
+  //                 PrimaryButton(
+  //                   text: 'Parse results',
+  //                   onPressed: () => context.go('/results'),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }
 
 /// A pill that displays the analysis type.
@@ -1041,5 +1063,43 @@ class StatusPill extends StatelessWidget {
                   ),
             ),
           );
+  }
+}
+
+/// A toggle that switches between public and private.
+class PublicPrivateToggle extends StatefulWidget {
+  final bool isPublic;
+  final ValueChanged<bool>? onChanged;
+
+  PublicPrivateToggle({required this.isPublic, this.onChanged});
+
+  @override
+  _PublicPrivateToggleState createState() => _PublicPrivateToggleState();
+}
+
+class _PublicPrivateToggleState extends State<PublicPrivateToggle> {
+  bool _isPublic = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isPublic = widget.isPublic;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SecondaryButton(
+      text: _isPublic ? 'Public' : 'Private',
+      onPressed: () {
+        setState(() {
+          _isPublic = !_isPublic;
+          widget.onChanged?.call(_isPublic);
+        });
+      },
+      leading: Icon(
+        _isPublic ? Icons.public : Icons.public_off,
+        // color: Colors.white,
+      ),
+    );
   }
 }

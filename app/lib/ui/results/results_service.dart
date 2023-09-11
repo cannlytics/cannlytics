@@ -83,9 +83,9 @@ final labResultProvider =
     builder: (data, documentId) {
       // Keep track of analysis results for editing.
       var labResult = LabResult.fromMap(data ?? {});
-      var results =
-          labResult.results?.map((result) => result?.toMap()).toList();
-      ref.read(analysisResults.notifier).update((state) => results ?? []);
+      // var results =
+      //     labResult.results?.map((result) => result?.toMap()).toList();
+      ref.read(analysisResults.notifier).update(labResult.results ?? []);
       ref.read(updatedLabResult.notifier).update((state) => labResult);
       return labResult;
     },
@@ -114,7 +114,29 @@ final resultJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
 final updatedLabResult = StateProvider<LabResult?>((ref) => null);
 
 // Updated analysis results.
-final analysisResults = StateProvider<List<Map?>>((ref) => []);
+// final analysisResults = StateProvider<List<Map?>>((ref) => []);
+final analysisResults =
+    StateNotifierProvider<AnalysisResultsNotifier, List<Result?>>(
+        (ref) => AnalysisResultsNotifier());
+
+class AnalysisResultsNotifier extends StateNotifier<List<Result?>> {
+  AnalysisResultsNotifier() : super([]);
+
+  void sortResults<T>(Comparable<T> Function(Result) getField, bool ascending) {
+    state.sort((a, b) {
+      final aValue = getField(a!);
+      final bValue = getField(b!);
+      return ascending
+          ? Comparable.compare(aValue, bValue)
+          : Comparable.compare(bValue, aValue);
+    });
+    state = [...state];
+  }
+
+  void update(List<Result?> newResults) {
+    state = newResults;
+  }
+}
 
 // New analysis result.
 final newAnalysisResult = StateProvider<Map>((ref) => {});

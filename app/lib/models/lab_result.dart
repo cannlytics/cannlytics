@@ -92,6 +92,7 @@ class LabResult {
     this.coaUrls,
     this.labResultsUrl,
     this.jobFileUrl,
+    this.public,
   });
 
   // Properties.
@@ -164,6 +165,7 @@ class LabResult {
   final dynamic coaUrls;
   final String? labResultsUrl;
   final String? jobFileUrl;
+  final bool? public;
 
   // @override
   // List<String?> get props => [labId];
@@ -275,6 +277,7 @@ class LabResult {
       coaUrls: DataUtils.formatListOfMaps(data['coa_urls']),
       labResultsUrl: data['lab_results_url'],
       jobFileUrl: data['job_file_url'],
+      public: data['public'] == true || data['public'] == 1 ? true : false,
     );
   }
 
@@ -350,6 +353,7 @@ class LabResult {
       'coa_urls': coaUrls,
       'lab_results_url': labResultsUrl,
       'job_file_url': jobFileUrl,
+      'public': public,
     };
   }
 }

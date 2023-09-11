@@ -70,6 +70,21 @@ final receiptsDataSourceProvider = StateNotifierProvider.family<
       idKey: 'hash',
       selectedCountProvider: receiptsSelectedProvider,
       columnWidths: [240.0, 160.0, 160.0, 160.0, 120.0, 120.0],
+      onView: (id) {
+        ref.read(goRouterProvider).go('/sales/$id');
+      },
+      onDelete: (id) async {
+        await ref.read(receiptService).deleteReceipt(id);
+        // TODO: Add delete confirmation dialog.
+        // final delete = await InterfaceUtils.showAlertDialog(
+        //   context: context, // You might need to pass context through, or find another way
+        //   title: 'Are you sure that you want to delete this receipt?',
+        //   cancelActionText: 'Cancel',
+        //   defaultActionText: 'Delete',
+        //   primaryActionColor: Colors.redAccent,
+        // );
+        // if (delete)
+      },
     ),
   );
 });

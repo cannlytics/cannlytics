@@ -45,32 +45,57 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
   int? sortColumnIndex;
   bool sortAscending = true;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _localResults = widget.results;
+  // }
+
+  // @override
+  // void didUpdateWidget(covariant AnalysisResultsTable oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (widget.results != oldWidget.results) {
+  //     _localResults = widget.results;
+  //   }
+  // }
+
   /// Sort the table.
-  void onSort<T>(int columnIndex, bool ascending,
-      Comparable<T> Function(Result) getField) {
+  void onSort<T>(
+    int columnIndex,
+    bool ascending,
+    Comparable<T> Function(Result) getField,
+  ) {
+    ref.read(analysisResults.notifier).sortResults(getField, ascending);
     setState(() {
       sortColumnIndex = columnIndex;
       sortAscending = ascending;
-      widget.results!.sort((a, b) {
-        final aValue = getField(a!);
-        final bValue = getField(b!);
-        return ascending
-            ? Comparable.compare(aValue, bValue)
-            : Comparable.compare(bValue, aValue);
-      });
     });
   }
+  // void onSort<T>(int columnIndex, bool ascending,
+  //     Comparable<T> Function(Result) getField) {
+  //   setState(() {
+  //     sortColumnIndex = columnIndex;
+  //     sortAscending = ascending;
+  //     _localResults!.sort((a, b) {
+  //       final aValue = getField(a!);
+  //       final bValue = getField(b!);
+  //       return ascending
+  //           ? Comparable.compare(aValue, bValue)
+  //           : Comparable.compare(bValue, aValue);
+  //     });
+  //   });
+  // }
 
   /// Change an analysis result value.
   void changeValue(key, field, value) {
     var currentResults = ref.read(analysisResults);
     for (var result in currentResults) {
-      if (result!['key'] == key) {
+      if (result?.toMap()['key'] == key) {
         var parsedValue = double.tryParse(value);
-        result[field] = parsedValue ?? value;
+        result?.toMap()[field] = parsedValue ?? value;
       }
     }
-    ref.read(analysisResults.notifier).update((state) => currentResults);
+    ref.read(analysisResults.notifier).update(currentResults);
   }
 
   /// Change a value of a new result.
@@ -89,7 +114,9 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
     var currentResults = ref.read(analysisResults);
     var updatedResults = List<Map>.from(currentResults);
     updatedResults.removeWhere((result) => result['key'] == key);
-    ref.read(analysisResults.notifier).update((state) => updatedResults);
+    List<Result> convertedResults =
+        updatedResults.map((item) => Result.fromMap(item)).toList();
+    ref.read(analysisResults.notifier).update(convertedResults);
   }
 
   /// Add an analysis result.
@@ -212,9 +239,12 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
                         var currentResults = ref.read(analysisResults);
                         var updatedResults = List<Map>.from(currentResults);
                         updatedResults.add(ref.read(newAnalysisResult));
+                        List<Result> convertedResults = updatedResults
+                            .map((item) => Result.fromMap(item))
+                            .toList();
                         ref
                             .read(analysisResults.notifier)
-                            .update((state) => updatedResults);
+                            .update(convertedResults);
                         Navigator.of(context).pop();
 
                         // Reset the update.
@@ -251,52 +281,48 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
     bool isMobile = MediaQuery.of(context).size.width < 600;
 
     // Listen to the analysis results.
-    var results = ref.watch(analysisResults).map((x) => Result.fromMap(x!));
+    var results = ref.watch(analysisResults);
 
     // Headers.
-    var columnStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).textTheme.bodyMedium!.color,
+    var headerStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).textTheme.titleLarge?.color,
+          fontWeight: FontWeight.w600,
         );
-    var columns = <DataColumn>[
-      DataColumn(
-        label: Text('Analysis', style: columnStyle),
-        onSort: (columnIndex, ascending) {
-          onSort<String>(
-              columnIndex, ascending, (result) => result.analysis ?? '');
-        },
-      ),
-      DataColumn(
-        label: Text('Name', style: columnStyle),
-        onSort: (columnIndex, ascending) {
-          onSort<String>(columnIndex, ascending, (result) => result.name ?? '');
-        },
-      ),
-      DataColumn(
-        label: Text('Value', style: columnStyle),
-        onSort: (columnIndex, ascending) {
-          onSort<num>(columnIndex, ascending, (result) => result.value ?? 0);
-        },
-      ),
-      if (!isMobile)
+    List<Map> analysisHeaders = [
+      {'name': 'Analysis', 'key': 'analysis', 'sort': true},
+      {'name': 'Name', 'key': 'name', 'sort': true},
+      {'name': 'Value', 'key': 'value', 'sort': true},
+      if (!isMobile) {'name': 'Units', 'key': 'units', 'sort': false},
+      if (!isMobile) {'name': 'Limit', 'key': 'limit', 'sort': false},
+      if (!isMobile) {'name': 'Status', 'key': 'status', 'sort': false},
+      {'name': '', 'key': 'empty', 'sort': false},
+    ];
+    List<DataColumn> columns = <DataColumn>[
+      for (Map header in analysisHeaders)
         DataColumn(
-          label: Text('Units', style: columnStyle),
+          label: Expanded(
+            child: Text(
+              header['name'],
+              style: headerStyle,
+            ),
+          ),
+          onSort: header['sort']
+              ? (columnIndex, ascending) {
+                  onSort(columnIndex, ascending, (x) {
+                    var value = x.toMap()[header['key']];
+                    if (value is double) {
+                      value = value.toString();
+                    }
+                    return value ?? '';
+                  });
+                }
+              : null,
         ),
-      if (!isMobile)
-        DataColumn(
-          label: Text('Limit', style: columnStyle),
-        ),
-      if (!isMobile)
-        DataColumn(
-          label: Text('Status', style: columnStyle),
-        ),
-      DataColumn(
-        label: Text('', style: columnStyle),
-      ),
     ];
 
     // Rows.
-    var rows = results.map((result) {
-      String key = result.key ?? '';
+    var rows = results!.map((result) {
+      String key = result?.key ?? '';
       return DataRow(
         cells: <DataCell>[
           DataCell(
@@ -304,31 +330,31 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
                 ? _buildEditCell(
                     key,
                     'analysis',
-                    result.analysis ?? '',
+                    result?.analysis ?? '',
                     isDark: isDark,
                   )
-                : _buildTextCell(result.analysis ?? ''),
+                : _buildTextCell(result?.analysis ?? ''),
           ),
           DataCell(
             widget.isEditing
                 ? _buildEditCell(
                     key,
                     'name',
-                    result.name ?? '',
+                    result?.name ?? '',
                     isDark: isDark,
                   )
-                : _buildTextCell(result.name ?? ''),
+                : _buildTextCell(result?.name ?? ''),
           ),
           DataCell(
             widget.isEditing
                 ? _buildEditCell(
                     key,
                     'value',
-                    result.value?.toString() ?? '',
+                    result?.value?.toString() ?? '',
                     isNumeric: true,
                     isDark: isDark,
                   )
-                : _buildTextCell(result.value?.toString() ?? ''),
+                : _buildTextCell(result?.value?.toString() ?? ''),
           ),
           if (!isMobile)
             DataCell(
@@ -336,10 +362,10 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
                   ? _buildEditCell(
                       key,
                       'units',
-                      result.units ?? '',
+                      result?.units ?? '',
                       isDark: isDark,
                     )
-                  : _buildTextCell(result.units ?? ''),
+                  : _buildTextCell(result?.units ?? ''),
             ),
           if (!isMobile)
             DataCell(
@@ -347,11 +373,11 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
                   ? _buildEditCell(
                       key,
                       'limit',
-                      result.limit?.toString() ?? '',
+                      result?.limit?.toString() ?? '',
                       isNumeric: true,
                       isDark: isDark,
                     )
-                  : _buildTextCell(result.limit?.toString() ?? ''),
+                  : _buildTextCell(result?.limit?.toString() ?? ''),
             ),
           if (!isMobile)
             DataCell(
@@ -359,10 +385,10 @@ class _AnalysisResultsTableState extends ConsumerState<AnalysisResultsTable> {
                   ? _buildEditCell(
                       key,
                       'status',
-                      result.status ?? '',
+                      result?.status ?? '',
                       isDark: isDark,
                     )
-                  : _buildTextCell(result.status ?? ''),
+                  : _buildTextCell(result?.status ?? ''),
             ),
 
           // Delete result button.

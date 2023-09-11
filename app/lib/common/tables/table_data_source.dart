@@ -22,12 +22,16 @@ class TableConfig {
   final String idKey;
   final dynamic selectedCountProvider;
   final List<double>? columnWidths;
+  final Function(String)? onView; // Function to handle view logic
+  final Function(String)? onDelete; // Function to handle
 
   TableConfig({
     required this.fields,
     required this.idKey,
     required this.selectedCountProvider,
     this.columnWidths,
+    this.onView,
+    this.onDelete,
   });
 }
 
@@ -60,10 +64,18 @@ class CustomDataTableSource extends DataTableSource {
   @override
   DataRow getRow(int index) {
     final item = data[index];
-    var values = config.fields.map((field) {
-      var value = item.data?[field];
-      return formatCellValue(value);
-    }).toList();
+    // var values = config.fields.map((field) {
+    //   var value = item.data?[field];
+    //   return formatCellValue(value);
+    // }).toList();
+    var values = [
+      // Add a dummy value for the new column at the beginning.
+      '',
+      ...config.fields.map((field) {
+        var value = item.data?[field];
+        return formatCellValue(value);
+      }).toList()
+    ];
     return DataRow.byIndex(
       index: index,
       selected: item.selected,
@@ -79,6 +91,45 @@ class CustomDataTableSource extends DataTableSource {
       },
       cells: values.asMap().entries.map((entry) {
         int idx = entry.key;
+        // Menu column.
+        if (idx == 0) {
+          return DataCell(
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert),
+              padding: EdgeInsets.all(2),
+              surfaceTintColor: Colors.transparent,
+              onSelected: (value) async {
+                if (value == 'View') {
+                  config.onView!(item.data?[config.idKey] ?? '');
+                } else if (value == 'Delete') {
+                  await config.onDelete!(item.data?[config.idKey] ?? '');
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'View',
+                  child: Text('View',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).textTheme.bodyLarge!.color)),
+                ),
+
+                // TODO: Download.
+
+                // TODO: Open COA.
+
+                // Optional: Delete.
+                // PopupMenuItem<String>(
+                //   value: 'Delete',
+                //   child: Text('Delete',
+                //       style: Theme.of(context)
+                //           .textTheme
+                //           .bodySmall!
+                //           .copyWith(color: Colors.redAccent)),
+                // ),
+              ],
+            ),
+          );
+        }
         var value = entry.value;
         // double width = idx >= 4 ? 120.0 : 160.0;
         double width =
@@ -94,6 +145,23 @@ class CustomDataTableSource extends DataTableSource {
                 ),
         );
       }).toList(),
+      // cells: values.asMap().entries.map((entry) {
+      //   int idx = entry.key;
+      //   var value = entry.value;
+      //   // double width = idx >= 4 ? 120.0 : 160.0;
+      //   double width =
+      //       config.columnWidths != null && idx < config.columnWidths!.length
+      //           ? config.columnWidths![idx]
+      //           : 160.0; // Default width if not provided
+      //   return DataCell(
+      //     (value is double && value.isNaN) || value == null
+      //         ? Container()
+      //         : Container(
+      //             width: width,
+      //             child: Text('$value'),
+      //           ),
+      //   );
+      // }).toList(),
     );
   }
 
