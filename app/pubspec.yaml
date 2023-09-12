@@ -2,7 +2,7 @@ name: cannlytics_data
 description: An app to interface with cannabis data and analytics.
 
 publish_to: 'none'
-version: 0.3.0
+version: 0.3.2
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -21,11 +21,10 @@ dependencies:
   firebase_storage: ^11.2.5
   fl_chart: ^0.63.0
   flutter_animate: ^4.2.0+1
-  # FIXME: This package has been deprecated.
-  # flutter_downloader: ^1.11.1
   flutter_dropzone: ^3.0.6
   flutter_layout_grid: ^2.0.4
   flutter_launcher_icons: ^0.13.1
+  flutter_material_color_picker: ^1.2.0
   flutter_native_splash: ^2.3.1
   flutter_openmoji: ^0.0.8
   flutter_riverpod: ^2.3.1

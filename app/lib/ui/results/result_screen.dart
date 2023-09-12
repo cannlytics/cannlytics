@@ -4,13 +4,17 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/11/2023
-// Updated: 9/9/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'dart:convert';
+
 import 'package:cannlytics_data/common/layout/search_placeholder.dart';
+import 'package:cannlytics_data/ui/account/account_controller.dart';
 import 'package:cannlytics_data/ui/results/result_coa.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +37,6 @@ import 'package:cannlytics_data/constants/colors.dart';
 import 'package:cannlytics_data/constants/design.dart';
 import 'package:cannlytics_data/models/lab_result.dart';
 import 'package:cannlytics_data/ui/layout/console.dart';
-// import 'package:cannlytics_data/ui/results/result_history.dart';
 import 'package:cannlytics_data/ui/results/result_table.dart';
 import 'package:cannlytics_data/ui/results/results_service.dart';
 import 'package:cannlytics_data/utils/utils.dart';
@@ -80,7 +83,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   late String? _pdfUrl;
   late final TabController _tabController;
   int _tabCount = 3;
-  Future<void>? _updateFuture;
+  String? _updateFuture;
 
   // Initialize.
   @override
@@ -104,7 +107,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
   @override
   Widget build(BuildContext context) {
     if (widget.labResult != null) return _form(widget.labResult);
-    print('Getting lab result data: ${widget.labResultId}');
     final asyncData = ref.watch(labResultProvider(widget.labResultId!));
     return asyncData.when(
       // Loading UI.
@@ -115,7 +117,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
 
       // Error UI.
       error: (err, stack) {
-        print(stack);
         return MainContent(
           child: SelectableText('Error: $err'),
         );
@@ -144,6 +145,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         var update = state?.toMap() ?? {};
         var parsedValue = double.tryParse(value);
         update[key] = parsedValue ?? value;
+        List<Map<String, dynamic>> mapResults =
+            ref.read(analysisResults).map((result) => result!.toMap()).toList();
+        String jsonEncodedResults = jsonEncode(mapResults);
+        update['results'] = jsonEncodedResults;
         return LabResult.fromMap(update);
       });
     }
@@ -160,19 +165,24 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     }
 
     /// Save edit.
-    void _saveEdit() {
-      // Update any modified details and results.
+    void _saveEdit() async {
+      // Update any modified details.
       var update = ref.read(updatedLabResult)?.toMap() ?? {};
-      update['results'] = ref.read(analysisResults);
-      update['updated_at'] = DateTime.now().toUtc().toIso8601String();
 
-      // TODO: Create a log.
+      // Update any modified results.
+      List<Map<String, dynamic>> mapResults =
+          ref.read(analysisResults).map((result) => result!.toMap()).toList();
+      String jsonEncodedResults = jsonEncode(mapResults);
+      update['results'] = jsonEncodedResults;
 
       // Update the data in Firestore.
-      _updateFuture = ref.read(resultService).updateResult(
-            widget.labResultId ?? widget.labResult?.sampleHash ?? '',
+      update['updated_at'] = DateTime.now().toUtc().toIso8601String();
+      _updateFuture = await ref.read(resultService).updateResult(
+            widget.labResultId ?? widget.labResult?.sampleId ?? '',
             update,
           );
+
+      // TODO: Create a log.
 
       // Show notification snackbar.
       if (_updateFuture == 'success') {
@@ -212,7 +222,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         items: [
           {'label': 'Data', 'path': '/'},
           {'label': 'Lab Results', 'path': '/results'},
-          {'label': 'Result', 'path': '/results/${labResult?.sampleHash}'},
+          {'label': 'Result', 'path': '/results/${labResult?.sampleId}'},
         ],
       ),
     );
@@ -272,6 +282,16 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           Text('${labResult?.productSize}', style: fieldStyle),
           Text('${labResult?.servingSize}', style: fieldStyle),
           Text('${labResult?.servingsPerPackage}', style: fieldStyle),
+        ],
+      ),
+      gapH24,
+
+      // Analytics data.
+      KeyValueDataTable(
+        tableName: 'Analytics',
+        labels: ['Cannabinoid Type'],
+        values: <Widget>[
+          Text('${labResult?.cannabinoidType}', style: fieldStyle),
         ],
       ),
       gapH24,
@@ -490,6 +510,17 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
         value: labResult?.totalTerpenes.toString(),
         onChanged: (value) => _onEdit('total_terpenes', value),
         isNumeric: true,
+      ),
+
+      // Analytics data.
+      Padding(
+        padding: labelPadding,
+        child: SelectableText('Analytics', style: labelStyle),
+      ),
+      CustomTextField(
+        label: 'Cannabinoid Type',
+        value: labResult?.cannabinoidType,
+        onChanged: (value) => _onEdit('cannabinoid_type', value),
       ),
 
       // Analysis data.
@@ -771,24 +802,145 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     );
 
     // Public/private choice.
+    final subscription = ref.watch(userSubscriptionProvider).value;
     var _publicPrivateChoice = Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: EdgeInsets.only(left: 24, right: 24, top: 8),
+        padding: EdgeInsets.only(left: 32, right: 32, top: 8, bottom: 48),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: 129,
+            maxWidth: 130,
           ),
           child: PublicPrivateToggle(
             isPublic: labResult.public ?? false,
+            disabled: subscription?['support'] != 'enterprise',
             onChanged: (newValue) {
-              // FIXME: Change public / private.
-              var id = widget.labResultId ?? widget.labResult?.sampleHash ?? '';
-              var update = {'public': newValue};
-              ref.read(resultService).updateResult(id, update);
+              // Change public / private (only if the user has enterprise support).
+              if (subscription?['support'] == 'enterprise') {
+                var id = widget.labResultId ?? widget.labResult?.sampleId ?? '';
+                var update = {'public': newValue};
+                ref.read(resultService).updateResult(id, update);
+              }
             },
           ),
         ),
+      ),
+    );
+
+    // Label color.
+    // FIXME: Initial color is not correct.
+    final currentColor = ref.read(labelColorProvider);
+    var _colorPicker = Row(
+      children: [
+        SelectionArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Label color',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Text(
+                'Color code for your results.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.only(left: 24, right: 24, bottom: 8),
+          child: GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Select a color'),
+                        IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                      ],
+                    ),
+                    content: SingleChildScrollView(
+                      child: MaterialColorPicker(
+                        allowShades: false,
+                        // Change color functionality.
+                        onMainColorChange: (ColorSwatch<dynamic>? color) async {
+                          if (color != null) {
+                            String hexCode = StringUtils.colorToHexCode(color);
+                            var update = {'label_color': hexCode};
+                            print('UPDATE: $update');
+                            update['updated_at'] =
+                                DateTime.now().toUtc().toIso8601String();
+                            _updateFuture =
+                                await ref.read(resultService).updateResult(
+                                      widget.labResultId ??
+                                          widget.labResult?.sampleHash ??
+                                          '',
+                                      update,
+                                    );
+                            print('updateFuture: $_updateFuture');
+                            if (_updateFuture != 'success') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error changing label color!'),
+                                  duration: Duration(seconds: 4),
+                                  backgroundColor: isDark
+                                      ? DarkColors.darkOrange
+                                      : LightColors.darkOrange,
+                                  showCloseIcon: true,
+                                ),
+                              );
+                            }
+                            setState(() {
+                              _updateFuture = null;
+                            });
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        selectedColor: currentColor,
+                        colors: [
+                          Colors.red,
+                          Colors.orange,
+                          Colors.amberAccent,
+                          Colors.green,
+                          Colors.teal,
+                          Colors.blue,
+                          Colors.indigo,
+                          Colors.purple,
+                          Colors.brown,
+                          Colors.grey,
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: CircleColor(
+                color: currentColor,
+                circleSize: 32,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+    var _labelColor = Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: 32, right: 32, top: 0, bottom: 24),
+        child: _colorPicker,
       ),
     );
 
@@ -824,8 +976,31 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
           slivers: [
             _breadcrumbs,
             SliverToBoxAdapter(child: _actions),
-            SliverToBoxAdapter(child: _publicPrivateChoice),
             _isEditing ? _editForm : _viewForm,
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 32,
+                      right: 32,
+                      bottom: 24,
+                    ),
+                    child: Text(
+                      'Settings',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  _labelColor,
+                  _publicPrivateChoice,
+                ],
+              ),
+            ),
           ],
         ),
 
@@ -913,59 +1088,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
     // Render.
     return TabbedForm(tabCount: _tabCount, tabs: _tabs);
   }
-
-  /// Message displayed when there is no COA.
-  // Widget _placeholder(BuildContext context, WidgetRef ref) {
-  //   return Center(
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16.0),
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           // Image.
-  //           // TODO: Use downloadUrl if available as an image.
-  //           Padding(
-  //             padding: EdgeInsets.only(top: 16),
-  //             child: ClipOval(
-  //               child: Image.network(
-  //                 'https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_a_scroll_with_robot_arms_and_a_disguise_for_a_face_a_57549317-7365-4350-9b7b-84fd7421b103.png?alt=media&token=72631010-56c8-4981-a936-58b89294f336',
-  //                 width: 128,
-  //                 height: 128,
-  //                 fit: BoxFit.cover,
-  //               ),
-  //             ),
-  //           ),
-
-  //           // Text.
-  //           Container(
-  //             width: 540,
-  //             child: Column(
-  //               children: <Widget>[
-  //                 SelectableText(
-  //                   'No COA available',
-  //                   textAlign: TextAlign.center,
-  //                   style: TextStyle(
-  //                       fontSize: 20,
-  //                       color: Theme.of(context).textTheme.titleLarge!.color),
-  //                 ),
-  //                 SelectableText(
-  //                   'If you have a COA, then you can upload it to have it parsed and attached.',
-  //                   textAlign: TextAlign.center,
-  //                   style: Theme.of(context).textTheme.bodyMedium,
-  //                 ),
-  //                 gapH12,
-  //                 PrimaryButton(
-  //                   text: 'Parse results',
-  //                   onPressed: () => context.go('/results'),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
 /// A pill that displays the analysis type.
@@ -1069,8 +1191,13 @@ class StatusPill extends StatelessWidget {
 class PublicPrivateToggle extends StatefulWidget {
   final bool isPublic;
   final ValueChanged<bool>? onChanged;
+  final bool disabled;
 
-  PublicPrivateToggle({required this.isPublic, this.onChanged});
+  PublicPrivateToggle({
+    required this.isPublic,
+    this.onChanged,
+    this.disabled = false,
+  });
 
   @override
   _PublicPrivateToggleState createState() => _PublicPrivateToggleState();
@@ -1087,17 +1214,23 @@ class _PublicPrivateToggleState extends State<PublicPrivateToggle> {
 
   @override
   Widget build(BuildContext context) {
-    return SecondaryButton(
-      text: _isPublic ? 'Public' : 'Private',
-      onPressed: () {
-        setState(() {
-          _isPublic = !_isPublic;
-          widget.onChanged?.call(_isPublic);
-        });
-      },
-      leading: Icon(
-        _isPublic ? Icons.public : Icons.public_off,
-        // color: Colors.white,
+    return Tooltip(
+      message:
+          'Only Enterprise users have the ability to toggle between public/private status.',
+      child: SecondaryButton(
+        text: _isPublic ? 'Public' : 'Private',
+        disabled: widget.disabled,
+        onPressed: () {
+          setState(() {
+            _isPublic = !_isPublic;
+            widget.onChanged?.call(_isPublic);
+          });
+        },
+        leading: Icon(
+          _isPublic ? Icons.public : Icons.public_off,
+          size: 16,
+          color: _isPublic ? Colors.blueAccent : Colors.grey.shade600,
+        ),
       ),
     );
   }

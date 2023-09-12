@@ -128,7 +128,6 @@ class LabResultsSearchForm extends HookConsumerWidget {
       return InkWell(
         onTap: () {
           String value = _searchTextController.text;
-          print('Searching for value: $value');
           // ref
           //     .watch(asyncLabResultsProvider.notifier)
           //     .searchLabResults(value);

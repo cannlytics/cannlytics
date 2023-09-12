@@ -58,7 +58,6 @@ class LabResultItem extends StatelessWidget {
       );
 
       // Download the data.
-      print(data);
       DownloadService.downloadData(
         [data],
         '/api/data/coas/download',

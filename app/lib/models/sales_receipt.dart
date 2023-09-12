@@ -4,8 +4,10 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 7/2/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+import 'package:cannlytics_data/utils/utils.dart';
 
 /// A sales receipt model.
 class SalesReceipt {
@@ -131,8 +133,8 @@ class SalesReceipt {
       identificationMethod: data['identification_method'] as String?,
       patientRegistrationLocationId:
           data['patient_registration_location_id'] as String?,
-      totalPackages: data['total_packages'] as int?,
-      totalPrice: data['total_price'] as double?,
+      totalPackages: DataUtils.formatInt(data['total_packages']),
+      totalPrice: DataUtils.formatNumber(data['total_price']),
       transactions: data['transactions'] as List<dynamic>?,
       isFinal: data['is_final'] as bool?,
       archivedDate: data['archived_date'] as String?,
@@ -152,18 +154,18 @@ class SalesReceipt {
           List<double>.from(data['product_prices'] as List<dynamic>? ?? []),
       productIds:
           List<String>.from(data['product_ids'] as List<dynamic>? ?? []),
-      totalAmount: data['total_amount'] as double?,
-      subtotal: data['subtotal'] as double?,
-      totalDiscount: data['total_discount'] as double?,
-      totalPaid: data['total_paid'] as double?,
-      changeDue: data['change_due'] as double?,
-      rewardsEarned: data['rewards_earned'] as double?,
-      rewardsSpent: data['rewards_spent'] as double?,
-      totalRewards: data['total_rewards'] as double?,
-      cityTax: data['city_tax'] as double?,
-      countyTax: data['county_tax'] as double?,
-      stateTax: data['state_tax'] as double?,
-      exciseTax: data['excise_tax'] as double?,
+      totalAmount: DataUtils.formatNumber(data['total_amount']),
+      subtotal: DataUtils.formatNumber(data['subtotal']),
+      totalDiscount: DataUtils.formatNumber(data['total_discount']),
+      totalPaid: DataUtils.formatNumber(data['total_paid']),
+      changeDue: DataUtils.formatNumber(data['change_due']),
+      rewardsEarned: DataUtils.formatNumber(data['rewards_earned']),
+      rewardsSpent: DataUtils.formatNumber(data['rewards_spent']),
+      totalRewards: DataUtils.formatNumber(data['total_rewards']),
+      cityTax: DataUtils.formatNumber(data['city_tax']),
+      countyTax: DataUtils.formatNumber(data['county_tax']),
+      stateTax: DataUtils.formatNumber(data['state_tax']),
+      exciseTax: DataUtils.formatNumber(data['excise_tax']),
       retailer: data['retailer'] as String?,
       retailerLicenseNumber: data['retailer_license_number'] as String?,
       retailerAddress: data['retailer_address'],
@@ -172,8 +174,8 @@ class SalesReceipt {
       retailerState: data['retailer_state'],
       retailerZipcode: data['retailer_zipcode'],
       budtender: data['budtender'] as String?,
-      totalTax: data['total_tax'] as double?,
-      totalTransactions: data['total_transactions'] as double?,
+      totalTax: DataUtils.formatNumber(data['total_tax']),
+      totalTransactions: DataUtils.formatNumber(data['total_transactions']),
       parsedAt: DateTime.parse(data['parsed_at'] as String? ?? ''),
       algorithm: data['algorithm'] as String?,
       algorithmVersion: data['algorithm_version'] as String?,

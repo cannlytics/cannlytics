@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/15/2023
-// Updated: 9/10/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -109,11 +109,15 @@ class ReceiptService {
   final String uid;
 
   // Update receipt.
-  Future<void> updateReceipt(String id, Map<String, dynamic> data) async {
-    await _dataSource.updateDocument(
-      path: 'users/$uid/receipts/$id',
-      data: data,
-    );
+  Future<String> updateReceipt(String id, Map<String, dynamic> data) async {
+    try {
+      String path = 'users/$uid/receipts/$id';
+      await _dataSource.updateDocument(path: path, data: data);
+      return 'success';
+    } catch (e) {
+      print(e.toString());
+      return e.toString();
+    }
   }
 
   // Delete receipt.

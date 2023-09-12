@@ -26,6 +26,7 @@ class SecondaryButton extends StatelessWidget {
     this.isLoading = false,
     this.onPressed,
     this.leading,
+    this.disabled = false,
   });
 
   // Properties.
@@ -34,11 +35,12 @@ class SecondaryButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
   final Widget? leading;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       style: TextButton.styleFrom(
         backgroundColor: Colors.transparent,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -60,24 +62,19 @@ class SecondaryButton extends StatelessWidget {
             )
           : (leading != null)
               ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     leading!,
                     gapW8,
                     Text(
                       text,
                       style: Theme.of(context).textTheme.titleMedium,
-                      // !.copyWith(
-                      //       color: isDark ? DarkColors.text : LightColors.text,
-                      //     ),
                     ),
                   ],
                 )
               : Text(
                   text,
                   style: Theme.of(context).textTheme.titleMedium,
-                  // !.copyWith(
-                  //       color: isDark ? DarkColors.text : LightColors.text,
-                  //     ),
                 ),
     );
   }

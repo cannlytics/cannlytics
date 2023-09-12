@@ -389,7 +389,7 @@ if __name__ == '__main__':
     # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
 
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(DATA_DIR)
+    # kaycha_coas = get_results_kaycha(DATA_DIR)
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
@@ -614,8 +614,8 @@ if __name__ == '__main__':
     DATA_DIR = 'D://data/florida/lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
-    the_flowery_products = get_product_results_the_flowery(DATA_DIR)
-    the_flowery_coas = get_results_the_flowery(DATA_DIR)
+    # the_flowery_products = get_product_results_the_flowery(DATA_DIR)
+    # the_flowery_coas = get_results_the_flowery(DATA_DIR)
 
 
 #-----------------------------------------------------------------------
@@ -838,7 +838,9 @@ if __name__ == '__main__':
     # Note: This is a super, super long process
     pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
     date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    for folder in os.listdir(pdf_dir):
+    folders = os.listdir(pdf_dir)
+    folders.reverse()
+    for folder in folders:
         if folder.startswith('MMTC'):
             data_dir = os.path.join(pdf_dir, folder)
             outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')

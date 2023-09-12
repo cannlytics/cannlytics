@@ -63,6 +63,7 @@ final resultsDataSourceProvider = StateNotifierProvider.family<CustomDataSource,
       fields: [
         'coa_parsed_at',
         'product_name',
+        'strain_name',
         'producer',
         'lab',
         'date_tested',
@@ -75,6 +76,7 @@ final resultsDataSourceProvider = StateNotifierProvider.family<CustomDataSource,
       columnWidths: [
         42,
         100.0,
+        160.0,
         160.0,
         160.0,
         160.0,
@@ -143,6 +145,7 @@ class ResultsFilterNotifier extends StateNotifier<AsyncValue<List<Map?>>> {
     Map<String, dynamic> itemMap = {
       'coa_parsed_at': item?['coa_parsed_at'],
       'product_name': item?['product_name'],
+      'strain_name': item?['strain_name'],
       'producer': item?['producer'],
       'lab': item?['lab'],
       'date_tested': item?['date_tested'],
@@ -241,6 +244,7 @@ class UserResultsTable extends ConsumerWidget {
         List<Map> headers = [
           {'name': 'Parsed', 'key': 'coa_parsed_at', 'sort': true},
           {'name': 'Product Name', 'key': 'product_name', 'sort': true},
+          {'name': 'Strain Name', 'key': 'strain_name', 'sort': true},
           {'name': 'Producer', 'key': 'producer', 'sort': true},
           {'name': 'Lab', 'key': 'lab', 'sort': true},
           {'name': 'Date Tested', 'key': 'date_tested', 'sort': true},
@@ -300,7 +304,6 @@ class UserResultsTable extends ConsumerWidget {
           availableRowsPerPage.add(data.length);
           availableRowsPerPage.sort();
         }
-        print('availableRowsPerPage: $availableRowsPerPage');
 
         // Get the sorting state.
         final sortColumnIndex = ref.watch(resultsSortColumnIndex);

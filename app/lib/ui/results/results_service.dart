@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/13/2023
-// Updated: 9/5/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Dart imports:
@@ -12,6 +12,7 @@ import 'dart:async';
 // import 'package:async/async.dart' show StreamGroup;
 
 // Flutter imports:
+import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -83,10 +84,10 @@ final labResultProvider =
     builder: (data, documentId) {
       // Keep track of analysis results for editing.
       var labResult = LabResult.fromMap(data ?? {});
-      // var results =
-      //     labResult.results?.map((result) => result?.toMap()).toList();
       ref.read(analysisResults.notifier).update(labResult.results ?? []);
       ref.read(updatedLabResult.notifier).update((state) => labResult);
+      ref.read(labelColorProvider.notifier).update((state) =>
+          StringUtils.hexCodeToColor(labResult.labelColor ?? '#9E9E9E'));
       return labResult;
     },
   );
@@ -110,11 +111,16 @@ final resultJobsProvider = StreamProvider.autoDispose<List<Map?>>((ref) async* {
       .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
 });
 
+/* === Updates === */
+
+// Label color provider.
+final labelColorProvider =
+    StateProvider.autoDispose<Color>((ref) => Colors.grey);
+
 // Updated result.
-final updatedLabResult = StateProvider<LabResult?>((ref) => null);
+final updatedLabResult = StateProvider.autoDispose<LabResult?>((ref) => null);
 
 // Updated analysis results.
-// final analysisResults = StateProvider<List<Map?>>((ref) => []);
 final analysisResults =
     StateNotifierProvider<AnalysisResultsNotifier, List<Result?>>(
         (ref) => AnalysisResultsNotifier());
@@ -141,6 +147,8 @@ class AnalysisResultsNotifier extends StateNotifier<List<Result?>> {
 // New analysis result.
 final newAnalysisResult = StateProvider<Map>((ref) => {});
 
+/* === Service === */
+
 // Result service provider.
 final resultService = Provider<ResultService>((ref) {
   final uid = ref.read(userProvider).value?.uid ?? 'cannlytics';
@@ -156,11 +164,14 @@ class ResultService {
   final String uid;
 
   // Update result.
-  Future<void> updateResult(String id, Map<String, dynamic> data) async {
-    await _dataSource.updateDocument(
-      path: 'users/$uid/lab_results/$id',
-      data: data,
-    );
+  Future<String> updateResult(String id, Map<String, dynamic> data) async {
+    try {
+      String path = 'users/$uid/lab_results/$id';
+      await _dataSource.updateDocument(path: path, data: data);
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   // Delete result.

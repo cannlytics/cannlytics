@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/9/2023
-// Updated: 8/6/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -62,7 +62,7 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
   bool _isEditing = false;
   late final TabController _tabController;
   int _tabCount = 2;
-  Future<void>? _updateFuture;
+  String? _updateFuture;
 
   // Initialize the state.
   @override
@@ -119,7 +119,12 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     void _onEdit(key, value) {
       ref.read(updatedReceipt.notifier).update((state) {
         var update = state?.toMap() ?? {};
-        var parsedValue = double.tryParse(value);
+        var parsedValue;
+        try {
+          parsedValue = double.parse(value);
+        } catch (e) {
+          parsedValue = value;
+        }
         update[key] = parsedValue ?? value;
         return SalesReceipt.fromMap(update);
       });
@@ -137,16 +142,18 @@ class _ReceiptScreenState extends ConsumerState<ReceiptScreen>
     }
 
     /// Save edit.
-    void _saveEdit() {
+    void _saveEdit() async {
       // Update any modified details and results.
       var update = ref.read(updatedReceipt)?.toMap() ?? {};
-      update['updated_at'] = DateTime.now().toUtc().toIso8601String();
 
       // Update the data in Firestore.
-      _updateFuture = ref.read(receiptService).updateReceipt(
+      update['updated_at'] = DateTime.now().toUtc().toIso8601String();
+      _updateFuture = await ref.read(receiptService).updateReceipt(
             widget.salesReceiptId ?? widget.salesReceipt?.hash ?? '',
             update,
           );
+
+      // TODO: Create a log.
 
       // Show notification snackbar.
       if (_updateFuture == 'success') {

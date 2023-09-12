@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 3/2/2023
-// Updated: 9/8/2023
+// Updated: 9/12/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Package imports:
@@ -93,6 +93,8 @@ class LabResult {
     this.labResultsUrl,
     this.jobFileUrl,
     this.public,
+    this.labelColor,
+    this.cannabinoidType,
   });
 
   // Properties.
@@ -166,6 +168,8 @@ class LabResult {
   final String? labResultsUrl;
   final String? jobFileUrl;
   final bool? public;
+  final String? labelColor;
+  final String? cannabinoidType;
 
   // @override
   // List<String?> get props => [labId];
@@ -278,6 +282,8 @@ class LabResult {
       labResultsUrl: data['lab_results_url'],
       jobFileUrl: data['job_file_url'],
       public: data['public'] == true || data['public'] == 1 ? true : false,
+      labelColor: data['label_color'],
+      cannabinoidType: data['cannabinoid_type'],
     );
   }
 
@@ -354,6 +360,8 @@ class LabResult {
       'lab_results_url': labResultsUrl,
       'job_file_url': jobFileUrl,
       'public': public,
+      'label_color': labelColor,
+      'cannabinoid_type': cannabinoidType,
     };
   }
 }

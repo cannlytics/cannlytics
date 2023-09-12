@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 6/23/2023
+Updated: 9/12/2023
 License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 Description: Authentication mechanisms for the Cannlytics API, including API key
@@ -18,7 +18,8 @@ from os import environ
 from secrets import token_urlsafe
 
 # External imports.
-from django.http.response import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 # Internal imports.
 from cannlytics.auth.auth import authenticate_request, sha256_hmac
@@ -39,6 +40,7 @@ except ValueError:
     pass
 
 
+@api_view(['GET'])
 def get_api_key_hmacs(request, *args, **argv):
     """Get a user's API key HMAC information.
     Args:
@@ -51,9 +53,10 @@ def get_api_key_hmacs(request, *args, **argv):
     uid = user_claims['uid']
     query = {'key': 'uid', 'operation': '==', 'value': uid}
     docs = get_collection('admin/api/api_key_hmacs', filters=[query])
-    return JsonResponse({'status': 'success', 'data': docs})
+    return Response({'status': 'success', 'data': docs}, status=200)
 
 
+@api_view(['POST'])
 def create_api_key(request, *args, **argv):
     """Mint an API key for a user, granting programmatic use at the same
     level of permission as the user.
@@ -70,7 +73,7 @@ def create_api_key(request, *args, **argv):
         user_claims = authenticate_request(request)
         uid = user_claims['uid']
     except:
-        return JsonResponse({'success': False, 'message': 'Invalid credentials.'})
+        return Response({'success': False, 'message': 'Invalid credentials.'}, status=401)
 
     # Mint an API key.
     try:
@@ -127,14 +130,16 @@ def create_api_key(request, *args, **argv):
 
         # Return the newly minted API key.
         print('Minted new API key with prefix:', api_key[:4])
-        return JsonResponse({'success': True, 'api_key': api_key})
+        return Response({'success': True, 'api_key': api_key}, status=200)
     
     # Handle unknown errors.
-    except:
+    except Exception as e:
         print('Unknown error creating API key.')
-        return JsonResponse({'success': False, 'message': 'Unknown error creating API key.'})
+        print(e)
+        return Response({'success': False, 'message': 'Unknown error creating API key.'}, status=500)
 
 
+@api_view(['POST'])
 def delete_api_key(request, *args, **argv):
     """Deletes a user's API key passed through an authorization header,
     e.g. `Authorization: API-key xyz`.
@@ -146,14 +151,14 @@ def delete_api_key(request, *args, **argv):
     try:
         uid = user_claims['uid']
     except KeyError:
-        return JsonResponse({'success': False, 'message': 'Invalid credentials.'})
+        return Response({'success': False, 'message': 'Invalid credentials.'}, status=401)
 
     # Get the prefix of the desired key to delete.
     try:
         post_data = loads(request.body.decode('utf-8'))
         prefix = post_data['prefix']
     except:
-        return JsonResponse({'success': False, 'message': 'A `prefix` is expected in the request body.'})
+        return Response({'success': False, 'message': 'A `prefix` is expected in the request body.'}, status=403)
     
     # Get the API key that belongs to the user with the given prefix.
     try:
@@ -167,7 +172,7 @@ def delete_api_key(request, *args, **argv):
         )
         code = docs[0]['code']
     except:
-        return JsonResponse({'success': False, 'message': 'No API key found with the given prefix.'})
+        return Response({'success': False, 'message': 'No API key found with the given prefix.'}, status=403)
 
     # Delete the key from the users API keys.
     try:
@@ -186,9 +191,10 @@ def delete_api_key(request, *args, **argv):
 
         # Return a success message.
         message = 'API key successfully deleted.'
-        return JsonResponse({'success': True, 'message': message})
+        return Response({'success': True, 'message': message}, status=200)
 
     # Handle unknown errors.
-    except:
+    except Exception as e:
         print('Unknown error deleting API key.')
-        return JsonResponse({'success': False, 'message': 'Unknown error deleting API key.'})
+        print(e)
+        return Response({'success': False, 'message': 'Unknown error deleting API key.'}, status=500)
