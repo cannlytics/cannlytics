@@ -1,4 +1,4 @@
-| Cannlytics SOP-0008 |  |
+<!-- | Cannlytics SOP-0008 |  |
 |---------------------|--|
 | Title | Security |
 | Version | 1.0.0 |
@@ -8,7 +8,7 @@
 | Last Review | 2023-07-18 |
 | Author | Keegan Skeate, Founder |
 | Approved by | Keegan Skeate, Founder |
-| Status | Active |
+| Status | Active | -->
 
 # Security
 

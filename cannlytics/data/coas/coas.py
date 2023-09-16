@@ -131,7 +131,7 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
 
 # Encountered Metrc prefixes used to identify Metrc IDs.
-METRC_PREFIXES = ['1A40603', '1A40A01']
+METRC_PREFIXES = ['1A40']
 
 # A custom `ValueError` message to raise when no known LIMS is identified.
 UNIDENTIFIED_LIMS = 'COA not recognized as a COA from a known lab: '

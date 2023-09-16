@@ -1,4 +1,4 @@
-| Cannlytics SOP-0001 |  |
+<!-- | Cannlytics SOP-0001 |  |
 |---------------------|--|
 | Title | Control of Documents |
 | Version | 0.0.2 |
@@ -8,7 +8,7 @@
 | Last Review | 2023-07-18 |
 | Author | Keegan Skeate, Founder |
 | Approved by | Keegan Skeate, Founder |
-| Status | Active |
+| Status | Active | -->
 
 ## Introduction
 

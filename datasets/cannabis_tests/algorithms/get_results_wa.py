@@ -15,7 +15,7 @@ Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LI
 Data Source:
 
     - WSLCB PRR (latest)
-    URL: <https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o>
+    URL: <https://lcb.app.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz>
 
 """
 # Standard imports:

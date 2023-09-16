@@ -6,10 +6,6 @@
 
 <https://cannlytics.com>
 
-<!-- [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/pypi/v/cannlytics.svg)](https://pypi.org/project/cannlytics)
-[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics?color=orange)](https://pypi.python.org/pypi/cannlytics/) -->
-
 </div>
 
 🔥 **Cannlytics** is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data. We believe that people in the cannabis space would benefit from organized, decentralized, and accessible data. This repository contains each core component of Cannlytics and detailed instructions on how to build, develop, publish, and use each tool. You can find more information about each tool below:
@@ -19,7 +15,6 @@
 | [🦾 Cannlytics AI](https://github.com/cannlytics/cannlytics/tree/main/ai) | 🟢 | <https://data.cannlytics.com> |
 | [📡 Cannlytics API](https://github.com/cannlytics/cannlytics/tree/main/api) | 🟢 | <https://cannlytics.com/api> |
 | [📱 Cannlytics App](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟡  | In Development |
-<!-- | [📱 Cannlytics Data](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟢  | In Development | -->
 | [🕹️ Cannlytics Console](https://github.com/cannlytics/cannlytics/tree/main/console) | 🟢 | <https://console.cannlytics.com> |
 | [📜 Cannlytics Documentation](https://github.com/cannlytics/cannlytics/tree/main/docs) | 🟡 | <https://docs.cannlytics.com> |
 | [🐍 Cannlytics Python SDK](https://github.com/cannlytics/cannlytics/tree/main/cannlytics) | 🟢 | <https://pypi.org/project/cannlytics/>|
@@ -28,12 +23,6 @@
 ## 🧑‍🚀 Cannabis Data Science
 
 Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Please join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
-
-<!-- TODO: **Cannlytics Data Catalogue**
-
-<!-- TODO: Diagram of Cannlytics data -->
-
-| Dataset | Description |  -->
 
 ## 👨‍🏭 Contributing <a name="contributing"></a>
 
@@ -48,15 +37,12 @@ Contributions are always welcome! You are encouraged to submit [issues](https://
 
 ## 💖 Support <a name="support"></a>
 
-Cannlytics is made available with ❤️ and your good will. Please consider making a contribution to help us continue crafting useful tools and data pipelines for you. Thank you 🙏
+Cannlytics is made available with hard work and your good will. Please consider making a contribution to help us continue crafting useful tools and data pipelines for you. Thank you 🙏
 
 | Provider | Link |
 |----------|------|
 | 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
-| 💸 PayPal Donation | <https://paypal.me/cannlytics> |
-| 💵 Venmo Donation | <https://www.venmo.com/u/cannlytics> |
-| ⚡ Ethereum donation address | `cannlytics.eth` |
-<!-- | 🪙 Bitcoin donation address| `34CoUcAFprRnLnDTHt6FKMjZyvKvQHb6c6` | -->
+
 
 ## 🏛️ License <a name="license"></a>
 
@@ -80,15 +66,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
-
-Please cite the following if you use the code examples in your research:
-
-```bibtex
-@misc{cannlytics2023,
-  title={Cannabis Data Science},
-  author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
-  journal={https://github.com/cannlytics/cannabis-data-science},
-  year={2023}
-}
 ```
