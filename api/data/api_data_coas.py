@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 9/4/2023
+Updated: 9/16/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -88,11 +88,17 @@ def save_file(
     else:
         filepath = file
 
+    print('SAVING FILEPATH:', filepath)
+
     # Create a document ID.
     doc_id = str(uuid.uuid4())
 
     # Upload the file to Firebase Storage.
-    ext = filepath.split('.').pop()
+    try:
+        ext = filepath.split('.').pop()
+    except Exception as e:
+        print('ERROR GETTING FILE EXTENSION:', str(e))
+        ext = 'pdf'
     ref = 'users/%s/%s/%s.%s' % (uid, collection, doc_id, ext)
     upload_file(
         destination_blob_name=ref,
@@ -284,6 +290,12 @@ def api_data_coas(request, coa_id=None):
             # Save each file to the temporary directory.
             for coa_file in request_files:
 
+                # try:
+                #     pdfs.append(pdfplumber.open(coa_file))
+                #     continue
+                # except Exception as e:
+                #     print('FAILED TO OPEN FILE AS PDF:', str(e))
+
                 # File safety check.
                 ext: str = coa_file.name.split('.').pop()
 
@@ -365,26 +377,37 @@ def api_data_coas(request, coa_id=None):
 
             # Save user's file to Firebase Storage.
             try:
-                print('Saving file:', doc)
                 file_data = save_file(
                     uid=uid,
                     file=doc,
                     collection='coas',
                     project_id=project_id,
                 )
+                print('Saved file:', doc)
             except:
                 print('Failed to save file:', doc)
                 file_data = {}
 
             # Use the temporary file for parsing.
             coa_file = file_data.get('filepath', doc)
+            # coa_file = file_data.get('download_url', doc)
 
             # Parse the document.
             try:
+                # try:
                 print('Parsing:', coa_file)
-                data = parser.parse(coa_file)
+                data = parser.parse(coa_file, verbose=True)
+                print('PARSED:', str(data))
                 parsed_data.append({**data[0], **file_data})
-            except:
+                # except Exception as e:
+                #     print('ERROR PARSING COA:', str(e))
+                #     print('Parsing:', doc)
+                #     data = parser.parse(doc)
+                #     print('PARSED:', str(data))
+                #     parsed_data.append({**data[0], **file_data})
+                
+            except Exception as e:
+                print('ERROR PARSING COA:', str(e))
                 try:
 
                     # Require tokens to parse with AI.
@@ -393,16 +416,18 @@ def api_data_coas(request, coa_id=None):
 
                     # Parse COA with AI.
                     print('Parsing with AI:', coa_file)
+                    # print('SKIPPING FOR DEV')
+                    # continue
+
                     data, prompts, cost = parser.parse_with_ai(
                         coa_file,
                         openai_api_key=openai_api_key,
                         user=uid,
-                        # use_cached=True,
                         verbose=True,
-                        # model='gpt-3.5-turbo',
                         max_tokens=4_000,
                         max_prompt_length=1_000,
                     )
+                    print('PARSED:', str(data))
                     parsed_data.append({**data, **file_data})
                     all_prompts.extend(prompts)
                     total_cost += cost
@@ -417,8 +442,9 @@ def api_data_coas(request, coa_id=None):
                         )
                     except:
                         print('Failed to debit tokens from user:', uid)
+
                 except Exception as e:
-                    print('Failed to parse with AI:', e)
+                    print('ERROR PARSING COA WITH AI:', str(e))
                     continue
 
         # Try to parse images.
@@ -444,7 +470,8 @@ def api_data_coas(request, coa_id=None):
                 print('Scanned:', coa_url)
                 data = parser.parse(coa_url)
                 parsed_data.append({**data[0], **file_data})
-            except:
+            except Exception as e:
+                print('ERROR SCANNING COA:', str(e))
 
                 # Require tokens to parse with AI.
                 if current_tokens < 1:
@@ -476,8 +503,10 @@ def api_data_coas(request, coa_id=None):
                         )
                     except:
                         print('Failed to debit tokens from user:', uid)
-                except:
+    
+                except Exception as e:
                     print('Failed to parse URL:', coa_url)
+                    print(str(e))
                     continue
 
         # Finish parsing.
@@ -513,24 +542,27 @@ def api_data_coas(request, coa_id=None):
         )
 
         # Record cost and prompts.
-        ai_model = 'coa_doc'
-        timestamp = datetime.now().isoformat()
-        doc_id = timestamp.replace(':', '-').replace('.', '-')
-        refs.append(f'admin/ai/{ai_model}_usage/{doc_id}')
-        docs.append({
-            'ai_model': ai_model,
-            'uid': uid,
-            'timestamp': timestamp,
-            'total_cost': total_cost,
-            'prompts': all_prompts,
-        })
-        if claims:
-            refs.append(f'users/{uid}/usage/{doc_id}')
+        try:
+            ai_model = 'coa_doc'
+            timestamp = datetime.now().isoformat()
+            doc_id = timestamp.replace(':', '-').replace('.', '-')
+            refs.append(f'admin/ai/{ai_model}_usage/{doc_id}')
             docs.append({
                 'ai_model': ai_model,
+                'uid': uid,
                 'timestamp': timestamp,
                 'total_cost': total_cost,
+                'prompts': all_prompts,
             })
+            if claims:
+                refs.append(f'users/{uid}/usage/{doc_id}')
+                docs.append({
+                    'ai_model': ai_model,
+                    'timestamp': timestamp,
+                    'total_cost': total_cost,
+                })
+        except Exception as e:
+            print('Failed to record AI usage:', str(e))
 
         # Update the database.
         if refs:

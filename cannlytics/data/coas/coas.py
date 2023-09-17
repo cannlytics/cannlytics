@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/24/2023
+Updated: 9/16/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -39,10 +39,10 @@ from typing import Any, List, Optional
 # External imports.
 import cv2
 import numpy as np
-try:
-    import openai
-except ImportError:
-    print('Unable to find `openai` package. This tool is used for parsing with AI.')
+# try:
+#     import openai
+# except ImportError:
+#     print('Unable to find `openai` package. This tool is used for parsing with AI.')
 import openpyxl
 import pandas as pd
 import requests
@@ -623,6 +623,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> list:
         """Parse all CoAs given a directory, a list of files,
         or a list of URLs.
@@ -653,31 +654,40 @@ class CoADoc:
         # Parse a URL, PDF path, or .zip folder.
         if isinstance(data, str):
 
-            # FIXME: Parse a URL to an image of a COA or QR code.
+            # Parse a URL to an image of a COA or QR code.
             image_extensions = ['.png', '.jpg', '.jpeg']
             if 'https' in data and any(ext in data.lower() for ext in image_extensions):
+                if verbose:
+                    print('Parsing image URL.')
+                image_url = self.scan(data)
                 coa_data = self.parse_url(
-                    data,
+                    image_url,
                     headers=headers,
                     lims=lims,
                     max_delay=max_delay,
                     persist=persist,
+                    verbose=verbose,
                 )
                 coas.append(coa_data)
 
             # Parse a URL.
-            if 'https' in data:
+            elif 'https' in data:
+                if verbose:
+                    print('Parsing URL.')
                 coa_data = self.parse_url(
                     data,
                     headers=headers,
                     lims=lims,
                     max_delay=max_delay,
                     persist=persist,
+                    verbose=verbose,
                 )
                 coas.append(coa_data)
 
             # Parse a PDF.
             elif '.pdf' in data:
+                if verbose:
+                    print('Parsing PDF.')
                 coa_data = self.parse_pdf(
                     data,
                     cleanup=cleanup,
@@ -688,6 +698,7 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    verbose=verbose,
                 )
                 coas.append(coa_data)
 
@@ -695,15 +706,21 @@ class CoADoc:
 
             # Parse a ZIP.
             elif '.zip' in data:
+                if verbose:
+                    print('Parsing ZIP.')
                 doc_dir = unzip_files(data)
                 docs = get_directory_files(doc_dir)
 
             # Parse a directory.
             else:
+                if verbose:
+                    print('Parsing directory.')
                 docs = get_directory_files(data)
 
         # Handle a list of URLs, PDFs, and/or ZIPs.
         else:
+            if verbose:
+                print('Parsing list.')
             docs = data
 
         # Parse all of the PDFs.
@@ -711,6 +728,8 @@ class CoADoc:
 
             # Parse a .zip folder.
             if '.zip' in doc and kind != 'url':
+                if verbose:
+                    print('Parsing ZIP.')
                 doc_dir = unzip_files(doc)
                 pdf_files = get_directory_files(doc_dir)
                 for pdf_file in pdf_files:
@@ -724,11 +743,28 @@ class CoADoc:
                         resolution=resolution,
                         temp_path=temp_path,
                         use_cached=use_cached,
+                        verbose=verbose,
                     )
                     coas.append(coa_data)
 
+            # Parse a URL.
+            elif doc.startswith('http'):
+                if verbose:
+                    print('Parsing URL.')
+                coa_data = self.parse_url(
+                    doc,
+                    headers=headers,
+                    lims=lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                    verbose=verbose,
+                )
+            
             # Parse a PDF.
-            elif '.pdf' in doc and kind != 'url':
+            # elif '.pdf' in doc and kind != 'url':
+            else:
+                if verbose:
+                    print('Parsing PDF.')
                 coa_data = self.parse_pdf(
                     doc,
                     cleanup=cleanup,
@@ -739,19 +775,10 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    verbose=verbose,
                 )
 
             # TODO: Parse image of COAs and QR codes.
-
-            # Parse a URL.
-            else:
-                coa_data = self.parse_url(
-                    doc,
-                    headers=headers,
-                    lims=lims,
-                    max_delay=max_delay,
-                    persist=persist,
-                )
             
             # Record the COA data.
             coas.append(coa_data)
@@ -774,6 +801,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
@@ -824,6 +852,8 @@ class CoADoc:
         # then raise an error if the labs / LIMS is unknown for safety.
         # TODO: Parse unidentified CoAs to the best of our abilities.
         known_lims = self.identify_lims(pdf_file, lims=lims)
+        if verbose:
+            print(f'Identified LIMS: {known_lims}')
         if known_lims is None:
             temp_pdf = f'{temp_path}/ocr-coa.pdf'
             if isinstance(pdf, str):
@@ -841,6 +871,8 @@ class CoADoc:
             )
             pdf_file = pdfplumber.open(temp_pdf)
             known_lims = self.identify_lims(pdf_file, lims=lims)
+            if verbose:
+                print(f'Identified LIMS after OCR: {known_lims}')
             if known_lims is None:
                 raise ValueError(UNIDENTIFIED_LIMS)
 
@@ -856,22 +888,32 @@ class CoADoc:
                 url = self.find_pdf_qr_code_url(pdf_file)
         except IndexError:
             url = self.find_pdf_qr_code_url(pdf_file)
+        if verbose:
+            print(f'Found URL on PDF: {url}')
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
+        if verbose:
+            print(f'Using algorithm: {algorithm_name}')
 
         # Use the URL if found, then try the PDF if the URL fails or is missing.
         if url:
             try:
+                if verbose:
+                    print(f'Parsing URL: {url}')
                 data = self.parse_url(
                     url,
                     headers=headers,
                     lims=known_lims,
                     max_delay=max_delay,
                     persist=persist,
+                    verbose=verbose,
                 )
-            except:
+            except Exception as e:
+                if verbose:
+                    print(f'Failed to parse URL:', str(e))
+                    print('Trying algorithm instead.')
                 data = algorithm(
                     self,
                     pdf_file,
@@ -881,6 +923,8 @@ class CoADoc:
                     google_maps_api_key=self.google_maps_api_key,
                 )
         else:
+            if verbose:
+                print(f'Parsing PDF: {pdf}')
             data = algorithm(
                 self,
                 pdf_file,
@@ -890,7 +934,10 @@ class CoADoc:
                 google_maps_api_key=self.google_maps_api_key,
             )
 
+        # Close the PDF.
         pdf_file.close()
+
+        # Return the data.
         sample = {
             'date_tested': date_tested,
             'lab_results_url': url,
@@ -905,6 +952,7 @@ class CoADoc:
             headers: Optional[dict] = {},
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> dict:
         """Parse a CoA URL.
         Args:
@@ -925,14 +973,40 @@ class CoADoc:
 
         # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
+        if verbose:
+            print(f'Identified LIMS: {known_lims}')
 
-        # Restrict to known labs / LIMS for safety.
-        # TODO: Parse unidentified CoAs to the best of our abilities.
+        # Restrict to known labs / LIMS.
         if known_lims is None:
-            raise ValueError(UNIDENTIFIED_LIMS)
+            # raise ValueError(UNIDENTIFIED_LIMS)
+        
+            # Download URL to a temporary file.
+            temp_path = tempfile.gettempdir()
+            try:
+                filename = url.split('/')[-1].split('?')[0] + '.pdf'
+            except:
+                filename = 'coa.pdf'
+            temp_pdf = os.path.join(temp_path, filename)
+            if self.session is not None:
+                response = self.session.get(url)
+            else:
+                response = requests.get(url, headers=headers)
+            with open(temp_pdf, 'wb') as pdf:
+                pdf.write(response.content)
+
+            # Attempt to identify the LIMS from the PDF.
+            known_lims = self.identify_lims(temp_pdf, lims=lims)
+            if verbose:
+                print(f'Identified LIMS after download: {known_lims}')
+            if known_lims is None:
+                raise ValueError(UNIDENTIFIED_LIMS)
+            else:
+                url = temp_pdf
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
+        if verbose:
+            print(f'Using algorithm: {algorithm_name}')
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
         data = algorithm(
             self,

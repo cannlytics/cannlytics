@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 8/24/2023
+Updated: 9/16/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -391,7 +391,8 @@ def parse_coa_with_ai(
                     try:
                         start_index = content.find('{')
                         end_index = content.rfind('}') + 1
-                        partial_results = json.loads(content[start_index:end_index])['results']
+                        partial_results = json.loads(content[start_index:end_index])
+                        partial_results = partial_results.get('results', [])
 
                     # Otherwise, try to handle as a list.
                     except:
@@ -402,6 +403,7 @@ def parse_coa_with_ai(
                 # Extend the results.
                 try:
                     results.extend(partial_results)
+                    print('EXTENDED RESULTS:', partial_results)
                 except:
                     if verbose:
                         print('Failed to extend results.')
