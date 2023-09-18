@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 9/16/2023
+Updated: 9/17/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -159,8 +159,16 @@ def api_data_coas(request, coa_id=None):
     # Get a specific COA or query public COAs.
     if request.method == 'GET':
 
-         # Get a specific receipt.
+        # Disallow unauthenticated requests.
+        if uid == 'cannlytics':
+            message = 'You need to authenticate with an Authentication: Bearer <token> header to request lab result data.'
+            response = Response({'error': True, 'message': message}, status=402)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+
+        # Get a specific receipt.
         if coa_id:
+            print('GETTING COA:', coa_id)
             ref = f'users/{uid}/coas/{coa_id}'
             data = get_document(ref)
             response = {'success': True, 'data': data}
@@ -169,6 +177,7 @@ def api_data_coas(request, coa_id=None):
             return response
 
         # Query receipts.
+        print('QUERYING COAS...')
         data, filters = [], []
         available_queries = [
             {
@@ -229,14 +238,18 @@ def api_data_coas(request, coa_id=None):
         # Throttle the number of observations for free users.
         if throttle and limit > 1000:
             limit = 1000
-        else:
-            limit = params.get('limit')
 
         # Order the data.
         order_by = params.get('order_by', 'coa_parsed_at')
         desc = params.get('desc', True)
 
         # Query documents.
+        print('PARAMETERS:', order_by, desc, limit, str(filters))
+        if params.get('public'):
+            ref = f'public/data/lab_results'
+        else:
+            ref = f'users/{uid}/lab_results'
+        print('REF:', ref)
         ref = f'public/data/lab_results'
         data = get_collection(
             ref,
@@ -245,6 +258,7 @@ def api_data_coas(request, coa_id=None):
             limit=limit,
             order_by=order_by,
         )
+        print('FOUND %i COAS.' % len(data))
 
         # Return the data.
         response = {'success': True, 'data': data}
