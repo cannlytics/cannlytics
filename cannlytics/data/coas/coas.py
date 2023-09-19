@@ -52,17 +52,17 @@ from pypdf import PdfMerger
 try:
     from pyzbar import pyzbar
     # from pyzbar.pyzbar import decode
-except ImportError:
-    print('Unable to find `zbar` library. This tool is used for decoding QR codes.')
+except:
+    print('Unable to import `zbar` library. This tool is used for decoding QR codes.')
 try:
     from pytesseract import image_to_pdf_or_hocr
 except ImportError:
-    print('Unable to find `Tesseract` library. This tool is used for OCR.')
+    print('Unable to import `Tesseract` library. This tool is used for OCR.')
 try:
     from wand.image import Image as magick_wand
     from wand.color import Color
 except ImportError:
-    print('Unable to find `ImageMagick` library. This tool is used for OCR.')
+    print('Unable to import `ImageMagick` library. This tool is used for OCR.')
 
 # Internal imports.
 from cannlytics.data.data import create_hash, write_to_worksheet
