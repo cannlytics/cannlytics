@@ -1,0 +1,18 @@
+# Cannabis Licenses | Python Requirements
+# Created: 9/28/2022
+# Updated: 10/6/2022
+beautifulsoup4==4.11.1
+cannlytics==0.0.13
+chromedriver-binary==107.0.5304.18.0
+firebase_admin==5.3.0
+folium==0.12.1.post1
+fredapi==0.5.0
+matplotlib==3.6.0
+pandas==1.4.4
+pdfplumber==0.7.4
+python-dotenv==0.21.0
+requests==2.28.1
+seaborn==0.12.0
+selenium==4.5.0
+xlrd==2.0.1
+zipcodes==1.2.0

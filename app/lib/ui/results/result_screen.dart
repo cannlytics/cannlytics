@@ -169,11 +169,11 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
       // Update any modified details.
       var update = ref.read(updatedLabResult)?.toMap() ?? {};
 
-      // Update any modified results.
-      List<Map<String, dynamic>> mapResults =
-          ref.read(analysisResults).map((result) => result!.toMap()).toList();
-      String jsonEncodedResults = jsonEncode(mapResults);
-      update['results'] = jsonEncodedResults;
+      // // Update any modified results.
+      // List<Map<String, dynamic>> mapResults =
+      //     ref.read(analysisResults).map((result) => result!.toMap()).toList();
+      // String jsonEncodedResults = jsonEncode(mapResults);
+      // update['results'] = jsonEncodedResults;
 
       // Update the data in Firestore.
       update['updated_at'] = DateTime.now().toUtc().toIso8601String();
@@ -877,7 +877,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
                           if (color != null) {
                             String hexCode = StringUtils.colorToHexCode(color);
                             var update = {'label_color': hexCode};
-                            print('UPDATE: $update');
                             update['updated_at'] =
                                 DateTime.now().toUtc().toIso8601String();
                             _updateFuture =
@@ -887,7 +886,6 @@ class _ResultScreenState extends ConsumerState<ResultScreen>
                                           '',
                                       update,
                                     );
-                            print('updateFuture: $_updateFuture');
                             if (_updateFuture != 'success') {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

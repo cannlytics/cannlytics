@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/29/2022
-Updated: 8/13/2023
+Updated: 9/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,7 +36,7 @@ import requests
 
 # Specify where your data lives.
 DATA_DIR = '../data/ny'
-ENV_FILE = '../../../../.env'
+ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'NY'
@@ -151,6 +151,7 @@ def get_retailers_ny(
 
 
     # TODO: Standardize the licenses.
+    df['premise_state'] = STATE
 
 
     # TODO: Augment GIS data.
@@ -411,12 +412,13 @@ def get_licenses_ny(
     # sets = [retailers, cultivators, processors, labs]
     sets = [retailers, labs]
     licenses = pd.concat(sets, ignore_index=True)
+    licenses['premise_state'] = STATE
 
     # Save all of the licenses.
     if data_dir is not None:
         date = datetime.now().isoformat()[:10]
-        outfile = f'{data_dir}/licenses-{STATE.lower()}-{date}.csv'
-        licenses.to_csv(outfile, index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     # Return the licenses.
     return licenses

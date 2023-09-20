@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 9/2/2023
-// Updated: 9/10/2023
+// Updated: 9/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -281,7 +281,6 @@ class UserReceiptsTable extends ConsumerWidget {
           availableRowsPerPage.add(data.length);
           availableRowsPerPage.sort();
         }
-        print('availableRowsPerPage: $availableRowsPerPage');
 
         // Get the sorting state.
         final sortColumnIndex = ref.watch(receiptsSortColumnIndex);
@@ -395,6 +394,39 @@ class UserReceiptsTable extends ConsumerWidget {
         final selectedRowCount = ref.watch(receiptsSelectedProvider);
         var actions = Row(
           children: [
+            // Download button.
+            IconButton(
+              icon: Icon(
+                Icons.cloud_download,
+                color: isDark ? DarkColors.darkText : LightColors.darkText,
+              ),
+              onPressed: () async {
+                if (user == null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SignInDialog(isSignUp: false);
+                    },
+                  );
+                  return;
+                }
+                final dataSource =
+                    ref.read(receiptsDataSourceProvider(data).notifier);
+                var selectedRows = dataSource.dataTableSource.data
+                    .where((row) => row.selected)
+                    .map((row) => row.data)
+                    .toList();
+                if (selectedRows.length == 0) {
+                  selectedRows = data;
+                }
+                DownloadService.downloadData(
+                  selectedRows,
+                  '/api/data/receipts/download',
+                );
+              },
+              tooltip: 'Download',
+            ),
+
             // Delete button.
             if (selectedRowCount > 0) ...[
               IconButton(
@@ -412,7 +444,14 @@ class UserReceiptsTable extends ConsumerWidget {
                     primaryActionColor: Colors.redAccent,
                   );
                   if (delete == true) {
-                    for (var item in data) {
+                    // Only delete selected.
+                    final dataSource =
+                        ref.read(receiptsDataSourceProvider(data).notifier);
+                    var selectedRows = dataSource.dataTableSource.data
+                        .where((row) => row.selected)
+                        .map((row) => row.data)
+                        .toList();
+                    for (var item in selectedRows) {
                       ref.read(receiptService).deleteReceipt(item?['hash']);
                     }
                   }
@@ -420,30 +459,6 @@ class UserReceiptsTable extends ConsumerWidget {
                 tooltip: 'Delete',
               ),
             ],
-
-            // Download button.
-            IconButton(
-              icon: Icon(
-                Icons.cloud_download,
-                color: isDark ? DarkColors.darkText : LightColors.darkText,
-              ),
-              onPressed: () async {
-                if (user == null) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SignInDialog(isSignUp: false);
-                    },
-                  );
-                  return;
-                }
-                DownloadService.downloadData(
-                  data,
-                  '/api/data/receipts/download',
-                );
-              },
-              tooltip: 'Download',
-            ),
           ],
         );
 

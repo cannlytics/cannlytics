@@ -67,12 +67,12 @@ A dataset is composed of:
 3. Finally, you can [upload your data files](https://huggingface.co/docs/datasets/share#upload-your-files) through the Hugging Face user interface, commit through VS Code, or commit with the command line:
 
     ```
-    cp /datasets/your_new_dataset/*.json .
-    git lfs track *.json
+    cp /datasets/your_new_dataset/*.csv .
+    git lfs track *.csv
     git add .gitattributes
-    git add *.json
-    git commit -m "add json files"
-    cp /datasets/your_new_dataset/dataset_infos.json .
+    git add *.csv
+    git commit -m "add csv files"
+    cp /datasets/your_new_dataset/dataset_infos.csv .
     cp /datasets/your_new_dataset/load_script.py .
     git add --all
     git status

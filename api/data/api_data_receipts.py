@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/13/2023
-Updated: 9/4/2023
+Updated: 9/20/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with receipt data.
@@ -455,15 +455,32 @@ def download_receipts_data(request):
         uid = claims['uid']
 
     # Read the posted data.
-    data = loads(request.body.decode('utf-8'))['data']
+    try:
+        body = loads(request.body.decode('utf-8'))
+        data = body['data']
+    except:
+        try:
+            data = request.data.get('data', [])
+        except:
+            data = []
+
+    # Handle no observations.
+    if not data:
+        message = f'No data, please post your data in a `data` field in the request body.'
+        print(message)
+        response = Response({'error': True, 'message': message}, status=401)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    # Read the posted data.
     if len(data) > MAX_OBSERVATIONS_PER_FILE:
         message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
-        response = {'success': False, 'message': message}
         print(message)
-        return Response(response, status=400)
+        response = {'success': False, 'message': message}
+        return Response(response, status=401)
     
     # Specify the filename.
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     filename = f'receipt-data-{timestamp}.xlsx'
 
     # Save a temporary workbook.

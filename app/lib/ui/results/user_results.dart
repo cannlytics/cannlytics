@@ -61,6 +61,7 @@ class UserResultsInterface extends ConsumerWidget {
     // Render table of user results.
     return Scrollbar(
       child: SingleChildScrollView(
+        primary: true,
         child: Padding(
           padding: EdgeInsets.only(left: 16, right: 16, top: 24),
           child: Column(children: [UserResultsTable()]),

@@ -4,10 +4,12 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 8/31/2023
-// Updated: 9/10/2023
+// Updated: 9/20/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -417,6 +419,56 @@ class UserResultsTable extends ConsumerWidget {
         final selectedRowCount = ref.watch(resultsSelectedProvider);
         var actions = Row(
           children: [
+            // Download button.
+            IconButton(
+              icon: Icon(
+                Icons.cloud_download,
+                color: isDark ? DarkColors.darkText : LightColors.darkText,
+              ),
+              onPressed: () async {
+                if (user == null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SignInDialog(isSignUp: false);
+                    },
+                  );
+                  return;
+                }
+                final dataSource =
+                    ref.read(resultsDataSourceProvider(data).notifier);
+                var selectedRows = dataSource.dataTableSource.data
+                    .where((row) => row.selected)
+                    .map((row) => row.data)
+                    .toList();
+                if (selectedRows.length == 0) {
+                  selectedRows = data;
+                }
+                List<Map<String, dynamic>> encodedSelectedRows =
+                    selectedRows.map((row) {
+                  var encodedRow = <String, dynamic>{};
+                  for (var key in row!.keys) {
+                    var value = row[key];
+                    if (value is List || value is Map) {
+                      encodedRow[key] = jsonEncode(value);
+                    } else if (value == null) {
+                      encodedRow[key] =
+                          ""; // Convert null values to empty string
+                    } else {
+                      encodedRow[key] = value
+                          .toString(); // Convert other data types to string
+                    }
+                  }
+                  return encodedRow;
+                }).toList();
+                DownloadService.downloadData(
+                  encodedSelectedRows,
+                  '/api/data/coas/download',
+                );
+              },
+              tooltip: 'Download',
+            ),
+
             // Delete button.
             if (selectedRowCount > 0) ...[
               IconButton(
@@ -434,7 +486,14 @@ class UserResultsTable extends ConsumerWidget {
                     primaryActionColor: Colors.redAccent,
                   );
                   if (delete == true) {
-                    for (var item in data) {
+                    // Only delete selected.
+                    final dataSource =
+                        ref.read(resultsDataSourceProvider(data).notifier);
+                    var selectedRows = dataSource.dataTableSource.data
+                        .where((row) => row.selected)
+                        .map((row) => row.data)
+                        .toList();
+                    for (var item in selectedRows) {
                       ref
                           .read(resultService)
                           .deleteResult(item?['sample_id'] ?? item?['id']);
@@ -444,30 +503,6 @@ class UserResultsTable extends ConsumerWidget {
                 tooltip: 'Delete',
               ),
             ],
-
-            // Download button.
-            IconButton(
-              icon: Icon(
-                Icons.cloud_download,
-                color: isDark ? DarkColors.darkText : LightColors.darkText,
-              ),
-              onPressed: () async {
-                if (user == null) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SignInDialog(isSignUp: false);
-                    },
-                  );
-                  return;
-                }
-                DownloadService.downloadData(
-                  data,
-                  '/api/data/coas/download',
-                );
-              },
-              tooltip: 'Download',
-            ),
           ],
         );
 

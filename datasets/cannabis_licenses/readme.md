@@ -13,9 +13,10 @@ tags:
 
 # Cannabis Licenses
 
+<!-- FIXME:
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
   <img style="max-height:365px;width:100%;max-width:720px;" alt="" src="analysis/figures/cannabis-licenses-map.png">
-</div>
+</div> -->
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -107,7 +108,7 @@ You can load the licenses for each state. For example:
 from datasets import load_dataset
 
 # Get the licenses for a specific state.
-dataset = load_dataset('cannlytics/cannabis_licenses', 'ny')
+dataset = load_dataset('cannlytics/cannabis_licenses', 'all')
 data = dataset['data']
 ```
 

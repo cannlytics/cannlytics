@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/18/2023
+Updated: 9/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -171,7 +171,7 @@ def save_all_licenses(data_dir, version='latest'):
 
 
 # === Test ===
-# [✓] Tested: 2023-09-19 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-09-20 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.
@@ -192,8 +192,8 @@ if __name__ == '__main__':
     # Get licenses for each state.
     # all_licenses = main(data_dir, env_file)
 
-    # DEV: Save all licenses.
-    data_dir = r'C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data'
+    # Save all licenses.
+    data_dir = '../data'
     all_licenses = save_all_licenses(data_dir)
     print('Saved %i licenses.' % len(all_licenses))
 

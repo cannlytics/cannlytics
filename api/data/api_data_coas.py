@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/17/2022
-Updated: 9/17/2023
+Updated: 9/20/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API endpoints to interface with COA data.
@@ -53,7 +53,7 @@ MAX_FILE_SIZE = 1024 * 1000 * 100 # (100 MB)
 FILE_TYPES = ['pdf', 'png', 'jpg', 'jpeg']
 
 # Maximum number of observations that can be downloaded at once.
-MAX_OBSERVATIONS_PER_FILE = 200_000
+MAX_OBSERVATIONS_PER_FILE = 999_999
 
 
 def save_file(
@@ -621,6 +621,7 @@ def api_data_coas(request, coa_id=None):
 
 
 @api_view(['POST', 'OPTIONS'])
+@csrf_exempt
 def download_coa_data(request):
     """Download posted data as a .xlsx file. Pass a `data` field in the
     body with the data, an object or an array of objects, to standardize
@@ -629,19 +630,37 @@ def download_coa_data(request):
     # Authenticate the user, throttle requests if unauthenticated.
     claims = authenticate_request(request)
     uid = claims['uid'] if claims else 'cannlytics'
+    print(f'USER {uid} POSTED DATA')
 
     # Read the posted data.
-    data = loads(request.body.decode('utf-8'))['data']
-    count = len(data)
-    print(f'USER {uid} POSTED OBSERVATIONS:', count)
-    if count > MAX_OBSERVATIONS_PER_FILE:
-        message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
-        response = Response({'error': True, 'message': message}, status=400)
+    try:
+        body = loads(request.body.decode('utf-8'))
+        data = body['data']
+    except:
+        try:
+            data = request.data.get('data', [])
+        except:
+            data = []
+
+    # Handle no observations.
+    if not data:
+        message = f'No data, please post your data in a `data` field in the request body.'
+        print(message)
+        response = Response({'error': True, 'message': message}, status=401)
         response['Access-Control-Allow-Origin'] = '*'
         return response
-    
+
+    # Handle too many observations.
+    count = len(data)
+    if count > MAX_OBSERVATIONS_PER_FILE:
+        message = f'Too many observations, please limit your request to {MAX_OBSERVATIONS_PER_FILE} observations at a time.'
+        print(message)
+        response = Response({'error': True, 'message': message}, status=401)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
     # Specify the filename.
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     filename = f'coa-data-{timestamp}.xlsx'
 
     # Save a temporary workbook.
@@ -657,12 +676,14 @@ def download_coa_data(request):
 
     # Upload the file to Firebase Storage.
     ref = 'users/%s/lab_results/%s' % (uid, filename)
+    print('UPLOADING FILE:', ref)
     _, project_id = google.auth.default()
     upload_file(
         destination_blob_name=ref,
         source_file_name=temp.name,
         bucket_name=STORAGE_BUCKET
     )
+    print('UPLOADED FILE:', ref)
 
     # Delete the temporary file.
     os.unlink(temp.name)
@@ -671,11 +692,13 @@ def download_coa_data(request):
     download_url, short_url = None, None
     try:
         download_url = get_file_url(ref, bucket_name=STORAGE_BUCKET)
+        print('DOWNLOAD URL:', download_url)
         short_url = create_short_url(
             api_key=FIREBASE_API_KEY,
             long_url=download_url,
             project_name=project_id
         )
+        print('SHORT URL:', short_url)
     except Exception as e:
         print('Failed to get download URL:', e)
 

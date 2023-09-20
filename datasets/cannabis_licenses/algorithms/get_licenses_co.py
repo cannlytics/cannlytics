@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/17/2023
+Updated: 9/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -192,6 +192,21 @@ def get_licenses_co(
     # Clean-up after getting GIS data.
     retailers.drop(columns=['query'], inplace=True)
 
+    # TODO: Merge retailer fields with licenses.
+    new_fields = [
+        'license_number',
+        'premise_street_address',
+        'premise_county',
+        'premise_latitude',
+        'premise_longitude',
+        'business_website',
+        'business_phone'
+    ]
+    licenses = pd.merge(licenses, retailers[new_fields], how='left', on='license_number')
+    licenses.loc[licenses['business_phone_y'].notna(), 'business_phone_x'] = licenses['business_phone_y']
+    licenses.drop(columns=['business_phone_y'], inplace=True)
+    licenses.rename(columns={'business_phone_x': 'business_phone'}, inplace=True)
+
     # Save and return the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
@@ -203,7 +218,7 @@ def get_licenses_co(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-09-20 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.

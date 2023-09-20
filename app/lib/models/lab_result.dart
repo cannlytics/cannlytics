@@ -289,6 +289,11 @@ class LabResult {
 
   // Create JSON.
   Map<String, dynamic> toMap() {
+    // Convert results to JSON.
+    List<Map<String, dynamic>> mapResults =
+        results?.map((result) => result!.toMap()).toList() ?? [];
+    String jsonEncodedResults = jsonEncode(mapResults);
+
     return <String, dynamic>{
       'lab_id': labId,
       'batch_number': batchNumber,
@@ -346,7 +351,6 @@ class LabResult {
       'total_terpenes': totalTerpenes,
       'sample_id': sampleId,
       'strain_name': strainName,
-      'results': results,
       'coa_algorithm': coaAlgorithm,
       'coa_algorithm_version': coaAlgorithmVersion,
       'coa_parsed_at': coaParsedAt,
@@ -362,6 +366,7 @@ class LabResult {
       'public': public,
       'label_color': labelColor,
       'cannabinoid_type': cannabinoidType,
+      'results': jsonEncodedResults,
     };
   }
 }
