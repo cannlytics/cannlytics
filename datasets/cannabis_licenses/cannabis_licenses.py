@@ -1,17 +1,14 @@
 """
 Cannabis Licenses
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/15/2023
+Updated: 9/19/2023
 License: <https://huggingface.co/datasets/cannlytics/cannabis_licenses/blob/main/LICENSE>
 """
-# Standard imports.
-import json
-
 # External imports.
 import datasets
 import pandas as pd
@@ -19,7 +16,7 @@ import pandas as pd
 
 # Constants.
 _SCRIPT = 'cannabis_licenses.py'
-_VERSION = '1.1.0'
+_VERSION = '1.0.1'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_licenses'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
@@ -39,19 +36,29 @@ _CITATION = """\
 
 
 # Read subsets from local source.
-try:
-    try:
-        with open('./cannabis_licenses.json', 'r') as f:
-            SUBSETS = json.loads(f.read())
-    except:
-        with open('./datasets/cannabis_licenses/cannabis_licenses.json', 'r') as f:
-            SUBSETS = json.loads(f.read())
-
-# Otherwise, read subsets from Hugging Face.
-except:
-    with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/cannabis_licenses.json') as url:
-        SUBSETS = json.load(url)
-
+SUBSETS = [
+    'all',
+    'ak',
+    'az',
+    'ca',
+    'co',
+    'ct',
+    'il',
+    'ma',
+    'md',
+    'me',
+    'mi',
+    'mo',
+    'mt',
+    'nj',
+    'nm',
+    # 'ny',
+    'nv',
+    'or',
+    'ri',
+    'vt',
+    'wa',
+]
 
 
 # Dataset fields.
@@ -82,8 +89,8 @@ FIELDS = datasets.Features({
     'business_email': datasets.Value(dtype='string'),
     'business_phone': datasets.Value(dtype='string'),
     'parcel_number': datasets.Value(dtype='string'),
-    'premise_latitude': datasets.Value(dtype='float'),
-    'premise_longitude': datasets.Value(dtype='float'),
+    'premise_latitude': datasets.Value(dtype='string'),
+    'premise_longitude': datasets.Value(dtype='string'),
     'data_refreshed_date': datasets.Value(dtype='string'),
 })
 
@@ -99,7 +106,12 @@ class CannabisLicensesConfig(datasets.BuilderConfig):
         """
         description = _DESCRIPTION
         description += f'This configuration is for the `{name}` subset.'
-        super().__init__(name=name, description=description, **kwargs)
+        super().__init__(
+            data_dir='./data',
+            description=description,
+            name=name,
+            **kwargs,
+        )
 
 
 class CannabisLicenses(datasets.GeneratorBasedBuilder):
@@ -107,8 +119,8 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
 
     VERSION = datasets.Version(_VERSION)
     BUILDER_CONFIG_CLASS = CannabisLicensesConfig
-    BUILDER_CONFIGS = [CannabisLicensesConfig(s) for s in SUBSETS.keys()]
-    DEFAULT_CONFIG_NAME = 'ca'
+    BUILDER_CONFIGS = [CannabisLicensesConfig(s) for s in SUBSETS]
+    DEFAULT_CONFIG_NAME = 'all'
 
     def _info(self):
         """Returns the dataset metadata."""
@@ -124,36 +136,47 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
     
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        config_name = self.config.name
-        data_url = SUBSETS[config_name]['data_url']
-        print(data_url)
-        urls = {config_name: data_url}
+        subset = self.config.name
+        # Deprecated: Use the data from the Cannlytics Hugging Face repository.
+        # https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/
+        # data_url = SUBSETS[config_name]['data_url']
+        # TEST: Use local data.
+        data_url = f'./data/{subset}/licenses-{subset}-latest.csv'
+        urls = {subset: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
-        filepath = downloaded_files[config_name]
-        params = {'filepath': filepath}
+        params = {'filepath': downloaded_files[subset]}
         return [datasets.SplitGenerator(name='data', gen_kwargs=params)]
     
     def _generate_examples(self, filepath):
         """Returns the examples in raw text form."""
-        print(filepath)
-        with open(filepath) as f:
-            df = pd.read_csv(filepath)
-            for index, row in df.iterrows():
-                obs = row.to_dict()
-                yield index, obs
+        # Read the data.
+        df = pd.read_csv(filepath)
+
+        # Add missing columns.
+        for col in FIELDS.keys():
+            if col not in df.columns:
+                df[col] = ''
+
+        # Keep only the feature columns.
+        df = df[list(FIELDS.keys())]
+
+        # Fill missing values.
+        df.fillna('', inplace=True)
+
+        # Return the data as a dictionary.
+        for index, row in df.iterrows():
+            obs = row.to_dict()
+            yield index, obs
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-09-19 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     from datasets import load_dataset
 
-    # Define all of the dataset subsets.
-    subsets = list(SUBSETS.keys())
-
     # Load each dataset subset.
-    for subset in subsets:
+    for subset in SUBSETS:
         dataset = load_dataset(_SCRIPT, subset)
         data = dataset['data']
         assert len(data) > 0

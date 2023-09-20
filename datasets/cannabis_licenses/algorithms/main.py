@@ -49,27 +49,27 @@ import pandas as pd
 
 # Specify state-specific algorithms.
 ALGORITHMS = {
-    # 'ak': 'get_licenses_ak',
-    # 'az': 'get_licenses_az',
-    # 'ca': 'get_licenses_ca',
-    # 'co': 'get_licenses_co',
-    # 'ct': 'get_licenses_ct',
-    # 'de': 'get_licenses_de',
-    # 'il': 'get_licenses_il',
-    # 'ma': 'get_licenses_ma',
-    # 'md': 'get_licenses_md',
-    # 'me': 'get_licenses_me',
-    # 'mi': 'get_licenses_mi',
-    # 'mo': 'get_licenses_mo',
-    # 'mt': 'get_licenses_mt',
-    # 'nj': 'get_licenses_nj',
+    'ak': 'get_licenses_ak',
+    'az': 'get_licenses_az',
+    'ca': 'get_licenses_ca',
+    'co': 'get_licenses_co',
+    'ct': 'get_licenses_ct',
+    'de': 'get_licenses_de',
+    'il': 'get_licenses_il',
+    'ma': 'get_licenses_ma',
+    'md': 'get_licenses_md',
+    'me': 'get_licenses_me',
+    'mi': 'get_licenses_mi',
+    'mo': 'get_licenses_mo',
+    'mt': 'get_licenses_mt',
+    'nj': 'get_licenses_nj',
     'nm': 'get_licenses_nm',
-    # 'nv': 'get_licenses_nv',
-    # 'ny': 'get_licenses_ny',
-    # 'or': 'get_licenses_or',
-    # 'ri': 'get_licenses_ri',
-    # 'vt': 'get_licenses_vt',
-    # 'wa': 'get_licenses_wa',
+    'nv': 'get_licenses_nv',
+    'ny': 'get_licenses_ny',
+    'or': 'get_licenses_or',
+    'ri': 'get_licenses_ri',
+    'vt': 'get_licenses_vt',
+    'wa': 'get_licenses_wa',
     # Future:
     # 'va': 'get_licenses_va',
     # 'mn': 'get_licenses_mn',
@@ -127,10 +127,12 @@ def main(data_dir, env_file):
         # except:
         #     manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
 
-    # Save all of the retailers.
+    # Save all of the licenses.
     all_data_dir = os.path.join(data_dir, 'all')
     if not os.path.exists(all_data_dir):
         os.makedirs(all_data_dir)
+
+
     
     all_data_file = os.path.join(all_data_dir, f'licenses-{date}.csv')
     licenses.to_csv(all_data_file, index=False)
@@ -138,8 +140,38 @@ def main(data_dir, env_file):
     return licenses
 
 
+def save_all_licenses(data_dir, version='latest'):
+    """Save all of the licenses to a single CSV file."""
+
+    # Read all of the latest license data.
+    all_licenses = []
+    states = ALGORITHMS.keys()
+    for state in states:
+        state_data_dir = os.path.join(data_dir, state)
+        state_data_file = os.path.join(state_data_dir, f'licenses-{state}-{version}.csv')
+        if os.path.exists(state_data_file):
+            state_data = pd.read_csv(state_data_file)
+            all_licenses.append(state_data)
+            print('Aggregated data for', state.upper())
+        else:
+            print(f'No data for {state.upper()}.')
+
+    # Save all of the licenses.
+    if all_licenses:
+        licenses = pd.concat(all_licenses)
+        all_data_file = os.path.join(data_dir, f'all/licenses-all-{version}.csv')
+        licenses.to_csv(all_data_file, index=False)
+        print('Saved all licenses to', all_data_file)
+        return licenses
+    
+    # No datafiles found.
+    else:
+        print('No licenses to save.')
+        return None
+
+
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-09-19 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.
@@ -158,7 +190,12 @@ if __name__ == '__main__':
     env_file = args.get('env_file')
 
     # Get licenses for each state.
-    all_licenses = main(data_dir, env_file)
+    # all_licenses = main(data_dir, env_file)
+
+    # DEV: Save all licenses.
+    data_dir = r'C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data'
+    all_licenses = save_all_licenses(data_dir)
+    print('Saved %i licenses.' % len(all_licenses))
 
     # TODO: Upload all CSVs to Firebase Storage.
 

@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/5/2022
-Updated: 7/31/2022
+Updated: 9/19/2023
 License: MIT License <https://opensource.org/licenses/MIT>
 
 Data sources:
@@ -21,7 +21,7 @@ FIXME: SQL queries do not appear to work.
 
 """
 # Standard imports.
-import json
+import io
 import os
 from typing import Any, Optional
 
@@ -147,7 +147,7 @@ class OpenData(object):
         Returns:
             (DataFrame): The HTTP data formatted as a DataFrame.
         """
-        url = os.path.join(self.base, f'{endpoint}.json')
+        url = os.path.join(self.base, f'{endpoint}.csv')
         try:
             response = self.session.get(url, headers=self.headers, params=params)
         except ConnectionError:
@@ -155,11 +155,13 @@ class OpenData(object):
             response = self.session.get(url, headers=self.headers, params=params)
         if response.status_code != 200:
             raise APIError(response)
-        try:
-            body = response.json()
-        except:
-            body = json.loads(response.text.replace('\r', '').replace('\ufeff', ''))
-        data = pd.DataFrame(body)
+        # Deprecated JSON: 2023-09-19
+        # try:
+        #     body = response.json()
+        # except:
+        #     body = json.loads(response.text.replace('\r', '').replace('\ufeff', ''))
+        # data = pd.DataFrame(body)
+        data = pd.read_csv(io.StringIO(response.text))
         data.columns = map(str.lower, data.columns)
         data.columns = [x.replace('$', 'dollars').replace('%', 'percent') for x in data.columns]
         data.rename(columns=OPENDATA_CODINGS, inplace=True)
