@@ -166,17 +166,51 @@ nav:
 
   # About
   #------------
-  - Home: docs/index.md
+  # - Home: docs/index.md
 
+  # About
+  #------------
+  - About:
+    - Overview: README.md
+    # - About: docs/about/about.md
+    # - FAQ: docs/about/faq.md
+    - Support: docs/about/support.md
+    - License: docs/about/license.md
+    - Privacy policy: docs/about/privacy-policy.md
+    - Security policy: docs/about/security-policy.md
+    - Terms of service: docs/about/terms-of-service.md
+
+  # Data
+  #------------
+  - Data:
+    - Overview: datasets/readme.md
+    - Licenses: datasets/cannabis_licenses/readme.md
+    - Lab Results: datasets/cannabis_tests/readme.md
+    - Patents: datasets/cannabis_patents/readme.md
+    - Strains: datasets/cannabis_strains/readme.md
+    - Sales: datasets/cannabis_sales/readme.md
+
+  # API
+  #------------
+  - API:
+    - Overview: api/readme.md
+    - Authentication: api/auth/readme.md
+    - AI: api/ai/readme.md
+    - Data: api/data/readme.md
+    - Stats: api/stats/readme.md
+    - Metrc: api/metrc/readme.md
+    # - Users: api/users/readme.md
+    # - Organizations: api/organizations/readme.md
+    # - Settings: api/settings/readme.md
+    
   # Cannlytics
   #---------------
-  - Cannlytics:
+  - SDK:
     - Overview: cannlytics/readme.md
     - Data:
       - Archive: cannlytics/data/readme.md
       - CCRS: cannlytics/data/ccrs/readme.md
       - Lab Results: cannlytics/data/coas/readme.md
-      # TODO: Add licenses.
       # - Licenses: cannlytics/data/coas/readme.md
       # - Market: cannlytics/data/market/readme.md
       - Sales and Receipts: cannlytics/data/sales/readme.md
@@ -188,47 +222,9 @@ nav:
     # - Models: cannlytics/models/readme.md
     # - Stats: cannlytics/stats/readme.md
     - Utils: cannlytics/utils/readme.md
-    # TODO: Examples
-
-  # About
-  #------------
-  - About:
-    - Overview: docs/about/about.md
-    - FAQ: docs/about/faq.md
-    - Support: docs/about/support.md
-    - License: docs/about/license.md
-    - Privacy policy: docs/about/privacy-policy.md
-    - Security policy: docs/about/security-policy.md
-    - Terms of service: docs/about/terms-of-service.md
-
-  # API
-  #------------
-  - API:
-    - Overview: api/readme.md
-    - Authentication: api/auth/readme.md
-    - AI: api/ai/readme.md
-    - Data: api/data/readme.md
-    - Stats: api/stats/readme.md
-    - Metrc: api/metrc/readme.md
-    - Users: api/users/readme.md
-    - Organizations: api/organizations/readme.md
-    - Settings: api/settings/readme.md
-    
-
-  # Data
-  #------------
-  - Data:
-    - Overview: data/readme.md
-    - Archive: data/archive/readme.md
-    - Licenses: data/archive/cannabis_licenses/readme.md
-    - Lab Results: data/archive/cannabis_tests/readme.md
-    - Patents: data/archive/cannabis_patents/readme.md
-    - Strains: data/archive/cannabis_strains/readme.md
-    - Sales: data/archive/cannabis_sales/readme.md
 
   # Users
   #------------
-  # TODO: Write general user documentation.
   # - Users:
   #   - Getting Started: console/get-started.md
   #   - Authentication: console/authentication.md
@@ -237,17 +233,18 @@ nav:
   
   # Developers
   #------------
-  - Developers:
-    - Overview: README.md
+  - Contributing:
+    - Overview: docs/developers/contributing.md
+    # - Overview: README.md
+    # - Contributing: docs/developers/contributing.md
     - Getting Started: docs/developers/development.md
-    - Contributing: docs/developers/contributing.md
     - Testing: docs/developers/testing.md
     - Security: docs/developers/security.md
-    - Control of Documents: docs/developers/control-of-documents.md
-    - Data Collection: docs/developers/data-collection.md
-    - COA Parsing: docs/developers/coa-parsing.md
+    # - Control of Documents: docs/developers/control-of-documents.md
+    - Documentation: docs/developers/documentation.md
+    # - Data Collection: docs/developers/data-collection.md
+    # - COA Parsing: docs/developers/coa-parsing.md
     - Datasets: docs/developers/datasets.md
     - Packaging: docs/developers/packaging.md
     - Publishing: docs/developers/publishing.md
-    - Documentation: docs/developers/documentation.md
     - Change Log: docs/changelog.md

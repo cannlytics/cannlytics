@@ -166,6 +166,8 @@ final userStrainDataProvider =
   );
 });
 
+/* === Service === */
+
 // Current receipt values.
 final updatedStrain = StateProvider<Strain?>((ref) => null);
 
@@ -285,6 +287,11 @@ class StrainService {
     Strain strain,
     WidgetRef ref,
   ) async {
+    final requestedStrains = ref.read(requestedStrainsProvider);
+
+    // If the strain is already in our requested strains set, then return.
+    if (requestedStrains.contains(strain.id)) return;
+
     // Determine if the description or imageUrl are missing.
     bool shouldGenerateDescription = strain.description == null;
     bool shouldGenerateImageUrl = strain.imageUrl == null;
@@ -294,6 +301,12 @@ class StrainService {
 
     // If there is no strain ID, then return.
     if (strain.id.isEmpty) return;
+
+    // Add the strain ID to our set of requested strains.
+    requestedStrains.add(strain.id);
+    ref
+        .read(requestedStrainsProvider.notifier)
+        .update((state) => requestedStrains);
 
     // Generate strain art.
     if (shouldGenerateImageUrl) {
@@ -306,6 +319,9 @@ class StrainService {
     }
   }
 }
+
+/// Set of strains that have been requested from the API.
+final requestedStrainsProvider = StateProvider<Set<String>>((ref) => {});
 
 /// Strain description parameters.
 final strainDescriptionParams = StateProvider<StrainDescriptionParams>((ref) {

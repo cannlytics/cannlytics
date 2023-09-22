@@ -1,4 +1,6 @@
 {
+  "comments.visible": false,
+  "editor.folding": true,
   "css.lint.unknownProperties": "ignore",
   "editor.detectIndentation": false,
   "editor.glyphMargin": false,
@@ -38,10 +40,10 @@
   "git.autofetch": true,
   "git.decorations.enabled": false,
   "git.ignoreLimitWarning": true,
-  "python.linting.pylintEnabled": true,
-  "python.linting.pylintArgs": [
-    "--disable=W0614"
-  ],
+  // "python.linting.pylintEnabled": true,
+  // "python.linting.pylintArgs": [
+  //   "--disable=W0614"
+  // ],
   "[python]": {
     "editor.insertSpaces": true,
     "editor.tabSize": 4,

@@ -10,7 +10,7 @@ You can [get a Metrc integration solution](https://cannlytics.com/support) today
 
 ## Endpoints
 
-The Metrc API endpoints in the table below are available at the base, with `https://console.cannlytics.com` serving as the base of the official Cannlytics distribution.
+The Metrc API endpoints in the table below are available at the base, with `https://cannlytics.com` serving as the base of the official Cannlytics distribution.
 
 | Object | Endpoint | Methods |
 |-------|----------|---------|

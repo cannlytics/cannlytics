@@ -45,9 +45,9 @@ For advanced usage, you can manage your authentication session with the `auth` e
 
 | Endpoint | Methods | Description |
 | -------- | ------- | ----------- |
-| `\auth\authenticate` | `POST` | Create an authorized session. |
-| `\auth\login` | `POST` | Sign into your Firebase user account. |
-| `\auth\logout` | `POST` | Sign out of your Firebase user account and end your authorized session. |
+| `/auth/authenticate` | `POST` | Create an authorized session. |
+| `/auth/login` | `POST` | Sign into your Firebase user account. |
+| `/auth/logout` | `POST` | Sign out of your Firebase user account and end your authorized session. |
 
 <!-- TODO: Document the following endpoints:
 create-key
@@ -110,3 +110,11 @@ You can make requests through the API passing your API key as a bearer token in 
 <!-- /auth/get-keys-->
 <!-- /auth/get-signature -->
 <!-- /auth/verify-pin -->
+
+## Users Endpoint `/api/users`
+
+You can manage your Cannlytics user account through the `users` API endpoints listed in the table below.
+
+| Endpoint | Methods | Description |
+| -------- | ------- | ----------- |
+| `api/users/<user_id>` | `GET`, `POST` | Get and update your user details. |

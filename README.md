@@ -14,7 +14,7 @@
 |---------|--------|----------|
 | [🦾 Cannlytics AI](https://github.com/cannlytics/cannlytics/tree/main/ai) | 🟢 | <https://data.cannlytics.com> |
 | [📡 Cannlytics API](https://github.com/cannlytics/cannlytics/tree/main/api) | 🟢 | <https://cannlytics.com/api> |
-| [📱 Cannlytics App](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟡  | In Development |
+| [📱 Cannlytics App](https://github.com/cannlytics/cannlytics/tree/main/app) | 🟡  | <https://app.cannlytics.com> |
 | [🕹️ Cannlytics Console](https://github.com/cannlytics/cannlytics/tree/main/console) | 🟢 | <https://console.cannlytics.com> |
 | [📜 Cannlytics Documentation](https://github.com/cannlytics/cannlytics/tree/main/docs) | 🟡 | <https://docs.cannlytics.com> |
 | [🐍 Cannlytics Python SDK](https://github.com/cannlytics/cannlytics/tree/main/cannlytics) | 🟢 | <https://pypi.org/project/cannlytics/>|
@@ -22,18 +22,18 @@
 
 ## 🧑‍🚀 Cannabis Data Science
 
-Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Please join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
+Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
 
 ## 👨‍🏭 Contributing <a name="contributing"></a>
 
 Contributions are always welcome! You are encouraged to submit [issues](https://github.com/cannlytics/cannlytics/issues), functionality, and features that you want to be addressed. See [the contributing guide](https://docs.cannlytics.com/developers/contributing/) to get started. Anyone is welcome to contribute anything. Currently, the project could greatly benefit from:
 
-- 🎨 [Art](https://github.com/cannlytics/cannlytics/tree/main/website/static/website/images);
-- 👨‍💻 [Code refactoring](https://docs.cannlytics.com/developers/contributing/);
-- 💡 [General ideas for improvement](mailto:contact@cannlytics.com);
-- 👷 [Tests](https://github.com/cannlytics/cannlytics/tree/main/tests);
-- 🖊️ [User documentation](https://github.com/cannlytics/cannlytics/tree/main/docs);
-- 🏹 [Example use cases](https://github.com/cannabisdata/cannabisdata).
+<!-- - 🎨 [Art](https://github.com/cannlytics/cannlytics/tree/main/website/static/website/images); -->
+- 👨‍💻 [Code](https://docs.cannlytics.com/developers/contributing/)
+- 💡 [Ideas](mailto:contact@cannlytics.com)
+- 👷 [Tests](https://github.com/cannlytics/cannlytics/tree/main/tests)
+- 🖊️ [Documentation](https://github.com/cannlytics/cannlytics/tree/main/docs)
+- 🏹 [Examples](https://github.com/cannabisdata/cannabisdata)
 
 ## 💖 Support <a name="support"></a>
 

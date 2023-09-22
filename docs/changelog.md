@@ -1,6 +1,6 @@
 # Change Log
 
-## 2023-09-19 v0.0.16
+## 2023-09-22 v0.0.16
 
 - Continued work on the organization screens in the app.
 - Made significant progress on data collection and app.

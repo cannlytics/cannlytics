@@ -145,9 +145,6 @@ class APIService {
         ..body = body;
     }
 
-    // Ensure the client doesn't add cookies.
-    // request.headers.remove('Cookie');
-
     // Get the response.
     final response = await client.send(request).then(http.Response.fromStream);
 

@@ -1,5 +1,5 @@
 <div style="margin-top:1rem; margin-bottom: 1rem;">
-<img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fccrs.png?alt=media&token=91b23b6b-bdfc-4864-83ad-95dadedbeda2" alt="CCRS" style="width:300px;"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fccrs.png?alt=media&token=91b23b6b-bdfc-4864-83ad-95dadedbeda2" style="width:300px;"/>
 </div>
 
 The [Cannabis Compliance and Regulatory System (CCRS)](https://lcb.wa.gov/ccrs) is Washington State's traceability system for cannabis. The data is available to the public and can be wrangled with the following tools.

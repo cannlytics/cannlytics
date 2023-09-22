@@ -4,7 +4,7 @@
 // Authors:
 //   Keegan Skeate <https://github.com/keeganskeate>
 // Created: 6/24/2023
-// Updated: 7/12/2023
+// Updated: 9/22/2023
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
@@ -100,7 +100,6 @@ class _StrainScreenState extends ConsumerState<StrainScreen>
             _isEditing = true;
           });
         } else {
-          // Generate the strain art and description if missing.
           ref
               .read(strainService)
               .generateStrainArtAndDescriptionIfMissing(strain!, ref);

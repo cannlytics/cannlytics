@@ -29,7 +29,6 @@ def send_message(request):
 
     # FIXME: This endpoint is broken and only
     # being used maliciously. Time to deprecate it!
-    return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=401)
 
     # Check if the user passed math input, to prevent spam.
     # FIXME: Implement ReCaptcha:
@@ -40,22 +39,23 @@ def send_message(request):
     #     return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=401)
     
     # # Get any user data.
-    # claims = authenticate_request(request)
-    # uid = claims.get('uid', 'User not signed in.')
-    # user_email = claims.get('email', 'Unknown')
-    # name = request.POST.get('name', claims.get('name', 'Unknown'))
-    # print('User sending email:', uid, user_email, name)
+    claims = authenticate_request(request)
+    uid = claims.get('uid', 'User not signed in.')
+    user_email = claims.get('email', 'Unknown')
+    name = request.POST.get('name', claims.get('name', 'Unknown'))
+    print('User sending email:', uid, user_email, name)
 
     # # Get the posted message.
-    # try:
-    #     subject = request.POST['subject']
-    #     message = request.POST['message']
-    #     sender = request.POST['email']
-    # except KeyError:
-    #     message = 'An `email`, `subject`, and `message` are required.'
-    #     return JsonResponse({'success': False, 'message': message}, status=400)
+    try:
+        subject = request.POST['subject']
+        message = request.POST['message']
+        sender = request.POST['email']
+    except KeyError:
+        message = 'An `email`, `subject`, and `message` are required.'
+        return JsonResponse({'success': False, 'message': message}, status=400)
     
     # # Format the message.
+    print(str(message))
     # recipients = LIST_OF_EMAIL_RECIPIENTS
     # template = 'New message from the Cannlytics website:' \
     #            '\n\n{}\n\nUser ID: {}\nUser Email: {}\n\nFrom,\n{}\n{}'
