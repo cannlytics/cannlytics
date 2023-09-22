@@ -52,7 +52,7 @@ import os
 import requests
 
 # Define the API.
-BASE = 'https://console.cannlytics.com/api'
+BASE = 'https://cannlytics.com/api'
 
 # Pass your Cannlytics API Key.
 api_key = os.getenv('CANNLYTICS_API_KEY')

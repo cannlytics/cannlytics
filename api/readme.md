@@ -2,14 +2,10 @@
 
 The Cannlytics API allows users to interface with cannabis data and statistics. Each API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
-<!-- FIXME: Re-work table of contents -->
-- [Getting Started with the Cannlytics API](#getting-started)
-- [Data API Endpoints](#data-api-endpoints)
-- [Stats API Endpoints](#stats-api-endpoints)
-- [LIMS API Endpoints](#lims-api-endpoints)
-- [Traceability API Endpoints](#traceability-api-endpoints)
-- [Organizations API Endpoints](#organizations-api-endpoints)
-- [Users API Endpoints](#users-api-endpoints)
+- [AI API Endpoints](./ai/readme.md)
+- [Data API Endpoints](./data/readme.md)
+- [Stats API Endpoints](./stats/readme.md)
+- [Metrc API Endpoints](./metrc/__init__.py)
 
 ## Getting Started with the Cannlytics API <a name="getting-started"></a>
 
@@ -19,7 +15,7 @@ Getting started making requests to the Cannlytics API can be done in 3 quick ste
 2. Second, [create a Cannlytics API key](https://cannlytics.com/account/api-keys).
 3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <cannlytics_api_key>` header.
 
-You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example reading an API key from a local `.env` file and requesting 10 public lab results.
+You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example reading an API key from a local `.env` file.
 
 === "Python"
 

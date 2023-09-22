@@ -12,13 +12,13 @@
 
 # Contributing
 
-## Become a Sponsor
+<!-- ## Become a Sponsor
 
 Open source projects take time and money. Help support the project by becoming a sponsor. You can add your support at
 any tier you feel comfortable with. No amount is too little. We also accept one time contributions via PayPal.
 
 [:octicons-mark-github-16: GitHub Sponsors](https://github.com/sponsors/cannlytics){: .md-button .md-button--primary }
-[:fontawesome-brands-paypal: PayPal](https://www.paypal.me/cannlytics){ .md-button}
+[:fontawesome-brands-paypal: PayPal](https://www.paypal.me/cannlytics){ .md-button} -->
 
 ## Bug Reports
 

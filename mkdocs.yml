@@ -184,19 +184,25 @@ nav:
   #------------
   - Data:
     - Overview: datasets/readme.md
-    - Licenses: datasets/cannabis_licenses/readme.md
-    - Lab Results: datasets/cannabis_tests/readme.md
-    - Patents: datasets/cannabis_patents/readme.md
-    - Strains: datasets/cannabis_strains/readme.md
-    - Sales: datasets/cannabis_sales/readme.md
+    - Cannabis Licenses: datasets/cannabis_licenses/readme.md
+    # - Cannabis Patents: datasets/cannabis_patents/readme.md
+    # - Cannabis Sales: datasets/cannabis_sales/readme.md
+    # - Cannabis Strains: datasets/cannabis_strains/readme.md
+    - Cannabis Tests: datasets/cannabis_tests/readme.md
 
   # API
   #------------
   - API:
     - Overview: api/readme.md
-    - Authentication: api/auth/readme.md
-    - AI: api/ai/readme.md
-    - Data: api/data/readme.md
+    # - Authentication: api/auth/readme.md
+    - AI:
+      # - Overview: api/ai/readme.md
+      - Recipes: api/ai/recipes.md
+    - Data:
+      - COAs: api/ai/coas.md
+      - Receipts: api/ai/receipts.md
+      # - Sales: api/data/sales.md
+      - Strains: api/data/strains.md
     - Stats: api/stats/readme.md
     - Metrc: api/metrc/readme.md
     # - Users: api/users/readme.md
@@ -208,7 +214,7 @@ nav:
   - SDK:
     - Overview: cannlytics/readme.md
     - Data:
-      - Archive: cannlytics/data/readme.md
+      - Overview: cannlytics/data/readme.md
       - CCRS: cannlytics/data/ccrs/readme.md
       - Lab Results: cannlytics/data/coas/readme.md
       # - Licenses: cannlytics/data/coas/readme.md

@@ -6,9 +6,9 @@
 
 <https://cannlytics.com>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+<!-- [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/pypi/v/cannlytics.svg)](https://pypi.org/project/cannlytics)
-[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics.svg?color=orange)](https://pypi.python.org/pypi/cannlytics/)
+[![PyPI download month](https://img.shields.io/pypi/dm/cannlytics.svg?color=orange)](https://pypi.python.org/pypi/cannlytics/) -->
 
 </div>
 
@@ -17,13 +17,12 @@
 - [🚀 Installation](#installation)
 - [🗝️ Authentication](#auth)
 - [📡 Data](#data)
-  - [CoAs](#coas)
-  - [Market](#market)
+  - [📜 COAs](#coas)
+  - [🪙 Market](#market)
 - [🔥 Firebase](#firebase)
 - [⚗️ LIMS](#lims)
 - [🛡️ Metrc](#metrc)
 - [📈 Statistics](#stats)
-- [🏛️ License](#license)
 
 ## 🚀 Installation <a name="installation"></a>
 
@@ -39,39 +38,39 @@ You can also simply clone the repository to get your hands on the Cannlytics sou
 git clone https://github.com/cannlytics/cannlytics.git
 ```
 
-You can get the nightly development build by cloning the `dev` branch of the repository. The `dev` branch is not stable for production, but has the latest and greatest tools that we're working tirelessly to deliver to you shortly.
+You can get the nightly development build by cloning the `app-dev` branch of the repository. The `app-dev` branch is not stable for production, but has the latest and greatest tools that we're working tirelessly to deliver to you shortly.
 
 ```shell
-git clone -b dev https://github.com/cannlytics/cannlytics.git
+git clone -b app-dev https://github.com/cannlytics/cannlytics.git
 ```
 
 ## 🗝️ Authentication <a name="auth"></a>
 
-Cannlytics leverages [🔥Firebase](https://console.firebase.google.com/) by default for data storage, file storage, and authentication. Use of Firebase is entirely optional and you are welcome to use your favorite database and backend services. If you choose to use Firebase, then you will need to provide credentials for your application by setting a `GOOGLE_APPLICATION_CREDENTIALS` environment variable that points to your service account credentials. For more information on adding authentication to your app, see [the `cannlytics.firebase` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/firebase).
+Cannlytics leverages [🔥Firebase](https://console.firebase.google.com/) for data storage, file storage, and authentication. Use of Firebase is entirely optional and you are welcome to use your favorite database and backend services. If you choose to use Firebase, then you will need to provide credentials for your application. This is typically done by setting a `GOOGLE_APPLICATION_CREDENTIALS` environment variable that points to your service account credentials. For more information on adding authentication to your app, see [the `cannlytics.firebase` documentation](./firebase/readme.md).
 
 ## 📡 Data <a name="data"></a>
 
-The `cannlytics.data` module is a large toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data. See [the `cannlytics.data` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data) for more information on how to manage your cannabis data.
+The `cannlytics.data` module is a toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data. See [the `cannlytics.data` documentation](./data/readme.md) for nifty tools to get, standardize, and archive your cannabis data.
 
-### COAs <a name="coas"></a>
+### 📜 COAs <a name="coas"></a>
 
-Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas).
+Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](./data/coas/readme.md).
 
-### Market <a name="market"></a>
+<!-- ### 🪙 Market <a name="market"></a>
 
-Welcome to the [Cannabis Data Market](https://cannabisdatamarket.com) and [Algorithm Farm](https://algorithmfarm.com), firsts of their kind. The idea is that algorithms and data can be published, purchased, and consumed in a decentralized manner as NFTs, through [smart contracts](https://en.wikipedia.org/wiki/Smart_contract), empowering both algorithm and data suppliers and consumers. It's a win-win mechanism that potentially millions can make a good living from creating, curating, and consuming data and algorithms in the cannabis space. Please feel free to begin to share any initial ideas, questions, comments, etc. and join in on the fun as we populate the first cannabis-specific data NFT and algorithm NFT marketplace. You can read more about using the data market in [the `cannlytics.data.market` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/market).
+The [Cannabis Data Market](https://cannabisdatamarket.com) and [Algorithm Farm](https://algorithmfarm.com) are firsts of their kind. The idea is that algorithms and data can be published, purchased, and consumed in a decentralized manner as NFTs, through [smart contracts](https://en.wikipedia.org/wiki/Smart_contract), empowering both algorithm and data suppliers and consumers. It's a win-win mechanism that potentially millions can make a good living from creating, curating, and consuming data and algorithms in the cannabis space. Please feel free to begin to share any initial ideas, questions, comments, etc. and join in on the fun as we populate the first cannabis-specific data NFT and algorithm NFT marketplace. You can read more about using the data market in [the `cannlytics.data.market` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/market). -->
 
 ## 🔥 Firebase <a name="firebase"></a>
 
-The `cannlytics.firebase` module is a wrapper of the [`firebase_admin`](https://pypi.org/project/firebase-admin/) package to make interacting with Firebase services, such as Firestore databases and Firebase Storage buckets, even easier. For more information, see [the `cannlytics.firebase` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/firebase).
+The `cannlytics.firebase` module is a wrapper of the [`firebase_admin`](https://pypi.org/project/firebase-admin/) package to make interacting with Firebase services, such as Firestore databases and Firebase Storage buckets, even easier. For more information, see [the `cannlytics.firebase` documentation](./firebase/readme.md).
 
-## ⚗️ LIMS <a name="lims"></a>
+<!-- ## ⚗️ LIMS <a name="lims"></a>
 
-The `cannlytics.lims.instruments` submodule provides tools to collect data generated by scientific instruments typically used by analytical labs that test cannabis. You can see [the `cannlytics.lims` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/lims) to see how to automatically collect results from your scientific instruments.
+The `cannlytics.lims.instruments` submodule provides tools to collect data generated by scientific instruments typically used by analytical labs that test cannabis. You can see [the `cannlytics.lims` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/lims) to see how to automatically collect results from your scientific instruments. -->
 
-## 🛡️ Metrc <a name="metrc"></a>
+## 🔰 Metrc <a name="metrc"></a>
 
-Cannlytics supports [Metrc](https://metrc.com) out-of-the-box. You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
+Cannlytics integrates with [Metrc](https://metrc.com). You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
 
 ```py
 from cannlytics import metrc
@@ -135,43 +134,8 @@ sale.total_price = 25
 sale.update()
 ```
 
-See [the `cannlytics.metrc` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/metrc) for more information and examples on how you can interface with the Metrc API.
+See [the `cannlytics.metrc` documentation](./metrc/readme.md) for more information and examples on how you can interface with the Metrc API.
 
-## 📈 Statistics <a name="stats"></a>
+<!-- ## 📈 Statistics <a name="stats"></a>
 
-The `cannlytics.stats` submodule contains a number of functions for estimating, saving, and using statistical models. You can read more about the statistical tools in [the `cannlytics.stats` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas).
-
-## 🏛️ License <a name="license"></a>
-
-```
-Copyright (c) 2021-2023 Cannlytics and The Cannabis Data Science Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-Please cite the following if you use the code examples in your research:
-
-```bibtex
-@misc{cannlytics2023,
-  title={Cannabis Data Science},
-  author={Skeate, Keegan and Rice, Charles and O'Sullivan-Sutherland, Candace},
-  journal={https://github.com/cannlytics/cannabis-data-science},
-  year={2023}
-}
-```
+The `cannlytics.stats` submodule contains a number of functions for estimating, saving, and using statistical models. You can read more about the statistical tools in [the `cannlytics.stats` documentation](https://github.com/cannlytics/cannlytics/tree/main/cannlytics/data/coas). -->

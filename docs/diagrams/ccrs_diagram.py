@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
     # Render the diagram.
     diagram = ccrs_diagram(
-        filename='ccrs_diagram',
+        filename='../../cannlytics/data/ccrs/ccrs_diagram',
         direction='LR',
         cluster_attr={
             'fontname': 'times bold',

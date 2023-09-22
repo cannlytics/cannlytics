@@ -1,5 +1,5 @@
 """
-Upload Cannabis Sales Data
+Upload Cannabis Patent Data
 Copyright (c) 2023 Cannlytics
 
 Authors:
@@ -10,7 +10,7 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Command-line Usage:
 
-    python datasets/cannabis_sales/upload_sales.py all
+    python datasets/cannabis_patents/upload_patents.py all
 
 """
 # Standard imports:

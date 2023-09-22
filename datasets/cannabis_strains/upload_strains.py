@@ -5,12 +5,12 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/26/2023
-Updated: 7/2/2023
+Updated: 9/22/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Command-line Usage:
 
-    python data/archive/upload_strains.py all
+    python datasets/cannabis_strains/upload_strains.py all
 
 """
 # Standard imports:

@@ -20,6 +20,20 @@
 | [🐍 Cannlytics Python SDK](https://github.com/cannlytics/cannlytics/tree/main/cannlytics) | 🟢 | <https://pypi.org/project/cannlytics/>|
 | [🌐 Cannlytics Website](https://github.com/cannlytics/cannlytics/tree/main/website) | 🟢 | <https://cannlytics.com> |
 
+
+## 🍁 Datasets
+
+Cannlytics Datasets is a collection of cannabis data from around the world. The data is archived locally, stored in a [cloud database](https://firebase.google.com/docs/firestore), and available for download from [Hugging Face](https://huggingface.co/datasets/cannlytics).
+
+| Dataset | Description |
+|-----------|-------------|
+| [`cannabis_licenses`](https://huggingface.co/datasets/cannlytics/cannabis_licenses) | Cannabis license data for each state with permitted adult-use cannabis. |
+| [`cannabis_tests`](https://huggingface.co/datasets/cannlytics/cannabis_tests) | Public cannabis lab test results. |
+<!-- | [`cannabis_patents`](https://huggingface.co/datasets/cannlytics/cannabis_patents) | Cannabis patent data for each observed cannabis or hemp plant patent. |
+| [`cannabis_sales`](https://huggingface.co/datasets/cannlytics/cannabis_sales) | Cannabis sales data for each state with permitted adult-use cannabis. |
+| [`cannabis_strains`](https://huggingface.co/datasets/cannlytics/cannabis_strains) | Cannabis strain data for each observed strain. | -->
+
+
 ## 🧑‍🚀 Cannabis Data Science
 
 Do you want to join a team of data scientists from around the world who are advancing cannabis science, molecule by molecule? 🧬 Come to the [Cannabis Data Science Meetup Group](https://www.meetup.com/cannabis-data-science)! At the meetup, you will be introduced to many useful notes, notebooks, and video tutorials to help you get, wrangle, and analyze cannabis data with the best of them. Join the fun on Wednesdays at 8:30am PST / 9:30am MT / 10:30am CT / 11:30am EST. You are always welcome to use the [code](https://github.com/cannlytics/cannabis-data-science), watch the [videos](https://www.youtube.com/@cannlytics), and make contributions of your own! Please tune in 🚀
@@ -30,10 +44,10 @@ Contributions are always welcome! You are encouraged to submit [issues](https://
 
 <!-- - 🎨 [Art](https://github.com/cannlytics/cannlytics/tree/main/website/static/website/images); -->
 - 👨‍💻 [Code](https://docs.cannlytics.com/developers/contributing/)
-- 💡 [Ideas](mailto:contact@cannlytics.com)
+- 💡 [Ideas](https://join.slack.com/t/cannlytics/shared_invite/zt-23lugds82-t8ZMCekUdpL3iCJm9UJ64Q)
 - 👷 [Tests](https://github.com/cannlytics/cannlytics/tree/main/tests)
 - 🖊️ [Documentation](https://github.com/cannlytics/cannlytics/tree/main/docs)
-- 🏹 [Examples](https://github.com/cannabisdata/cannabisdata)
+- 🏹 [Examples](https://github.com/cannlytics/cannlytics/issues)
 
 ## 💖 Support <a name="support"></a>
 
@@ -41,7 +55,7 @@ Cannlytics is made available with hard work and your good will. Please consider 
 
 | Provider | Link |
 |----------|------|
-| 👐 OpenCollective | <https://opencollective.com/cannlytics-company/donate> |
+| 👐 OpenCollective | <https://opencollective.com/cannlytics-company> |
 
 
 ## 🏛️ License <a name="license"></a>

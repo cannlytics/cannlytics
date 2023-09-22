@@ -37,10 +37,21 @@ You will also need to install Twine:
 ```shell
 pip install --user --upgrade twine
 ```
+<!-- TODO: Migrated to pyproject.toml
+Building the package also requires the `build` module:
+
+```shell
+pip install build
+``` -->
 
 ## Deploying
 
 First, build the package from the same directory where setup.py is located:
+
+<!-- TODO: Migration to pyproject.toml
+```shell
+python -m build
+``` -->
 
 ```shell
 python setup.py sdist bdist_wheel
