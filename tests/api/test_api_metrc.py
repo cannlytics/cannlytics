@@ -26,7 +26,7 @@ from cannlytics.utils import (
 BASE = 'http://127.0.0.1:8000/api'
 
 # Production: Uncomment to test with the production server once published.
-BASE = 'https://console.cannlytics.com/api'
+BASE = 'https://cannlytics.com/api'
 
 # Load your API key to pass in the authorization header as a bearer token.
 config = dotenv_values('../../.env')

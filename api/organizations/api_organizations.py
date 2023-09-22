@@ -439,9 +439,9 @@ def join_organization(request):
     user_hmac = ''
     owner_hmac = ''
     # Optional: Find new home's for endpoints in api and cannlytics_website
-    confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
-    decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
-    unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
+    confirm_link = f'https://cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
+    decline_link = f'https://cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
+    unsubscribe_link = f'https://cannlytics.com/api/unsubscribe?hash={owner_hmac}'
     # html_message = render_to_string('templates/console/emails/action_email_template.html', {
     #     'recipient': org_email,
     #     'paragraphs': paragraphs,
@@ -496,9 +496,9 @@ def join_organization(request):
 #     user_hmac = ''
 #     owner_hmac = ''
 #     # Optional: Find new home's for endpoints in api and cannlytics_website
-#     confirm_link = f'https://console.cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
-#     decline_link = f'https://console.cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
-#     unsubscribe_link = f'https://console.cannlytics.com/api/unsubscribe?hash={owner_hmac}'
+#     confirm_link = f'https://cannlytics.com/api/organizations/confirm?hash={owner_hmac}&member={user_hmac}'
+#     decline_link = f'https://cannlytics.com/api/organizations/decline?hash={owner_hmac}&member={user_hmac}'
+#     unsubscribe_link = f'https://cannlytics.com/api/unsubscribe?hash={owner_hmac}'
 #     html_message = render_to_string('templates/console/emails/action_email_template.html', {
 #         'recipient': org_email,
 #         'paragraphs': paragraphs,

@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Test using development server.
 # Uncomment to test with production server.
-# BASE = 'https://console.cannlytics.com/api'
+# BASE = 'https://cannlytics.com/api'
 BASE = 'http://127.0.0.1:8000/api'
 
 # Define the endpoint.
