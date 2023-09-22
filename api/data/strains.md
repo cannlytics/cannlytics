@@ -1,12 +1,12 @@
-##  Strain Data <a name="strain-data"></a>
+##  Strain Data API <a name="strain-data"></a>
 
 <div style="margin-top:1rem; margin-bottom: 1rem;">
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">
 </div>
 
-You can get data about common cannabis strains with the `/data/strains` endpoint. You can request data for a specific strain with the `/data/strains/<strain_name>` endpoint.
+You can get data about common cannabis strains with the `api/data/strains` endpoint. You can request data for a specific strain with the `api/data/strains/<strain_name>` endpoint.
 
-### Parameters
+## Parameters
 
 Below are the parameters that you can pass and examples of how you can format a request body.
 
@@ -76,7 +76,7 @@ Any of the analytes below can be used to query strains by their average concentr
 
 <!-- ### Variables -->
 
-### Examples
+## Examples
 
 Below are a handful of examples, written in Python, that can be generalized to your favorite programming language.
 

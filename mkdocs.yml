@@ -200,10 +200,13 @@ nav:
       - Recipes: api/ai/recipes.md
     - Data:
       - COAs: api/ai/coas.md
+      # - Licenses: api/data/licenses.md
       - Receipts: api/ai/receipts.md
       # - Sales: api/data/sales.md
       - Strains: api/data/strains.md
-    - Stats: api/stats/readme.md
+    - Stats:
+      - Effects and Aromas: api/stats/skunkfx.md
+      # TODO: Document personality test API.
     - Metrc: api/metrc/readme.md
     # - Users: api/users/readme.md
     # - Organizations: api/organizations/readme.md
@@ -216,12 +219,12 @@ nav:
     - Data:
       - Overview: cannlytics/data/readme.md
       - CCRS: cannlytics/data/ccrs/readme.md
-      - Lab Results: cannlytics/data/coas/readme.md
+      - COAs: cannlytics/data/coas/readme.md
       # - Licenses: cannlytics/data/coas/readme.md
       # - Market: cannlytics/data/market/readme.md
       - Sales and Receipts: cannlytics/data/sales/readme.md
       - Strains: cannlytics/data/strains/readme.md
-    - Authentication: cannlytics/auth/readme.md
+    # - Authentication: cannlytics/auth/readme.md
     - Firebase: cannlytics/firebase/readme.md
     # - LIMS: cannlytics/lims/readme.md
     - Metrc: cannlytics/metrc/readme.md

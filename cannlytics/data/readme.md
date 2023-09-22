@@ -52,16 +52,16 @@ References:
 
 <!-- TODO: Examples -->
 
-## Figures
+<!-- ## Figures
 
 | Function | Description |
 |----------|-------------|
 | `crispy_barchart(df, annotations=False, key=0, fig_size=(5, 3.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B', notes='', notes_offset=.15, palette=None, percentage=False, title='', save='', x_label=None, y_label=None, y_ticks=None, zero_bound=False,)` | Create a beautiful bar chart given data. |
-| `crispy_scatterplot(data, x, y, category_key, categories, colors, label_size=20, legend_loc='upper left', notes='', notes_offset=.15, note_size=14, percentage=False, save='', title='', title_size=24, font_size=18, fig_size=(15, 7.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B',)` | Create a beautiful scatter plot given data. |
+| `crispy_scatterplot(data, x, y, category_key, categories, colors, label_size=20, legend_loc='upper left', notes='', notes_offset=.15, note_size=14, percentage=False, save='', title='', title_size=24, font_size=18, fig_size=(15, 7.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B',)` | Create a beautiful scatter plot given data. | -->
 
 <!-- TODO: Examples -->
 
-## Flower Art
+<!-- ## Flower Art
 
 You can programmatically create cannabis flower art using image data with the `cannlytics.data.flower_art` submodule.
 
@@ -81,7 +81,7 @@ art = FlowerArt(
 
 # Create a strain NFT.
 art.cartoonize_image('model.jpg', 'strain-nft.jpg')
-```
+``` -->
 
 ## GIS Data
 

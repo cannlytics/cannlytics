@@ -2,99 +2,100 @@
 
 The `api/data/coas` API endpoint allows users to extract lab results from certificates of analysis (COAs) through PDFs, images that contain QR codes of the COA URL, or directly from the COA URLs. The endpoint also provides functionality to get, query, and delete parsed lab results. Users can pass the COA data in the request body using the following formats:
 
-- PDFs: Users can upload COA PDF files directly as part of the request using the file field. The API supports a maximum of 10 files per request, and each file should not exceed 100 MB in size.
-- Images: Users can upload images that contain QR codes of the COA URLs using the file field. The API accepts PNG, JPG, and JPEG image formats.
-- URLs: Users can provide COA URLs in the request body using the urls field as an array.
+- **PDFs**: Users can upload COA PDF files directly as part of the request using the file field. The API supports a maximum of 100 files per request, and each file should not exceed 5 MB in size.
+- **Images**: Users can upload images that contain QR codes of the COA URLs using the file field. The API accepts PNG, JPG, and JPEG image formats.
+- **URLs**: Users can provide COA URLs in the request body using the urls field as an array.
 
-Example request:
+!!! example
 
-```bash
-POST /api/data/coas
-Content-Type: multipart/form-data
-Authorization: Bearer <token>
+    Post COA URLS and files to have the data extracted and returned.
+    ```bash
+    POST /api/data/coas
+    Content-Type: multipart/form-data
+    Authorization: Bearer <token>
 
-{
-  "urls": ["https://coa-url-1", "https://coa-url-2"],
-  "file": [PDF_FILE_1, PDF_FILE_2, IMAGE_FILE_1, IMAGE_FILE_2]
-}
-```
-
-Upon successful extraction, the API will return a JSON response with the extracted COA data.
-
-```bash
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "success": true,
-  "data": [
     {
-      "coa_pdf": "Pineapple-XX-5-13-2129146.pdf",
-      "coa_hash": "9501acee692a29f309b618ac994179d274753de3c4131837af2d8e552920ec95",
-      "analyses": "[\"terpenes\", \"pesticide\", \"microbiological\", \"water_activity\", \"mycotoxin\", \"residual_solvents\", \"potency\", \"heavy_metals\"]",
-      "potency_status": "pass",
-      "terpenes_status": "pass",
-      "microbiological_status": "pass",
-      "mycotoxin_status": "NT",
-      "residual_solvents_status": "NT",
-      "heavy_metals_status": "pass",
-      "pesticide_status": "pass",
-      "water_activity_status": "pass",
-      "methods": null,
-      "date_collected": null,
-      "date_tested": null,
-      "date_received": "2021-05-13T00:00:00",
-      "lab": "Genesis Testing Labs",
-      "lab_address": "1620 South Main St, Unit A, Grove, OK 74344",
-      "lab_street": "1620 South Main St",
-      "lab_city": "Grove",
-      "lab_state": "OK",
-      "lab_zipcode": "74344",
-      "distributor": null,
-      "distributor_address": null,
-      "distributor_street": null,
-      "distributor_city": null,
-      "distributor_state": null,
-      "distributor_zipcode": null,
-      "distributor_license_number": null,
-      "producer": "On The Hill",
-      "producer_address": "7703 W 7st Street, Tulsa, OK 74127",
-      "producer_street": "7703 W 7st Street",
-      "producer_city": "Tulsa",
-      "producer_state": "OK",
-      "producer_zipcode": "74127",
-      "producer_license_number": "GAAA-4JCT-WABI",
-      "product_name": "Pineapple XX",
-      "lab_id": "SA-051321-8070",
-      "product_type": "flower",
-      "batch_number": null,
-      "traceability_ids": null,
-      "product_size": null,
-      "serving_size": null,
-      "servings_per_package": null,
-      "sample_weight": null,
-      "status": "pass",
-      "total_cannabinoids": null,
-      "total_thc": 18.2281,
-      "total_cbd": null,
-      "total_terpenes": 1.7241,
-      "sample_id": "ae39227764932d53abbfe37ceb0e5f88c84ef9fce8e545a0135cdeedd3e41e04",
-      "strain_name": "Pineapple XX",
-      "coa_algorithm": "coa_ai.py",
-      "coa_algorithm_entry_point": "parse_coa_with_ai",
-      "coa_algorithm_version": "0.0.15",
-      "coa_parsed_at": "2023-06-12T18:22:33.816071",
-      "images": "[]",
-      "results": "[]",
-      "results_hash": "0dac0a24ba0545e6812b172c25d78eecd449f6d2e3463357c8051c693dcfe1f2",
-      "sample_hash": "559540bbcf278a11efdacebde76fc9305eaf54b22199b0b3648f2837a009ae0b",
-      "warning": "This data was extracted by AI. Please verify it before using it. You can submit feedback to dev@cannlytics.com"
+      "urls": ["https://coa-url-1", "https://coa-url-2"],
+      "file": [PDF_FILE_1, PDF_FILE_2, IMAGE_FILE_1, IMAGE_FILE_2]
     }
-  ]
-}
-```
+    ```
 
-Where:
+    Upon successful extraction, the API will return a JSON response with the extracted COA data.
+
+    ```bash
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+      "success": true,
+      "data": [
+        {
+          "coa_pdf": "Pineapple-XX-5-13-2129146.pdf",
+          "coa_hash": "9501acee692a29f309b618ac994179d274753de3c4131837af2d8e552920ec95",
+          "analyses": "[\"terpenes\", \"pesticide\", \"microbiological\", \"water_activity\", \"mycotoxin\", \"residual_solvents\", \"potency\", \"heavy_metals\"]",
+          "potency_status": "pass",
+          "terpenes_status": "pass",
+          "microbiological_status": "pass",
+          "mycotoxin_status": "NT",
+          "residual_solvents_status": "NT",
+          "heavy_metals_status": "pass",
+          "pesticide_status": "pass",
+          "water_activity_status": "pass",
+          "methods": null,
+          "date_collected": null,
+          "date_tested": null,
+          "date_received": "2021-05-13T00:00:00",
+          "lab": "Genesis Testing Labs",
+          "lab_address": "1620 South Main St, Unit A, Grove, OK 74344",
+          "lab_street": "1620 South Main St",
+          "lab_city": "Grove",
+          "lab_state": "OK",
+          "lab_zipcode": "74344",
+          "distributor": null,
+          "distributor_address": null,
+          "distributor_street": null,
+          "distributor_city": null,
+          "distributor_state": null,
+          "distributor_zipcode": null,
+          "distributor_license_number": null,
+          "producer": "On The Hill",
+          "producer_address": "7703 W 7st Street, Tulsa, OK 74127",
+          "producer_street": "7703 W 7st Street",
+          "producer_city": "Tulsa",
+          "producer_state": "OK",
+          "producer_zipcode": "74127",
+          "producer_license_number": "GAAA-4JCT-WABI",
+          "product_name": "Pineapple XX",
+          "lab_id": "SA-051321-8070",
+          "product_type": "flower",
+          "batch_number": null,
+          "traceability_ids": null,
+          "product_size": null,
+          "serving_size": null,
+          "servings_per_package": null,
+          "sample_weight": null,
+          "status": "pass",
+          "total_cannabinoids": null,
+          "total_thc": 18.2281,
+          "total_cbd": null,
+          "total_terpenes": 1.7241,
+          "sample_id": "ae39227764932d53abbfe37ceb0e5f88c84ef9fce8e545a0135cdeedd3e41e04",
+          "strain_name": "Pineapple XX",
+          "coa_algorithm": "coa_ai.py",
+          "coa_algorithm_entry_point": "parse_coa_with_ai",
+          "coa_algorithm_version": "0.0.15",
+          "coa_parsed_at": "2023-06-12T18:22:33.816071",
+          "images": "[]",
+          "results": "[]",
+          "results_hash": "0dac0a24ba0545e6812b172c25d78eecd449f6d2e3463357c8051c693dcfe1f2",
+          "sample_hash": "559540bbcf278a11efdacebde76fc9305eaf54b22199b0b3648f2837a009ae0b",
+          "warning": "This data was extracted by AI. Please verify it before using it. You can submit feedback to dev@cannlytics.com"
+        }
+      ]
+    }
+    ```
+
+## COA Metadata
 
 | Field | Example | Description |
 |-------|---------|-------------|
@@ -141,6 +142,8 @@ Where:
 | `sample_id` | "{sha256-hash}" | A generated ID to uniquely identify the `producer`, `product_name`, and `date_tested`. |
 | `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. |
 
+## COA Results
+
 The results are a JSON string representation, for example:
 
 ```bash
@@ -159,8 +162,6 @@ The results are a JSON string representation, for example:
   }
 ]
 ```
-
-Where:
 
 | Field | Example| Description |
 |-------|--------|-------------|
@@ -182,7 +183,7 @@ Where:
 - Supported file types: PDF, PNG, JPG, JPEG
 - Maximum number of observations that can be downloaded at once: 200,000
 
-### Example Usage
+### Examples
 
 ```py
 import requests

@@ -55,7 +55,7 @@ from cannlytics.utils import convert_to_numeric, download_file_from_url
 
 # API defaults.
 AUTH_ERROR = 'Authentication failed. Please login to Cannlytics\
- (https://console.cannlytics.com) or provide a valid Cannlytics API key\
+ (https://cannlytics.com) or provide a valid Cannlytics API key\
  in an `Authentication: Bearer <token>` header.'
 
 # OpenAI defaults.

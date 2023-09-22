@@ -2,7 +2,7 @@
 # Cannlytics API OpenAPI Specification
 # Authors: Keegan Skeate <https://github.com/keeganskeate>
 # Created 4/23/2023
-# Updated: 4/23/2023
+# Updated: 9/22/2023
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 #------------------------------------------------------------------------------
 openapi: 1.0.0
@@ -21,7 +21,7 @@ license:
 servers:
 - url: https://cannlytics.com/api
   description: Production server
-- url: https://console.cannlytics.com/api
+- url: https://cannlytics.com/api
   description: Enterprise server
 paths:
   /:

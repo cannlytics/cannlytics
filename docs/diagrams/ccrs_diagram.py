@@ -5,7 +5,7 @@ Copyright (c) 2022 Cannabis Data
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/26/2022
-Updated: 12/27/2022
+Updated: 9/22/2023
 License: <https://github.com/cannabisdata/cannabisdata/blob/main/LICENSE>
 """
 # Standard imports:

@@ -1,10 +1,10 @@
+# BudderBaker - Recipe Generator
 
-## BudderBaker - Recipe Generator
+BudderBaker is a Python-based tool that lets users create unique recipes for cannabis-infused products. The library interfaces with the Cannlytics API and OpenAI to produce these recipes.
 
-<!-- ```py
-# Get a user's recipes.
+## Usage
 
-``` -->
+To generate a recipe, set the appropriate parameters in the data dictionary and POST this data to the specified API endpoint.
 
 ```py
 # Create a recipe.

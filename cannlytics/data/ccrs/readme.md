@@ -35,7 +35,7 @@ Each key in the `CCRS_DATASETS` dictionary represents a dataset and its value is
 Each dataset in the `CCRS_DATASETS` dictionary has a unique structure and set of fields, as depicted below:
 
 <div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
-<img src="https://raw.githubusercontent.com/keeganskeate/cannabisdata/cannlytics-dev/docs/diagrams/ccrs_diagram.png" alt="CCRS Diagram" style="width:100%; max-width:720px;"/>
+<img src="../ccrs_diagram.png" alt="CCRS Diagram" style="width:100%; max-width:720px;"/>
 </div>
 
 ## Resources
