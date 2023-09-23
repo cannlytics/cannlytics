@@ -151,12 +151,17 @@ plugins:
       glob:
         - public/*
         - node_modules/*
+        - cannlytics.egg-info/*
         - dist/*
         - build/*
-        - tests/*
         - ai/*
+        - api/*[!m][!d]
         - app/*
-        - console/*
+        - cannlytics/*[!m][!d]
+        - datasets/*[!m][!d]
+        - functions/*
+        - lims/*
+        - metrc/*
         - tests/*
         - tools/*
         - website/*
@@ -225,6 +230,7 @@ nav:
       - Sales and Receipts: cannlytics/data/sales/readme.md
       - Strains: cannlytics/data/strains/readme.md
     # - Authentication: cannlytics/auth/readme.md
+    # TODO: Document Functions.
     - Firebase: cannlytics/firebase/readme.md
     # - LIMS: cannlytics/lims/readme.md
     - Metrc: cannlytics/metrc/readme.md
