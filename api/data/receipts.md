@@ -2,18 +2,6 @@
 
 The `api/data/receipts` endpoint allows users to extract their receipt data from images of receipts. It also provides functionality to get, query, and delete parsed receipts.
 
-| Parameter | Options | Example |
-|-----------|---------|---------|
-| `limit` | The maximum number of receipts to return, pass any positive integer. | `?limit=420` |
-| `order` | The field to use to order the returned receipts, `date_sold` by default. | `?order=total_price` |
-| `desc` | Whether or not to order in descending order, the default is `false`.  | `?desc=true` |
-| `product_name` | The desired product name. | `?product_name=skunk` |
-| `product_type` | The desired product type. | `?product_type=flower` |
-| `date` | The desired date sold. | `?date=2023-04-20` |
-| `price` | The desired total price. | `?price=42` |
-| `license` | The desired retailer license number. | `?license=123456789012345678901234` |
-| `number` | The desired invoice number. | `?number=123456789012345678901234` |
-
 !!! example
 
     Post receipt files to have the data extracted and returned.
@@ -69,3 +57,19 @@ The `api/data/receipts` endpoint allows users to extract their receipt data from
       "warning": "This data was parsed from text using OpenAI's GPT models. Please verify the data before using it. You can submit feedback and report issues to dev@cannlytics.com, thank you."
     }]
     ```
+
+## Query parameters
+
+You can use `GET` requests with the following parameters to the `api/data/receipts` endpoint to query the parsed receipts.
+
+| Parameter | Options | Example |
+|-----------|---------|---------|
+| `limit` | The maximum number of receipts to return, pass any positive integer. | `?limit=420` |
+| `order` | The field to use to order the returned receipts, `date_sold` by default. | `?order=total_price` |
+| `desc` | Whether or not to order in descending order, the default is `false`.  | `?desc=true` |
+| `product_name` | The desired product name. | `?product_name=skunk` |
+| `product_type` | The desired product type. | `?product_type=flower` |
+| `date` | The desired date sold. | `?date=2023-04-20` |
+| `price` | The desired total price. | `?price=42` |
+| `license` | The desired retailer license number. | `?license=123456789012345678901234` |
+| `number` | The desired invoice number. | `?number=123456789012345678901234` |

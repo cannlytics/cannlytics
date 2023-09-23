@@ -4,7 +4,7 @@ The Cannlytics Company is a software support business that exists to create **va
 
 ## Subscriptions
 
-You can manage your Cannlytics subscription at <https://cannlytics.com/account/subscriptions> after [creating an account](https://cannlytics.com/account/sign-up).
+You can [manage your Cannlytics subscription](https://cannlytics.com/account/subscriptions) after [creating an account](https://cannlytics.com/account/sign-up).
 
 | Tier | Price | Included |
 | ------- | ---- | ------ |

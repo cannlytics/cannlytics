@@ -20,7 +20,9 @@ any tier you feel comfortable with. No amount is too little. We also accept one 
 [:octicons-mark-github-16: GitHub Sponsors](https://github.com/sponsors/cannlytics){: .md-button .md-button--primary }
 [:fontawesome-brands-paypal: PayPal](https://www.paypal.me/cannlytics){ .md-button} -->
 
-## Bug Reports
+## Begin an Issue
+
+The first place to begin contributing is to identify an issue that you can help with. You can find issues that need help by looking at the [issues page](https://github.com/cannlytics/cannlytics/issues). For quick questions, you can contact a developer at <admin@cannlytics.com>.
 
 1. Please **don't hesitate** before asking your question through a [GitHub issue](https://github.com/cannlytics/cannlytics/issues), unless the bug is security related and then you should email <dev@cannlytics.com> directly and do not create an issue.
 
@@ -37,7 +39,7 @@ any tier you feel comfortable with. No amount is too little. We also accept one 
     The more information provided, the greater the chance that someone will be able to answer, implement, or fix your issue in a timely manner.
 
 3. Please be prepared to potentially field follow-up questions or provide additional information.
-
+<!-- 
 ## Reviewing Code
 
 You are welcome to take part in reviewing pull requests and/or reviewing direct commits. Please feel free to make suggestions to improve the code and discuss
@@ -55,34 +57,24 @@ contributing to the code base, then please see the [development guide](/about/de
 ## Documentation Improvements
 
 A ton of time has been spent not only creating and supporting this tool and related extensions, but also spent making
-this documentation. If you want a good place to contribute, then you are welcome to help improve the documentation. The [development guide](/about/dev/development/) has more details about improving the documentation.
+this documentation. If you want a good place to contribute, then you are welcome to help improve the documentation. The [development guide](/about/dev/development/) has more details about improving the documentation. -->
 
-### Have a question or problem?
+<!-- ### Have a question or problem?
 
-For quick questions there's no need to open an issue as you can reach us at <dev@cannlytics.com>.
+For quick questions there's no need to open an issue as you can reach us at <dev@cannlytics.com>. -->
 
-### Missing a feature?
+## Add a feature
 
 You can request new features by [submitting an issue to our GitHub Repository](https://github.com/cannlytics/cannlytics/issues).
 If you would like to implement a new feature, then you are welcome to submit an issue for your work first, so other Cannlytics contributors can be aware of your efforts. Please consider what kind of change you are proposing:
 
-* For a **major feature**, first open an issue and outline your proposal so
-  that it can be discussed. This will also allow us to better coordinate our
-  efforts, prevent duplication of work, and help you to craft the change so
-  that it is successfully accepted into the project.
+* For a **major feature**, we kindly request that you initiate a conversation by opening an issue. This would allow us to discuss your wonderful ideas in-depth. Doing so facilitates better coordination amongst all contributors, ensures we avoid redundant efforts, and assists you in shaping the proposal so that it seamlessly fits into the project. Your proactive approach to collaboration is genuinely appreciated.
 
-* **Small features and bugs** can be crafted and directly submitted as a Pull
-  Request. However, there is no guarantee that your feature will make it into
-  the `master`, depending on the benefits to the
-  overall functionality of the project and the community.
+* For **small features and bugs** you're welcome to craft and submit directly as a Pull Request. We sincerely value every contribution. However, please understand that while we'd love to incorporate every feature, inclusion in the `main` branch will be based on the broader benefit to the project and our cherished community. Your understanding and continued support mean a lot to us.
 
 ## Submission guidelines
 
 ### Submitting an issue
-
-Before you submit an issue, please search the issue tracker, maybe an issue for
-your problem already exists and the discussion might inform you of workarounds
-readily available.
 
 We want to fix all the issues as soon as possible, but before fixing a bug we
 need to reproduce and confirm it. In order to expedite the process, please provide as much information as you can as to how to recreate the bug. We may not be able to investigate / fix bugs that we can not reproduce.
@@ -95,12 +87,12 @@ When you are ready to start your contribution, follow these 3 steps.
   make your changes in a separate git branch and add descriptive messages to
   your commits.
 
-2. **Build**: Before submitting a pull request, [build the project](/about/dev/development/). Being able to build the project is
+2. **Build**: Before submitting a pull request, [build the project](./publishing.md). Being able to build the project is
   a mandatory requirement for your PR to get accepted, as the project should at
   all times be installable through [GitHub](https://github.com/cannlytics/cannlytics).
 
 3. **Pull Request**: After building the project, make a final commit, push
-  your branch to GitHub and [send a PR](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to `cannlytics:master`. If we
+  your branch to GitHub and [send a PR](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to `cannlytics:main`. If we
   suggest changes, then please make the required updates, rebase your branch and push the
   changes to your GitHub repository, which will automatically update your PR.
 

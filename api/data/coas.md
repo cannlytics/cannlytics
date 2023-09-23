@@ -176,35 +176,36 @@ The results are a JSON string representation, for example:
 | `loq` | 0.1 | The limit of quantification for the result analyte. Values above the `lod` but below the `loq` are typically reported as `<LOQ`. |
 | `status` | "pass" | The pass / fail status for contaminant screening analyses. |
 
-### Limitations
+## Limitations
 
 - Maximum number of files that can be parsed in one request: 10
 - Maximum file size for a single file: 100 MB
 - Supported file types: PDF, PNG, JPG, JPEG
 - Maximum number of observations that can be downloaded at once: 200,000
 
-### Examples
+## Examples
 
 ```py
 import requests
 
-# Make a request to the API.
-url = "https://api.example.com/api/data/coas"
-headers = {
-    "Authorization": "Bearer <token>"
-}
-data = {
-    "urls": [
-        "https://coa-url-1",
-        "https://coa-url-2"
-    ],
-    "file": [
-        open("coa_file_1.pdf", "rb"),
-        open("coa_file_2.png", "rb")
-    ]
-}
+# Define the API URL.
+api_url = "https://cannlytics.com/api/data/coas"
 
-# Parse the response.
-response = requests.post(url, headers=headers, files=data)
-parsed_data = response.json()["data"]
+# Define a COA URL to parse.
+coa_url = "https://cannlytics.page.link/test-coa"
+headers = {"Authorization": "Bearer <token>"}
+data = {"urls": [coa_url]}
+
+# Parse a COA URL with the API.
+response = requests.post(api_url, headers=headers, json=data)
+extracted = response.json()
+print(extracted["data"])
+
+# Parse a COA PDF with the API.
+doc = 'coa.pdf'
+with open(doc, 'rb') as pdf:
+    files = {'file': pdf}
+    response = requests.post(url, files=files, headers=headers)
+    extracted = response.json()
+    print(extracted["data"])
 ```

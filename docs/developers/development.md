@@ -35,15 +35,11 @@ This SOP covers the Cannlytics architecture and how to build, develop, and publi
 
 ## Introduction <a name="introduction"></a>
 
-The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. You can test the [console](https://console.cannlytics.com) with the following credentials.
-
-Email: test@cannlytics.com
-
-Password: dontpanic
+The `cannlytics` package is the core module implementing cannabis analytics logic. The `cannlytics` module handles [database interactions](#data), [file management](#storage), [authentication and authorization](#authentication), traceability, data importing and exporting, and the logic for all workflows, such as certificate creation, item transfers, and publishing results. The `api` is the interface between the user application and the cannabis analytics logic of `cannlytics`. The `console` is the user application where user's can interface with the infrastructure, such as the database, and utilize the cannabis analytics logic. The `docs` provide information about the project and the `website` provides people with information about cannabis analytics. You can test the [app](https://app.cannlytics.com), [console](https://console.cannlytics.com), and [data UI](https://data.cannlytics.com).
 
 ## Installation <a name="installation"></a>
 
-Cannlytics is an open box and transparent. You do not have to guess about the software used or how your logic is implemented. Our philosophy is that **open source** and **free** solutions are the best ([**free** as in **free** speech, not as in *free beer*](http://www.gnu.org/philosophy/free-sw.html)). In brief, installation entails:
+In brief, installing Cannlytics entails:
 
 1. [Cloning the repository.](#cloning-the-repository)
 2. [Setting your Firebase account credentials.](#setting-your-account-credentials)

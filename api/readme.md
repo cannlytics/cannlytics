@@ -2,10 +2,12 @@
 
 The Cannlytics API allows users to interface with cannabis data and statistics. Each API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
-- [AI API Endpoints](./ai/readme.md)
-- [Data API Endpoints](./data/readme.md)
-- [Stats API Endpoints](./stats/readme.md)
-- [Metrc API Endpoints](./metrc/__init__.py)
+- [AI Recipes API](./ai/recipes.md)
+- [COAs API](./data/coas.md)
+- [Receipts API](./data/receipts.md)
+- [Strains API](./data/strains.md)
+- [Effects and Aromas API](./stats/skunkfx.md)
+- [Metrc API](./metrc/readme.md)
 
 ## Getting Started with the Cannlytics API <a name="getting-started"></a>
 
@@ -20,9 +22,9 @@ You can make requests through the API passing your API key as a bearer token in 
 === "Python"
 
     ```py
-
-    import os
     from dotenv import load_dotenv
+    import os
+    import requests
 
     # Load your API key.
     load_dotenv('.env')
@@ -33,6 +35,13 @@ You can make requests through the API passing your API key as a bearer token in 
         'Authorization': 'Bearer %s' % API_KEY,
         'Content-type': 'application/json',
     }
+
+    # Parse a COA through the API.
+    url = 'https://cannlytics.page.link/test-coa'
+    data = {'urls': [url]}
+    response = requests.post(url, headers=headers, json=data)
+    extracted = response.json()
+    print(extracted["data"])
     ```
 
 
@@ -45,8 +54,24 @@ You can make requests through the API passing your API key as a bearer token in 
     // Pass API key through the authorization header as a bearer token.
     const apiKey = process.env.CANNLYTICS_API_KEY;
     const options = {
-      headers: { 'Authorization' : `Bearer ${apiKey}` }
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization' : `Bearer ${apiKey}`
+      }
     };
+
+    // Parse a COA through the API.
+    const url = 'https://cannlytics.page.link/test-coa';
+    const data = { urls: [url] };
+
+    axios.post(url, data, options)
+      .then((response) => {
+        const extracted = response.data;
+        console.log(extracted["data"]);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
     ```
 
 <!-- 

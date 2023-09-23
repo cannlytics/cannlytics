@@ -14,16 +14,6 @@
 
 This SOP guides you through packaging the `cannlytics` Python package and deploying the package to [PyPI](https://pypi.org).
 
-## Testing
-
-First, ensure that all tests are passed.
-
-```shell
-cd ./tests
-pytest --disable-pytest-warnings
-cd ../
-```
-
 ## Installation
 
 Make sure you have the latest versions of setuptools and wheel installed:
@@ -37,21 +27,11 @@ You will also need to install Twine:
 ```shell
 pip install --user --upgrade twine
 ```
-<!-- TODO: Migrated to pyproject.toml
-Building the package also requires the `build` module:
 
-```shell
-pip install build
-``` -->
 
 ## Deploying
 
 First, build the package from the same directory where setup.py is located:
-
-<!-- TODO: Migration to pyproject.toml
-```shell
-python -m build
-``` -->
 
 ```shell
 python setup.py sdist bdist_wheel
@@ -59,13 +39,13 @@ python setup.py sdist bdist_wheel
 
 Next, run Twine to upload all of the archives under dist:
 
-DEV:
+**DEV**:
 
  ```shell
 python -m twine upload --repository testpypi dist/*
  ```
 
- PRODUCTION
+**PRODUCTION**:
 
 ```shell
 python -m twine upload dist/*

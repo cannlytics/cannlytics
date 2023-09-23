@@ -199,9 +199,9 @@ nav:
       # - Overview: api/ai/readme.md
       - Recipes: api/ai/recipes.md
     - Data:
-      - COAs: api/ai/coas.md
+      - COAs: api/data/coas.md
       # - Licenses: api/data/licenses.md
-      - Receipts: api/ai/receipts.md
+      - Receipts: api/data/receipts.md
       # - Sales: api/data/sales.md
       - Strains: api/data/strains.md
     - Stats:
@@ -214,7 +214,7 @@ nav:
     
   # Cannlytics
   #---------------
-  - SDK:
+  - Open Source:
     - Overview: cannlytics/readme.md
     - Data:
       - Overview: cannlytics/data/readme.md

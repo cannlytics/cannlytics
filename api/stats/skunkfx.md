@@ -4,13 +4,13 @@
   <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fskunkfx_logo.png?alt=media&token=1a75b3cc-3230-446c-be7d-5c06012c8e30">
 </div>
 
-The `/stats/effects` endpoint is used to predict effects and aromas that may be reported for a given product given its lab results. For technical details of the model, please see the AI documentation. In general, there are 3 main actions:
+The `api/stats/effects` endpoint is used to predict effects and aromas that may be reported for a given product given its lab results. For technical details of the model, please see the AI documentation. In general, there are 3 main actions:
 
-1. You can use the model to predict potentially reported effects and aromas for any cannabis flower for which you have lab results. Simply post your lab results to the `/stats/effects` endpoint, specifying your model if you desire, and you will receive effect and aroma predictions.
+1. You can use the model to predict potentially reported effects and aromas for any cannabis flower for which you have lab results. Simply post your lab results to the `api/stats/effects` endpoint, specifying your model if you desire, and you will receive effect and aroma predictions.
 
-2. You can get the model statistics by making a `GET` request to `/stats/effects`. Currently, the model statistics include: `false_positive_rate`, `false_negative_rate`, `true_positive_rate`, `true_negative_rate`, `accuracy`, `informedness`.
+2. You can get the model statistics by making a `GET` request to `api/stats/effects`. Currently, the model statistics include: `false_positive_rate`, `false_negative_rate`, `true_positive_rate`, `true_negative_rate`, `accuracy`, `informedness`.
 
-3. Finally, you can post the actual effects and aromas that you may observe with the `/stats/effects/actual` endpoint.
+3. Finally, you can post the actual effects and aromas that you may observe with the `api/stats/effects/actual` endpoint.
 
 You can substitute training data, for strain reviews or lab results, as you see fit.
 
