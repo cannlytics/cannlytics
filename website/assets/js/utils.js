@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 2/21/2021
- * Updated: 6/6/2022
+ * Updated: 5/28/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { Toast } from 'bootstrap';
@@ -23,7 +23,10 @@ export const authRequest = async (endpoint, data, options) => {
   * @param {Object} options Any request options: `delete` (bool) or `params` (Object).
   */
   try {
-    const idToken = await getUserToken();
+    var idToken = await getUserToken();
+    if (typeof idToken != 'string' & !(idToken instanceof String)) {
+      idToken = '';
+    }
     return await apiRequest(endpoint, data, options, idToken);
   } catch(error) {
     return error;
@@ -41,6 +44,10 @@ export const apiRequest = async (endpoint, data, options, idToken = null) => {
   * @param {String} idToken = null
   */
   const csrftoken = getCookie('csrftoken');
+  if (!csrftoken) {
+  console.log('TOKEN:', csrftoken);
+    return;
+  }
   const headerAuth = new Headers({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${idToken}`,
@@ -48,8 +55,9 @@ export const apiRequest = async (endpoint, data, options, idToken = null) => {
   });
   const init = {
     headers: headerAuth,
-    // mode: 'no-cors',
     method: 'GET',
+    // mode: 'no-cors',
+    // credentials: 'include',
   };
   if (data) {
     init.method = 'POST';

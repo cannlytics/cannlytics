@@ -2,6 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // === Admin ===
+
     // Secure admin documents.
     match /admin/{document=**} {
       allow read, write: if false;
@@ -12,6 +14,8 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == resource.data.uid;
       allow write: if false;
     }
+
+    // === General access ===
     
     // Allow anyone to read the standard data models.
     match /public/state/data_models/{document=**} {
@@ -51,6 +55,8 @@ service cloud.firestore {
     	allow read: if true;
       allow write: if false;
     }
+
+    // === Organizations ===
     
     // Allow users to manage data in their organization.
     // Only owners can delete an organization.
@@ -103,6 +109,8 @@ service cloud.firestore {
           if request.auth.token.qa == organizationId
           || request.auth.token.owner == organizationId;
     }
+
+    // === Users ===
     
     // Allow user's to read and write their own records.
     match /users/{userId} {
@@ -114,7 +122,124 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // === Recipes ===
+    // Allow user's to write their own profile and anyone to read profiles.
+    match /users/{userId}/public_user_data/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId
+    }
+
+    // === Sensitive Data ===
+
+    // Allow anyone to read the public licenses data.
+    match /data/licenses/{state}/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public lab results data.
+    match /data/lab_results/{state}/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // === Public Data ===
+
+    // Allow anyone to read the public lab results data.
+    match /public/data/lab_results/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read the public strain data.
+    match /public/data/strains/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+    
+    // Allow anyone to read the public patents data.
+    match /public/data/patents/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // === Logs ===
+
+    // Allow anyone to read public logs.
+    match /public/logs/{collection=**}/{log} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to read a user's public logs.
+    match /users/{userId}/public_logs/{log} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow anyone to write, but not read, data logs.
+    // TODO: Make write more restrictive.
+    match /logs/data/{collection=**}/{document} {
+    	allow read: if false;
+      allow write: if true;
+    }
+
+    // === User Data ===
+
+    // Allow users to read and write their own receipts.
+    match /users/{userId}/receipts/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow user's to read their own receipt statistics.
+    match /users/{userId}/receipts_stats/{document=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Allow users to read and write their own COAs.
+    match /users/{userId}/coas/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read and write their own lab results.
+    match /users/{userId}/lab_results/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read and write their own AI parsing jobs.
+    match /users/{userId}/parse_coa_jobs/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/parse_receipt_jobs/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read and write their own strain data.
+    match /users/{userId}/strains/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow users to read their own statistics.
+    match /users/{userId}/stats/{document=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // === User public data ===
+
+    // Allow user's to write and edit their own reviews about licensees.
+    match /public/data/licenses/{document=**}/reviews/{commentId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow write: if false;
+    }
+
+    // Allow user's to write and edit their own comments about strains.
+    match /public/data/strains/{document=**}/comments/{commentId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      allow write: if false;
+    }
+
+    // === AI Data ===
 
     // Allow anyone to read public AI data.
     match /public/ai/{collection}/{document=**} {
@@ -126,8 +251,30 @@ service cloud.firestore {
     match /users/{userId}/recipes/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // TODO: Allow users to read the details of their team members.
+
+    // === Subscriptions ===
+
+    // Allow anyone to read the data subscriptions.
+    match /public/subscriptions/data_subscriptions/{document=**} {
+    	allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow user's to read their own subscription plan.
+    match /subscribers/{userId} {
+    	allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Allow user's to see their own orders and transactions.
+    match /payments/orders/{userId}/{document=**} {
+    	allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+    match /payments/transactions/{userId}/{document=**} {
+    	allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
 
     // Extra (common patterns / objects)
     // ----------------------------------

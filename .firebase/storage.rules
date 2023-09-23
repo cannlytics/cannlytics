@@ -51,5 +51,36 @@ service firebase.storage {
           || organizationId in request.auth.token.owner;
     }
 
+    // Allow users to download public licenses data.
+    match /data/licenses/{state}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Allow users to download public hemp data.
+    match /data/hemp/{allPaths=**} {
+      // allow read: if isSignedIn();
+      allow read: if true,
+      allow write: if false;
+    }
+
+    // Allow users to download public lab results data.
+    match /data/lab_results/{state}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Allow users to download public strain data.
+    match /data/sales/{state}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Allow users to download public sales data.
+    match /data/strains/{category}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
   }
 }

@@ -1,16 +1,18 @@
+<!-- | Cannlytics SOP-0010 |  |
+|---------------------|--|
+| Title | Packaging |
+| Version | 1.0.0 |
+| Created At | 2023-07-18 |
+| Updated At | 2023-07-18 |
+| Review Period | Annual |
+| Last Review | 2023-07-18 |
+| Author | Keegan Skeate, Founder |
+| Approved by | Keegan Skeate, Founder |
+| Status | Active | -->
+
 # Packaging
 
-Packaging Python modules and deploying them to [PyPI](https://pypi.org) is super easy.
-
-## Testing
-
-First, ensure that all tests are passed.
-
-```shell
-cd ./tests
-pytest --disable-pytest-warnings
-cd ../
-```
+This SOP guides you through packaging the `cannlytics` Python package and deploying the package to [PyPI](https://pypi.org).
 
 ## Installation
 
@@ -26,6 +28,7 @@ You will also need to install Twine:
 pip install --user --upgrade twine
 ```
 
+
 ## Deploying
 
 First, build the package from the same directory where setup.py is located:
@@ -36,13 +39,13 @@ python setup.py sdist bdist_wheel
 
 Next, run Twine to upload all of the archives under dist:
 
-DEV:
+**DEV**:
 
  ```shell
 python -m twine upload --repository testpypi dist/*
  ```
 
- PRODUCTION
+**PRODUCTION**:
 
 ```shell
 python -m twine upload dist/*

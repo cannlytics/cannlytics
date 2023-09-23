@@ -4,7 +4,7 @@
   <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_metrc_logo.png?alt=media&token=8087c714-c03f-47f1-9196-7353cc887ead">
 </div>
 
-[Metrc](https://metrc.com) is the predominant tracking and traceability system mandated for use by cannabis licensees in the majority of states that permit cannabis markets. Cannabis licensees and verified software integrators use Metrc to compliantly track cannabis at each point of the supply chain. You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
+[Metrc](https://metrc.com) is the predominant traceability system for cannabis licensees in the majority of states that permit cannabis markets. Cannabis licensees and verified software integrators use Metrc to compliantly track cannabis at each point of the supply chain. You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
 
 *Contents*
 

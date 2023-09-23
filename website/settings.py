@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Author: Keegan Skeate <keegan@cannlytics.com>
 Created: 1/5/2021
-Updated: 1/31/2023
+Updated: 8/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Django settings powered by environment variables and
@@ -100,13 +100,14 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.humanize',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
     'django_feather',
     'django_robohash',
-    'django.contrib.humanize',
+    'corsheaders',
 ]
 
 #----------------------------------------------------------------------#
@@ -115,8 +116,11 @@ INSTALLED_APPS = [
 #----------------------------------------------------------------------#
 
 # Define middleware that is executed by Django.
+# CorsMiddleware should be placed before any middleware that can generate responses.
 # WhiteNoise should be below SecurityMiddleWare and above all others.
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    f'{PROJECT_NAME}.core.middleware.BlockUserAgentsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django_permissions_policy.PermissionsPolicyMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -127,9 +131,26 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     f'{PROJECT_NAME}.core.middleware.AppendOrRemoveSlashMiddleware',
-    # 'csp.middleware.CSPMiddleware',
-    # 'csp.context_processors.nonce',
 ]
+
+# Allow CORS from the following domains.
+# See: https://github.com/adamchainz/django-cors-headers/tree/main
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^https://\w+\.cannlytics\.com$",
+#     r"^https://cannlytics-website-[\w-]+\.a\.run\.app$",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_URLS_REGEX = r"^/api/.*$"
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "origin",
+    "token",
+)
 
 #----------------------------------------------------------------------#
 # Livereload
@@ -157,6 +178,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                # Include certain variables in all templates.
+                'website.core.context_processors.selected_settings',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

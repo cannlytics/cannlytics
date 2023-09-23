@@ -336,7 +336,7 @@ async function getUserToken(refresh = false) {
   * @param {Boolean} refresh Whether or not the credentials of the ID token should be refreshed.
   */
   if (!auth.currentUser) {
-    return await onAuthStateChanged(auth, async (user) => {
+    return onAuthStateChanged(auth, async (user) => {
       if (user) return await user.getIdToken(refresh);
     });
   } else {

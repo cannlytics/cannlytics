@@ -1,0 +1,265 @@
+# Copyright (c) 2023 Cannlytics <contact@cannlytics.com>
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# Project information
+site_name: Cannlytics Documentation
+site_url: https://docs.cannlytics.com/
+site_author: Keegan Skeate
+site_description: Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.
+copyright: Copyright &copy; 2023 Cannlytics
+
+# Repository
+repo_name: Cannlytics
+repo_url: https://github.com/cannlytics/cannlytics
+edit_uri: ""
+docs_dir: ./
+site_dir: ./public/docs
+
+# Configuration
+theme:
+  name: material
+  custom_dir: ./docs/theme
+
+  # Static files
+  static_templates:
+    - 404.html   
+
+  # Logos
+  favicon: assets/images/favicon.ico
+  logo: assets/images/cannlytics_calyx_512.svg
+
+  # Features
+  features:
+    - content.code.annotate
+    - navigation.tabs
+    - navigation.tracking
+
+  # Theme
+  palette:
+    - scheme: default
+      primary: white
+      accent: green
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  font:
+    text: Lora
+    code: Roboto Mono
+      
+# Extensions
+markdown_extensions:
+  # - markdown.extensions.toc:
+  #     slugify: !!python/name:pymdownx.slugs.uslugify
+  #     permalink: ""
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.md_in_html:
+  - pymdownx.tabbed:
+  - pymdownx.superfences:
+  - pymdownx.highlight:
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+        - name: pycon3
+          lang: pycon
+          options:
+            python3: true
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite:
+      custom_inline:
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.inline_mathjax_format
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: cannlytics
+      repo: cannlytics
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.escapeall:
+      hardbreak: True
+      nbsp: True
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+  - pymdownx.mark:
+  - pymdownx.striphtml:
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
+  - pymdownx.tabbed:
+  - pymdownx.saneheaders:
+
+# Customization
+extra:
+  analytics:
+    provider: google
+    property: !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/cannlytics
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/cannlytics/
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/company/cannlytics
+
+# Plugins
+plugins:
+  - autorefs
+  - search
+  - same-dir
+  - exclude:
+      glob:
+        - public/*
+        - node_modules/*
+        - cannlytics.egg-info/*
+        - dist/*
+        - build/*
+        - ai/*
+        - api/*[!m][!d]
+        - app/*
+        - cannlytics/*[!m][!d]
+        - datasets/*[!m][!d]
+        - functions/*
+        - lims/*
+        - metrc/*
+        - tests/*
+        - tools/*
+        - website/*
+
+# Index
+nav:
+
+  # About
+  #------------
+  # - Home: docs/index.md
+
+  # About
+  #------------
+  - About:
+    - Overview: README.md
+    # - About: docs/about/about.md
+    # - FAQ: docs/about/faq.md
+    - Support: docs/about/support.md
+    - License: docs/about/license.md
+    - Privacy policy: docs/about/privacy-policy.md
+    - Security policy: docs/about/security-policy.md
+    - Terms of service: docs/about/terms-of-service.md
+
+  # Data
+  #------------
+  - Data:
+    - Overview: datasets/readme.md
+    - Cannabis Licenses: datasets/cannabis_licenses/readme.md
+    # - Cannabis Patents: datasets/cannabis_patents/readme.md
+    # - Cannabis Sales: datasets/cannabis_sales/readme.md
+    # - Cannabis Strains: datasets/cannabis_strains/readme.md
+    - Cannabis Tests: datasets/cannabis_tests/readme.md
+
+  # API
+  #------------
+  - API:
+    - Overview: api/readme.md
+    # - Authentication: api/auth/readme.md
+    - AI:
+      # - Overview: api/ai/readme.md
+      - Recipes: api/ai/recipes.md
+    - Data:
+      - COAs: api/data/coas.md
+      # - Licenses: api/data/licenses.md
+      - Receipts: api/data/receipts.md
+      # - Sales: api/data/sales.md
+      - Strains: api/data/strains.md
+    - Stats:
+      - Effects and Aromas: api/stats/skunkfx.md
+      # TODO: Document personality test API.
+    - Metrc: api/metrc/readme.md
+    # - Users: api/users/readme.md
+    # - Organizations: api/organizations/readme.md
+    # - Settings: api/settings/readme.md
+    
+  # Cannlytics
+  #---------------
+  - Open Source:
+    - Overview: cannlytics/readme.md
+    - Data:
+      - Overview: cannlytics/data/readme.md
+      - CCRS: cannlytics/data/ccrs/readme.md
+      - COAs: cannlytics/data/coas/readme.md
+      # - Licenses: cannlytics/data/coas/readme.md
+      # - Market: cannlytics/data/market/readme.md
+      - Sales and Receipts: cannlytics/data/sales/readme.md
+      - Strains: cannlytics/data/strains/readme.md
+    # - Authentication: cannlytics/auth/readme.md
+    # TODO: Document Functions.
+    - Firebase: cannlytics/firebase/readme.md
+    # - LIMS: cannlytics/lims/readme.md
+    - Metrc: cannlytics/metrc/readme.md
+    # - Models: cannlytics/models/readme.md
+    # - Stats: cannlytics/stats/readme.md
+    - Utils: cannlytics/utils/readme.md
+
+  # Users
+  #------------
+  # - Users:
+  #   - Getting Started: console/get-started.md
+  #   - Authentication: console/authentication.md
+  #   - Quickstart Guide
+  #   - Examples
+  
+  # Developers
+  #------------
+  - Contributing:
+    - Overview: docs/developers/contributing.md
+    # - Overview: README.md
+    # - Contributing: docs/developers/contributing.md
+    - Getting Started: docs/developers/development.md
+    - Testing: docs/developers/testing.md
+    - Security: docs/developers/security.md
+    # - Control of Documents: docs/developers/control-of-documents.md
+    - Documentation: docs/developers/documentation.md
+    # - Data Collection: docs/developers/data-collection.md
+    # - COA Parsing: docs/developers/coa-parsing.md
+    - Datasets: docs/developers/datasets.md
+    - Packaging: docs/developers/packaging.md
+    - Publishing: docs/developers/publishing.md
+    - Change Log: docs/changelog.md

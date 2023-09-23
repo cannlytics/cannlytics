@@ -3,49 +3,73 @@
   <!--
     Hero | Cannlytics Website
     Created: 1/5/2021
-    Updated: 6/21/2022
+    Updated: 8/20/2023
   -->
   {% load static %}
-  <div class="position-relative overflow-hidden text-center text-lg-start pb-3">
-
-    <!-- Wave -->
-    <div class="wave big">
-      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
-        <path d="M3.58,140.29 C137.89,29.76 225.35,138.31 596.12,-23.51 L500.00,150.00 L-34.23,201.48 Z"></path>
-      </svg>
-    </div>
-
-    <!-- Space particles -->
-    <div id="particles-js" class="position-absolute dark-only" style="height:250px;width:100%"></div>
+  <div class="position-relative overflow-hidden text-lg-start pb-3"
+    style="
+    background-image: url({{ hero.image }});
+    background-size:cover;
+    background-position:top left;
+    background-repeat: no-repeat;
+    background-color: #101013ff;"
+  >
+  <!-- #101013ff; -->
 
     <!-- Hero Text -->
-    <div class="d-flex mt-auto justify-content-center flex-wrap-reverse">
-      <div class="col-lg-5 mt-4 px-3 px-lg-0" style="z-index:1001;">
-        <h1 class="display-4 fw-bold text-dark light-only">{{ hero.title }}</h1>
-        <h1 class="display-4 fw-bold text-gradient-reverse dark-only">{{ hero.title }}</h1>
-        <p class="lead double-line text-dark mt-3 mb-4">
+    <div class="d-flex mt-auto justify-content-start flex-wrap-reverse mx-5">
+      
+      <div class="col-lg-5 card card-opaque mt-4 px-3 py-3" style="z-index:1001;">
+        
+        <!-- Title -->
+        <h1 class="display-4 fw-bold text-dark light-only">
+          {{ hero.title | safe }}
+        </h1>
+        <h1 class="display-4 fw-bold text-dark dark-only">
+          {{ hero.title | safe }}
+        </h1>
+        
+        <!-- Message -->
+        <p class="text-dark mt-2 mb-3" style="max-width:540px;">
           {{ hero.message }}
         </p>
-        <a
-          class="btn bg-gradient-green text-white serif text-nowrap me-2"
-          style="width:9rem;"
-          href="{{ hero.primary_action_url }}"
-        >
-          {{ hero.primary_action }}
-        </a>
-        <a
-          class="btn bg-gradient-orange text-white serif text-nowrap"
-          style="width:9rem;"
-          href="{{ hero.secondary_action_url }}"
-        >
-          {{ hero.secondary_action }}
-        </a>
-      </div>
-      <div class="col no-grow mb-3 mb-lg-5" style="z-index:1001;">
-        <img
-          src="{% static hero.image %}"
-          class="hero-image"
-        >
+  
+        <!-- Subscribe -->
+        <form action="" method="POST">
+          {% csrf_token %}
+          <div 
+            id="subscribe-field"
+            class="subscription w-75 mb-4"
+            style="max-width:420px;"
+          >
+            <input
+              id="subscribe-email"
+              class="form-control form-control-sm my-2"
+              type="email"
+              aria-describedby="subscribe-button"
+              placeholder="Get your monthly dose of data..."
+              {% if user.email and not user.newsletter %}value="{{ user.email }}"{% endif %}
+            >
+            <button
+              id="subscribe-button"
+              class="btn btn-sm w-100 bg-gradient-green serif text-white mt-0"
+              onclick="cannlytics.payments.subscribe(null, 'subscribe')"
+              type="button"
+            >
+              Subscribe to get monthly data
+            </button>
+            <button
+              id="subscribe-button-loading"
+              class="btn btn-sm w-100 bg-gradient-green text-white mt-0 d-none"
+              type="button"
+              title="Loading"
+              disabled
+            >
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+
       </div>
     </div>
   </div>

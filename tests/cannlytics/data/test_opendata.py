@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Internal imports.
-from cannlytics.data.opendata import CCC
+from cannlytics.data.opendata.opendata import CCC
 
 
 

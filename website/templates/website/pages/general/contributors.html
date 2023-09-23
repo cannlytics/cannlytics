@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 11/17/2020
-  Updated: 11/25/2021
+  Updated: 5/30/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
 TODO:
@@ -28,25 +28,36 @@ TODO:
       primary_action_url='https://opencollective.com/cannlytics-company'
       secondary_action='Browse contributions'
       secondary_action_url='https://github.com/cannlytics/cannlytics/graphs/contributors'
-      image_url="website/images/illustrations/outline/lab_microbiologist.svg"
+      background_image='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_Data_scientists_collaborate_analyzing_the_cannabis_i_c0032ca3-6ef1-4e83-9f36-76c6d8e957df.png?alt=media&token=d2e06936-b437-4137-9b9a-20c966aad414'
+      background_position='bottom right'
       only
     %}
 
-    <!-- Contributors -->
+    <!-- Open Collective Contributors -->
     <div class="container mt-5">
+      <h1 class="pt-4 fw-bold text-dark serif">Financial Contributors</h1>
+      <p class="text-dark mt-2 mb-0" style="max-width:540px;">
+        These are the heros who put their money where their mouth is to advance cannabis science.
+      </p>
+      <div id="financial-contributors" class="d-flex flex-wrap"></div>
+    </div>
 
-      <!-- Introduction -->
-      <div class="markdown">
-        <svg class="pe-1 pt-3" style="float:left;width:125px;height:125px;">
-          <use href="{% static "website/images/emojies/heart.svg" %}#heart-emoji"></use>
-        </svg>
-        <h1 class="pt-4 text-dark">Cannlytics is built with the love of...</h1>
-        <p class="mt-2" style="max-width:560px;">
-          These heros who tinker and toil to deliver your software solutions.
-        </p>
-      </div>
+    <!-- Contribute -->
+    {% include "website/components/content/introduction.html" with
+      title="Contribute"
+      description='If you find value from Cannlytics and want to contribute your time, your talent, or your treasure, then please consider <a class="serif text-gradient" href="https://opencollective.com/cannlytics-company">becoming a sponsor</a>. We also accept one time contributions via <a class="serif text-gradient" href="https://www.paypal.me/cannlytics">PayPal</a>. No amount is too little. You can also see the <a class="serif text-gradient" href="https://github.com/cannlytics/cannlytics/blob/main/docs/developers/contributing.md">contributing guide</a>, explore the <a class="serif text-gradient" href="https://github.com/cannlytics">GitHub repositories</a>, and <a class="serif text-gradient" href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">create a pull request</a> if you wish to make a code contribution.'
+      action="Contribute Now"
+      image_id="factory-worker-emoji"
+      image_ref="website/images/emojies/factory-worker.svg"
+      link="https://opencollective.com/cannlytics-company"
+    %}
 
-      <!-- Contributor Grid -->
+    <!-- GitHub Contributors -->
+    <div class="container mt-5">
+      <h1 class="pt-4 fw-bold text-dark serif">Code Contributors</h1>
+      <p class="text-dark mt-2">
+        These are the heros who tinker and toil to deliver your software solutions.
+      </p>
       <div class="d-flex flex-wrap mt-5">
         {% for item in contributors %}
           <div class="col px-3 mb-3">
@@ -74,27 +85,16 @@ TODO:
           </div>
         {% endfor %}
       </div>
-
     </div>
 
-    <!-- Contribute -->
+    <!-- Joining the team -->
     {% include "website/components/content/introduction.html" with
-      title="Contribute"
-      description='If you want to contribute your time, your talent, or your treasure, then please dive into the <a class="serif text-gradient" href="https://docs.cannlytics.com/developers/contributing/">contributing guide</a>, explore the <a class="serif text-gradient" href="https://github.com/cannlytics">GitHub repositories</a>, and <a class="serif text-gradient" href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request">create a pull request</a> for your contributions sooner rather than later.'
-      action="Contribute Now"
-      image_id="factory-worker-emoji"
-      image_ref="website/images/emojies/factory-worker.svg"
-      link="https://docs.cannlytics.com/developers/contributing"
-    %}
-
-    <!-- Sponsor -->
-    {% include "website/components/content/introduction.html" with
-      title="Sponsor"
-      description='Open source projects take time and money. Help support the project by <a class="serif text-gradient" href="https://opencollective.com/cannlytics-company">becoming a sponsor</a>. You can add your support at any tier you feel comfortable with. No amount is too little. We also accept one time contributions via <a class="serif text-gradient" href="https://www.paypal.me/cannlytics">PayPal</a>.'
-      action="Sponsor Now"
-      image_id="money-emoji"
-      image_ref="website/images/emojies/money.svg"
-      link="https://opencollective.com/cannlytics-company"
+      title="Join the Team"
+      description='Do you have the chops and / or passion to help deliver industry-leading analytics, software, and support to everyone in the cannabis industry? Then please email the team at <a href="mailto:dev@cannlytics.com" class="serif text-gradient">dev@cannlytics.com</a> and explain who, what, where, why, when, and how you can contrbiute to Cannlytics.'
+      action="Join today"
+      image_id="handshake-emoji"
+      image_ref="website/images/emojies/handshake.svg"
+      link="https://cannlytics.com/jobs"
     %}
   
   </div>
@@ -103,5 +103,117 @@ TODO:
   {% include "website/components/art/vines.html" %}
 
 {% endblock material %}
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+
+  // Fetch financial contributors from Open Collective.
+  function fetchBackers() {
+    console.log('Fethicng financial contributors...');
+    var slug = 'cannlytics-company';
+    var limit = 25;
+    var offset = 0;
+    fetch(`https://opencollective.com/${slug}/members/all.json?limit=${limit}&offset=${offset}`)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        console.log('CONTRIBUTORS FOUND:');
+        console.log(data);
+        const contributorsDiv = document.getElementById("financial-contributors");
+
+        data
+          .filter(function(member) {
+            return member.role === 'BACKER';
+          })
+          .forEach(function(member) {
+            // Render a card.
+            const card = document.createElement('div');
+            card.className = 'card col-10 col-md-10 col-lg-5 m-3';
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body bg-transparent text-dark';
+
+            // Add the contributor's name.
+            const nameElement = document.createElement('h5');
+            nameElement.className = 'card-title fs-4 fw-bold fancy-serif text-nowrap';
+            nameElement.textContent = member.name;
+
+            // Add contributor's details.
+            var tierBadge;
+            if (member.tier == 'Buddha') {
+              tierBadge = document.createElement('span');
+              tierBadge.className = 'badge rounded-pill text-bg-warning fs-6 fancy-serif mt-1';
+              tierBadge.textContent = 'Buddha';
+            } else if (member.tier == 'Cannabis Data Scientist') {
+              tierBadge = document.createElement('span');
+              tierBadge.className = 'badge rounded-pill text-bg-primary fs-6 fancy-serif  mt-1';
+              tierBadge.textContent = 'Cannabis Data Scientist';
+            } else {
+              tierBadge = document.createElement('span');
+              tierBadge.className = 'badge rounded-pill text-bg-success fs-6 fancy-serif mt-1';
+              tierBadge.textContent = 'Seedling';
+            }
+
+            // Add the amount donated.
+            const amountRow = document.createElement('div');
+            const amountElement = document.createElement('h2');
+            amountElement.className = 'card-text fw-bold simple-serif fs-1 mt-0 mb-0';
+            amountElement.textContent = `$${member.totalAmountDonated}`;
+
+            // Add small text "total contributions!"
+            const smallTextElement = document.createElement('p');
+            smallTextElement.className = 'text-secondary fs-6 mt-0';
+            smallTextElement.textContent = "total contributions!";
+
+            amountRow.className = 'row'
+            amountRow.appendChild(amountElement);
+            amountRow.appendChild(smallTextElement);
+
+            // Add the user's `image` with a link to their `profile`.
+            // Use `https://cannlytics.com/robohash/${member.MemberId}` if no image.
+            const imgDiv = document.createElement('div');
+            imgDiv.style.width = '128px';
+            imgDiv.style.height = '128px';
+            imgDiv.style.borderRadius = '50%';
+            imgDiv.style.backgroundSize = 'cover';
+            imgDiv.style.backgroundPosition = 'center';
+            imgDiv.style.float = 'left';
+            imgDiv.style.marginRight = '10px';
+            if (member.image) {
+                imgDiv.style.backgroundImage = `url(${member.image})`;
+            } else {
+                imgDiv.style.backgroundImage = `url(https://cannlytics.com/robohash/${member.MemberId}.png?size=128)`;
+            }
+
+            // Add a link to the image.
+            const imgLinkElement = document.createElement('a');
+            if (member.profile) {
+                imgLinkElement.href = member.profile;
+            } else {
+                imgLinkElement.href = `https://opencollective.com/${member.name}`;
+            }
+            imgLinkElement.title = member.name;
+            imgLinkElement.appendChild(imgDiv);
+
+            // Add the elements to the card.
+            cardBody.appendChild(imgLinkElement); 
+            cardBody.appendChild(nameElement);
+            cardBody.appendChild(tierBadge);
+            cardBody.appendChild(amountRow);
+            card.appendChild(cardBody);
+            contributorsDiv.appendChild(card);
+          });
+      })
+      .catch(function(error) {
+        console.error("Error: " + error);
+      });
+  }
+
+  // jQuery document ready function
+  fetchBackers();
+
+</script>
+{% endblock page_js %}
 
 </html>

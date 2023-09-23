@@ -1,42 +1,81 @@
 # <img height="32" alt="" src="https://cannlytics.com/static/cannlytics_website/images/logos/cannlytics_calyx_detailed.svg"> Cannlytics API
 
-The Cannlytics API allows users to seamlessly integrate with all of the functionality that Cannlytics has to offer. The Cannlytics API endpoints are simply an interface to the logic implemented in the `cannlytics` module. The API endpoints handle authentication, error handling, and identifying the precise logic to perform.
+The Cannlytics API allows users to interface with cannabis data and statistics. Each API endpoints handle authentication, error handling, and identifying the precise logic to perform.
 
-- [Getting Started with the Cannlytics API](#getting-started)
-- [Data API Endpoints](#data-api-endpoints)
-- [Stats API Endpoints](#stats-api-endpoints)
-- [LIMS API Endpoints](#lims-api-endpoints)
-- [Traceability API Endpoints](#traceability-api-endpoints)
-- [Organizations API Endpoints](#organizations-api-endpoints)
-- [Users API Endpoints](#users-api-endpoints)
+- [AI Recipes API](./ai/recipes.md)
+- [COAs API](./data/coas.md)
+- [Receipts API](./data/receipts.md)
+- [Strains API](./data/strains.md)
+- [Effects and Aromas API](./stats/skunkfx.md)
+- [Metrc API](./metrc/readme.md)
 
 ## Getting Started with the Cannlytics API <a name="getting-started"></a>
 
 Getting started making requests to the Cannlytics API can be done in 3 quick steps.
 
-1. First, [create a Cannlytics account](https://console.cannlytics.com/account/sign-up).
-2. Second, [create an API key](https://console.cannlytics.com/settings/api).
-3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <token>` header.
+1. First, [create a Cannlytics account](https://cannlytics.com/account/sign-up).
+2. Second, [create a Cannlytics API key](https://cannlytics.com/account/api-keys).
+3. Third, begin making requests to the Cannlytics API with your API Key in an `Authorization: Bearer <cannlytics_api_key>` header.
 
-For advanced usage, you can manage your authentication session with the `auth` endpoints in the table below.
+You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example reading an API key from a local `.env` file.
 
-| Endpoint | Methods | Description |
-| -------- | ------- | ----------- |
-| `\auth\authenticate` | `POST` | Create an authorized session. |
-| `\auth\login` | `POST` | Sign into your Firebase user account. |
-| `\auth\logout` | `POST` | Sign out of your Firebase user account and end your authorized session. |
+=== "Python"
 
-<!-- TODO: Document the following endpoints:
-create-key
-create-pin
-create-signature
-delete-key
-delete-pin
-delete-signature
-get-keys
-get-signature
-verify-pin
--->
+    ```py
+    from dotenv import load_dotenv
+    import os
+    import requests
+
+    # Load your API key.
+    load_dotenv('.env')
+    API_KEY = os.getenv('CANNLYTICS_API_KEY')
+
+    # Pass your API key through the authorization header as a bearer token.
+    HEADERS = {
+        'Authorization': 'Bearer %s' % API_KEY,
+        'Content-type': 'application/json',
+    }
+
+    # Parse a COA through the API.
+    url = 'https://cannlytics.page.link/test-coa'
+    data = {'urls': [url]}
+    response = requests.post(url, headers=headers, json=data)
+    extracted = response.json()
+    print(extracted["data"])
+    ```
+
+
+=== "Node.js"
+
+    ```js
+    const axios = require('axios');
+    require('dotenv').config();
+
+    // Pass API key through the authorization header as a bearer token.
+    const apiKey = process.env.CANNLYTICS_API_KEY;
+    const options = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization' : `Bearer ${apiKey}`
+      }
+    };
+
+    // Parse a COA through the API.
+    const url = 'https://cannlytics.page.link/test-coa';
+    const data = { urls: [url] };
+
+    axios.post(url, data, options)
+      .then((response) => {
+        const extracted = response.data;
+        console.log(extracted["data"]);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    ```
+
+<!-- 
+FUTURE WORK:
 
 ## Data API Endpoints <a name="data-api-endpoints"></a>
 
@@ -50,12 +89,15 @@ You can get all of the open data curated by Cannlytics through the `data` API en
 | `\data\labs` | `GET` | Get the data of labs that test cannabis. Append a URL-escaped `<lab>` or `<lab_license_number>` to query a specific lab. |
 | `\data\regulations` | `GET` | Get regulation data for permitted cannabis markets. Append a `<state>` to query regulation data for a specific state. The regulations include the `limits` used in quality control testing. |
 | `\data\states` | `GET` | Get data for states that permit adult-use / recreational or medicinal cannabis. Append a `<state>` path to get data for a specific state. |
-| `\data\strains` | `GET` | Get data for documented cannabis strains. Append a `<strain_name>` to query a specific strain. |
+| `\data\strains` | `GET` | Get data for documented cannabis strains. Append a `<strain_name>` to query a specific strain. | -->
 
 <!-- TODO: Implement data API endpoints for:
   - [ ] Licensee data.
   - [ ] Patent data.
 -->
+<!-- 
+
+TODO: MOVE THESE.
 
 ## Stats API Endpoints <a name="stats-api-endpoints"></a>
 
@@ -64,12 +106,15 @@ You can interface with various statistical models through the `stats` API endpoi
 | Endpoint | Methods | Description |
 | -------- | ------- | ----------- |
 | `\stats\effects` | `GET`, `POST` | Get predicted effects or append `actual` to the path to post actual effects for a particular cannabis strain. You can also query by appending the `<strain>` as a URL-escaped path. |
-| `\stats\personality` | `GET`, `POST` | Get the Big 5 personality test questions and rubric. Post your completed test to get the Big 5 personality trait metrics on a 0 to 1 scale. |
+| `\stats\personality` | `GET`, `POST` | Get the Big 5 personality test questions and rubric. Post your completed test to get the Big 5 personality trait metrics on a 0 to 1 scale. | -->
 
 <!-- TODO:
   - [ ] Patent prediction API
   - [ ] Product recommendations API
 -->
+<!-- 
+
+DEPRECATED:
 
 ## LIMS API Endpoints <a name="lims-api-endpoints"></a>
 
@@ -93,7 +138,11 @@ The `lims` API endpoints allows all actions necessary for managing a laboratory 
 | `\lims\transfers` | `GET`, `POST`, `DELETE` | Manage transfers. Append `transfer_id` to query a specific transfer |
 | `\lims\transporters` | `GET`, `POST`, `DELETE` | Manage transporters. Append `transporter_id` to query a specific transporter |
 | `\lims\vehicles` | `GET`, `POST`, `DELETE` | Manage vehicles. Append `vehicle_id` to query a specific vehicle |
-| `\lims\waste` | `GET`, `POST` | Manage waste data. Append `waste_item_id` to query a specific wasted item. |
+| `\lims\waste` | `GET`, `POST` | Manage waste data. Append `waste_item_id` to query a specific wasted item. | -->
+
+<!-- 
+
+DEPRECATED:
 
 ## Traceability API Endpoints <a name="traceability-api-endpoints"></a>
 
@@ -107,7 +156,11 @@ The `traceability` API endpoints are primarily used to add track and trace funct
 | `\traceability\locations` | `GET`, `POST`, `DELETE` | Manage tracked locations. |
 | `\traceability\packages` | `GET`, `POST`, `DELETE` | Manage tracked packages. |
 | `\traceability\strains` | `GET`, `POST`, `DELETE` | Manage tracked strains. |
-| `\traceability\transfers` | `GET`, `POST`, `DELETE` | Manage tracked transfers. |
+| `\traceability\transfers` | `GET`, `POST`, `DELETE` | Manage tracked transfers. | -->
+
+<!--
+
+DEPRECATED:
 
 ## Organizations API Endpoints <a name="organizations-api-endpoints"></a>
 
@@ -118,14 +171,5 @@ You can manage your Cannlytics organizations through the `organizations` API end
 | `\organizations\<organization_id>` | `GET`, `POST` | Get an organization's details. Must be an organization owner or authorized team member to change the organization details. |
 | `\organizations\<organization_id>\settings` | `GET`, `POST` | Get an organization's settings. Must be the organization's owner or team member to get the settings and must be the owner or an authorized team member to change the settings. |
 | `\organizations\<organization_id>\team` | `GET` | Get an organization's team. |
-| `\organizations\<organization_id>\team\<user_ud>` | `GET` | Get an organization team member details. |
+| `\organizations\<organization_id>\team\<user_ud>` | `GET` | Get an organization team member details. | -->
 
-## Users API Endpoints <a name="users-api-endpoints"></a>
-
-You can manage your Cannlytics user account through the `users` API endpoints listed in the table below.
-
-| Endpoint | Methods | Description |
-| -------- | ------- | ----------- |
-| `\users\<user_id>` | `GET`, `POST` | Get your user details. |
-| `\users\<user_id>\logs` | `GET`, `POST` | Get your user logs. Append a `log_id` path to query a specific log. |
-| `\users\<user_id>\settings` | `GET`, `POST` | Get your user settings. |

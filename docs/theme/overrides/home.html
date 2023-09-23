@@ -43,7 +43,7 @@
 
         <!-- Hero content -->
         <div class="tx-hero__content">
-          <h1>Simple, easy, end-to-end cannabis analytics.</h1>
+          <h1>Cannabis Data and Analytics</h1>
           <p>{{ config.site_description }}</p>
           <a
             href="{{ page.next_page.url | url }}"
@@ -57,12 +57,20 @@
             title="{{ lang.t('source.link.title') }}"
             class="md-button"
           >
-            Go to GitHub
+            GitHub
           </a>
         </div>
       </div>
     </div>
   </section>
+
+{% endblock %}
+
+<!-- No Content -->
+{% block content %}{% endblock %}
+
+<!-- No Application footer -->
+{% block footer %}{% endblock %}
 
   <!-- Optional: Add Cards -->
   <!-- large-vertical-margin   order-md-2 -->
@@ -98,11 +106,3 @@
   </div>-->
 
   <!-- Optional: Add custom homepage footer -->
-
-{% endblock %}
-
-<!-- No Content -->
-{% block content %}{% endblock %}
-
-<!-- No Application footer -->
-{% block footer %}{% endblock %}

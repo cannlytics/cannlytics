@@ -1,0 +1,17 @@
+{
+    "coa_pdf": "Pineapple-XX-5-13-2129146.pdf",
+    "coa_urls": null,
+    "lab_results_url": null,
+    "coa_hash": "9501acee692a29f309b618ac994179d274753de3c4131837af2d8e552920ec95",
+    "coa_algorithm": "coa_ai.py",
+    "coa_algorithm_entry_point": "parse_coa_with_ai",
+    "coa_algorithm_version": "0.0.16",
+    "coa_parsed_at": "2023-09-05T10:48:34.978289",
+    "images": "[]",
+    "results": "[]",
+    "results_hash": "4088801307a125d9946d667a155b837026eb5dbe92748b36b44599e26f6851b9",
+    "sample_id": "90b811f4ace062b9e933af17f97235ebf295af52fdb63ffe9af7d29d9db6e3a5",
+    "sample_hash": "b34bf22cf74099bf1722381eb6293ef51ecb5a650313fbcf615ea17615e1924a",
+    "warning": "This data was parsed from text using OpenAI's GPT models. Please verify the data before using it. You can submit feedback and report issues to dev@cannlytics.com, thank you.",
+    "cost": 0.14292
+}

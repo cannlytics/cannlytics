@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<!--
+  Token Management | Cannlytics Website
+  Created: 6/20/2023
+  Updated: 6/21/2023
+-->
+{% load static %}
+
+<!-- Sign In Prompt -->
+<section class="indicates-auth container mb-2 mt-5 d-flex justify-content-center">
+  <div class="markdown py-5" style="max-width:560px;">
+    <svg class="pe-3 pt-3" style="float:left;width:125px;height:125px;">
+      <use href="{% static "website/images/emojies/newspaper.svg" %}#newspaper-emoji"></use>
+    </svg>
+    <h1 class="pt-4 text-dark">Cannlytics Subscriptions</h1>
+    <p class="mt-2">
+      You will need to create an account or to sign in
+      to take advantage of Cannlytics subscriptions.
+    </p>
+    <div class="d-flex justify-content-center mt-3">
+      <a
+        class="btn bg-gradient-green text-white serif mx-2"
+        data-bs-target="#sign-in-dialog"
+        data-bs-toggle="modal"
+      >
+        Sign in
+      </a>
+      <a
+        class="btn bg-gradient-orange text-white serif mx-2"
+        href="{% url 'section' page='account' section='sign-up' %}"
+      >
+        Sign Up
+      </a>
+    </div>
+  </div>
+</section>
+
+</html>

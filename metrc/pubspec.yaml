@@ -1,0 +1,271 @@
+name: cannlytics_app
+description: An app to interface with Cannlytics, cannabis data and analytics.
+
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  cloud_firestore: ^4.4.4
+  dartx: ^1.1.0
+  file_picker: ^5.2.5
+  firebase_auth: ^4.2.10
+  firebase_core: ^2.7.1
+  firebase_storage: ^11.0.15
+  flutter:
+    sdk: flutter
+  flutter_animate: ^4.1.0
+  flutter_layout_grid: ^2.0.1
+  flutter_native_splash: ^2.2.18
+  flutter_riverpod: ^2.3.1
+  flutter_svg: ^2.0.3
+  # fuzzy: 0.3.0
+  fluttertoast: ^8.2.1
+  flutter_typeahead: ^4.3.7
+  go_router: ^6.2.0
+  http: ^0.13.5
+  intl: ^0.17.0
+  rxdart: ^0.27.7
+  url_launcher: ^6.1.10
+  uuid: ^3.0.7
+
+dev_dependencies:
+  import_sorter: ^4.6.0
+  flutter_test:
+    sdk: flutter
+  mocktail: ^0.3.0
+  random_string:
+  custom_lint:
+  riverpod_lint:
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logos/cannlytics_calyx_192.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/images/logos/cannlytics_calyx_192.png"
+    background_color: "#ffffff"
+    theme_color: "#ff9500"
+  windows:
+    generate: false
+    image_path: "assets/images/logos/cannlytics_calyx_192.png"
+    icon_size: 256
+  macos:
+    generate: false
+    image_path: "assets/images/logos/cannlytics_calyx_192.png"
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/logos/cannlytics_calyx_192.png
+  branding: assets/images/logos/cannlytics_brand_small.png
+  branding_mode: bottom
+  color_dark: "#24292e"
+  image_dark: assets/images/logos/cannlytics_calyx_192.png
+  branding_dark: assets/images/logos/cannlytics_brand_small_dark.png
+  background_image: assets/images/logos/cannlytics_background_light.png
+  background_image_dark: assets/images/logos/cannlytics_background_dark.png
+  android: false
+  ios: false
+  web: true
+  android_12:
+    color: "#42a5f5"
+    icon_background_color: "#ffffff"
+    branding: assets/images/logos/cannlytics_logo_with_text_light.png
+    image: assets/images/logos/cannlytics_calyx_1152.png
+    color_dark: "#042a49"
+    icon_background_color_dark: "#eeeeee"
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/logos/logo_dark.svg
+    - assets/images/logos/logo_light.svg
+    - assets/images/logos/cannlytics_calyx_192.png
+    - assets/images/logos/cannlytics_logo_with_text_dark.png
+    - assets/images/logos/cannlytics_logo_with_text_light.png
+    - assets/images/icons/additives.png
+    - assets/images/icons/anchor.png
+    - assets/images/icons/award.png
+    - assets/images/icons/book.png
+    - assets/images/icons/bug.png
+    - assets/images/icons/certificate.png
+    - assets/images/icons/chemistry.png
+    - assets/images/icons/clock.png
+    - assets/images/icons/clones.png
+    - assets/images/icons/document.png
+    - assets/images/icons/driver.png
+    - assets/images/icons/electricity.png
+    - assets/images/icons/employees.png
+    - assets/images/icons/facilities.png
+    - assets/images/icons/fan.png
+    - assets/images/icons/figures.png
+    - assets/images/icons/figures.svg
+    - assets/images/icons/flower-plant.png
+    - assets/images/icons/heavy-metal.png
+    - assets/images/icons/images.png
+    - assets/images/icons/indoor.png
+    - assets/images/icons/item.png
+    - assets/images/icons/leaf.png
+    - assets/images/icons/leaf_outline.png
+    - assets/images/icons/light.png
+    - assets/images/icons/locations.png
+    - assets/images/icons/logs.png
+    - assets/images/icons/measurement.png
+    - assets/images/icons/measurements.png
+    - assets/images/icons/meter.png
+    - assets/images/icons/microbe.png
+    - assets/images/icons/notes.png
+    - assets/images/icons/organizations.png
+    - assets/images/icons/organizations.svg
+    - assets/images/icons/outdoor.png
+    - assets/images/icons/packages.png
+    - assets/images/icons/patients.png
+    - assets/images/icons/person.png
+    - assets/images/icons/photos.png
+    - assets/images/icons/plant.png
+    - assets/images/icons/plant-batches.png
+    - assets/images/icons/plant-data.png
+    - assets/images/icons/plant-environment.png
+    - assets/images/icons/process.png
+    - assets/images/icons/product.png
+    - assets/images/icons/products.png
+    - assets/images/icons/reagents.png
+    - assets/images/icons/recipe.png
+    - assets/images/icons/result.png
+    - assets/images/icons/results.png
+    - assets/images/icons/sales.png
+    - assets/images/icons/sample-plant.png
+    - assets/images/icons/security.png
+    - assets/images/icons/seedlings.png
+    - assets/images/icons/settings.png
+    - assets/images/icons/shop.png
+    - assets/images/icons/shop.svg
+    - assets/images/icons/shovel.png
+    - assets/images/icons/spade.png
+    - assets/images/icons/spend.png
+    - assets/images/icons/spending.png
+    - assets/images/icons/stats.png
+    - assets/images/icons/strains.png
+    - assets/images/icons/toolbox.png
+    - assets/images/icons/transfers.png
+    - assets/images/icons/tree.png
+    - assets/images/icons/unknown-docs.png
+    - assets/images/icons/waste.png
+    - assets/images/icons/water.png
+    - assets/images/icons/weights.png
+    - assets/images/icons/wrench.png
+
+  fonts:
+    - family: IBMPlexSans
+      fonts:
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-ThinItalic.ttf
+          style: italic
+          weight: 100
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Italic.ttf
+          style: italic
+          weight: 400
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-MediumItalic.ttf
+          style: italic
+          weight: 500
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-ExtraLightItalic.ttf
+          style: italic
+          weight: 200
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-LightItalic.ttf
+          style: italic
+          weight: 300
+        - asset: assets/fonts/IBM_Plex_Sans/IBMPlexSans-Thin.ttf
+          weight: 100
+
+    - family: CormorantGaramond
+      fonts:
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-Italic.ttf
+          style: italic
+          weight: 400
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-LightItalic.ttf
+          style: italic
+          weight: 300
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-MediumItalic.ttf
+          style: italic
+          weight: 500
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cormorant_Garamond/CormorantGaramond-SemiBold.ttf
+          weight: 600
+
+    - family: LibreBaskerville
+      fonts:
+        - asset: assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Libre_Baskerville/LibreBaskerville-Italic.ttf
+          style: italic
+          weight: 400
+
+    - family: SourceSerifPro
+      fonts:
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-BlackItalic.ttf
+          style: italic
+          weight: 900
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-ExtraLightItalic.ttf
+          style: italic
+          weight: 200
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-Italic.ttf
+          style: italic
+          weight: 400
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-LightItalic.ttf
+          style: italic
+          weight: 300
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Source_Serif_Pro/SourceSerifPro-SemiBoldItalic.ttf
+          style: italic
+          weight: 600

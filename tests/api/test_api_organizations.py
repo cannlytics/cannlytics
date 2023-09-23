@@ -14,10 +14,10 @@ from dotenv import load_dotenv
 ENDPOINT = 'organizations'
 
 # Test using development server.
-# BASE = 'http://127.0.0.1:8000/api'
+BASE = 'http://127.0.0.1:8000/api'
 
 # Uncomment to test with production server.
-BASE = 'https://console.cannlytics.com/api'
+# BASE = 'https://cannlytics.com/api'
 
 # Load your API key.
 load_dotenv('../../../.env')
@@ -37,19 +37,21 @@ ORG_ID = 'test-company'
 # Create an organization
 #------------------------------------------------------------------------------
 
+
 #------------------------------------------------------------------------------
 # Update an organization
 #------------------------------------------------------------------------------
 
+
 #------------------------------------------------------------------------------
-# Get an organization
-#------------------------------------------------------------------------------
+# Get organizations
 #------------------------------------------------------------------------------
 url = f'{BASE}/{ENDPOINT}'
 response = requests.get(url, headers=HEADERS)
 assert response.status_code == 200
 data = response.json()['data']
 print('Found:', len(data))
+
 
 #------------------------------------------------------------------------------
 # Delete an organization?

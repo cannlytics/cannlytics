@@ -1,19 +1,10 @@
-# -*- coding: utf-8 -*-
 """
-Title | Project
+Users API Endpoint Test | Cannlytics API
 
-Author: keega
-Created: Sun Feb 14 19:10:21 2021
-
-License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-
-Description:
-    
-
-Resources:
-
+Author: Keegan Skeate <keegan@cannlytics.com>
+Created: 2/14/2021
+Updated: 6/23/2023
+License: MIT License <https://opensource.org/licenses/MIT>
 """
 import os
 import requests

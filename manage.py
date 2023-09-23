@@ -15,6 +15,7 @@ def main():
     """ Run administrative tasks. """
     # Allow user to specify project from the command line.
     project = os.environ.get('PROJECT', 'website').strip()
+    print('DJANGO PROJECT:', project)
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'{project}.settings')
     try:
         from django.core.management import execute_from_command_line

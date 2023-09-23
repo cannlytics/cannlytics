@@ -4,13 +4,13 @@ Why use the Cannlytics API to interface with the Metrc API?
 
 - You get to use **one** standardized API in all states with Metrc traceability.
 - You get enhanced functionality, such as returning created data and elegant time queries.
-- You get free, world-class support to handle any updates Metrc may make to their API.
+- You get world-class support to handle any updates Metrc may make to their API.
 
 You can [get a Metrc integration solution](https://cannlytics.com/support) today through Cannlytics, a [verified Metrc integrator](https://cannlytics.com#metrc) in 9 states. Once you have signed up for service, or if you are running your own distribution, then you can begin using the Metrc API endpoints.
 
 ## Endpoints
 
-The Metrc API endpoints in the table below are available at the base, with `https://console.cannlytics.com` serving as the base of the official Cannlytics distribution.
+The Metrc API endpoints in the table below are available at the base, with `https://cannlytics.com` serving as the base of the official Cannlytics distribution.
 
 | Object | Endpoint | Methods |
 |-------|----------|---------|
@@ -52,7 +52,7 @@ import os
 import requests
 
 # Define the API.
-BASE = 'https://console.cannlytics.com/api'
+BASE = 'https://cannlytics.com/api'
 
 # Pass your Cannlytics API Key.
 api_key = os.getenv('CANNLYTICS_API_KEY')
@@ -1736,14 +1736,6 @@ params = {
 response = session.post(f'{BASE}/metrc/deliveries', json=data, params=params)
 print('Ended a delivery.')
 ```
-
-<!-- ## Drivers and Vehicles
-
-You can get drivers and vehicles from the Metrc API as follows.
-
-```py
-
-``` -->
 
 ## Types
 

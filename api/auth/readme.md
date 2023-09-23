@@ -10,13 +10,14 @@ A Cannlytics API key identifies a particular user, granting programmatic use at 
 
 !!! tip "We strongly recommend that you encrypt your API keys in your data store and in memory when working with them except when you need to access them to access the service."
 
+<!-- 
 ### Permissions
 
 The default levels of permission are:
 
 - **Staff**: Has a restricted set of actions that can be performed, such as lacking the ability to delete data, and has restricted access to certain data.
 - **QA**: Can perform the majority of organization actions and has access to the majority of organization data.
-- **Owner**: Has full control of an organization and can perform any action and access all organization data.
+- **Owner**: Has full control of an organization and can perform any action and access all organization data. -->
 
 #### Expiration
 
@@ -38,6 +39,29 @@ Cannlytics leverages Firebase Auth for [server-side session cookie management](h
 
 Client requests are sent with a hash-based message authentication code (HMAC) [in case HTTPS is defeated](https://hackernoon.com/improve-the-security-of-api-keys-v5kp3wdu). Request authorization time is checked before issuing a client session cookie, minimizing the window of attack in case an ID token is stolen. After sign-in, all access-protected views check the session cookie and verify it before serving restricted content based on the user's custom claims.
 
+## App authentication
+
+For advanced usage, you can manage your authentication session with the `auth` endpoints in the table below.
+
+| Endpoint | Methods | Description |
+| -------- | ------- | ----------- |
+| `/auth/authenticate` | `POST` | Create an authorized session. |
+| `/auth/login` | `POST` | Sign into your Firebase user account. |
+| `/auth/logout` | `POST` | Sign out of your Firebase user account and end your authorized session. |
+
+<!-- TODO: Document the following endpoints:
+create-key
+create-pin
+create-signature
+delete-key
+delete-pin
+delete-signature
+get-keys
+get-signature
+verify-pin
+-->
+
+<!-- 
 ## API Requests
 
 You can make requests through the API passing your API key as a bearer token in the authorization header. Below is an example in Python reading an API key from a local `.env` file.
@@ -72,7 +96,7 @@ You can make requests through the API passing your API key as a bearer token in 
     const options = {
       headers: { 'Authorization' : `Bearer ${apiKey}` }
     };
-    ```
+    ``` -->
 
 <!-- DRAFTS -->
 <!-- You can restrict the domains from which your API key can be used. -->
@@ -86,3 +110,11 @@ You can make requests through the API passing your API key as a bearer token in 
 <!-- /auth/get-keys-->
 <!-- /auth/get-signature -->
 <!-- /auth/verify-pin -->
+
+## Users Endpoint `/api/users`
+
+You can manage your Cannlytics user account through the `users` API endpoints listed in the table below.
+
+| Endpoint | Methods | Description |
+| -------- | ------- | ----------- |
+| `api/users/<user_id>` | `GET`, `POST` | Get and update your user details. |

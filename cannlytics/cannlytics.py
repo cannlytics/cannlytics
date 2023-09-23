@@ -1,18 +1,20 @@
 """
 Cannlytics Module | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/12/2022
+Updated: 8/13/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains the Cannlytics class,
 the entry point into Cannlytics features and functionality.
 """
 # Standard imports.
+from datetime import datetime
 import logging
-from os import environ
+import os
+import tempfile
 from typing import Dict, Optional, Union
 
 # External imports
@@ -33,10 +35,10 @@ class Cannlytics:
             license_number: Optional[str] = None,
             state: Optional[str] = None,
             firebase: Optional[bool] = False,
-            lims: Optional[bool] = False,
             metrc: Optional[bool] = False,
-            paypal: Optional[bool] = False,
-            quickbooks: Optional[bool] = False,
+            openai: Optional[bool] = False,
+            logs: Optional[bool] = True,
+            name: Optional[str] = 'cannlytics',
     ) -> None:
         """Initialize a Cannlytics class.
         Args:
@@ -46,14 +48,16 @@ class Cannlytics:
                 `METRC_VENDOR_API_KEY`
                 `METRC_USER_API_KEY`
                 `METRC_STATE`
+                `OPENAI_API_KEY`
             license_number (str): A primary license number (optional).
             state (str): A state abbreviation (optional).
             firebase (bool): Initialize the Firebase module, default `False` (optional).
-            lims (bool): Initialize the LIMS module, default `False` (optional).
             metrc (bool): Initialize the Metrc module, default `False` (optional).
-            paypal (bool): Initialize the PayPal module, default `False` (optional).
-            quickbooks (bool): Initialize the QuickBooks module, default `False` (optional).
+            openai (bool): Initialize the OpenAI module, default `False` (optional).
+            logs (bool): Initialize the logs, default `True` (optional).
+            name (str): The name of the log file, default `cannlytics` (optional).
         """
+        # Initialize the Cannlytics class state.
         if isinstance(config, dict):
             self.config = config
         else:
@@ -63,20 +67,26 @@ class Cannlytics:
         self.state = self.config.get('METRC_STATE', state)
         self.storage = None
         self.track = None
-        self.initialize_logs()
-        # TODO: Test / ensure module initialization errors are skipped.
+
+        # Initialize logs.
+        if logs:
+            self.initialize_logs(name=name)
+
+        # Initialize Firebase.
         if firebase:
             self.initialize_firebase(self.config)
+
+        # Initialize Metrc.
         if metrc:
             self.initialize_traceability(
                 self.config,
                 primary_license=self.license,
                 state=self.state
             )
-        # TODO: Initialize modules if specified.
-        # lims
-        # paypal
-        # quickbooks
+
+        # Initialize OpenAI.
+        if openai:
+            self.initialize_openai(self.config.get('OPENAI_API_KEY'))
 
 
     def create_log(self, message: str):
@@ -84,16 +94,20 @@ class Cannlytics:
         Args:
             (message): Print a given message to the logs.
         """
-        self.logger.debug(message)
+        try:
+            self.logger.debug(str(message))
+        except KeyError:
+            raise ValueError({'message': '`logs=True` but no logger initialized. Use `client.initialize_logs()`.'})
 
 
-    def initialize_logs(self):
-        """Initialize logs.
-        """
-        # Optional: Reduce duplication of logging code (also in the Metrc module)?
-        logging.getLogger('cannlytics').handlers.clear()
+    def initialize_logs(self, name: Optional[str] = 'cannlytics'):
+        """Initialize logs with a timestamped temp file."""
+        timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        temp_dir = tempfile.gettempdir()
+        temp_file = os.path.join(temp_dir, f'{name}-{timestamp}.log')
+        logging.getLogger(name).handlers.clear()
         logging.basicConfig(
-            filename='./tmp/cannlytics.log',
+            filename=temp_file,
             filemode='w+',
             level=logging.DEBUG,
             format='%(asctime)s %(message)s',
@@ -101,7 +115,7 @@ class Cannlytics:
         )
         console = logging.StreamHandler()
         console.setLevel(logging.DEBUG)
-        self.logger = logging.getLogger('cannlytics')
+        self.logger = logging.getLogger(name)
         self.logger.addHandler(console)
 
 
@@ -116,12 +130,32 @@ class Cannlytics:
         if config is None:
             config = self.config
         credentials = config['GOOGLE_APPLICATION_CREDENTIALS']
-        environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials
         self.database = initialize_firebase()
         self.storage = config.get('FIREBASE_STORAGE_BUCKET')
         # TODO: Map all firebase function to cannlytics.<function_name>, passing DB as an argument.
         self.create_log('Firebase client initialized.')
         return self.database
+    
+
+    def initialize_openai(self, openai_api_key=None):
+        """Initialize OpenAI with Google Secret Manager or .env variable."""
+        import openai
+        if openai_api_key is None:
+            try:
+                import google.auth
+                from cannlytics.firebase import access_secret_version
+                self.initialize_firebase()
+                _, project_id = google.auth.default()
+                openai_api_key = access_secret_version(
+                    project_id=project_id,
+                    secret_id='OPENAI_API_KEY',
+                    version_id='latest',
+                )
+            except:
+                openai_api_key = self.config.get('OPENAI_API_KEY')
+        openai.api_key = openai_api_key
+        self.create_log('OpenAI initialized.')
 
 
     def initialize_traceability(self, config=None, primary_license=None, state=None):
@@ -142,27 +176,6 @@ class Cannlytics:
         )
         self.create_log('Traceability client initialized.')
         return self.track
-
-
-    # Optional: Make `paypal` available through the interface?
-
-
-    # Optional: Make `lims` available through the interface?
-
-
-    # Optional: Make `quickbooks` available through the interface?
-    
-
-    # Optional: Make `charts` available through the interface?
-
-
-    # Optional: Make `stats` available through the interface?
-
-
-    # Optional: Make `utils` available through the interface?
-
-
-    # Future work: Use models that have their own functions.
 
 
     # TODO: Make data and statistics readily available through

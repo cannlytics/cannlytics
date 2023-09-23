@@ -1,12 +1,12 @@
 """
-CoADoc | A Certificate of Analysis (CoA) Parser
-Copyright (c) 2022 Cannlytics
+CoADoc | A Certificate of Analysis (COA) Parser
+Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 12/1/2022
+Updated: 9/16/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -18,63 +18,31 @@ Description:
     parsing PDFs and URLs, finding all the data, standardizing the data,
     and cleanly returning the data to you.
 
-    In order to parse CoAs well, CoADoc takes into consideration:
-
-        * The lab or LIMS that generated the CoA;
-        * PDF properties, such as the fonts used and the page dimensions;
-        * All detected words, lines, columns, white-space, etc.
-    
-    The roadmap for CoADoc is to continue adding lab and LIMS CoA
-    parsing algorithms until a general CoA parsing algorithm may be able
-    to be created. As CoA parsing algorithms are still under development,
-    if you want a specific lab or LIMS CoA parsed, then please contact
-    The Cannlytics Team: <dev@cannlytics.com>
-
-Supported Labs and LIMS:
-
-    ✓ Anresco Laboratories
-    ✓ Cannalysis
-    ✓ Confident Cannabis
-    ✓ Green Leaf Lab
-    ✓ MCR Labs
-    ✓ SC Labs
-    ✓ Sonoma Lab Works
-    ✓ Steep Hill Massachusetts
-    ✓ TagLeaf LIMS
-    ✓ Veda Scientific
-
 Future work:
 
     - [ ] Integrate `create_hash` into `save` and `standardize`.
     - [ ] Improve the `standardize` method.
-    - [ ] Parse unidentified CoAs to the best of our abilities.
-    
-Setup:
-
-    1. Install `Tesseract`.
-    For Windows: <https://github.com/UB-Mannheim/tesseract/wiki>
-    For all other OS: <https://github.com/madmaze/pytesseract>
-
-    2. Install `ImageMagick`
-    Download: <https://imagemagick.org/script/download.php#windows>
-    Cloud: <https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function>
-
-    3. Install `zbar`.
-    Download: <http://zbar.sourceforge.net/download.html>
-    Cloud: TODO: Install in the cloud!
 
 """
 # Standard imports.
 import ast
 import base64
+from datetime import datetime
 import importlib
 from io import BytesIO
 import json
 import operator
 import os
+import tempfile
 from typing import Any, List, Optional
 
 # External imports.
+import cv2
+import numpy as np
+# try:
+#     import openai
+# except ImportError:
+#     print('Unable to find `openai` package. This tool is used for parsing with AI.')
 import openpyxl
 import pandas as pd
 import requests
@@ -82,18 +50,19 @@ import pdfplumber
 from PIL import Image
 from pypdf import PdfMerger
 try:
-    from pyzbar.pyzbar import decode
-except ImportError:
-    print('Unable to find `zbar` library. This tool is used for decoding QR codes.')
+    from pyzbar import pyzbar
+    # from pyzbar.pyzbar import decode
+except:
+    print('Unable to import `zbar` library. This tool is used for decoding QR codes.')
 try:
     from pytesseract import image_to_pdf_or_hocr
 except ImportError:
-    print('Unable to find `Tesseract` library. This tool is used for OCR.')
+    print('Unable to import `Tesseract` library. This tool is used for OCR.')
 try:
     from wand.image import Image as magick_wand
     from wand.color import Color
 except ImportError:
-    print('Unable to find `ImageMagick` library. This tool is used for OCR.')
+    print('Unable to import `ImageMagick` library. This tool is used for OCR.')
 
 # Internal imports.
 from cannlytics.data.data import create_hash, write_to_worksheet
@@ -116,25 +85,30 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.anresco import ANRESCO
-from cannlytics.data.coas.cannalysis import CANNALYSIS
-from cannlytics.data.coas.confidence import CONFIDENCE
-from cannlytics.data.coas.confidentcannabis import CONFIDENT_CANNABIS
-from cannlytics.data.coas.greenleaflab import GREEN_LEAF_LAB
-from cannlytics.data.coas.mcrlabs import MCR_LABS
-from cannlytics.data.coas.sclabs import SC_LABS
-from cannlytics.data.coas.sonoma import SONOMA
-from cannlytics.data.coas.tagleaf import TAGLEAF
-from cannlytics.data.coas.steephill import STEEPHILL
-from cannlytics.data.coas.veda import VEDA_SCIENTIFIC
+from cannlytics.data.coas.coa_ai import parse_coa_with_ai
+from cannlytics.data.coas.algorithms.acs import ACS_LABS
+from cannlytics.data.coas.algorithms.anresco import ANRESCO
+from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
+from cannlytics.data.coas.algorithms.confidence import CONFIDENCE
+from cannlytics.data.coas.algorithms.confidentcannabis import CONFIDENT_CANNABIS
+from cannlytics.data.coas.algorithms.greenleaflab import GREEN_LEAF_LAB
+from cannlytics.data.coas.algorithms.kaycha import KAYCHA_LABS
+from cannlytics.data.coas.algorithms.mcrlabs import MCR_LABS
+from cannlytics.data.coas.algorithms.sclabs import SC_LABS
+from cannlytics.data.coas.algorithms.sonoma import SONOMA
+from cannlytics.data.coas.algorithms.tagleaf import TAGLEAF
+from cannlytics.data.coas.algorithms.steephill import STEEPHILL
+from cannlytics.data.coas.algorithms.veda import VEDA_SCIENTIFIC
 
 # Labs and LIMS that CoADoc can parse.
 LIMS = {
+    'ACS Labs': ACS_LABS,
     'Anresco Laboratories': ANRESCO,
     'Cannalysis': CANNALYSIS,
     'Confidence Analytics': CONFIDENCE,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
+    'Kaycha Labs': KAYCHA_LABS,
     'MCR Labs': MCR_LABS,
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
@@ -157,10 +131,10 @@ DEFAULT_NUISANCE_COLUMNS = ['received_by', 'sampled_by', 'Unnamed: 1',
 DEFAULT_NUMERIC_COLUMNS = ['value', 'mg_g', 'lod', 'loq', 'limit', 'margin_of_error']
 
 # Encountered Metrc prefixes used to identify Metrc IDs.
-METRC_PREFIXES = ['1A40603', '1A40A01']
+METRC_PREFIXES = ['1A40']
 
 # A custom `ValueError` message to raise when no known LIMS is identified.
-UNIDENTIFIED_LIMS = 'CoA not recognized as a CoA from a supported LIMS: '
+UNIDENTIFIED_LIMS = 'COA not recognized as a COA from a known lab: '
 UNIDENTIFIED_LIMS += ', '.join([f'"{x}"' for x in LIMS.keys()])
 
 
@@ -298,7 +272,7 @@ class CoADoc:
         if init_all:
             for values in self.lims.values():
                 script = values['coa_algorithm'].replace('.py', '')
-                module = f'cannlytics.data.coas.{script}'
+                module = f'cannlytics.data.coas.algorithms.{script}'
                 entry_point = values['coa_algorithm_entry_point']
                 setattr(self, entry_point, importlib.import_module(module))
 
@@ -378,7 +352,7 @@ class CoADoc:
         bbox = (img['x0'], y - img['y1'], img['x1'], y - img['y0'])
         crop = page.crop(bbox)
         obj = crop.to_image(resolution=resolution)
-        return decode(obj.original)
+        return pyzbar.decode(obj.original)
 
     def find_pdf_qr_code_url(
             self,
@@ -529,6 +503,21 @@ class CoADoc:
         img_str = base64.b64encode(buffered.getvalue())
         return img_str.decode('utf-8')
 
+    def save_image_data(
+            self,
+            image_data: str,
+            image_file: Optional[str] ='image.png',
+        ):
+        """Save image data to a file.
+        Args:
+            image_data (str): The image data.
+            image_file (str): A filename for the image.
+        """
+        image_bytes = base64.b64decode(image_data)
+        image_io = BytesIO(image_bytes)
+        image = Image.open(image_io)
+        image.save(image_file)
+
     def identify_lims(
             self,
             doc: Any,
@@ -634,6 +623,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> list:
         """Parse all CoAs given a directory, a list of files,
         or a list of URLs.
@@ -661,22 +651,43 @@ class CoADoc:
         """
         coas, docs = [], []
 
-        # Parse a URL, PDF, .zip, or directory.
+        # Parse a URL, PDF path, or .zip folder.
         if isinstance(data, str):
 
+            # Parse a URL to an image of a COA or QR code.
+            image_extensions = ['.png', '.jpg', '.jpeg']
+            if 'https' in data and any(ext in data.lower() for ext in image_extensions):
+                if verbose:
+                    print('Parsing image URL.')
+                image_url = self.scan(data)
+                coa_data = self.parse_url(
+                    image_url,
+                    headers=headers,
+                    lims=lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                    verbose=verbose,
+                )
+                coas.append(coa_data)
+
             # Parse a URL.
-            if 'https' in data:
+            elif 'https' in data:
+                if verbose:
+                    print('Parsing URL.')
                 coa_data = self.parse_url(
                     data,
                     headers=headers,
                     lims=lims,
                     max_delay=max_delay,
                     persist=persist,
+                    verbose=verbose,
                 )
                 coas.append(coa_data)
 
             # Parse a PDF.
             elif '.pdf' in data:
+                if verbose:
+                    print('Parsing PDF.')
                 coa_data = self.parse_pdf(
                     data,
                     cleanup=cleanup,
@@ -687,23 +698,38 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    verbose=verbose,
                 )
                 coas.append(coa_data)
 
+            # TODO: Handle paths to images of COAs and QR codes.
+
             # Parse a ZIP.
             elif '.zip' in data:
+                if verbose:
+                    print('Parsing ZIP.')
                 doc_dir = unzip_files(data)
                 docs = get_directory_files(doc_dir)
 
             # Parse a directory.
             else:
+                if verbose:
+                    print('Parsing directory.')
                 docs = get_directory_files(data)
 
         # Handle a list of URLs, PDFs, and/or ZIPs.
         else:
+            if verbose:
+                print('Parsing list.')
             docs = data
+
+        # Parse all of the PDFs.
         for doc in docs:
+
+            # Parse a .zip folder.
             if '.zip' in doc and kind != 'url':
+                if verbose:
+                    print('Parsing ZIP.')
                 doc_dir = unzip_files(doc)
                 pdf_files = get_directory_files(doc_dir)
                 for pdf_file in pdf_files:
@@ -717,9 +743,28 @@ class CoADoc:
                         resolution=resolution,
                         temp_path=temp_path,
                         use_cached=use_cached,
+                        verbose=verbose,
                     )
                     coas.append(coa_data)
-            elif '.pdf' in doc and kind != 'url':
+
+            # Parse a URL.
+            elif doc.startswith('http'):
+                if verbose:
+                    print('Parsing URL.')
+                coa_data = self.parse_url(
+                    doc,
+                    headers=headers,
+                    lims=lims,
+                    max_delay=max_delay,
+                    persist=persist,
+                    verbose=verbose,
+                )
+            
+            # Parse a PDF.
+            # elif '.pdf' in doc and kind != 'url':
+            else:
+                if verbose:
+                    print('Parsing PDF.')
                 coa_data = self.parse_pdf(
                     doc,
                     cleanup=cleanup,
@@ -730,18 +775,19 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    verbose=verbose,
                 )
-            else:
-                coa_data = self.parse_url(
-                    doc,
-                    headers=headers,
-                    lims=lims,
-                    max_delay=max_delay,
-                    persist=persist,
-                )
+
+            # TODO: Parse image of COAs and QR codes.
+            
+            # Record the COA data.
             coas.append(coa_data)
+
+        # Close the parser at the end.
         if persist:
             self.quit()
+
+        # Return the parsed COAs.
         return coas
 
     def parse_pdf(
@@ -755,6 +801,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
@@ -805,6 +852,8 @@ class CoADoc:
         # then raise an error if the labs / LIMS is unknown for safety.
         # TODO: Parse unidentified CoAs to the best of our abilities.
         known_lims = self.identify_lims(pdf_file, lims=lims)
+        if verbose:
+            print(f'Identified LIMS: {known_lims}')
         if known_lims is None:
             temp_pdf = f'{temp_path}/ocr-coa.pdf'
             if isinstance(pdf, str):
@@ -822,6 +871,8 @@ class CoADoc:
             )
             pdf_file = pdfplumber.open(temp_pdf)
             known_lims = self.identify_lims(pdf_file, lims=lims)
+            if verbose:
+                print(f'Identified LIMS after OCR: {known_lims}')
             if known_lims is None:
                 raise ValueError(UNIDENTIFIED_LIMS)
 
@@ -837,22 +888,32 @@ class CoADoc:
                 url = self.find_pdf_qr_code_url(pdf_file)
         except IndexError:
             url = self.find_pdf_qr_code_url(pdf_file)
+        if verbose:
+            print(f'Found URL on PDF: {url}')
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
+        if verbose:
+            print(f'Using algorithm: {algorithm_name}')
 
         # Use the URL if found, then try the PDF if the URL fails or is missing.
         if url:
             try:
+                if verbose:
+                    print(f'Parsing URL: {url}')
                 data = self.parse_url(
                     url,
                     headers=headers,
                     lims=known_lims,
                     max_delay=max_delay,
                     persist=persist,
+                    verbose=verbose,
                 )
-            except:
+            except Exception as e:
+                if verbose:
+                    print(f'Failed to parse URL:', str(e))
+                    print('Trying algorithm instead.')
                 data = algorithm(
                     self,
                     pdf_file,
@@ -862,6 +923,8 @@ class CoADoc:
                     google_maps_api_key=self.google_maps_api_key,
                 )
         else:
+            if verbose:
+                print(f'Parsing PDF: {pdf}')
             data = algorithm(
                 self,
                 pdf_file,
@@ -871,7 +934,10 @@ class CoADoc:
                 google_maps_api_key=self.google_maps_api_key,
             )
 
+        # Close the PDF.
         pdf_file.close()
+
+        # Return the data.
         sample = {
             'date_tested': date_tested,
             'lab_results_url': url,
@@ -886,6 +952,7 @@ class CoADoc:
             headers: Optional[dict] = {},
             max_delay: Optional[float] = 7,
             persist: Optional[bool] = False,
+            verbose: Optional[bool] = False,
         ) -> dict:
         """Parse a CoA URL.
         Args:
@@ -906,14 +973,40 @@ class CoADoc:
 
         # Identify the LIMS.
         known_lims = self.identify_lims(url, lims=lims)
+        if verbose:
+            print(f'Identified LIMS: {known_lims}')
 
-        # Restrict to known labs / LIMS for safety.
-        # TODO: Parse unidentified CoAs to the best of our abilities.
+        # Restrict to known labs / LIMS.
         if known_lims is None:
-            raise ValueError(UNIDENTIFIED_LIMS)
+            # raise ValueError(UNIDENTIFIED_LIMS)
+        
+            # Download URL to a temporary file.
+            temp_path = tempfile.gettempdir()
+            try:
+                filename = url.split('/')[-1].split('?')[0] + '.pdf'
+            except:
+                filename = 'coa.pdf'
+            temp_pdf = os.path.join(temp_path, filename)
+            if self.session is not None:
+                response = self.session.get(url)
+            else:
+                response = requests.get(url, headers=headers)
+            with open(temp_pdf, 'wb') as pdf:
+                pdf.write(response.content)
+
+            # Attempt to identify the LIMS from the PDF.
+            known_lims = self.identify_lims(temp_pdf, lims=lims)
+            if verbose:
+                print(f'Identified LIMS after download: {known_lims}')
+            if known_lims is None:
+                raise ValueError(UNIDENTIFIED_LIMS)
+            else:
+                url = temp_pdf
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
+        if verbose:
+            print(f'Using algorithm: {algorithm_name}')
         algorithm = getattr(getattr(self, algorithm_name), algorithm_name)
         data = algorithm(
             self,
@@ -981,13 +1074,38 @@ class CoADoc:
         # Remove individual PDF files.
         if cleanup:
             for pdf in pdf_files:
-                os.remove(pdf)
+                try:
+                    os.remove(pdf)
+                except PermissionError:
+                    pass
 
         # Remove all `magick-*` files from the temp directory.
         # for i in os.listdir(temp_path):
         #     path = os.path.join(temp_path, i)
         #     if os.path.isfile(path) and i.startswith('magick-'):
         #         os.remove(path)
+    
+    def open_pdf_with_ocr(self, doc: str) -> pdfplumber.pdf.PDF:
+        """
+        Tries to open a PDF document. If an error occurs when opening the PDF,
+        then OCR is applied and the PDF is reopened.
+        Args:
+            parser (Any): An instance of a parser, expected to have a pdf_ocr method.
+            doc (str): Path to the PDF document to be parsed.
+        Returns:
+            pdfplumber.pdf.PDF: An opened PDF document via pdfplumber.
+        """
+        try:
+            report = pdfplumber.open(doc)
+        except:
+            temp = tempfile.mkstemp('.pdf')[1]
+            temp_path = tempfile.gettempdir()
+            self.pdf_ocr(doc, temp, temp_path=temp_path)
+            try:
+                report = pdfplumber.open(temp)
+            except:
+                raise Exception('Failed to open the PDF even after applying OCR.')
+        return report
 
     def save(
             self,
@@ -1001,6 +1119,7 @@ class CoADoc:
             standard_analytes: Optional[dict] = None,
             standard_fields: Optional[dict] = None,
             google_maps_api_key: Optional[str] = None,
+            # TODO: Allow dates to be saved to Excel.
         ) -> Any:
         """Save all CoA data, elongating results and widening values.
         That is, a Workbook is created with a "Details" worksheet that
@@ -1222,6 +1341,7 @@ class CoADoc:
                     except:
                         json.loads(sample_results)
                 for result in sample_results:
+                    
                     analysis = result.get('analysis')
                     result['analysis'] = standard_analyses.get(analysis, analysis)
                     for c in numeric_columns:
@@ -1309,7 +1429,10 @@ class CoADoc:
 
                 # Apply codings to results.
                 # FIXME: This is super slow (2-3 mins for 2.5k observations)!
-                details_data['results'].replace(codings, inplace=True)
+                if 'results' in details_data.columns:
+                    details_data['results'].replace(codings, inplace=True)
+                # except KeyError:
+                #     pass
 
                 # Convert totals to numeric.
                 # TODO: Calculate totals if they don't already exist:
@@ -1418,8 +1541,12 @@ class CoADoc:
                     )
 
                 # Map keys to analysis for ordering for Values worksheet columns.
+                # FIXME: Handle observations without results.
                 pairs = []
-                analytes = list(results_data['key'].unique())
+                try:
+                    analytes = list(results_data['key'].unique())
+                except:
+                    analytes = []
                 for a in analytes:
                     try:
                         analyses = results_data.loc[results_data['key'] == a]
@@ -1515,18 +1642,132 @@ class CoADoc:
         else:
             raise ValueError
     
-    def scan(self, filename: Any) -> str:
+    def parse_with_ai(
+            self,
+            filename: Any,
+            temp_path: Optional[str] = None,
+            session: Optional[Any] = None,
+            headers: Optional[dict] = DEFAULT_HEADERS,
+            use_cached: Optional[bool] = False,
+            openai_api_key: Optional[str] = None,
+            model: Optional[str] = 'gpt-4',
+            max_tokens: Optional[int] = 4_000,
+            temperature: Optional[float] = 0.0,
+            initial_cost: Optional[float] = 0.0,
+            instructional_prompt: Optional[str] = None,
+            results_prompt: Optional[str] = None,
+            coa_prompt: Optional[str] = None,
+            max_prompt_length: Optional[int] = 4_000,
+            verbose: Optional[bool] = False,
+            user: Optional[str] = None,
+            retry_pause: Optional[float] = 3.33,
+        ) -> list:
+        """Parse a COA with AI.
+        Args:
+            filename (str): The filename or URL of the COA to parse.
+        Returns:
+            (dict): The parsed CoA data.
+        """
+        data, prompts, cost = parse_coa_with_ai(
+            self,
+            filename,
+            temp_path=temp_path,
+            session=session,
+            headers=headers,
+            use_cached=use_cached,
+            openai_api_key=openai_api_key,
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            initial_cost=initial_cost,
+            instructional_prompt=instructional_prompt,
+            results_prompt=results_prompt,
+            coa_prompt=coa_prompt,
+            max_prompt_length=max_prompt_length,
+            verbose=verbose,
+            user=user,
+            retry_pause=retry_pause,
+        )
+        return data, prompts, cost
+    
+    def scan(
+            self,
+            filename: Any,
+            width: Optional[int] = 1024,
+            temp_path: Optional[str] = '/tmp'
+        ) -> str:
         """Scan an image for a QR code or barcode and return any data.
         Args:
             filename (str): A path to an image with a barcode or qr code.
+            width (int): The base width to resize the image.
         Returns:
             (str): Returns the data from the decoded QR code.
         """
+        # Handle the filename.
         if isinstance(filename, str):
-            code = decode(Image.open(filename))
+            image = cv2.imread(filename)
+        elif isinstance(filename, np.ndarray):
+            image = filename
         else:
-            code = decode(filename)
-        return code[0].data.decode('utf-8')
+            try:
+                image = cv2.imread(filename.filename)
+            except:
+                raise ValueError('`filename` must be a string or Image.')
+
+        # If the temp path has any extension, then use it as the outfile.
+        if os.path.splitext(temp_path)[1] != '':
+            outfile = temp_path
+
+        # Otherwise, create a temporary file to store the image.
+        else:
+            if not os.path.exists(temp_path): os.makedirs(temp_path)
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            outfile = os.path.join(temp_path, f'{timestamp}.png')
+
+        # Load the image, apply grayscale, Gaussian blur, and Otsu's threshold.
+        # Use morphology to find and connect text contours.
+        # Finally, filter for any QR code.
+        qr_code_found = False
+        original = image.copy()
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (9,9), 0)
+        thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+        close = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+        contours = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = contours[0] if len(contours) == 2 else contours[1]
+        for c in contours:
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+            x, y, w, h = cv2.boundingRect(approx)
+            area = cv2.contourArea(c)
+            ar = w / float(h)
+            if len(approx) == 4 and area > 1000 and (ar > .85 and ar < 1.3):
+                cv2.rectangle(image, (x, y), (x + w, y + h), (36, 255, 12), 3)
+                cv2.imwrite(outfile, original[y: y + h, x: x + w])
+                qr_code_found = True
+
+        # If a QR code was not found, then return None.
+        if not qr_code_found:
+            return None
+
+        # If a width is given, then resize the image to facilitate
+        # QR code reading. Calculates the height based on the new width
+        # and the original aspect ratio.
+        if width:
+            img = Image.open(outfile)
+            w_percent = (width / float(img.size[0]))
+            h_size = int((float(img.size[1]) * float(w_percent)))
+            img = img.resize((width, h_size), Image.Resampling.LANCZOS)
+            img.save(outfile)
+
+        # Read the resized image again (important) and try to decode QR codes.
+        code = None
+        image = Image.open(outfile)
+        codes = pyzbar.decode(image)
+        if codes:
+            code = codes[0].data.decode('utf-8')
+        return code
 
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""

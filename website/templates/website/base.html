@@ -2,11 +2,11 @@
 <html lang="en-US">
 <!--
   Base Template | Cannlytics Website
-  Copyright (c) 2021-2022 Cannlytics
+  Copyright (c) 2021-2023 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 2/8/2023
+  Updated: 8/20/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% load static %}
@@ -36,8 +36,15 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
   <!-- Cannlytics JavaScript and CSS Module -->
-  <!-- FIXME: Automate incrementing date for production. -->
-  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{% if DEBUG %}{% now 'U' %}{% else %}0-0-13+7{% endif %}"></script>
+  {% comment %} FIXME: Smoothly switch between dev and production. {% endcomment %}
+
+  <!-- PRODUCTION: -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script>
+  
+  {% comment %}
+  <!-- DEV: -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js' %}?v={{ now|date:"YmdHis" }}"></script>
+  {% endcomment %}
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}
@@ -58,8 +65,8 @@
   <!-- Login Dialog -->
   {% include "website/components/dialogs/sign_in_dialog.html" %}
 
-  <!-- Cookie Notification -->
-  {% include "website/components/dialogs/cookie_notification.html" %}
+  <!-- 21+ age verification. -->
+  {% include "website/components/dialogs/age_verification_dialog.html" %}
 
   <!-- General Notifications -->
   {% include "website/components/notifications/notification_toast.html" %}

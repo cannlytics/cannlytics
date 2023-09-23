@@ -68,9 +68,6 @@ env.yaml
 # Ignore any SQL database
 *.sqlite3
 
-# Ignore Webpack hashes
-*webpack-stats.json
-
 # Ignore documentation build
 docs/build
 
@@ -115,16 +112,19 @@ tmp/
 # Ignore Firebase cahce.
 *.cache
 
-# Ignore VS Code settings.
-.vscode/*
-
 # Ignore Webpack bundles.
-console/static/console/bundles/*
+lims/static/console/bundles/*
 website/static/website/js/bundles/*
 *webpack-stats.json
 
 # Ignore local copy of cannlytics.
 # cannlytics/*
 /public/static/*
-public/console/
+public/lims/
 public/website/
+public/docs/
+
+# Exception for Flutter library.
+!app/lib/
+!data/lib/
+*firebase_options.dart

@@ -8,7 +8,9 @@
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { accountSettings } from './account.js';
+import { apiSettings } from './api-keys.js';
 
 export const settings = {
   ...accountSettings,
+  ...apiSettings,
 };

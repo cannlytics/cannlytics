@@ -48,7 +48,7 @@ if __name__ == '__main__':
     BASE = 'http://127.0.0.1:8000/api'
 
     # Uncomment to test with production server.
-    # BASE = 'https://console.cannlytics.com/api'
+    # BASE = 'https://cannlytics.com/api'
 
     # Load your API key.
     load_dotenv('../../.env')

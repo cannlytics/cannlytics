@@ -12,8 +12,11 @@ Description: Crude VAR functions.
 """
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-from statsmodels.tsa import tsatools
+try:
+    import statsmodels.api as sm
+    from statsmodels.tsa import tsatools
+except:
+    pass
 
 
 def VAR(Vector, lag_order):

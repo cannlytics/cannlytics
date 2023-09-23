@@ -1,0 +1,76 @@
+%---------------------------------%
+% Article Citations
+% Copyright (c) 2022 Cannlytics
+% Author: Keegan Skeate <keegan@cannlytics.com>
+% Created: 1/23/2022
+% Updated: 1/23/2022
+%---------------------------------%
+\documentclass[11pt, leqno]{article}
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  paperheight = 11in,
+  paperwidth = 8.5in,
+  top = 0.75in,
+  bottom = 0.75in,
+  right = 0.5in,
+  left = 0.5in,
+	headsep = 0.25in,
+	columnsep = 20pt,
+	heightrounded,
+}
+
+%---------------------------------%
+% Packages
+%---------------------------------%
+\usepackage{xurl} % For wrapping long URLs.
+\urlstyle{same}
+
+%---------------------------------%
+% References
+%---------------------------------%
+\usepackage{natbib}
+\def\bibfont{\scriptsize}
+\setlength{\bibsep}{0pt} % Reducing spacing in the bibliography.
+%\setcitestyle{authoryear, open={\bfseries}}
+%\setcitestyle{aysep={,}}
+
+%\usepackage[style=ACM-Reference-Format,backend=bibtex,sorting=none]{biblatex}
+%\addbibresource{article-reference.bib}
+%---------------------------------%
+% Document
+%---------------------------------%
+\begin{document}
+
+\nocite{*}
+
+%\noindent {\large\bfseries ACM Reference}
+%\bibliographystyle{acmauthoryear}
+%\bibliography{article-reference}
+%\printbibliography
+
+%\vspace*{3\baselineskip}
+%\noindent {\large\bfseries APA Reference}
+%\bibliographystyle{apalike}
+%\bibliography{article-reference}
+
+
+%\vspace*{3\baselineskip}
+%\noindent {\large\bfseries Chicago Reference}
+%\bibliographystyle{chicago}
+%\bibliography{article-reference}
+
+%\vspace*{3\baselineskip}
+%\noindent {\large\bfseries Harvard Reference}
+%\bibliographystyle{agsm}
+%\bibliography{article-reference}
+
+
+\vspace*{3\baselineskip}
+\noindent {\large\bfseries MLA Reference}
+\bibliographystyle{biblatex-mla}
+\bibliography{article-reference}
+
+
+%---------------------------------%
+\end{document}

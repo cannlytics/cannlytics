@@ -5,7 +5,7 @@ Copyright (c) 2021-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2021
-Updated: 1/22/2023
+Updated: 4/23/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: API URLs to interface with cannabis data and analytics.
@@ -15,8 +15,8 @@ from django.urls import include, path
 from rest_framework import urlpatterns #pylint: disable=unused-import
 
 # Core API imports.
-from api.auth import auth
-from api.base import base
+from api.auth import api_auth
+from api.base import api_base
 
 # Functional API imports.
 import api.ai
@@ -26,9 +26,9 @@ import api.stats
 import api.metrc
 
 # Administrative API imports.
-from api.organizations import organizations
-from api.users import users
-from api.settings import settings
+from api.organizations import api_organizations
+from api.users import api_users
+from api.settings import api_settings
 
 
 app_name = 'api' # pylint: disable=invalid-name
@@ -36,19 +36,13 @@ app_name = 'api' # pylint: disable=invalid-name
 urlpatterns = [
 
     # Base API endpoint for users to discover an index of endpoints.
-    path('', base.index, name='index'),
+    path('', api_base.index, name='index'),
 
     # Authentication API endpoints.
     path('auth', include([
-        path('/create-key', auth.create_api_key),
-        path('/create-pin', auth.create_user_pin),
-        path('/create-signature', auth.create_signature),
-        path('/delete-key', auth.delete_api_key),
-        path('/delete-pin', auth.delete_user_pin),
-        path('/delete-signature', auth.delete_signature),
-        path('/get-keys', auth.get_api_key_hmacs),
-        path('/get-signature', auth.get_signature),
-        path('/verify-pin', auth.verify_user_pin),
+        path('/create-key', api_auth.create_api_key),
+        path('/delete-key', api_auth.delete_api_key),
+        path('/get-keys', api_auth.get_api_key_hmacs),
     ])),
 
     # AI API endpoints.
@@ -65,6 +59,10 @@ urlpatterns = [
         path('/color', api.ai.text_to_color_api),
         path('/emoji', api.ai.text_to_emoji_api),
 
+        # Strain AI utilities: art, description, and name identification.
+        path('/strains', api.data.api_data_strains),
+        path('/strains/<strain_id>', api.data.api_data_strains),
+
     ])),
 
     # Data API endpoints.
@@ -80,8 +78,14 @@ urlpatterns = [
         path('/analytes/<analyte_id', api.data.analytes_data),
 
         # COA data and parser API endpoints.
-        path('/coas', api.data.coa_data),
+        path('/coas', api.data.api_data_coas),
         path('/coas/download', api.data.download_coa_data),
+        path('/coas/<coa_id>', api.data.api_data_coas),
+
+        # Receipt data API endpoints.
+        path('/receipts', api.data.api_data_receipts),
+        path('/receipts/download', api.data.download_receipts_data),
+        path('/receipts/<receipt_id>', api.data.api_data_receipts),
 
         # Labs data API endpoints.
         path('labs', include([
@@ -93,8 +97,8 @@ urlpatterns = [
 
         # License data.
         path('/licenses', include([
-            path('', api.data.license_data),
-            path('/<license_number>', api.data.license_data),
+            path('', api.data.api_data_licenses),
+            path('/<license_number>', api.data.api_data_licenses),
         ])),
 
         # Lab result data API endpoints.
@@ -113,9 +117,8 @@ urlpatterns = [
         path('/regulations', api.data.regulation_data),
         path('/regulations/<state>', api.data.regulation_data),
 
-        # State data API endpoints.
-        path('/states', api.data.state_data),
-        path('/states/<state>', api.data.state_data),
+        # Patent data.
+        path('/patents', api.stats.patent_stats),
 
     ])),
 
@@ -127,22 +130,21 @@ urlpatterns = [
         path('/effects/<strain>', api.stats.effects_stats),
         path('/personality', api.stats.personality_stats),
         path('/recommendations', api.stats.recommendation_stats),
-        path('/patents', api.stats.patent_stats),
         # TODO: Flower Art API endpoint.
     ])),
 
     # Metrc API endpoints.
     path('metrc', include([
-        path('/admin/create-license', api.metrc.add_license),
-        path('/admin/delete-license', api.metrc.delete_license),
+        path('/admin/add-key', api.metrc.add_metrc_user_api_key),
+        path('/admin/delete-key', api.metrc.delete_metrc_user_api_key),
         path('/batches', api.metrc.batches),
         path('/batches/<batch_id>', api.metrc.batches),
         path('/deliveries', api.metrc.deliveries),
         path('/deliveries/<delivery_id>', api.metrc.deliveries),
         path('/employees', api.metrc.employees),
-        path('/employees/<license_number>', api.metrc.employees),
+        path('/employees/<employee_id>', api.metrc.employees),
         path('/facilities', api.metrc.facilities),
-        path('/facilities/<license_number>', api.metrc.facilities),
+        path('/facilities/<facility_id>', api.metrc.facilities),
         path('/harvests', api.metrc.harvests),
         path('/harvests/<harvest_id>', api.metrc.harvests),
         path('/items', api.metrc.items),
@@ -194,25 +196,26 @@ urlpatterns = [
 
     # Organization API endpoints.
     path('organizations', include([
-        path('/<organization_id>', organizations.organizations),
-        path('/<organization_id>/settings', organizations.organizations),
-        path('/<organization_id>/team', organizations.organization_team),
-        path('/<organization_id>/team/<user_id>', organizations.organization_team),
-        path('/<organization_id>/join', organizations.join_organization),
+        path('', api_organizations.organizations),
+        path('/<organization_id>', api_organizations.organizations),
+        path('/<organization_id>/settings', api_organizations.organizations),
+        path('/<organization_id>/team', api_organizations.organization_team),
+        path('/<organization_id>/team/<user_id>', api_organizations.organization_team),
+        path('/<organization_id>/join', api_organizations.join_organization),
     ])),
 
     # User API Endpoints.
     path('users', include([
-        path('', users.users),
-        path('/<user_id>', users.users),
-        path('/<user_id>/about', users.users),
-        path('/<user_id>/consumption', users.users),
-        path('/<user_id>/spending', users.users),
+        path('', api_users.users),
+        path('/<user_id>', api_users.users),
+        path('/<user_id>/about', api_users.users),
+        path('/<user_id>/consumption', api_users.users),
+        path('/<user_id>/spending', api_users.users),
         path('/<user_id>/logs', include([
-            path('', settings.logs),
-            path('/<log_id>', settings.logs),
+            path('', api_settings.logs),
+            path('/<log_id>', api_settings.logs),
         ])),
-        path('/<user_id>/settings', users.users),
+        path('/<user_id>/settings', api_users.users),
     ])),
 
     # LIMS API endpoints.

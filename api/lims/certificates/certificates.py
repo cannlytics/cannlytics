@@ -19,7 +19,6 @@ from rest_framework.response import Response
 
 # Internal imports
 from api.api import get_objects, update_object, delete_object
-from api.auth.auth import verify_user_pin # Does this belong in `cannlytics`?
 from api.lims.results.results import calculate_results
 from cannlytics.auth.auth import authenticate_request, sha256_hmac
 from cannlytics.firebase import get_collection, get_document
@@ -40,12 +39,6 @@ def create_coas(request):
     if claims.get('user') is None:
         message = 'Authentication failed.'
         return Response({'success': False, 'data': message}, status=401)
-
-    # Require pin.
-    error_response = verify_user_pin(request)
-    print(error_response)
-    if error_response.status_code != 200:
-        return error_response
 
     # Get posted samples.
     posted_data = loads(request.body.decode('utf-8'))

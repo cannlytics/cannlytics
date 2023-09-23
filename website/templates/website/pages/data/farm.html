@@ -417,9 +417,9 @@
 {% include "website/components/art/vines.html" %}
 {% endblock material %}
 {% block page_css %}
-  <link href="{% static 'website/css/prism.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}" rel="stylesheet" />
-  <link href="{% static 'website/css/prism-dracula.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}" rel="stylesheet" />
-  <link href="{% static 'website/css/farm.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ APP_VERSION_NUMBER }}{% endif %}" rel="stylesheet" />
+  <link href="{% static 'website/css/prism.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ version }}{% endif %}" rel="stylesheet" />
+  <link href="{% static 'website/css/prism-dracula.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ version }}{% endif %}" rel="stylesheet" />
+  <link href="{% static 'website/css/farm.css'%}?{% if DEBUG %}{% now 'U' %}{% else %}{{ version }}{% endif %}" rel="stylesheet" />
 {% endblock page_css %}
 {% block page_js %}
   <script src="{% static 'website/js/prism.js'%}"></script>

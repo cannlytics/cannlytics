@@ -5,11 +5,12 @@ Copyright (c) 2022 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/8/2022
-Updated: 1/22/2023
+Updated: 3/24/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-from api.metrc.metrc import (
-    add_license,
+from api.metrc.api_metrc import (
+    add_metrc_user_api_key,
+    delete_metrc_user_api_key,
     additive_types,
     adjustment_reasons,
     batches,
@@ -17,7 +18,6 @@ from api.metrc.metrc import (
     categories,
     customer_types,
     deliveries,
-    delete_license,
     drivers,
     employees,
     facilities,
@@ -49,7 +49,8 @@ from api.metrc.metrc import (
 )
 
 __all__ = [
-    add_license,
+    add_metrc_user_api_key,
+    delete_metrc_user_api_key,
     additive_types,
     adjustment_reasons,
     batches,
@@ -57,7 +58,6 @@ __all__ = [
     categories,
     customer_types,
     deliveries,
-    delete_license,
     drivers,
     employees,
     facilities,

@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<!--
+  Jobs Page | Cannlytics Website
+  Copyright (c) 2021-2023 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 11/17/2021
+  Updated: 5/30/2023
+  License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static %}
+{% block title %}Team | Cannlytics{% endblock %}
+{% block material %}
+  <div class="contributors large-bottom-margin">
+
+    <!-- Hero -->
+    {% include "website/components/heros/hero_banner.html" with
+      title='Join the Cannabis Data Science Team!'
+      description='All aboard! Join the team that develops the Cannlytics platform and helps the Cannlytics ecosystem thrive.'
+      primary_action='Join now'
+      primary_action_url='/contact?topic=join'
+      secondary_action='Browse opportunities'
+      secondary_action_url='https://github.com/orgs/cannlytics/projects'
+      background_image='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2FCannlytics_Data_scientists_collaborate_analyzing_the_cannabis_i_c0032ca3-6ef1-4e83-9f36-76c6d8e957df.png?alt=media&token=d2e06936-b437-4137-9b9a-20c966aad414'
+      background_position='bottom right'
+      only
+    %}
+
+    <!-- Grid of job openings -->
+    <div class="container markdown text-start">
+      <h1 class="pt-4 text-dark serif fw-bold mt-3">We're hiring!</h1>
+      <div class="row row-cols-1 row-cols-lg-2 px-3">
+        {% for job in jobs %}
+        <div class="col-sm-8 col-md-8 col-lg-5 card bg-transparent mb-4 mt-3 mx-lg-3">
+          <div class="card-body text-dark text-start bg-transparent">
+            <h5 class="fs-4 fw-bold fancy-serif">
+              {{ job.job_title }}
+            </h5>
+            <span class="badge rounded-pill text-bg-light">{{ job.salary }}</span>
+            <span class="badge rounded-pill text-bg-light">{{ job.job_type }}</span>
+            <span class="badge rounded-pill text-bg-light">{{ job.location }}</span>
+            <p class="fs-6 fancy-serif lh-base mt-2">
+              {{ job.description }}
+            </p>
+            <p class="text-dark fs-6 lh-sm fancy-serif">
+              Please send your resume and an introductory email to
+                <a href="mailto:dev@cannlytics.com"><small class="fancy-serif text-dark fw-bold fs-6">dev@cannlytics.com</small></a> to apply.
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <!-- EEO is the Law Information -->
+    <div class="container markdown text-start">
+      <p id="eeo" class="fs-6 serif lh-base" style="max-width:560px;">
+        <small>
+        <strong>Note:</strong>
+        We adhere to the principles of Equal Employment Opportunity.
+        <br>
+        <br>
+        Federal laws prohibit job discrimination based on race, color,
+        sex (including pregnancy and related conditions, sexual orientation,
+        or gender identity), national origin, religion, age (40 and older),
+        equal pay, disability or genetic information (including family medical
+        history or genetic tests or services), and retaliation for filing a charge,
+        reasonably opposing discrimination, or participating in a discrimination
+        lawsuit, investigation, or proceeding.
+        <br>
+        <br>
+        For more information, please see the 
+        <a href="https://www.eeoc.gov/know-your-rights-workplace-discrimination-illegal-poster" target="_blank"><small>EEO is the Law</small></a> 
+        poster. A 
+        <a href="https://www.eeoc.gov/sites/default/files/2022-10/EEOC_KnowYourRights_screen_reader_10_20.pdf" target="_blank"><small>PDF</small></a> 
+        version of the poster is also available.
+        For Spanish speakers, please refer to the 
+        <a href="https://www.eeoc.gov/es/conozca-sus-derechos-la-discriminacion-en-el-lugar-de-trabajo-es-ilegal" target="_blank"><small>Spanish version</small></a>.
+        </small>
+      </p>
+    </div>
+
+    <!-- Current team -->
+    <div class="container mt-5">
+
+      <!-- Introduction -->
+      <div class="markdown">
+        <img src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Ficons%2Fai-icons%2Fgreen-heart.svg?alt=media&token=eaf87707-c4e4-41a9-b9c7-367919f21139"
+          class="pe-1 pt-3"
+          style="float:left;width:175px;height:175px;"
+        >
+        <h1 class="pt-4 text-dark fw-bold serif">Cannlytics is built<br>with the love of...</h1>
+        <p class="mt-2" style="max-width:720px;">
+          These heros who create, make, and deliver your software solutions and support.
+          Join the team! Connect with us on
+          <a href="https://join.slack.com/t/cannlytics/shared_invite/zt-1wfbpb61s-JyN2Rt0H4xCmNigop4roWg" target="_blank">Slack</a>.
+        </p>
+      </div>
+
+      <!-- Team Grid -->
+      <div class="row mt-5">
+        {% for item in team %}
+          {% if item.active %}
+            <figure id="{{ item.id }}" class="figure col-md-4 p-4">
+              <a href="{{ item.url }}" title="{{ item.name}}">
+                <img
+                  class="figure-img img-fluid rounded-3"
+                  src="{{ item.image }}"
+                  style="height:150px"
+                >
+              </a>
+              <figcaption class="figure-caption text-dark mt-1">
+                <div class="fs-6 text-dark fw-bold serif">{{ item.name}}</div>
+                <div class="mb-2">{{ item.position}}</div>
+                <div class="serif lh-md">{{ item.description}}</div>
+                <!-- Optional: Add phone number and email-->
+              </figcaption>
+            </figure>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- TODO: Contributors grid  -->
+  
+  </div>
+
+  <!-- Vines -->
+  {% include "website/components/art/vines.html" %}
+
+{% endblock material %}
+
+</html>

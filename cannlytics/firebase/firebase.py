@@ -4,7 +4,7 @@ Copyright (c) 2021-2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 1/10/2023
+Updated: 9/11/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: A wrapper of `firebase_admin` to make interacting with a Firestore
@@ -271,6 +271,7 @@ def get_collection( #pylint: disable=too-many-arguments
         limit: int = None,
         order_by: str = None,
         desc: bool = False,
+        # TODO: Allow user to pass a list of tuples.
         filters: List[dict] = None,
         database=None,
         start_at: dict = None,
@@ -399,6 +400,13 @@ def export_data(database, ref: str, data_file: str):
         output.to_csv(data_file)
     else:
         output.to_excel(data_file)
+
+
+def create_doc_id(database=None, collection='tests') -> str:
+    """Generate a unique document ID."""
+    if database is None:
+        database = firestore.client()
+    return database.collection(collection).document().id
 
 
 def create_id() -> str:
@@ -760,25 +768,41 @@ def create_short_url(
         api_key: str,
         long_url: str,
         project_name: str,
+        suffix_option: str = 'UNGUESSABLE',
+        social_title: Optional[str] = None,
+        social_description: Optional[str] = None,
+        social_image_link: Optional[str] = None,
     ) -> str:
     """Create a short URL to a specified file.
     Args:
         api_key (str): An API key for Firebase dynamic links.
         long_url (str): A URL to create a short, dynamic link.
         project_name (str): The name of the Firebase project.
+        suffix_option (str): The suffix option for the short link, either 'SHORT' or 'UNGUESSABLE'.
+            Defaults to 'UNGUESSABLE'.
+        social_title (str): The title to use when the Dynamic Link is shared in a social post.
+        social_description (str): The description to use when the Dynamic Link is shared in a social post.
+        social_image_link (str): The URL to an image related to this link.
     Returns:
         (str): A short link to the given URL.
     """
     try:
         url = f'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key={api_key}'
-        data= {
+        data = {
             'dynamicLinkInfo': {
                 'domainUriPrefix': f'https://{project_name}.page.link',
                 'link': long_url,
+                'socialMetaTagInfo': {
+                    'socialTitle': social_title,
+                    'socialDescription': social_description,
+                    'socialImageLink': social_image_link
+                }
             },
-            # TODO: Make suffix a argument.
-            'suffix': {'option': 'UNGUESSABLE'}
+            'suffix': {'option': suffix_option}
         }
+        # Remove None values from the dictionary
+        data = {k: v for k, v in data.items() if v is not None}
+        data['dynamicLinkInfo'] = {k: v for k, v in data['dynamicLinkInfo'].items() if v is not None}
         response = requests.post(url, json=data)
         return response.json()['shortLink']
     except ConnectionError:
@@ -823,7 +847,7 @@ def download_files(
 def get_file_url(
         ref: str,
         bucket_name: Optional[str] = None,
-        expiration=None,
+        expiration: Optional[int] = 604800,
     ) -> str:
     """Return the storage URL of a given file reference.
     Args:
@@ -833,11 +857,16 @@ def get_file_url(
     Returns:
         (str): The storage URL of the file.
     """
-    if expiration is None:
-        expiration = datetime.now() + timedelta(days=100 * 365)
     bucket = storage.bucket(name=bucket_name)
     blob = bucket.blob(ref)
-    return blob.generate_signed_url(expiration)
+    blob.make_public()
+    return blob.public_url
+    # Deprecated (8/24/2023):
+    # return blob.generate_signed_url(
+    #     expiration,
+    #     credentials=credentials,
+    #     version=version,
+    # )
 
 
 def upload_file(
@@ -846,7 +875,7 @@ def upload_file(
         data_url: Optional[str] = None,
         content_type: Optional[str] = 'image/jpg',
         bucket_name: Optional[str] = None,
-):
+    ):
     """Upload file to Firebase Storage.
     Args:
         destination_blob_name (str): The name to save the file as.

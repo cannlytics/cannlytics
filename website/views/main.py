@@ -10,12 +10,15 @@ License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main
 # External imports
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
 # Internal imports
 from website.views.mixins import BaseMixin, get_page_docs
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class GeneralView(BaseMixin, TemplateView):
     """Generic view for most pages."""
 

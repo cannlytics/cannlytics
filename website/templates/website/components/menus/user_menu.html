@@ -3,9 +3,11 @@
 <!--
   User Menu | Cannlytics Website
   Created: 11/15/2021
-  Updated: 11/28/2021
+  Updated: 6/22/2023
 -->
-<ul class="navbar-nav align-items-center me-3 requires-auth visually-hidden">
+<ul class="navbar-nav align-items-start align-items-lg-center me-3 ms-auto requires-auth visually-hidden">
+  
+  <!-- Open app button -->
   <li class="nav-item h6 mb-0">
     <a
       class="btn btn-sm bg-gradient-orange text-white text-nowrap me-2 serif"
@@ -14,7 +16,11 @@
       Launch App
     </a>
   </li>
+
+  <!-- User icon menu button -->
   <li class="nav-item">
+
+    <!-- User photo button -->
     <a
       id="navbarUserMenu"
       class="nav-link dropdown-toggle py-0"
@@ -32,17 +38,23 @@
         title="User Menu"
       >
     </a>
+
+    <!-- User menu -->
     <ul
       id="user-menu"
       class="dropdown-menu dropdown-menu-end bg-light shadow mx-2"
       aria-labelledby="navbarUserMenu"
       style="z-index:10000; right:1rem !important; top:8rem; position: fixed !important;"
     >
+
+      <!-- User name and email -->
       <li class="px-3 pt-1">
         <h5 class="fs-6 serif text-dark" id="user-name"></h5>
         <h6 class="fs-6"><small class="serif text-secondary" id="user-email"></small></h6>
       </li>
       <li><hr class="dropdown-divider"></li>
+
+      <!-- Account -->
       <li>
         <a
           class="dropdown-item background-hover"
@@ -51,6 +63,8 @@
           <small class="serif">Your account</small>
         </a>
       </li>
+
+      <!-- Change password -->
       <li>
         <a
           class="serif dropdown-item background-hover"
@@ -59,23 +73,29 @@
           <small class="serif">Change your password</small>
         </a>
       </li>
+
+      <!-- Manage subscription -->
       <li>
         <a
           class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='subscription' %}"
+          href="{% url 'section' page='account' section='subscriptions' %}"
         >
           <small class="serif">Manage your subscription</small>
         </a>
       </li>
+
+      <!-- Manage API keys -->
       <li>
         <a
           class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='feedback' %}"
+          href="{% url 'section' page='account' section='api-keys' %}"
         >
-          <small class="serif">Make a suggestion</small>
+          <small class="serif">Manage your API keys</small>
         </a>
       </li>
-      <!-- Optional: Sign out oddly does no highlight on hover correctly. Worth an optional fix. -->
+      
+      <!-- Sign out -->
+      <li><hr class="dropdown-divider"></li>
       <li>
         <button
           class="serif dropdown-item background-hover"
@@ -84,8 +104,8 @@
           <small class="serif ">Sign Out</small>
         </button>
       </li>
+
     </ul>
   </li>
 </ul>
-
 </html>

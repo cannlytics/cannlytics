@@ -3,7 +3,7 @@
 <!--
   Footer Template | Cannlytics Website
   Created: 12/30/2020
-  Updated: 1/31/2023
+  Updated: 5/28/2023
 -->
 {% load static %}
 
@@ -67,32 +67,36 @@
           </a>
 
           <!-- Subscribe -->
-          <div id="subscribe" class="subscription w-100">
-            <input
-              id="sign-up-email"
-              class="form-control form-control-sm my-2"
-              type="email"
-              aria-describedby="subscribe-button"
-              placeholder="Enter your email to get data reports ↬"
-              {% if user.email and not user.newsletter %}value="{{ user.email }}"{% endif %}
-            >
-            <button
-              id="subscribe-button"
-              class="btn btn-sm w-100 bg-gradient-green serif text-white mt-0"
-              onclick="cannlytics.payments.subscribe()"
-            >
-              Subscribe to Data Reports
-            </button>
-            <button
-              id="subscribe-button-loading"
-              class="btn btn-sm w-100 bg-gradient-green text-white mt-0 d-none"
-              type="button"
-              title="Loading"
-              disabled
-            >
-              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-            </button>
-          </div>
+          <form action="" method="POST">
+            {% csrf_token %}
+            <div id="sign-up-field" class="subscription w-100">
+              <input
+                id="sign-up-email"
+                class="form-control form-control-sm my-2"
+                type="email"
+                aria-describedby="sign-up-button"
+                placeholder="Get your dose of data..."
+                {% if user.email and not user.newsletter %}value="{{ user.email }}"{% endif %}
+              >
+              <button
+                id="sign-up-button"
+                class="btn btn-sm w-100 bg-gradient-green serif text-white mt-0"
+                onclick="cannlytics.payments.subscribe(null, 'sign-up')"
+                type="button"
+              >
+                Subscribe to Data Reports
+              </button>
+              <button
+                id="sign-up-button-loading"
+                class="btn btn-sm w-100 bg-gradient-green text-white mt-0 d-none"
+                type="button"
+                title="Loading"
+                disabled
+              >
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
 
         </div>
       </div>
@@ -255,10 +259,21 @@
   <script src="https://apis.google.com/js/platform.js"></script>
   <script>
 
-    // Add subscribe to input on enter.
-    document.getElementById('sign-up-email').addEventListener('keydown', function(event) {
-      if (event.keyCode === 13) cannlytics.payments.subscribe();
-    });
+    // Add subscribe to sign up input on enter (footer).
+    var signUpEmail = document.getElementById('sign-up-email');
+    if (signUpEmail != null) {
+      signUpEmail.addEventListener('keydown', function(event) {
+        if (event.keyCode === 13) cannlytics.payments.subscribe(null, 'sign-up');
+      });
+    }
+
+    // Add subscribe to subscribe input on enter (hero).
+    var subscribeEmail = document.getElementById('subscribe-email');
+    if (subscribeEmail != null) {
+      subscribeEmail.addEventListener('keydown', function(event) {
+        if (event.keyCode === 13) cannlytics.payments.subscribe(null, 'subscribe');
+      });
+    }
 
   </script>
 {% endblock page_js %}

@@ -4,7 +4,7 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 12/3/2020
- * Updated: 1/5/2022
+ * Updated: 8/20/2023
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
 import { checkGoogleLogIn, onAuthChange } from '../firebase.js';
@@ -39,11 +39,13 @@ export const website = {
           document.getElementById('user-photo').src = robohash;
         }
         this.toggleAuthenticatedMaterial(true);
+        console.log('Request to /src/auth/login');
         await authRequest('/src/auth/login');
         if (user.metadata.createdAt == user.metadata.lastLoginAt) {
           const { email } = user;
           const defaultPhoto = `${window.location.origin}/robohash/${user.email}/?width=60&height=60`;
           const data = { email, photo_url: defaultPhoto };
+          console.log('Request to /api/users');
           await apiRequest('/api/users', data);
         }
       } else {
@@ -74,6 +76,66 @@ export const website = {
       toast.style.display = 'block';
       toast.style.opacity = 1;
     }
+  },
+
+  ageCheck() {
+    /**
+     * Checks if a user has or has not accepted age verification.
+     * Displays the age verification modal and adds an event listener
+     * to the birthdate input to enable or disable the proceed button based on
+     * age verification.
+     */
+    const acceptAge = localStorage.getItem('cannlytics_age');
+    console.log('acceptAge', acceptAge);
+    if (!acceptAge) {
+      const modal = document.getElementById('age-verification');
+      modal.style.display = 'block';
+      modal.style.opacity = 1;
+      const birthdateInput = document.getElementById('birthdate');
+      birthdateInput.addEventListener('change', (event) => {
+        console.log('event.target.value', event.target.value);
+        if (cannlytics.website.verifyAge(event.target.value)) {
+          document.getElementById('accept-age-verification-button').disabled = false;
+          console.log('age verified');
+        } else {
+          document.getElementById('accept-age-verification-button').disabled = true;
+          console.log('age not verified');
+        }
+      });
+    }
+  },
+
+  verifyAge(date) {
+    /**
+     * Determines if the provided birthdate is for someone 21 years or older.
+     */
+    const birthdate = new Date(date);
+    const year = birthdate.getFullYear();
+    if (year < 1900 || year > 2099) return false;
+    const currentTime = new Date();
+    let age = currentTime.getFullYear() - birthdate.getFullYear();
+    const m = currentTime.getMonth() - birthdate.getMonth();
+    if (m < 0 || (m === 0 && currentTime.getDate() < birthdate.getDate())) {
+      age--;
+    }
+    return age >= 21;
+  },
+
+  acceptAgeCheck() {
+    /**
+     * Save the user's choice to accept age verification.
+     */
+    localStorage.setItem('cannlytics_age', true);
+    const modal = document.getElementById('age-verification');
+    modal.style.display = 'none';
+    modal.style.opacity = 0;
+  },
+
+  rejectAgeCheck() {
+    /**
+     * Redirect the user to another site if they reject age verification.
+     */
+    window.location.href = "https://google.com";
   },
 
   changeTheme() {
@@ -155,7 +217,8 @@ async function checkForCredentials() {
    */
   try {
     await checkGoogleLogIn();
-    await authRequest('/api/internal/login');
+    console.log('Request to /src/auth/login');
+    await authRequest('/src/auth/login');
   } catch(error) {
     // No Google sign-in token.
   }

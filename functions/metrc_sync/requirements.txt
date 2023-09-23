@@ -1,0 +1,5 @@
+# Function dependencies, for example:
+# package>=version
+cannlytics==0.0.15
+firebase_admin
+google-auth

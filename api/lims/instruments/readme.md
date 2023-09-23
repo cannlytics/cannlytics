@@ -18,7 +18,7 @@ For all requests, you will need to pass an `organization_id` parameter. Ensure t
     }
 
     # Define the API and your organization.
-    BASE = 'https://console.cannlytics.com/api'
+    BASE = 'https://cannlytics.com/api'
     ORG_ID = 'test-company'
     ```
 
@@ -35,7 +35,7 @@ For all requests, you will need to pass an `organization_id` parameter. Ensure t
     };
 
     // Define the API and your organization.
-    const base = 'https://console.cannlytics.com/api';
+    const base = 'https://cannlytics.com/api';
     const orgId = 'test-company';
     ```
 

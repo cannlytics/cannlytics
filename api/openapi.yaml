@@ -1,0 +1,723 @@
+#------------------------------------------------------------------------------
+# Cannlytics API OpenAPI Specification
+# Authors: Keegan Skeate <https://github.com/keeganskeate>
+# Created 4/23/2023
+# Updated: 9/22/2023
+# License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+#------------------------------------------------------------------------------
+openapi: 1.0.0
+info:
+  title: Cannlytics API
+  summary: Cannabis data and analytics.
+description: The Cannlytics API allows users to interface with cannabis data and statistics.
+termsOfService: https://docs.cannlytics.com/about/terms-of-service/
+contact:
+  name: Cannlytics Admin
+  url: https://www.cannlytics.com/support
+  email: admin@cannlytics.com
+license:
+  name: MIT
+  url: https://github.com/cannlytics/cannlytics/blob/main/LICENSE
+servers:
+- url: https://cannlytics.com/api
+  description: Production server
+- url: https://cannlytics.com/api
+  description: Enterprise server
+paths:
+  /:
+    get:
+      operationId: base.index
+      summary: Base API endpoint for users to discover an index of endpoints.
+      responses:
+        200:
+          description: Successful operation
+
+  #------------------------------------------------------------------------------
+  # Authentication
+  #------------------------------------------------------------------------------
+
+  # Create API key.
+  /auth/create-key:
+    post:
+      operationId: auth.create_api_key
+      summary: Create an API key.
+      responses:
+        200:
+          description: Successful operation
+
+  # Delete key.
+  /auth/delete-key:
+    delete:
+      operationId: auth.delete_api_key
+      summary: Delete an API key.
+      responses:
+        200:
+          description: Successful operation
+
+  # Get keys.
+  /auth/get-keys:
+    get:
+      operationId: auth.get_api_key_hmacs
+      summary: Get API key HMACs.
+      responses:
+        200:
+          description: Successful operation
+
+
+  #------------------------------------------------------------------------------
+  # AI
+  #------------------------------------------------------------------------------
+
+  # AI base.
+  /ai:
+    get:
+      operationId: api.ai.ai_base
+      summary: Base AI API endpoint for users to find available AI tools.
+      responses:
+        200:
+          description: Successful operation
+
+  # AI recipes.
+  /ai/recipes/{recipe_id}:
+    get:
+      operationId: api.ai.recipes_api
+      summary: Get AI-generated recipes or a specific recipe by ID.
+      parameters:
+        - name: recipe_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+
+  # AI text to color.
+  /ai/color:
+    post:
+      operationId: api.ai.text_to_color_api
+      summary: Use AI to convert text to a color.
+      responses:
+        200:
+          description: Successful operation
+
+  # AI text to emoji.
+  /ai/emoji:
+    post:
+      operationId: api.ai.text_to_emoji_api
+      summary: Use AI to convert text to an emoji.
+      responses:
+        200:
+          description: Successful operation
+
+  # AI strain name generation.
+  /ai/strain/name:
+    post:
+      operationId: api.ai.recipes_api
+      summary: Use AI to generate a strain name.
+      responses:
+        200:
+          description: Successful operation
+
+  #------------------------------------------------------------------------------
+  # Data
+  #------------------------------------------------------------------------------
+
+  # Data base.
+  /data:
+    get:
+      summary: Base data API endpoint for users to find available datasets.
+      operationId: api.data.data_base
+      responses:
+        '200':
+          description: A list of available datasets.
+
+  # Analyses data.
+  /data/analyses/{analysis_id}:
+    get:
+      summary: Retrieve analyses data.
+      operationId: api.data.analyses_data
+      parameters:
+        - name: analysis_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of analyses data.
+
+  # Analyte data.
+  /data/analytes/{analyte_id}:
+    get:
+      summary: Retrieve specific analyte data by ID.
+      operationId: api.data.analytes_data
+      parameters:
+        - name: analyte_id
+          in: path
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analyte data for the given ID.
+
+  # COA data.
+  /data/coas:
+    get:
+      summary: Retrieve COA data.
+      operationId: api.data.api_data_coas
+      responses:
+        '200':
+          description: A list of COA data.
+
+  # Download COA data.
+  /data/coas/download:
+    get:
+      summary: Download COA data.
+      operationId: api.data.download_coa_data
+      responses:
+        '200':
+          description: COA data downloaded.
+
+  # Lab data.
+  /data/labs/{license_number}:
+    get:
+      summary: Retrieve lab data.
+      operationId: api.data.lab_data
+      parameters:
+        - name: license_number
+          in: path
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of lab data.
+
+  # License data.
+  /data/licenses/{license_number}:
+    get:
+      operationId: api.data.license_data
+      summary: Get licenses data.
+      parameters:
+        - name: license_number
+          in: path
+          required: false
+          schema:
+            type: string
+  
+  # Lab results data.
+  /data/results/{lab_result_id}:
+    get:
+      operationId: api.data.strain_data
+      summary: Get lab result data.
+      parameters:
+        - name: lab_result_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Strain data.
+  /data/strains/{strain_name}:
+    get:
+      operationId: api.data.strain_data
+      summary: Get strain data by strain_name.
+      parameters:
+        - name: strain_name
+          in: path
+          required: false
+          schema:
+            type: string
+  
+  # Regulation data.
+  /data/regulations/{state}:
+    get:
+      operationId: api.data.regulation_data
+      summary: Get regulation data by state.
+      parameters:
+        - name: state
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # Patent data.
+  /data/patents:
+    get:
+      summary: Retrieve patent stats.
+      operationId: api.data.patent_stats
+      responses:
+        '200':
+          description: A list of patent stats.
+
+  #------------------------------------------------------------------------------
+  # Statistics
+  #------------------------------------------------------------------------------
+
+  # Stats base.  
+  /stats:
+    get:
+      summary: Retrieve effects stats.
+      operationId: api.stats.effects_stats
+      responses:
+        '200':
+          description: A list of effects stats.
+
+  # Effects prediction model.
+  /stats/effects:
+    get:
+      summary: Retrieve effects stats.
+      operationId: api.stats.effects_stats
+      responses:
+        '200':
+          description: A list of effects stats.
+
+  /stats/effects/actual:
+    get:
+      summary: Record actual effects.
+      operationId: api.stats.record_effects
+      responses:
+        '200':
+          description: Actual effects recorded.
+
+  /stats/effects/{strain}:
+    get:
+      summary: Retrieve effects stats for a specific strain.
+      operationId: api.stats.effects_stats
+      parameters:
+        - name: strain
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Effects stats for the given strain.
+
+  # Personality statistics.
+  /stats/personality:
+    get:
+      summary: Retrieve personality stats.
+      operationId: api.stats.personality_stats
+      responses:
+        '200':
+          description: A list of personality stats.
+
+  # Recommendation statistics.
+  /stats/recommendations:
+    get:
+      summary: Retrieve recommendation stats.
+      operationId: api.stats.recommendation_stats
+      responses:
+        '200':
+          description: A list of recommendation stats.
+
+  #------------------------------------------------------------------------------
+  # Organizations
+  #------------------------------------------------------------------------------
+
+  # Organization data.
+  /organizations/{organization_id}:
+    get:
+      operationId: organizations.organizations
+      summary: Get organization data by organization_id.
+      parameters:
+        - name: organization_id
+          in: path
+          required: false
+          schema:
+            type: string
+  
+  # Organization's settings.
+  /organizations/{organization_id}/settings:
+    get:
+      operationId: organizations.organizations
+      summary: Get organization settings by organization_id.
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # Organization's team.
+  /organizations/{organization_id}/team:
+    get:
+      operationId: organizations.organization_team
+      summary: Get organization team members by organization_id.
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # Organization team member.
+  /organizations/{organization_id}/team/{user_id}:
+    get:
+      operationId: organizations.organization_team
+      summary: Get organization team member by organization_id and user_id.
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # Join an organization.
+  /organizations/{organization_id}/join:
+    post:
+      operationId: organizations.join_organization
+      summary: Join an organization by organization_id.
+      parameters:
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  #------------------------------------------------------------------------------
+  # Users
+  #------------------------------------------------------------------------------
+
+  # User data.
+  /users/{user_id}:
+    get:
+      operationId: users.users
+      summary: Get user data by user_id.
+      parameters:
+        - name: user_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # User consumption data.
+  /users/{user_id}/consumption:
+    get:
+      operationId: users.users
+      summary: Get user consumption data by user_id.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # User spending data.
+  /users/{user_id}/spending:
+    get:
+      operationId: users.users
+      summary: Get user spending data by user_id.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+  
+  # User logs.
+  /users/{user_id}/logs/{log_id}:
+    get:
+      operationId: settings.logs
+      summary: Get user log data by user_id and log_id.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: log_id
+          in: path
+          required: false
+          schema:
+            type: string
+  
+  # User settings.
+  /users/{user_id}/settings:
+    get:
+      operationId: users.users
+      summary: Get user settings by user_id.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+
+  #------------------------------------------------------------------------------
+  # Metrc
+  #------------------------------------------------------------------------------
+
+  # Add Metrc API key.
+  /metrc/admin/add-key:
+    post:
+      operationId: api.metrc.add_metrc_user_api_key
+      summary: Add a Metrc user API key.
+
+  # Delete Metrc API key.
+  /metrc/admin/delete-key:
+    delete:
+      operationId: api.metrc.delete_metrc_user_api_key
+      summary: Delete a Metrc user API key.
+
+  # Batches.
+  /metrc/batches/{batch_id}:
+    get:
+      operationId: api.metrc.batches
+      summary: Retrieve a specific batch by ID.
+      parameters:
+        - name: batch_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Deliveries.
+  /metrc/deliveries/{delivery_id}:
+    get:
+      operationId: api.metrc.deliveries
+      summary: Retrieve a specific delivery by ID.
+      parameters:
+        - name: delivery_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Employees.
+  /metrc/employees/{employee_id}:
+    get:
+      operationId: api.metrc.employees
+      summary: Retrieve a specific employee by ID.
+      parameters:
+        - name: employee_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Facilities.
+  /metrc/facilities/{facility_id}:
+    get:
+      operationId: api.metrc.facilities
+      summary: Retrieve a specific facility by ID.
+      parameters:
+        - name: facility_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Harvests.
+  /metrc/harvests/{harvest_id}:
+    get:
+      operationId: api.metrc.harvests
+      summary: Retrieve a specific harvest by ID.
+      parameters:
+        - name: harvest_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Items.
+  /metrc/items/{item_id}:
+    get:
+      operationId: api.metrc.items
+      summary: Retrieve a specific item by ID.
+      parameters:
+        - name: item_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Locations.
+  /metrc/locations/{area_id}:
+    get:
+      operationId: api.metrc.locations
+      summary: Retrieve a specific location by ID.
+      parameters:
+        - name: area_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Packages.
+  /metrc/packages/{package_id}:
+    get:
+      operationId: api.metrc.packages
+      summary: Retrieve a specific package by ID.
+      parameters:
+        - name: package_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Patients.
+  /metrc/patients/{patient_id}:
+    get:
+      operationId: api.metrc.patients
+      summary: Retrieve a specific patient by ID.
+      parameters:
+        - name: patient_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Plants.
+  /metrc/plants/{plant_id}:
+    get:
+      operationId: api.metrc.plants
+      summary: Retrieve a specific plant by ID.
+      parameters:
+        - name: plant_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Tests.
+  /metrc/tests/{test_id}:
+    get:
+      operationId: api.metrc.lab_tests
+      summary: Retrieve a specific lab test by ID.
+      parameters:
+        - name: test_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Test COAs.
+  /metrc/tests/{test_id}/{coa_id}:
+    get:
+      operationId: api.metrc.lab_tests
+      summary: Retrieve a specific lab test by test ID and COA ID.
+      parameters:
+        - name: test_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: coa_id
+          in: path
+          required: true
+          schema:
+            type: string
+
+  # Sales.
+  /metrc/sales/{sale_id}:
+    get:
+      operationId: api.metrc.sales
+      summary: Retrieve a specific sale by ID.
+      parameters:
+        - name: sale_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Transactions.
+  /metrc/transactions/{start}/{end}:
+    get:
+      operationId: api.metrc.transactions
+      summary: Retrieve transactions between a specific date range.
+      parameters:
+        - name: start
+          in: path
+          required: false
+          schema:
+            type: string
+        - name: end
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Strains.
+  /metrc/strains/{strain_id}:
+    get:
+      operationId: api.metrc.strains
+      summary: Retrieve a specific strain by ID.
+      parameters:
+        - name: strain_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Transfer templates.
+  /metrc/transfers/templates/{template_id}:
+    get:
+      operationId: api.metrc.transfer_templates
+      summary: Retrieve a specific transfer template by ID.
+      parameters:
+        - name: template_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Transfers.
+  /metrc/transfers/{transfer_id}:
+    get:
+      operationId: api.metrc.transfers
+      summary: Retrieve a specific transfer by ID.
+      parameters:
+        - name: transfer_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Drivers.
+  /metrc/drivers/{driver_id}:
+    get:
+      operationId: api.metrc.drivers
+      summary: Retrieve a specific driver by ID.
+      parameters:
+        - name: driver_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Vehicles.
+  /metrc/vehicles/{vehicle_id}:
+    get:
+      operationId: api.metrc.vehicles
+      summary: Retrieve a specific vehicle by ID.
+      parameters:
+        - name: vehicle_id
+          in: path
+          required: false
+          schema:
+            type: string
+
+  # Types.
+  /metrc/types/{type_id}:
+    get:
+      operationId: api.metrc.types
+      summary: Retrieve Metrc types.
+      parameters:
+        - name: type_id
+          in: path
+          required: true
+          schema:
+            type: string
+
+  #------------------------------------------------------------------------------
+  # TODO: LIMS
+  #------------------------------------------------------------------------------
