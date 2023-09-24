@@ -351,6 +351,7 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
         gc.collect()
 
     # Merge and save inventory data with curated lab result data.
+    # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
     try:
         manager.create_log('Merging lab results...')
         inventory_dir = os.path.join(stats_dir, 'inventory')
@@ -429,6 +430,6 @@ if __name__ == '__main__':
     # Specify where your data lives.
     base = 'D://data/washington/'
     data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
-    stats_dir = f'{base}/ccrs-stats/'
+    stats_dir = f'../data/wa'
     manager = CCRS()
     curate_ccrs_inventory(manager, data_dir, stats_dir)

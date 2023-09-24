@@ -315,3 +315,25 @@ except:
         print('Error saving:', outfile)
 
 print('Saved %i results:' % len(coa_data), outfile)
+
+
+# === Aggregate lab results ===
+
+# Aggregate all CA lab results.
+aggregate = []
+datafiles = [
+    '../data/ca/glasshouse-lab-results-2023-09-22.xlsx',
+    '../data/ca/rawgarden-lab-results-2023-09-23.csv',
+    '../data/ca/sc-labs-lab-results-2022-07-13.xlsx',
+]
+for datafile in datafiles:
+    if datafile.endswith('.xlsx'):
+        df = pd.read_excel(datafile, sheet_name='Details')
+    else:
+        df = pd.read_csv(datafile)
+    aggregate.append(df)
+
+# Save aggregated CA lab results.
+aggregate = pd.concat(aggregate)
+aggregate.to_csv(f'../data/ca/ca-lab-results-latest.csv', index=False)
+print('Saved %i CA lab results' % len(aggregate))

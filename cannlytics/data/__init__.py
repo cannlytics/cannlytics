@@ -14,16 +14,16 @@ from .data import (
     parse_data_block,
     write_to_worksheet,
 )
-from .ccrs.ccrs import CCRS
-from .coas.coas import CoADoc
+# from .ccrs.ccrs import CCRS
+# from .coas.coas import CoADoc
 from .opendata.opendata import OpenData
-from .sales.receipts_ai import ReceiptsParser
+# from .sales.receipts_ai import ReceiptsParser
 
 __all__ = [
-    'CCRS',
-    'CoADoc',
+    # 'CCRS',
+    # 'CoADoc',
     'OpenData',
-    'ReceiptsParser',
+    # 'ReceiptsParser',
     'aggregate_datasets',
     'create_hash',
     'create_sample_id',

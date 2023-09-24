@@ -131,9 +131,6 @@ def main(data_dir, env_file):
     all_data_dir = os.path.join(data_dir, 'all')
     if not os.path.exists(all_data_dir):
         os.makedirs(all_data_dir)
-
-
-    
     all_data_file = os.path.join(all_data_dir, f'licenses-{date}.csv')
     licenses.to_csv(all_data_file, index=False)
     manager.create_log(f'Finished collecting licenses data.')
@@ -144,25 +141,26 @@ def save_all_licenses(data_dir, version='latest'):
     """Save all of the licenses to a single CSV file."""
 
     # Read all of the latest license data.
-    all_licenses = []
+    all_data = []
     states = ALGORITHMS.keys()
     for state in states:
+        filename = f'licenses-{state}-{version}.csv'
         state_data_dir = os.path.join(data_dir, state)
-        state_data_file = os.path.join(state_data_dir, f'licenses-{state}-{version}.csv')
+        state_data_file = os.path.join(state_data_dir, filename)
         if os.path.exists(state_data_file):
             state_data = pd.read_csv(state_data_file)
-            all_licenses.append(state_data)
+            all_data.append(state_data)
             print('Aggregated data for', state.upper())
         else:
             print(f'No data for {state.upper()}.')
 
     # Save all of the licenses.
-    if all_licenses:
-        licenses = pd.concat(all_licenses)
+    if all_data:
+        aggregate = pd.concat(all_data)
         all_data_file = os.path.join(data_dir, f'all/licenses-all-{version}.csv')
-        licenses.to_csv(all_data_file, index=False)
+        aggregate.to_csv(all_data_file, index=False)
         print('Saved all licenses to', all_data_file)
-        return licenses
+        return aggregate
     
     # No datafiles found.
     else:

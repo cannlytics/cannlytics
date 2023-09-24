@@ -242,6 +242,7 @@ if __name__ == '__main__':
     # Specify where your data lives.
     DATA_DIR = 'D:/data/connecticut/lab_results'
     PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
+    stats_dir = '../data/ct'
 
     # Set the destination for the PDFs.
     data_dir = args.get('data_dir', DATA_DIR)
@@ -258,11 +259,8 @@ if __name__ == '__main__':
 
     # Save the results to Excel.
     date = datetime.now().isoformat()[:10]
-    datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
-    try:
-        cannlytics.utils.to_excel_with_style(results, datafile)
-    except:
-        results.to_excel(datafile)
-    print('Connecticut lab results archived:', datafile)
+    results.to_excel(f'{stats_dir}/ct-lab-results-{date}.xlsx', index=False)
+    results.to_csv(f'{stats_dir}/ct-lab-results-latest.csv', index=False)
+    print('Connecticut lab results archived:', stats_dir)
 
     # Future work: Parse the PDFs with CoADoc (to train a custom GPT model).

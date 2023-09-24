@@ -6,18 +6,18 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/10/2022
-Updated: 8/15/2023
+Updated: 9/23/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
-import json
+# External imports:
 import datasets
+import numpy as np
 import pandas as pd
-import urllib.request
 
 
 # Constants.
-_ALGORITHM = './cannabis_tests.py'
-_VERSION = '1.1.0'
+_SCRIPT = 'cannabis_tests.py'
+_VERSION = '2023.09.23'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_tests'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
@@ -35,19 +35,17 @@ _CITATION = """\
 }
 """
 
-# Read subsets from local source.
-try:
-    try:
-        with open('./cannabis_tests.json', 'r') as f:
-            SUBSETS = json.loads(f.read())
-    except:
-        with open('./datasets/cannabis_tests/cannabis_tests.json', 'r') as f:
-            SUBSETS = json.loads(f.read())
-
-# Otherwise, read subsets from Hugging Face.
-except:
-    with urllib.request.urlopen('https://huggingface.co/datasets/cannlytics/cannabis_tests/raw/main/cannabis_tests.json') as url:
-        SUBSETS = json.load(url)
+# Define subsets.
+SUBSETS = [
+    # 'all',
+    # 'ca',
+    # 'ct',
+    'fl',
+    'ma',
+    'mi',
+    # 'md',
+    'wa',
+]
 
 # Lab result model.
 _FEATURES = datasets.Features({
@@ -216,7 +214,12 @@ class CannabisTestsConfig(datasets.BuilderConfig):
         """BuilderConfig for Cannabis Tests."""
         description = _DESCRIPTION
         description += f'This configuration is for the `{name}` subset.'
-        super().__init__(name=name, description=description, **kwargs)
+        super().__init__(
+            data_dir='./data',
+            description=description,
+            name=name,
+            **kwargs,
+        )
 
 
 class CannabisTests(datasets.GeneratorBasedBuilder):
@@ -225,7 +228,7 @@ class CannabisTests(datasets.GeneratorBasedBuilder):
     # Parameters.
     VERSION = datasets.Version(_VERSION)
     BUILDER_CONFIG_CLASS = CannabisTestsConfig
-    BUILDER_CONFIGS = [CannabisTestsConfig(s) for s in SUBSETS.keys()]
+    BUILDER_CONFIGS = [CannabisTestsConfig(s) for s in SUBSETS]
     DEFAULT_CONFIG_NAME = 'all'
 
     def _info(self):
@@ -242,68 +245,101 @@ class CannabisTests(datasets.GeneratorBasedBuilder):
     
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
-        config_name = self.config.name
-        data_url = SUBSETS[config_name]['data_url']
-        print('data_url:', data_url)
-        urls = {config_name: data_url}
+        subset = self.config.name
+        data_url = f'./data/{subset}/{subset}-lab-results-latest.csv'
+        urls = {subset: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
-        filepath = downloaded_files[config_name]
-        params = {'filepath': filepath}
+        params = {'filepath': downloaded_files[subset]}
         return [datasets.SplitGenerator(name='data', gen_kwargs=params)]
-    
+
     def _generate_examples(self, filepath):
         """Returns the examples in raw text form."""
-        print('filepath:', filepath)
-        with open(filepath) as f:
-            try:
-                df = pd.read_excel(filepath)
-            except:
-                df = pd.read_csv(filepath)
+        print('Reading file:', filepath)
+        try:
+            df = pd.read_csv(filepath)
+        except:
+            df = pd.read_excel(filepath.replace('.csv', '.xlsx'))
 
-            # Rename columns.
-            df = df.rename(columns=FIELD_TO_FEATURE_MAP)
+        # Rename columns.
+        df = df.rename(columns=FIELD_TO_FEATURE_MAP)
 
-            # Get the features we want to keep.
-            for index, row in df.iterrows():
+        # # Add missing columns.
+        # for col in _FEATURES.keys():
+        #     if col not in df.columns:
+        #         df[col] = np.nan
 
-                # Get observation features.
-                obs = {key: None for key in _FEATURES.keys()}
+        # Keep only the feature columns.
+        # df = df[list(_FEATURES.keys())]
+
+        # Fill missing values.
+        # df.fillna(np.nan, inplace=True)
+
+        # Get the features we want to keep.
+        for index, row in df.iterrows():
+
+            # Get observation features.
+            keys = _FEATURES.keys()
+            obs = {}
+            
+            # Populate our structure with values from the row wherever available.
+            for key in keys:
+                # Convert the value to the appropriate type
+                dtype = _FEATURES[key].dtype
+                value = row[key]
                 
-                # Populate our structure with values from the row wherever available.
-                for key in obs.keys():
-                    if key in row:
-                        obs[key] = row[key]
+                # If the type is a string, ensure it's a string. For other types, use the corresponding conversion.
+                if dtype == 'string':
+                    obs[key] = str(value)
+                elif dtype == 'float64':
+                    try:
+                        obs[key] = float(value)
+                    except ValueError:
+                        obs[key] = np.nan
+                elif dtype == 'int64':
+                    try:
+                        obs[key] = int(value)
+                    except ValueError:
+                        obs[key] = np.nan
+                else:
+                    obs[key] = value
 
-                yield index, obs
+            # Yield the index and observation.
+            yield index, obs
 
 
 # === Tests ===
-# [ ] Tested:
+# [✓] Tested: 2023-09-23 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     from datasets import load_dataset
-    import tempfile
-
-    # Define all of the dataset subsets.
-    subsets = list(SUBSETS.keys())
-
-    # Get the default temporary directory in a cross-platform manner.
-    cache_directory = tempfile.gettempdir()
-    cache_path = os.path.join(cache_directory, 'cache')
-    if not os.path.exists(cache_path):
-        os.makedirs(cache_path)
 
     # Load each dataset subset.
-    aggregate = {}
-    for subset in subsets:
-        print('Loading subset:', subset)
-        dataset = load_dataset(
-            _ALGORITHM,
-            subset,
-            download_mode='force_redownload',
-            cache_dir=cache_directory
-        )
+    for subset in SUBSETS:
+        dataset = load_dataset(_SCRIPT, subset)
         data = dataset['data']
         assert len(data) > 0
         print('Read %i %s data points.' % (len(data), subset))
-        aggregate[subset] = data
+
+    # # Define all of the dataset subsets.
+    # subsets = list(SUBSETS.keys())
+
+    # # Get the default temporary directory in a cross-platform manner.
+    # cache_directory = tempfile.gettempdir()
+    # cache_path = os.path.join(cache_directory, 'cache')
+    # if not os.path.exists(cache_path):
+    #     os.makedirs(cache_path)
+
+    # # Load each dataset subset.
+    # aggregate = {}
+    # for subset in subsets:
+    #     print('Loading subset:', subset)
+    #     dataset = load_dataset(
+    #         _ALGORITHM,
+    #         subset,
+    #         download_mode='force_redownload',
+    #         cache_dir=cache_directory
+    #     )
+    #     data = dataset['data']
+    #     assert len(data) > 0
+    #     print('Read %i %s data points.' % (len(data), subset))
+    #     aggregate[subset] = data

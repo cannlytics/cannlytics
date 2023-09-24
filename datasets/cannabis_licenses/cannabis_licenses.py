@@ -9,7 +9,7 @@ Created: 9/29/2022
 Updated: 9/19/2023
 License: <https://huggingface.co/datasets/cannlytics/cannabis_licenses/blob/main/LICENSE>
 """
-# External imports.
+# External imports:
 import datasets
 import pandas as pd
 
@@ -35,7 +35,7 @@ _CITATION = """\
 """
 
 
-# Read subsets from local source.
+# Define subsets.
 SUBSETS = [
     'all',
     'ak',
@@ -137,10 +137,6 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         subset = self.config.name
-        # Deprecated: Use the data from the Cannlytics Hugging Face repository.
-        # https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/
-        # data_url = SUBSETS[config_name]['data_url']
-        # TEST: Use local data.
         data_url = f'./data/{subset}/licenses-{subset}-latest.csv'
         urls = {subset: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)

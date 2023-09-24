@@ -26,7 +26,6 @@ from typing import Any, Optional
 from dotenv import dotenv_values
 import openai
 import pandas as pd
-import pdfplumber
 import requests
 
 # Internal imports:
