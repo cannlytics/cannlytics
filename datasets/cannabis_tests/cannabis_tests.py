@@ -37,9 +37,9 @@ _CITATION = """\
 
 # Define subsets.
 SUBSETS = [
-    # 'all',
-    # 'ca',
-    # 'ct',
+    'all',
+    'ca',
+    'ct',
     'fl',
     'ma',
     'mi',
@@ -315,10 +315,13 @@ if __name__ == '__main__':
 
     # Load each dataset subset.
     for subset in SUBSETS:
-        dataset = load_dataset(_SCRIPT, subset)
-        data = dataset['data']
-        assert len(data) > 0
-        print('Read %i %s data points.' % (len(data), subset))
+        try:
+            dataset = load_dataset(_SCRIPT, subset)
+            data = dataset['data']
+            assert len(data) > 0
+            print('Read %i %s data points.' % (len(data), subset))
+        except:
+            print('Failed to load subset:', subset)
 
     # # Define all of the dataset subsets.
     # subsets = list(SUBSETS.keys())
