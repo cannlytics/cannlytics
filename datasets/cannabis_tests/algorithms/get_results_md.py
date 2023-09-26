@@ -26,6 +26,9 @@ from datetime import datetime
 from cannlytics.utils import snake_case
 
 
+STATE = 'MD'
+
+
 # def extract_columns_from_page(page, column_widths):
 #     column_texts = []
 #     left_edge = 0
@@ -153,6 +156,7 @@ def extract_data_from_pdf(pdf_path):
 
         # Assign producer ID.
         df['producer_id'] = df['metrc_lab_id'].apply(extract_producer_id)
+        df['producer_state'] = STATE
 
         # # TODO: Add standard data.
         # pivot_df['analyses'] = ["cannabinoids", "microbes"]
