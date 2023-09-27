@@ -37,12 +37,12 @@ _CITATION = """\
 
 # Define subsets.
 SUBSETS = [
-    'all',
-    'ca',
-    'ct',
-    'fl',
-    'ma',
-    'mi',
+    # 'all',
+    # 'ca',
+    # 'ct',
+    # 'fl',
+    # 'ma',
+    # 'mi',
     # 'md',
     'wa',
 ]
@@ -53,38 +53,26 @@ _FEATURES = datasets.Features({
     'results_hash': datasets.Value(dtype='string'),
     'sample_id': datasets.Value(dtype='string'),
     'product_name': datasets.Value(dtype='string'),
-    'producer': datasets.Value(dtype='string'),
+    'strain_name': datasets.Value(dtype='string'),
     'product_type': datasets.Value(dtype='string'),
     'product_subtype': datasets.Value(dtype='string'),
+    'category': datasets.Value(dtype='string'),
+    'classification': datasets.Value(dtype='string'),
     'date_tested': datasets.Value(dtype='string'),
+    'expiration_date': datasets.Value(dtype='string'),
     'analyses': datasets.Value(dtype='string'),
-    'batch_number': datasets.Value(dtype='string'),
-    'batch_size': datasets.Value(dtype='string'),
-    'batch_units': datasets.Value(dtype='string'),
-    'cannabinoids_method': datasets.Value(dtype='string'),
-    'cannabinoids_status': datasets.Value(dtype='string'),
+    'status': datasets.Value(dtype='string'),
+    'images': datasets.Value(dtype='string'),
+    'coa_algorithm_version': datasets.Value(dtype='string'),
     'coa_algorithm': datasets.Value(dtype='string'),
     'coa_algorithm_entry_point': datasets.Value(dtype='string'),
     'coa_parsed_at': datasets.Value(dtype='string'),
-    'coa_pdf': datasets.Value(dtype='string'),
+    'coa_url': datasets.Value(dtype='string'),
     'coa_urls': datasets.Value(dtype='string'),
+    'lab_results_url': datasets.Value(dtype='string'),
     'date_collected': datasets.Value(dtype='string'),
     'date_produced': datasets.Value(dtype='string'),
     'date_received': datasets.Value(dtype='string'),
-    'date_retail': datasets.Value(dtype='string'),
-    'delta_9_thc_per_unit': datasets.Value(dtype='string'),
-    'distributor': datasets.Value(dtype='string'),
-    'distributor_address': datasets.Value(dtype='string'),
-    'distributor_city': datasets.Value(dtype='string'),
-    'distributor_license_number': datasets.Value(dtype='string'),
-    'distributor_state': datasets.Value(dtype='string'),
-    'distributor_street': datasets.Value(dtype='string'),
-    'distributor_zipcode': datasets.Value(dtype='float64'),
-    'foreign_matter_method': datasets.Value(dtype='string'),
-    'foreign_matter_status': datasets.Value(dtype='string'),
-    'heavy_metals_method': datasets.Value(dtype='string'),
-    'heavy_metals_status': datasets.Value(dtype='string'),
-    'images': datasets.Value(dtype='string'),
     'lab': datasets.Value(dtype='string'),
     'lab_address': datasets.Value(dtype='string'),
     'lab_city': datasets.Value(dtype='string'),
@@ -96,24 +84,15 @@ _FEATURES = datasets.Features({
     'lab_license_number': datasets.Value(dtype='string'),
     'lab_longitude': datasets.Value(dtype='float64'),
     'lab_phone': datasets.Value(dtype='string'),
-    'lab_results_url': datasets.Value(dtype='string'),
     'lab_state': datasets.Value(dtype='string'),
     'lab_street': datasets.Value(dtype='string'),
     'lab_website': datasets.Value(dtype='string'),
     'lab_zipcode': datasets.Value(dtype='int64'),
     'lims': datasets.Value(dtype='string'),
-    'metrc_ids': datasets.Value(dtype='string'),
     'metrc_lab_id': datasets.Value(dtype='string'),
     'metrc_source_id': datasets.Value(dtype='string'),
-    'microbes_method': datasets.Value(dtype='string'),
-    'microbes_status': datasets.Value(dtype='string'),
-    'moisture_content': datasets.Value(dtype='string'),
-    'moisture_method': datasets.Value(dtype='string'),
-    'mycotoxins_method': datasets.Value(dtype='string'),
-    'mycotoxins_status': datasets.Value(dtype='string'),
     'notes': datasets.Value(dtype='string'),
-    'pesticides_method': datasets.Value(dtype='string'),
-    'pesticides_status': datasets.Value(dtype='string'),
+    'producer': datasets.Value(dtype='string'),
     'producer_address': datasets.Value(dtype='string'),
     'producer_city': datasets.Value(dtype='string'),
     'producer_image_url': datasets.Value(dtype='string'),
@@ -122,76 +101,102 @@ _FEATURES = datasets.Features({
     'producer_street': datasets.Value(dtype='string'),
     'producer_url': datasets.Value(dtype='string'),
     'producer_zipcode': datasets.Value(dtype='float64'),
-    'product_size': datasets.Value(dtype='string'),
-    'public': datasets.Value(dtype='float64'),
-    'residual_solvents_method': datasets.Value(dtype='string'),
-    'residual_solvents_status': datasets.Value(dtype='string'),
-    'results': datasets.Value(dtype='string'),
-    'sample_number': datasets.Value(dtype='float64'),
-    'sample_size': datasets.Value(dtype='string'),
-    'sampling_method': datasets.Value(dtype='string'),
-    'serving_size': datasets.Value(dtype='string'),
-    'status': datasets.Value(dtype='string'),
-    'sum_of_cannabinoids': datasets.Value(dtype='float64'),
-    'terpenes_method': datasets.Value(dtype='string'),
-    'terpenes_status': datasets.Value(dtype='string'),
-    'total_cannabinoids': datasets.Value(dtype='float64'),
-    'total_cbc': datasets.Value(dtype='float64'),
-    'total_cbd': datasets.Value(dtype='float64'),
-    'total_cbdv': datasets.Value(dtype='float64'),
-    'total_cbg': datasets.Value(dtype='float64'),
-    'total_terpenes': datasets.Value(dtype='float64'),
-    'total_terpenes_mg_g': datasets.Value(dtype='float64'),
-    'total_thc': datasets.Value(dtype='float64'),
-    'total_thcv': datasets.Value(dtype='float64'),
-    'url': datasets.Value(dtype='string'),
-    'water_activity_method': datasets.Value(dtype='string'),
-    'water_activity_status': datasets.Value(dtype='string'),
-    # New:
-    # 'business_dba_name': datasets.Value(dtype='string'),
-    # 'business_image_url': datasets.Value(dtype='string'),
-    # 'business_legal_name': datasets.Value(dtype='string'),
-    # 'business_owner_name': datasets.Value(dtype='string'),
-    # 'business_phone': datasets.Value(dtype='string'),
-    # 'business_structure': datasets.Value(dtype='string'),
-    # 'business_website': datasets.Value(dtype='string'),
-    'category': datasets.Value(dtype='string'),
-    'classification': datasets.Value(dtype='string'),
-    'coa_algorithm_version': datasets.Value(dtype='string'),
-    'coa_url': datasets.Value(dtype='string'),
-    'distributor_license_type': datasets.Value(dtype='string'),
-    'expiration_date': datasets.Value(dtype='string'),
-    # 'homogeneity_status': datasets.Value(dtype='string'),
-    'image_url': datasets.Value(dtype='string'),
-    'indica_percentage': datasets.Value(dtype='string'),
-    'sativa_percentage': datasets.Value(dtype='string'),
-    # 'issue_date': datasets.Value(dtype='string'),
-    # 'license_designation': datasets.Value(dtype='string'),
-    # 'license_status': datasets.Value(dtype='string'),
-    # 'license_status_date': datasets.Value(dtype='string'),
-    # 'license_term': datasets.Value(dtype='string'),
-    # 'license_type': datasets.Value(dtype='string'),
-    # 'licensing_authority': datasets.Value(dtype='string'),
-    # 'licensing_authority_id': datasets.Value(dtype='string'),
-    'lineage': datasets.Value(dtype='string'),
-    # 'microbial_method': datasets.Value(dtype='string'),
-    # 'moisture_status': datasets.Value(dtype='string'),
-    # 'moisture_units': datasets.Value(dtype='string'),
-    # 'parcel_number': datasets.Value(dtype='string'),
-    'predicted_aromas': datasets.Value(dtype='string'),
     'producer_county': datasets.Value(dtype='string'),
     'producer_latitude': datasets.Value(dtype='string'),
     'producer_longitude': datasets.Value(dtype='string'),
-    # 'producer_street_address': datasets.Value(dtype='string'),
-    # 'solvents_status': datasets.Value(dtype='string'),
-    'strain_id': datasets.Value(dtype='string'),
-    'strain_name': datasets.Value(dtype='string'),
-    'strain_type': datasets.Value(dtype='string'),
-    'strain_url': datasets.Value(dtype='string'),
-    # 'total_aflatoxins': datasets.Value(dtype='string'),
-    # 'total_xylenes': datasets.Value(dtype='string'),
-    # FIXME: `uid` should be mapped to `metrc_source_id`
-    # 'uid': datasets.Value(dtype='string')
+    'batch_number': datasets.Value(dtype='string'),
+    'batch_size': datasets.Value(dtype='string'),
+    'batch_units': datasets.Value(dtype='string'),
+    'product_size': datasets.Value(dtype='string'),
+    'sample_size': datasets.Value(dtype='string'),
+    'serving_size': datasets.Value(dtype='string'),
+    'total_cannabinoids': datasets.Value(dtype='float64'),
+    'total_thc': datasets.Value(dtype='float64'),
+    'total_cbd': datasets.Value(dtype='float64'),
+    'total_terpenes': datasets.Value(dtype='float64'),
+    'moisture_content': datasets.Value(dtype='string'),
+    'water_activity': datasets.Value(dtype='string'),
+    'results': datasets.Value(dtype='string'),
+    # TODO: Combine methods into methods?
+    # 'cannabinoids_method': datasets.Value(dtype='string'),
+    # 'cannabinoids_status': datasets.Value(dtype='string'),
+    # 'foreign_matter_method': datasets.Value(dtype='string'),
+    # 'foreign_matter_status': datasets.Value(dtype='string'),
+    # 'heavy_metals_method': datasets.Value(dtype='string'),
+    # 'heavy_metals_status': datasets.Value(dtype='string'),
+    # 'microbes_method': datasets.Value(dtype='string'),
+    # 'microbes_status': datasets.Value(dtype='string'),
+    # 'moisture_method': datasets.Value(dtype='string'),
+    # 'mycotoxins_method': datasets.Value(dtype='string'),
+    # 'mycotoxins_status': datasets.Value(dtype='string'),
+    # 'pesticides_method': datasets.Value(dtype='string'),
+    # 'pesticides_status': datasets.Value(dtype='string'),
+    # 'residual_solvents_method': datasets.Value(dtype='string'),
+    # 'residual_solvents_status': datasets.Value(dtype='string'),
+    # 'water_activity_method': datasets.Value(dtype='string'),
+    # 'water_activity_status': datasets.Value(dtype='string'),
+    # # 'microbial_method': datasets.Value(dtype='string'),
+    # # 'moisture_status': datasets.Value(dtype='string'),
+    # # 'solvents_status': datasets.Value(dtype='string'),
+    
+    # TODO: Should distributor be included?
+    # 'distributor': datasets.Value(dtype='string'),
+    # 'distributor_address': datasets.Value(dtype='string'),
+    # 'distributor_city': datasets.Value(dtype='string'),
+    # 'distributor_license_number': datasets.Value(dtype='string'),
+    # 'distributor_state': datasets.Value(dtype='string'),
+    # 'distributor_street': datasets.Value(dtype='string'),
+    # 'distributor_zipcode': datasets.Value(dtype='float64'),
+    # 'distributor_license_type': datasets.Value(dtype='string'),
+    
+    # TODO: Standardize the fields below. Or make them obsolete.
+    # 'coa_pdf': datasets.Value(dtype='string'),
+    # 'public': datasets.Value(dtype='float64'),
+    # 'date_retail': datasets.Value(dtype='string'),
+    # 'delta_9_thc_per_unit': datasets.Value(dtype='string'),
+    # 'metrc_ids': datasets.Value(dtype='string'),
+    # 'sample_number': datasets.Value(dtype='float64'),
+    # 'sampling_method': datasets.Value(dtype='string'),
+    # 'sum_of_cannabinoids': datasets.Value(dtype='float64'),
+    # 'terpenes_method': datasets.Value(dtype='string'),
+    # 'terpenes_status': datasets.Value(dtype='string'),
+    # 'total_cbc': datasets.Value(dtype='float64'),
+    # 'total_cbdv': datasets.Value(dtype='float64'),
+    # 'total_cbg': datasets.Value(dtype='float64'),
+    # 'total_terpenes_mg_g': datasets.Value(dtype='float64'),
+    # 'total_thcv': datasets.Value(dtype='float64'),
+    # 'url': datasets.Value(dtype='string'),
+
+    # # 'business_dba_name': datasets.Value(dtype='string'),
+    # # 'business_image_url': datasets.Value(dtype='string'),
+    # # 'business_legal_name': datasets.Value(dtype='string'),
+    # # 'business_owner_name': datasets.Value(dtype='string'),
+    # # 'business_phone': datasets.Value(dtype='string'),
+    # # 'business_structure': datasets.Value(dtype='string'),
+    # # 'business_website': datasets.Value(dtype='string'),
+    # # 'homogeneity_status': datasets.Value(dtype='string'),
+    # 'image_url': datasets.Value(dtype='string'),
+    # 'indica_percentage': datasets.Value(dtype='string'),
+    # 'sativa_percentage': datasets.Value(dtype='string'),
+    # # 'issue_date': datasets.Value(dtype='string'),
+    # # 'license_designation': datasets.Value(dtype='string'),
+    # # 'license_status': datasets.Value(dtype='string'),
+    # # 'license_status_date': datasets.Value(dtype='string'),
+    # # 'license_term': datasets.Value(dtype='string'),
+    # # 'license_type': datasets.Value(dtype='string'),
+    # # 'licensing_authority': datasets.Value(dtype='string'),
+    # # 'licensing_authority_id': datasets.Value(dtype='string'),
+    # 'lineage': datasets.Value(dtype='string'),
+    # # 'moisture_units': datasets.Value(dtype='string'),
+    # # 'parcel_number': datasets.Value(dtype='string'),
+    # 'predicted_aromas': datasets.Value(dtype='string'),
+    # 'strain_id': datasets.Value(dtype='string'),
+    # 'strain_type': datasets.Value(dtype='string'),
+    # 'strain_url': datasets.Value(dtype='string'),
+    # # 'total_aflatoxins': datasets.Value(dtype='string'),
+    # # 'total_xylenes': datasets.Value(dtype='string'),
+    # # FIXME: `uid` should be mapped to `metrc_source_id`
+    # # 'uid': datasets.Value(dtype='string')
 })
 
 # Fields that should be mapped to features.
@@ -263,13 +268,17 @@ class CannabisTests(datasets.GeneratorBasedBuilder):
         # Rename columns.
         df = df.rename(columns=FIELD_TO_FEATURE_MAP)
 
-        # # Add missing columns.
-        # for col in _FEATURES.keys():
-        #     if col not in df.columns:
-        #         df[col] = np.nan
+        # Add missing columns with appropriate defaults based on type.
+        for col, series in _FEATURES.items():
+            dtype = series.dtype
+            if col not in df.columns:
+                if dtype == 'string':
+                    df[col] = ''
+                else:
+                    df[col] = np.nan
 
         # Keep only the feature columns.
-        # df = df[list(_FEATURES.keys())]
+        df = df[list(_FEATURES.keys())]
 
         # Fill missing values.
         # df.fillna(np.nan, inplace=True)
@@ -315,13 +324,14 @@ if __name__ == '__main__':
 
     # Load each dataset subset.
     for subset in SUBSETS:
-        try:
-            dataset = load_dataset(_SCRIPT, subset)
-            data = dataset['data']
-            assert len(data) > 0
-            print('Read %i %s data points.' % (len(data), subset))
-        except:
-            print('Failed to load subset:', subset)
+        # try:
+        dataset = load_dataset(_SCRIPT, subset)
+        data = dataset['data']
+        assert len(data) > 0
+        print('Read %i %s data points.' % (len(data), subset))
+        # except Exception as e:
+        #     print(e)
+        #     print('Failed to load subset:', subset)
 
     # # Define all of the dataset subsets.
     # subsets = list(SUBSETS.keys())
