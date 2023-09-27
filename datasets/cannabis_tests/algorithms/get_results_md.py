@@ -20,6 +20,7 @@ Data Sources:
 """
 import os
 import re
+import numpy as np
 import pandas as pd
 import pdfplumber
 from datetime import datetime
@@ -29,26 +30,13 @@ from cannlytics.utils import snake_case
 STATE = 'MD'
 
 
-# def extract_columns_from_page(page, column_widths):
-#     column_texts = []
-#     left_edge = 0
-#     for width in column_widths:
-#         right_edge = left_edge + width
-#         bbox = (left_edge, 0, right_edge, page.height)
-#         column = page.crop(bbox)
-#         column_text = column.extract_text()
-#         column_texts.append(column_text)
-#         left_edge = right_edge
-#     return column_texts
-
-
 def extract_info(line):
     """Extracts the tag, category, test name, test passed, and result from a line of text."""
-    # Extract Tag and Category
+    # Extract Tag and Category.
     tag, rest_of_line = line.split(" ", 1)
     category, rest_of_line = rest_of_line.split(" ", 1)
 
-    # Identify if Test Passed is merged or not
+    # Identify if Test Passed is merged or not.
     if "TR PUlaEnt" in rest_of_line:
         test_passed = "TRUE"
         test_name, rest_of_line = rest_of_line.rsplit("TR PUlaEnt", 1)
@@ -65,10 +53,9 @@ def extract_info(line):
         test_passed = None
         test_name = None
 
-    # Extract result using regex
+    # Extract result using regex.
     result_match = re.search(r'(\d+(\.\d+)?)', rest_of_line)
     result = result_match.group(1) if result_match else None
-
     return tag, category, test_name, test_passed, result
 
 
@@ -95,7 +82,7 @@ def extract_data_from_pdf(pdf_path):
     # Define the columns.
     columns = [
         'metrc_lab_id',
-        'category',
+        'product_type',
         'analyte',
         'status',
         'value'
@@ -104,6 +91,9 @@ def extract_data_from_pdf(pdf_path):
     # Loop through each page in the PDF.
     dates = []
     for start, end in zip(page_numbers[:-1], page_numbers[1:]):
+
+        if start < 3999:
+            continue
 
         results = []
         for page in pdf.pages[start:end]:
@@ -118,13 +108,14 @@ def extract_data_from_pdf(pdf_path):
                     columns=columns
                 )
                 results.append(df)
+                df = pd.concat(results[1:])
             except:
-                # TODO: Figure out how to augment dates.
+                # FIXME: Figure out how to augment dates.
                 # dates.extend(lines)
                 continue
 
         # Combine the results.
-        df = pd.concat(results[1:])
+        
         # df['date_tested'] = dates[1:len(df) + 1]
 
         # Convert the 'product_name' column to snake_case
@@ -151,7 +142,9 @@ def extract_data_from_pdf(pdf_path):
 
         # TODO: Keep track of "R&D Testing".
 
-        # Calculate total THC.
+        # TODO: Keep track of stability testing.
+
+        # TODO: Calculate total THC.
         # df['total_thc'] = 0.877 * df['thca'] + df['delta_9_thc']
 
         # Assign producer ID.
@@ -164,9 +157,15 @@ def extract_data_from_pdf(pdf_path):
         # # sample_id
         filename = os.path.join(dataset_folder, f"md_results_{start}_{end-1}.csv")
         pivot_df.to_csv(filename, index=False)
+        print(f"Data saved: {filename}")
 
     # Close the PDF.
     pdf.close()
+
+    # Save the dates.
+    dates_df = pd.DataFrame(dates, columns=['date_tested'])
+    dates_df.to_excel(os.path.join(dataset_folder, 'md_dates.xlsx'), index=False)
+    print(f"Dates saved: {os.path.join(dataset_folder, 'md_dates.xlsx')}")
 
 
 def aggregate_datasets(folder_path, output_filename):
@@ -178,21 +177,16 @@ def aggregate_datasets(folder_path, output_filename):
         output_filename (str): Name of the output CSV file to save the compiled dataset.
     """
     all_files = [os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if filename.endswith('.csv')]
-    
-    # List comprehension to read each CSV file into a DataFrame
     dfs = [pd.read_csv(file) for file in all_files]
-    
-    # Concatenate all DataFrames into a single DataFrame
     compiled_df = pd.concat(dfs, ignore_index=True)
-    
-    # Save the resulting DataFrame as a CSV file
     compiled_df.to_csv(output_filename, index=False)
     print(f"Data compiled and saved: {output_filename}")
 
 
-
-# TODO: Standardize the data.
 def standardize_data(df, output_filename):
+    """Standardizes the data and saves it to a CSV file."""
+
+    # TODO: Standardize the data.
 
     # Extract product subtype
     product_types = [
@@ -214,6 +208,8 @@ def standardize_data(df, output_filename):
     # FIXME: Add a dummy variable for R&D.
     # df['is_r_and_d'] = (df.filter(like='randd_testing').notnull().any(axis=1)).astype(int)
 
+    # TODO: Add a dummy variable for stability tests.
+
     # FIXME: Remove old columns
     # cols_to_remove = df.filter(like='randd_testing').columns.tolist()
     # cols_to_remove.extend(['thc_percent_raw_plant_material', 'thca_percent_raw_plant_material', 'total_yeast_and_mold_count_cfutog_raw'])
@@ -224,22 +220,93 @@ def standardize_data(df, output_filename):
     print(f"Data standardized and saved: {output_filename}")
 
 
-# def save_data(all_results):
-#     # Save the results to Excel.
-#     data = pd.DataFrame(all_results)
-#     date = datetime.now().isoformat()[:10]
-#     data_dir = "./data"  # Define your data directory path
-#     if not os.path.exists(data_dir):
-#         os.makedirs(data_dir)
-#     datafile = f'{data_dir}/ma-lab-results-{date}.xlsx'
-#     try:
-#         data.to_excel(datafile, index=False)
-#     except:
-#         print("Error occurred when saving the data to Excel.")
+def get_unique_analytes(df):
+    """Get a list of all analytes."""
+    unique_analytes = set()
+    for col in list(df.columns):
+        analyte_name = col.split('(')[0].strip()
+        unique_analytes.add(analyte_name)
+    return sorted(list(unique_analytes))
+
+
+def standardize_long_results():
+    """Standardize the long results data."""
+
+    data_dir = r"D:\data\maryland\prr"
+
+    # Aggregate all lab results.
+    all_data = []
+
+    for dirpath, _, filenames in os.walk(data_dir):
+        for filename in filenames:
+            if filename.endswith('.csv'):
+                filepath = os.path.join(dirpath, filename)
+                df = pd.read_csv(filepath)
+                all_data.append(df)
+
+    # Combine all dataframes (if necessary)
+    df = pd.concat(all_data, ignore_index=True)
+
+    # TODO: Standardize the data.
+
+    # Pivot the dataframe
+    pivot_df = df.pivot_table(
+        index=['TestYear', 'PackageId', 'StrainName', 'TestingFacilityId',], # 'date_tested'
+        columns='TestTypeName',
+        values='TestResultLevel',
+        aggfunc='first'
+    ).reset_index()
+
+    # Determine the "status" based on the "date_tested" column
+    status = df.groupby('PackageId')['TestPassed'].apply(lambda x: 'Fail' if False in x.values else 'Pass')
+    pivot_df = pivot_df.merge(status, left_on='PackageId', right_index=True)
+
+    # # Isolate a specific test.
+    # test = 'Total Yeast and Mold Count (CFU/g) Raw Plant Material'
+    # ym = pivot_df[pivot_df[test].notna()]
+
+    # Standardize the columns.
+    std = pd.DataFrame(pivot_df)
+    std['product_subtype'] = None
+
+    # Get a list of all analytes.
+    analytes = get_unique_analytes(pivot_df)
+    elements_to_remove = ['TestPassed', 'TestingFacilityId', 'TestYear', 'StrainName']
+    analytes = [x for x in analytes if x not in elements_to_remove]
+    for analyte in analytes:
+        std[analyte] = np.nan
+
+    # FIXME: Get the result for each analyte.
+    skip_columns = ['PackageId', 'TestingFacilityId', 'TestPassed',
+                    'TestYear', 'StrainName']
+    for index, row in pivot_df.iterrows():
+        for col in pivot_df.columns:
+            if col not in skip_columns:
+                if pd.notna(row[col]):
+                    analyte = col.split('(')[0].strip()
+                    subtype = col.split(')')[-1].strip()
+                    std.at[index, 'product_subtype'] = subtype
+                    std.at[index, analyte] = row[col]
+
+    # Remove the old columns.
+    std = std[[col for col in std.columns if "(" not in col]]
+
+    # Add standard columns.
+    std['sample_id'] = pivot_df['PackageId']
+
+    # TODO: Rename columns.
+    # std['year'] = pivot_df['TestYear']
+    # std['strain_name'] = pivot_df['StrainName']
+    # std['lab_id'] = pivot_df['TestingFacilityId']
+
+    # Save the results.
+    outfile = "../data/md/raw/md-lab-results-2023-09-27.csv"
+    std.to_csv(outfile, index=False)
+    print(f"Data standardized and saved: {outfile}")
 
 
 # === Test ===
-# [ ] Tested:
+# [✓] Tested: 2023-09-27 by Keegan Skeate <keegan@cannlytics>
 if __name__ == "__main__":
 
     # Extract all data.
@@ -248,4 +315,4 @@ if __name__ == "__main__":
 
     # Aggregate the data.
     dataset_folder = os.path.join(os.path.dirname(pdf_path), ".datasets")
-    aggregate_datasets(dataset_folder, "../data/md/raw/public-records-request-md-2023-06-30.csv")
+    aggregate_datasets(dataset_folder, "../data/md/raw/md-lab-results-2023-06-30.csv")
