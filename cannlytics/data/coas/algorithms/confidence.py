@@ -48,6 +48,7 @@ Data Points (✓):
 from datetime import datetime
 import json
 import os
+import re
 from typing import Any, Optional, List
 
 # External imports:
@@ -297,18 +298,23 @@ def parse_confidence_pdf(
     for page in report.pages[1:]:
         all_lines.extend(page.extract_text().split('\n'))
 
-    # Aggregate all of the analyte tables.
-    analyte_lines = []
-    header = False
-    for line in all_lines:
-        if 'Analyte Name' in line:
-            header = True
-        elif 'Document Created' in line:
-            header = False
-        elif '[ END OF ANALYTE TABLE ]' in line:
-            break
-        elif header:
-            analyte_lines.append(line)
+    # Deprecated: Aggregate all of the analyte tables.
+    # analyte_lines = []
+    # header = False
+    # for line in all_lines:
+    #     if 'Analyte Name' in line:
+    #         header = True
+    #     elif 'Document Created' in line:
+    #         header = False
+    #     elif '[ END OF ANALYTE TABLE ]' in line:
+    #         break
+    #     elif header:
+    #         analyte_lines.append(line)
+
+    # Aggregate all of the analyte results.
+    pattern = r'^\w+.*\d{4}-\d{2}-\d{2}$'
+    analyte_lines = [line for line in all_lines if re.match(pattern, line)]
+    analyte_lines = [line for line in analyte_lines if not line.startswith('Date of Rec')]
 
     # Remove blank lines from the analyte tables.
     analyte_lines = [x for x in analyte_lines if x.strip()]
@@ -345,6 +351,7 @@ def parse_confidence_pdf(
                 result['name'] = name
                 result['key'] = analyte
             else:
+                # FIXME:
                 result[field] = convert_to_numeric(values[-k - 1])
 
         # Skip totals.
@@ -372,6 +379,7 @@ def parse_confidence_pdf(
 
     # Get the producer's latitude and longitude from the
     # `cannabis_licenses` dataset or by geocoding their address.
+    # FIXME:
     wa_licenses = load_dataset('cannlytics/cannabis_licenses', 'wa')
     licenses = wa_licenses['data'].to_pandas()
     criterion = licenses['license_number'].str.contains(obs['producer_license_number'])
