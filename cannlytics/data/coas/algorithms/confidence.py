@@ -6,7 +6,7 @@ Authors:
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/26/2022
-Updated: 12/2/2022
+Updated: 9/29/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
