@@ -262,78 +262,69 @@ if __name__ == '__main__':
     data_dir = 'D://data/california/lab_results'
 
     # Get CA lab results.
-    # ca_results = get_glass_house_farms_lab_results(data_dir)
+    ca_results = get_glass_house_farms_lab_results(data_dir)
 
 
-# DEV: Parse all COAs in directory.
-parser = CoADoc()
-license_number = GLASS_HOUSE_FARMS['producer_license_number']
-license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
-# pdf_files = os.listdir(license_pdf_dir)
-# pdf_files.reverse()
+# === DEV ===
 
-outfile = os.path.join(data_dir, f'ca-lab-results-2023-09-21.xlsx')
-results = pd.read_excel(outfile)
+# Parse all COAs in directory.
+# parser = CoADoc()
+# license_number = GLASS_HOUSE_FARMS['producer_license_number']
+# license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
+# # pdf_files = os.listdir(license_pdf_dir)
+# # pdf_files.reverse()
 
-# Parse the data from all COAs.
-coa_data = []
-for _, result in results.iterrows():
-    lab_result_id = result['lab_result_id']
-    pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
-    if not os.path.exists(pdf_file):
-        print('File not found:', pdf_file)
-        continue
-    try:
-        parsed = parser.parse(pdf_file)
-        coa_data.append({**result.to_dict(), **parsed[0]})
-        print('Parsed:', pdf_file)
-    except:
-        print('Error parsing:', pdf_file)
-        continue
+# outfile = os.path.join(data_dir, f'ca-lab-results-2023-09-21.xlsx')
+# results = pd.read_excel(outfile)
+
+# # Parse the data from all COAs.
 # coa_data = []
-# for index, result in results.iterrows():
+# for _, result in results.iterrows():
+#     lab_result_id = result['lab_result_id']
+#     pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+#     if not os.path.exists(pdf_file):
+#         print('File not found:', pdf_file)
+#         continue
 #     try:
-#         file_name = os.path.join(license_pdf_dir, pdf_file)
-#         obs = parser.parse(file_name)
-#         coa_data.append(obs[0])
+#         parsed = parser.parse(pdf_file)
+#         coa_data.append({**result.to_dict(), **parsed[0]})
 #         print('Parsed:', pdf_file)
-#     except Exception as e:
+#     except:
 #         print('Error parsing:', pdf_file)
-#         print(e)
 #         continue
 
-# Save the lab results.
-date = datetime.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
-try:
-    parser.save(coa_data, outfile)
-except:
-    try:
-        coa_df = pd.DataFrame(coa_data)
-        coa_df.to_excel(outfile, index=False)
-    except:
-        print('Error saving:', outfile)
+# # Save the lab results.
+# date = datetime.now().strftime('%Y-%m-%d')
+# outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
+# try:
+#     parser.save(coa_data, outfile)
+# except:
+#     try:
+#         coa_df = pd.DataFrame(coa_data)
+#         coa_df.to_excel(outfile, index=False)
+#     except:
+#         print('Error saving:', outfile)
 
-print('Saved %i results:' % len(coa_data), outfile)
+# print('Saved %i results:' % len(coa_data), outfile)
 
 
-# === Aggregate lab results ===
+# # === Aggregate lab results ===
 
-# Aggregate all CA lab results.
-aggregate = []
-datafiles = [
-    '../data/ca/glasshouse-lab-results-2023-09-22.xlsx',
-    '../data/ca/rawgarden-lab-results-2023-09-23.csv',
-    '../data/ca/sc-labs-lab-results-2022-07-13.xlsx',
-]
-for datafile in datafiles:
-    if datafile.endswith('.xlsx'):
-        df = pd.read_excel(datafile, sheet_name='Details')
-    else:
-        df = pd.read_csv(datafile)
-    aggregate.append(df)
+# # Aggregate all CA lab results.
+# aggregate = []
+# datafiles = [
+#     '../data/ca/glasshouse-lab-results-2023-09-22.xlsx',
+#     '../data/ca/rawgarden-lab-results-2023-09-23.csv',
+#     '../data/ca/sc-labs-lab-results-2022-07-13.xlsx',
+# ]
+# for datafile in datafiles:
+#     if datafile.endswith('.xlsx'):
+#         df = pd.read_excel(datafile, sheet_name='Details')
+#     else:
+#         df = pd.read_csv(datafile)
+#     aggregate.append(df)
 
-# Save aggregated CA lab results.
-aggregate = pd.concat(aggregate)
-aggregate.to_csv(f'../data/ca/ca-lab-results-latest.csv', index=False)
-print('Saved %i CA lab results' % len(aggregate))
+# # Save aggregated CA lab results.
+# aggregate = pd.concat(aggregate)
+# aggregate.to_csv(f'../data/ca/ca-lab-results-latest.csv', index=False)
+# print('Saved %i CA lab results' % len(aggregate))

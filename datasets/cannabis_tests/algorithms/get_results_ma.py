@@ -86,7 +86,8 @@ def get_results_mcrlabs(
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = '../data/ma'
+    # DATA_DIR = '../data/ma'
+    DATA_DIR = 'D://data/massachusetts/lab_results'
 
     # Get all of the MCR Labs test results.
     ma_results = get_results_mcrlabs(DATA_DIR)

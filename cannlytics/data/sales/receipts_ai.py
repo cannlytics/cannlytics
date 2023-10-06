@@ -150,7 +150,7 @@ class ReceiptsParser(object):
         M = cv2.getRotationMatrix2D(center, angle, scale)
         rotated = cv2.warpAffine(image, M, (w, h))
         return rotated
-    
+
     def parse(
             self,
             doc: str,

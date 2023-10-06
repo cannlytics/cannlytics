@@ -104,7 +104,7 @@ def parse_receipt_jobs(event, context) -> None:
         if current_tokens < 1:
             raise Exception('User does not have enough tokens to perform this action.')
 
-    # Make a request to parse the COA.
+    # Make a request to parse the receipt.
     headers = {'Authorization': 'Bearer %s' % id_token}
     body = {'urls': [job_file_url]}
     response = requests.post(API_URL, json=body, headers=headers)
