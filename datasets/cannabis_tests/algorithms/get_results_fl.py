@@ -809,6 +809,7 @@ outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
 df = pd.DataFrame(all_data)
 df.replace(r'\\u0000', '', regex=True, inplace=True)
 parser.save(df, outfile)
+print('Saved COA data:', outfile)
 
 
 #-----------------------------------------------------------------------
@@ -828,97 +829,97 @@ parser.save(df, outfile)
 
 # === Tests ===
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     from datetime import datetime
-#     import os
-#     from cannlytics.data.coas import CoADoc
-#     import pandas as pd
+    from datetime import datetime
+    import os
+    from cannlytics.data.coas import CoADoc
+    import pandas as pd
 
-#     # [✓] TEST: Parse Kaycha COAs.
-#     # Note: This is a super, super long process
-#     pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-#     date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-#     folders = os.listdir(pdf_dir)
-#     folders.reverse()
-#     for folder in folders:
-#         if folder.startswith('MMTC'):
-#             data_dir = os.path.join(pdf_dir, folder)
-#             outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-#             print('Parsing:', folder)
-#             coa_data = parse_results_kaycha(
-#                 data_dir,
-#                 outfile,
-#                 reverse=True,
-#                 completed=[],
-#                 license_number=folder,
-#             )
+    # [✓] TEST: Parse Kaycha COAs.
+    # Note: This is a super, super long process
+    pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    folders = os.listdir(pdf_dir)
+    folders.reverse()
+    for folder in folders:
+        if folder.startswith('MMTC'):
+            data_dir = os.path.join(pdf_dir, folder)
+            outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+            print('Parsing:', folder)
+            coa_data = parse_results_kaycha(
+                data_dir,
+                outfile,
+                reverse=True,
+                completed=[],
+                license_number=folder,
+            )
     
-#     # Lab result constants.
-#     CONSTANTS = {
-#         'lims': 'Kaycha Labs',
-#         'lab': 'Kaycha Labs',
-#         'lab_image_url': 'https://www.kaychalabs.com/wp-content/uploads/2020/06/newlogo-2.png',
-#         'lab_address': '4101 SW 47th Ave, Suite 105, Davie, FL 33314',
-#         'lab_street': '4101 SW 47th Ave, Suite 105',
-#         'lab_city': 'Davie',
-#         'lab_county': 'Broward',
-#         'lab_state': 'FL',
-#         'lab_zipcode': '33314',
-#         'lab_phone': '833-465-8378',
-#         'lab_email': 'info@kaychalabs.com',
-#         'lab_website': 'https://www.kaychalabs.com/',
-#         'lab_latitude': 26.071350,
-#         'lab_longitude': -80.210750,
-#         'licensing_authority_id': 'OMMU',
-#         'licensing_authority': 'Florida Office of Medical Marijuana Use',
-#     }
+    # Lab result constants.
+    CONSTANTS = {
+        'lims': 'Kaycha Labs',
+        'lab': 'Kaycha Labs',
+        'lab_image_url': 'https://www.kaychalabs.com/wp-content/uploads/2020/06/newlogo-2.png',
+        'lab_address': '4101 SW 47th Ave, Suite 105, Davie, FL 33314',
+        'lab_street': '4101 SW 47th Ave, Suite 105',
+        'lab_city': 'Davie',
+        'lab_county': 'Broward',
+        'lab_state': 'FL',
+        'lab_zipcode': '33314',
+        'lab_phone': '833-465-8378',
+        'lab_email': 'info@kaychalabs.com',
+        'lab_website': 'https://www.kaychalabs.com/',
+        'lab_latitude': 26.071350,
+        'lab_longitude': -80.210750,
+        'licensing_authority_id': 'OMMU',
+        'licensing_authority': 'Florida Office of Medical Marijuana Use',
+    }
 
-#     # Specify where your ACS Labs COAs live.
-#     folder_path = 'D://data/florida/lab_results/.datasets/'
+    # Specify where your ACS Labs COAs live.
+    folder_path = 'D://data/florida/lab_results/.datasets/'
 
-#     # Aggregate all of the parsed COAs.
-#     data_frames = []
-#     for filename in os.listdir(folder_path):
-#         if filename.endswith('.xlsx'):
-#             file_path = os.path.join(folder_path, filename)
-#             try:
-#                 df = pd.read_excel(file_path, sheet_name='Details')
-#                 data_frames.append(df)
-#                 print('Compiled %i results:' % len(df), filename)
-#             except:
-#                 continue
+    # Aggregate all of the parsed COAs.
+    data_frames = []
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.xlsx'):
+            file_path = os.path.join(folder_path, filename)
+            try:
+                df = pd.read_excel(file_path, sheet_name='Details')
+                data_frames.append(df)
+                print('Compiled %i results:' % len(df), filename)
+            except:
+                continue
 
-#     # Sort by when the COA was parsed and keep only the most recent by sample ID.
-#     aggregate = pd.concat(data_frames, ignore_index=True)
-#     aggregate.sort_values('coa_parsed_at', ascending=False, inplace=True)
-#     aggregate.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-#     print('Aggregated %i COAs.' % len(aggregate))
+    # Sort by when the COA was parsed and keep only the most recent by sample ID.
+    aggregate = pd.concat(data_frames, ignore_index=True)
+    aggregate.sort_values('coa_parsed_at', ascending=False, inplace=True)
+    aggregate.drop_duplicates(subset='sample_id', keep='first', inplace=True)
+    print('Aggregated %i COAs.' % len(aggregate))
 
-#     # FIXME: Standardize the data.
-#     for constant, value in CONSTANTS.items():
-#         aggregate[constant] = value
+    # FIXME: Standardize the data.
+    for constant, value in CONSTANTS.items():
+        aggregate[constant] = value
 
-#     # FIXME: Augment license data.
-#     import sys
-#     sys.path.append('./datasets')
-#     sys.path.append('../../../datasets')
-#     from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
-#     licenses = get_licenses_fl()
-#     licenses['license_type'] = 'Medical - Retailer'
-#     data = pd.merge(
-#         aggregate,
-#         licenses,
-#         suffixes=['', '_copy'],
-#         on='license_number',
-#     )
-#     data = data.filter(regex='^(?!.*_copy$)')
+    # FIXME: Augment license data.
+    import sys
+    sys.path.append('./datasets')
+    sys.path.append('../../../datasets')
+    from cannabis_licenses.algorithms.get_licenses_fl import get_licenses_fl
+    licenses = get_licenses_fl()
+    licenses['license_type'] = 'Medical - Retailer'
+    data = pd.merge(
+        aggregate,
+        licenses,
+        suffixes=['', '_copy'],
+        on='license_number',
+    )
+    data = data.filter(regex='^(?!.*_copy$)')
 
-#     # Save the results.
-#     parser = CoADoc()
-#     date = datetime.now().isoformat()[:19].replace(':', '-')
-#     outfile = f'D://data/florida/lab_results/.datasets/fl-lab-results-{date}.xlsx'
-#     parser.save(aggregate, outfile)
-#     print('Saved aggregated COAs data:', outfile)
+    # Save the results.
+    parser = CoADoc()
+    date = datetime.now().isoformat()[:19].replace(':', '-')
+    outfile = f'D://data/florida/lab_results/.datasets/fl-lab-results-{date}.xlsx'
+    parser.save(aggregate, outfile)
+    print('Saved aggregated COAs data:', outfile)
 
 #     # TODO: Merge with unparsed COA URLs.

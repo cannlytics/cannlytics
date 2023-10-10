@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/23/2022
-Updated: 5/5/2023
+Updated: 10/7/2023
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -361,111 +361,142 @@ if __name__ == '__main__':
 
     # === Data Curation ===
 
-    # FIXME: This needs to be entirely redone so that COAs can be
-    # saved intermittently.
-
     # Parse COA PDFs with CoADoc.
     # filenames.reverse()
-    coa_data, unidentified_coas = parse_rawgarden_coas(
-        COA_PDF_DIR,
-        filenames=filenames,
-        temp_path=TEMP_PATH,
-        verbose=True,
-    )
-
-    # Merge the `products`'s `product_subtype` with the COA data.
-    # FIXME: Keep the URL (`lab_results_url`)!
-    coa_df = rmerge(
-        pd.DataFrame(coa_data),
-        products,
-        on='coa_pdf',
-        how='left',
-        replace='right',
-    )
-
-    # Create hashes.
-    coa_df = coa_df.where(pd.notnull(coa_df), None)
-    coa_df['results_hash'] = coa_df['results'].apply(
-        lambda x: create_hash(x),
-    )
-    coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
-        lambda x: create_hash(x.to_dict()),
-        axis=1,
-    )
-    datafile_hash = create_hash(coa_df)
-
-    # === Data Archiving ===
-
-    # Create custom column order.
-    column_order = ['sample_hash', 'results_hash']
-    # column_order += list(parser.column_order)
-    column_index = coa_df.columns.get_loc('product_type') + 1
-    column_order.insert(column_index, 'product_subtype')
-
-    # Optional: Save the COA data to a workbook.
-    parser = CoADoc()
-    datafile = f'{COA_DATA_DIR}/{datafile_hash}.xlsx'
-    parser.save(coa_df, datafile, column_order=column_order)
-
-    # Optional: Save the unidentified COA data.
-    errors = [x['coa_pdf'] for x in unidentified_coas]
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
-    products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
-
-    # === Firebase Database and Storage ===
-
-    # Optional: Initialize Firebase.
-    # initialize_firebase(ENV_FILE)
-
-    # # Optional: Upload the lab results to Firestore.
-    # upload_lab_results(
-    #     coa_df.to_dict(orient='records'),
-    #     update=True,
-    #     verbose=True
+    # coa_data, unidentified_coas = parse_rawgarden_coas(
+    #     COA_PDF_DIR,
+    #     filenames=filenames,
+    #     temp_path=TEMP_PATH,
+    #     verbose=True,
     # )
+    directory = COA_PDF_DIR
+    temp_path = TEMP_PATH
+    verbose = True
+    parsed, unidentified = [], []
+    started = False
+    filename = None
+    for path, _, files in os.walk(directory):
+        if verbose and not started:
+            started = True
+            if filenames:
+                total = len(filenames)
+            else:
+                total = len(files)
+            print('Parsing %i COAs, ETA > %.2fm' % (total, total * 25 / 60))
+        for filename in files:
+            if not filename.endswith('.pdf'):
+                continue
+            if filenames is not None:
+                if filename not in filenames:
+                    continue
+            file_path = os.path.join(path, filename)
 
-    # # Optional: Upload datafiles to Firebase Storage.
-    # storage_datafile = '/'.join([STORAGE_REF, datafile.split('/')[-1]])
-    # storage_error_file = '/'.join([STORAGE_REF, error_file.split('/')[-1]])
-    # upload_file(storage_datafile, datafile, bucket_name=BUCKET_NAME)
-    # upload_file(storage_error_file, error_file, bucket_name=BUCKET_NAME)
+            # Parse the COA, by any means necessary!
+            parser = CoADoc()
+            try:
+                new_data = parser.parse_pdf(
+                    file_path,
+                    temp_path=temp_path,
+                )
+            except:
+                try:
+                    # FIXME: This should work without directly calling OCR.
+                    temp_file = f'{temp_path}/ocr_coa.pdf'
+                    parser.pdf_ocr(
+                        file_path,
+                        temp_file,
+                        temp_path,
+                        resolution=180,
+                    )
+                    new_data = parser.parse_pdf(
+                        temp_file,
+                        temp_path=temp_path,
+                    )
+                except Exception as e:
+                    # Hot-fix: Remove temporary `magick-*` files.
+                    try:
+                        for i in os.listdir(temp_path):
+                            magick_path = os.path.join(temp_path, i)
+                            if os.path.isfile(magick_path) and i.startswith('magick-'):
+                                os.remove(magick_path)
+                    except FileNotFoundError:
+                        pass
+                    unidentified.append({'coa_pdf': filename})
+                    if verbose:
+                        print('Error:', filename)
+                        print(e)
+                    continue
 
-    # == Data Aggregation ===
+            # Add the subtype key and record the data.
+            subtype = path.split('\\')[-1]
+            if isinstance(new_data, dict):
+                new_data = [new_data]
+            new_data[0]['product_subtype'] = subtype
+            parsed.extend(new_data)
+            if verbose:
+                print('Parsed:', filename)
 
-    # # Initialize the COA parser.
-    # parser = CoADoc()
+            # Deprecated: Reset the parer.
+            # parser.quit()
+            # gc.collect()
 
-    # # Stack COA datafiles, re-hash, and re-save!
-    # datafiles = [
-    #     f'{COA_DATA_DIR}/d7815fd2a097d06b719aadcc00233026f86076a680db63c532a11b67d7c8bc70.xlsx',
-    #     f'{COA_DATA_DIR}/01880e30f092cf5739f9f2b58de705fc4c245d6859c00b50505a3a802ff7c2b2.xlsx',
-    # ]
+            # TODO: See if the following fields need to be augmented:
+            # - date_retail
+            # - lab_results_url
 
-    # # Create custom column order.
-    # column_order = ['sample_hash', 'results_hash']
-    # column_order += list(parser.column_order)
-    # index = column_order.index('product_type') + 1
-    # column_order.insert(index, 'product_subtype')
+            # Save intermittently.
+            if len(parsed) % 100 == 0:
 
-    # # Aggregate the datafiles.
-    # master_data = parser.aggregate(
-    #     datafiles,
-    #     output=COA_DATA_DIR,
-    #     sheet_name='Details',
-    #     column_order=column_order,
+                # Merge the `products`'s `product_subtype` with the COA data.
+                # FIXME: Keep the URL (`lab_results_url`)!
+                coa_df = pd.DataFrame(parsed)
+                # coa_df = rmerge(
+                #     pd.DataFrame(parsed),
+                #     products,
+                #     on='coa_pdf',
+                #     how='left',
+                #     replace='right',
+                # )
+
+                # Create custom column order.
+                column_order = ['sample_hash', 'results_hash']
+                # column_order += list(parser.column_order)
+                column_index = coa_df.columns.get_loc('product_type') + 1
+                column_order.insert(column_index, 'product_subtype')
+
+                # Save the COA data.
+                parser = CoADoc()
+                timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+                datafile = f'{COA_DATA_DIR}/rawgarden-coa-data-{timestamp}.xlsx'
+                parser.save(coa_df, datafile, column_order=column_order)
+                print('Saved:', datafile)
+
+                # Save the unidentified COA data.
+                errors = [x['coa_pdf'] for x in unidentified]
+                timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+                error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
+                products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
+
+    # # Create hashes.
+    # coa_df = coa_df.where(pd.notnull(coa_df), None)
+    # coa_df['results_hash'] = coa_df['results'].apply(
+    #     lambda x: create_hash(x),
     # )
+    # coa_df['sample_hash'] = coa_df.loc[:, coa_df.columns != 'sample_hash'].apply(
+    #     lambda x: create_hash(x.to_dict()),
+    #     axis=1,
+    # )
+    # datafile_hash = create_hash(coa_df)
 
     # === Data Aggregation ===
 
     # Aggregate historic lab results.
     aggregate = []
-    agg_dir = 'D://data/california/lab_results/rawgarden'
-    files = os.listdir(agg_dir)
+    files = os.listdir(COA_DATA_DIR)
     for file in files:
         if 'unidentified' in file or not file.endswith('.xlsx'):
             continue
-        file_name = os.path.join(agg_dir, file)
+        file_name = os.path.join(COA_DATA_DIR, file)
         df = pd.read_excel(file_name, sheet_name='Details')
         aggregate.append(df)
 

@@ -1,0 +1,243 @@
+[
+  {
+    "description": "",
+    "key": "beta_pinene",
+    "name": "beta-Pinene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Beta-Pinene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "127-91-3"
+  },
+  {
+    "description": "",
+    "key": "d_limonene",
+    "name": "D-Limonene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Limonene",
+    "degrades_to": [
+      "p_cymene"
+    ],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "5989-27-5"
+  },
+  {
+    "description": "",
+    "key": "p_cymene",
+    "name": "p-Cymene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/p-Cymene",
+    "degrades_to": [],
+    "precursors": [
+      "d_limonene"
+    ],
+    "subtype": "monoterpene",
+    "CAS_number": "99-87-6"
+  },
+  {
+    "description": "",
+    "key": "beta_caryophyllene",
+    "name": "beta-Caryophyllene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Caryophyllene",
+    "degrades_to": [
+      "caryophyllene_oxide"
+    ],
+    "precursors": [],
+    "subtype": "sesquiterpene",
+    "CAS_number": "87-44-5"
+  },
+  {
+    "description": "",
+    "key": "caryophyllene_oxide",
+    "name": "Caryophyllene Oxide",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Caryophyllene_oxide",
+    "degrades_to": [],
+    "precursors": [
+      "beta_caryophyllene"
+    ],
+    "subtype": "sesquiterpenoid",
+    "CAS_number": "1139-30-6"
+  },
+  {
+    "description": "",
+    "key": "gamma_terpinene",
+    "name": "Gamma Terpinene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Gamma-Terpinene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "99-85-4"
+  },
+  {
+    "description": "",
+    "key": "alpha_terpinene",
+    "name": "Alpha Terpinene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Alpha-Terpinene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "99-86-5"
+  },
+  {
+    "description": "",
+    "key": "alpha_pinene",
+    "name": "Alpha-Pinene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Alpha-Pinene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "80-56-8"
+  },
+  {
+    "description": "",
+    "key": "beta_myrcene",
+    "name": "Beta-Myrcene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Myrcene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "123-35-3"
+  },
+  {
+    "description": "",
+    "key": "ocimene",
+    "name": "Ocimene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Ocimene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "13877-91-3"
+  },
+  {
+    "description": "",
+    "key": "carene",
+    "name": "Carene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Carene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "13466-78-9"
+  },
+  {
+    "description": "",
+    "key": "camphene",
+    "name": "Camphene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Camphene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "79-92-5"
+  },
+  {
+    "description": "",
+    "key": "terpinolene",
+    "name": "Terpinolene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Terpinolene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpene",
+    "CAS_number": "586-62-9"
+  },
+  {
+    "description": "",
+    "key": "humulene",
+    "name": "Humulene",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Humulene",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "sesquiterpene",
+    "CAS_number": "6753-98-6"
+  },
+  {
+    "description": "",
+    "key": "guaiol",
+    "name": "Guaiol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Guaiol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "sesquiterpenoid",
+    "CAS_number": "489-86-1"
+  },
+  {
+    "description": "",
+    "key": "nerolidol",
+    "name": "Nerolidol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Nerolidol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "sesquiterpene",
+    "CAS_number": "7212-44-4"
+  },
+  {
+    "description": "",
+    "key": "eucalyptol",
+    "name": "Eucalyptol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Eucalyptol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpenoid",
+    "CAS_number": "470-82-6"
+  },
+  {
+    "description": "",
+    "key": "linalool",
+    "name": "Linalool",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Linalool",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpenoid",
+    "CAS_number": "78-70-6"
+  },
+  {
+    "description": "",
+    "key": "isopulegol",
+    "name": "Isopulegol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Isopulegol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "monoterpenoid",
+    "CAS_number": "89-79-2"
+  },
+  {
+    "description": "",
+    "key": "alpha_bisabolol",
+    "name": "Alpha-Bisabolol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Bisabolol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "sesquiterpenoid",
+    "CAS_number": "23089-26-1"
+  },
+  {
+    "description": "",
+    "key": "geraniol",
+    "name": "Geraniol",
+    "type": "terpene",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Geraniol",
+    "degrades_to": [],
+    "precursors": [
+      "linalool"
+    ],
+    "subtype": "sesquiterpenoid",
+    "CAS_number": "106-24-1"
+  }
+]

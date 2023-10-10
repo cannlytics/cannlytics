@@ -1,0 +1,106 @@
+[
+  {
+    "description": "",
+    "key": "delta_9_thc",
+    "name": "THC",
+    "scientific_name": "\u0394-9-Tetrahydrocannabinol",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Tetrahydrocannabinol",
+    "degrades_to": [],
+    "precursors": [
+      "thca"
+    ],
+    "subtype": "",
+    "CAS_number": "1972-08-3"
+  },
+  {
+    "description": "",
+    "key": "thca",
+    "name": "THCA",
+    "scientific_name": "Tetrahydrocannabinolic acid",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Tetrahydrocannabinolic_acid",
+    "degrades_to": [
+      "delta_9_thc"
+    ],
+    "precursors": [],
+    "subtype": "",
+    "CAS_number": "23978-85-0"
+  },
+  {
+    "description": "",
+    "key": "delta_8_thc",
+    "name": "Delta-8 THC",
+    "scientific_name": "\u0394-8-Tetrahydrocannabinol",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Delta-8-Tetrahydrocannabinol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "",
+    "CAS_number": "5957-75-5"
+  },
+  {
+    "description": "",
+    "key": "thcv",
+    "name": "THCV",
+    "scientific_name": "Tetrahydrocannabivarin",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Tetrahydrocannabivarin",
+    "degrades_to": [],
+    "precursors": [
+      "thcva"
+    ],
+    "subtype": "",
+    "CAS_number": "31262-37-0"
+  },
+  {
+    "description": "",
+    "key": "thcva",
+    "name": "Tetrahydrocannabivarinic acid (THCVA)",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Tetrahydrocannabivarinic_acid",
+    "degrades_to": [
+      "thcv"
+    ],
+    "precursors": [],
+    "subtype": "",
+    "CAS_number": "24274-48-4"
+  },
+  {
+    "description": "",
+    "key": "cbg",
+    "name": "Cannabigerol (CBG)",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Cannabigerol",
+    "degrades_to": [],
+    "precursors": [
+      "cbga"
+    ],
+    "subtype": "",
+    "CAS_number": "25654-31-3"
+  },
+  {
+    "description": "",
+    "key": "cbga",
+    "name": "Cannabigerolic acid (CBGA)",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Cannabigerolic_acid",
+    "degrades_to": [
+      "cbg"
+    ],
+    "precursors": [],
+    "subtype": "",
+    "CAS_number": "25555-57-1"
+  },
+  {
+    "description": "",
+    "key": "cbn",
+    "name": "Cannabinol (CBN)",
+    "type": "cannabinoid",
+    "wikipedia_url": "https://en.wikipedia.org/wiki/Cannabinol",
+    "degrades_to": [],
+    "precursors": [],
+    "subtype": "",
+    "CAS_number": "521-35-7"
+  }
+]
