@@ -77,7 +77,7 @@ def save_file(
             temp_file.write(response.content)
         filepath = temp[1]
 
-    # Deprecated: If the file is a PDF, then create an image of the first page.
+    # FIXME: If the file is a PDF, then create a thumbnail of the first page.
     # elif filepath.endswith('.pdf'):
     #     filepath = 'coa.png'
     #     pdf = pdfplumber.open(filepath)

@@ -12,10 +12,11 @@ This dataset consists of analyte data for various analytes that are regularly te
 
 The dataset is partitioned into 18 subsets for each state and the aggregate.
 
-| State | Code | Status |
-|  [All](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/analytes.json) |  `all` | ✅ |
-|  [Cannabinoids](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/cannabinoids.json) |  `cannabinoids` | ✅ |
-|  [Terpenes](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/terpenes.json) |  `terpenes` | ✅ |
+| Subset | Code | Status |
+|-------|------|--------|
+|  [All](https://huggingface.co/datasets/cannlytics/cannabis_analytes/tree/main/data/analytes.json) |  `all` | ✅ |
+|  [Cannabinoids](https://huggingface.co/datasets/cannlytics/cannabis_analytes/tree/main/data/cannabinoids.json) |  `cannabinoids` | ✅ |
+|  [Terpenes](https://huggingface.co/datasets/cannlytics/cannabis_analytes/tree/main/data/terpenes.json) |  `terpenes` | ✅ |
 |  Pesticides |  `pesticides` | ⏳ Coming soon |
 |  Microbes |  `microbes` | ⏳ Coming soon |
 |  Heavy metals |  `heavy_metals` | ⏳ Coming soon |
@@ -30,15 +31,15 @@ You can load all the analytes, or the analytes for a specific test. For example:
 from datasets import load_dataset
 
 # Get all of the analytes
-dataset = load_dataset('cannlytics/cannabis_licenses', 'all')
+dataset = load_dataset('cannlytics/cannabis_analytes', 'all')
 analytes = dataset['data']
 
 # Get the cannabinoids.
-dataset = load_dataset('cannlytics/cannabis_licenses', 'cannabinoids')
+dataset = load_dataset('cannlytics/cannabis_analytes', 'cannabinoids')
 terpenes = dataset['data']
 
 # Get the terpenes.
-dataset = load_dataset('cannlytics/cannabis_licenses', 'terpenes')
+dataset = load_dataset('cannlytics/cannabis_analytes', 'terpenes')
 terpenes = dataset['data']
 ```
 
@@ -69,3 +70,52 @@ Below is a non-exhaustive list of fields used to standardize the various data th
 | `image_url`                  | `"https://example.com/image.jpg"`            | URL of an image representing the analyte.                                                            |
 | `chemical_formula_image_url` | `"https://example.com/formula_image.jpg"`    | URL of an image representing the chemical formula of the analyte.                                    |
 
+## Data Splits
+
+The data is split into subsets by analysis. You can retrieve all analytes by requesting the `all` subset.
+
+```py
+from datasets import load_dataset
+
+# Get all cannabis licenses.
+dataset = load_dataset('cannlytics/cannabis_analytes', 'all')
+data = dataset['data']
+```
+
+## Curation Rationale
+
+This dataset provides a standard set of analyte data for [cannabis tests](https://huggingface.co/datasets/cannlytics/cannabis_tests).
+
+## Data Collection and Normalization
+
+The `get_cannabis_analytes.py` routine is used to normalize values collected from Wikipedia.
+
+## Known Limitations
+
+The datasets are not complete and may include inaccurate information.
+
+## Dataset Curators
+
+Curated by [🔥Cannlytics](https://cannlytics.com)<br>
+<contact@cannlytics.com>
+
+## License
+
+```
+Copyright (c) 2023 Cannlytics
+
+The files associated with this dataset are licensed under a 
+Creative Commons Attribution 4.0 International license.
+
+You can share, copy and modify this dataset so long as you give
+appropriate credit, provide a link to the CC BY license, and
+indicate if changes were made, but you may not do so in a way
+that suggests the rights holder has endorsed you or your use of
+the dataset. Note that further permission may be required for
+any content within the dataset that is identified as belonging
+to a third party.
+```
+
+## Contributions
+
+Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@keeganskeate](https://github.com/keeganskeate), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.

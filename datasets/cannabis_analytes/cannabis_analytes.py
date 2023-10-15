@@ -35,7 +35,7 @@ _CITATION = """\
 
 # Define subsets.
 SUBSETS = [
-    # 'all',
+    'all',
     'cannabinoids',
     'terpenes',
 ]
@@ -103,6 +103,8 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         subset = self.config.name
+        if subset == 'all':
+            subset = 'analytes'
         data_url = f'data/{subset}.json'
         urls = {subset: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
