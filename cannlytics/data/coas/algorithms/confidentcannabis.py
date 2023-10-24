@@ -160,6 +160,8 @@ def parse_cc_url(
     obs = {'lims': 'Confident Cannabis'}
 
     # Find the sample image.
+    # FIXME: Need to find the image with URL like this:
+    # https://orders-confidentcannabis.imgix.net/samples/1909CH0015.0074/images/52de710b-5875-4903-b7f0-8b87f132ebf7?auto=enhance&fit=fill&bg=ffffff&w=287&h=260
     try:
         el = parser.driver.find_element(
             by=By.CLASS_NAME,

@@ -1713,6 +1713,10 @@ class CoADoc:
                 image = cv2.imread(filename.filename)
             except:
                 raise ValueError('`filename` must be a string or Image.')
+        
+        # Handle invalid images.
+        if image is None:
+            raise ValueError('`filename` must be a valid image.')
 
         # If the temp path has any extension, then use it as the outfile.
         if os.path.splitext(temp_path)[1] != '':

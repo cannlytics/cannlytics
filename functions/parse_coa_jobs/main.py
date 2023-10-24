@@ -120,6 +120,7 @@ def parse_coa_jobs(event, context) -> None:
         lab_result_data = {}
 
     # Once the request is complete, update the job.
+    # FIXME: Ensure the date is correct.
     end_time = datetime.now()
     if response.status_code == 200:
         job_data = {
