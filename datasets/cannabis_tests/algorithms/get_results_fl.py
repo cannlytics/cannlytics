@@ -234,7 +234,10 @@ def download_coas_kaycha(
             values = [x.text for x in spans]
             for k, value in enumerate(values):
                 observation[columns[k]] = value
-            observation['download_url'] = links[n]
+            try:
+                observation['download_url'] = links[n]
+            except:
+                continue
             if dba is not None:
                 observation['business_dba_name'] = dba
             if producer_license_number is not None:

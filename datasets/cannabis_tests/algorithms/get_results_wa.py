@@ -232,7 +232,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
+    data_dir = f'{base}/CCRS PRR (9-5-23)/CCRS PRR (9-5-23)/'
     stats_dir = f'../data/wa'
     manager = CCRS()
     lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)

@@ -429,7 +429,7 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
+    data_dir = f'{base}/CCRS PRR (9-5-23)/CCRS PRR (9-5-23)/'
     stats_dir = f'../data/wa'
     manager = CCRS()
     curate_ccrs_inventory(manager, data_dir, stats_dir)

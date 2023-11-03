@@ -53,12 +53,12 @@ def auth_signup(data, context):
         entry = {
             'created_at': created_at,
             'support': 'free',
-            'tokens': 10,
+            'tokens': 50,
             'uid': uid,
             'email': user_email,
         }
         firebase.update_document(f'subscribers/{uid}', entry)
-        print('Added 10 tokens for user: %s' % uid)
+        print('Added 50 tokens for user: %s' % uid)
 
     # Create the user's profile in the database.
     ref = 'users/%s/public_user_data/profile' % uid

@@ -476,7 +476,9 @@ if __name__ == '__main__':
                 timestamp = datetime.now().isoformat()[:19].replace(':', '-')
                 error_file = f'{COA_DATA_DIR}/rawgarden-unidentified-coas-{timestamp}.xlsx'
                 products.loc[products['coa_pdf'].isin(errors)].to_excel(error_file)
-
+    
+    # === Data saving ===
+    
     # # Create hashes.
     # coa_df = coa_df.where(pd.notnull(coa_df), None)
     # coa_df['results_hash'] = coa_df['results'].apply(
@@ -487,6 +489,22 @@ if __name__ == '__main__':
     #     axis=1,
     # )
     # datafile_hash = create_hash(coa_df)
+
+    # Save Raw Garden COA data as JSON.
+    coa_data = pd.DataFrame(parsed)
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    data_dir = 'D://data/california/lab_results'
+    outfile = os.path.join(data_dir, f'rawgarden-coa-data-{timestamp}.json')
+    coa_data.to_json(outfile, orient='records')
+    print('Saved Raw Garden lab results:', outfile)
+
+    # Save Raw Garden COA datafile.
+    coa_data = pd.DataFrame(parsed)
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    outfile = os.path.join(data_dir, f'rawgarden-coa-data-{timestamp}.xlsx')
+    parser.save(coa_data[:1000], outfile)
+    print('Saved Raw Garden lab results:', outfile)
+
 
     # === Data Aggregation ===
 
