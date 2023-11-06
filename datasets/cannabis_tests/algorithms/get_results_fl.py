@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 8/14/2023
+Updated: 11/5/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,6 +36,8 @@ Resources:
 # Standard imports:
 from datetime import datetime
 import os
+import random
+import string
 import tempfile
 from time import sleep
 from typing import Optional
@@ -622,155 +624,154 @@ if __name__ == '__main__':
 
 
 #-----------------------------------------------------------------------
-# FIXME: TerpLife Labs.
+# Download TerpLife Labs COAs.
 #-----------------------------------------------------------------------
 
-def get_search_box(driver):
-    """Find the search box and enter text."""
-    inputs = driver.find_elements(By.TAG_NAME, 'input')
-    for input in inputs:
-        if input.get_attribute('placeholder') == 'Enter a keyword to search':
-            return input
-    return None
+class TerpLifeLabs:
+    """Download lab results from TerpLife Labs."""
 
-def query_search_box(driver, character):
-    """Query the search box."""
-    search_box = get_search_box()
-    driver.execute_script("arguments[0].scrollIntoView();", search_box)
-    sleep(0.3)
-    search_box.clear()
-    search_box.send_keys(character)
+    def __init__(self, data_dir):
+        """Initialize the driver and directories."""
+        self.data_dir = data_dir
+        self.datasets_dir = os.path.join(data_dir, '.datasets')
+        self.pdf_dir = os.path.join(self.datasets_dir, 'pdfs')
+        self.license_pdf_dir = os.path.join(self.pdf_dir, 'terplife')
+        if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
+        if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
+        if not os.path.exists(self.license_pdf_dir): os.makedirs(self.license_pdf_dir)
+        self.driver = self.initialize_selenium()
 
+    def get_results_terplife(
+            self,
+            queries: list,
+            url='https://www.terplifelabs.com/coa/',
+            wait=60,
+        ):
+        """Get lab results published by TerpLife Labs on the public web."""
+        start = datetime.now()
+        self.driver.get(url)
+        sleep(1)
+        for query in queries:
+            print('Querying: %s' % query)
+            self.query_search_box(query)
+            self.download_search_results(wait=wait)
+        end = datetime.now()
+        print('Finished downloading TerpLife Labs COAs.')
+        print('Time elapsed: %s' % str(end - start))
 
-def download_search_results(driver, license_pdf_dir, wait=10):
-    """Download the results of a search."""
+    def download_search_results(self, wait=60):
+        """Download the results of a search."""
+        # FIXME: Wait for the table to load instead of simply waiting.
+        sleep(wait)
+        load = EC.presence_of_element_located((By.CLASS_NAME, 'file-list'))
+        table = WebDriverWait(self.driver, wait).until(load)
+        rows = table.find_elements(By.CLASS_NAME, 'file-item')
+        print('Found %i rows.' % len(rows))
+        for row in rows:
 
-    # Get all of the rows.
-    # table = driver.find_element(By.CLASS_NAME, 'file-list')
-    table = WebDriverWait(driver, wait).until(
-        EC.presence_of_element_located((By.CLASS_NAME, 'file-item'))
-    )
-    rows = table.find_elements(By.CLASS_NAME, 'file-item')
+            # Skip if the file has already be downloaded.
+            try:
+                file_name = row.find_element(By.CLASS_NAME, 'file-item-name').text
+                if file_name == 'COAS':
+                    continue
+                outfile = os.path.join(self.license_pdf_dir, file_name)
+                if os.path.exists(outfile):
+                    print('Cached: %s' % outfile)
+                    continue
+            except:
+                print('ERROR FINDING: %s' % file_name)
+                sleep(60)
+                break
 
-    # Download COA PDFs for each row.
-    for row in rows:
+            # Click on the icons for each row.
+            try:
+                self.driver.execute_script('arguments[0].scrollIntoView();', row)
+                sleep(3.33)
+                row.click()
+            except:
+                print('ERROR CLICKING: %s' % file_name)
+                continue
 
-        # Skip if the file has already be downloaded.
-        file_name = row.find_element(By.CLASS_NAME, 'file-item-name').text
-        outfile = os.path.join(license_pdf_dir, file_name)
-        if os.path.exists(outfile):
-            continue
+            # Click the download button.
+            try:
+                sleep(random.uniform(30, 31))
+                download_button = self.driver.find_element(By.CLASS_NAME, 'lg-download')
+                download_button.click()
+                print('Downloading: %s' % file_name)
+                # FIXME: Properly wait for the download to finish.
+                sleep(random.uniform(30, 31))
+            except:
+                print('ERROR DOWNLOADING: %s' % file_name)
+                continue
 
-        # Click on the icons for each row.
-        driver.execute_script("arguments[0].scrollIntoView();", row)
-        sleep(3.33)
-        row.click()
+            # Click the close button.
+            try:
+                close_button = self.driver.find_element(By.CLASS_NAME, 'lg-close')
+                close_button.click()
+            except:
+                print('ERROR CLOSING: %s' % file_name)
 
-        # Click the download button.
-        sleep(3.33)
-        download_button = driver.find_element(By.CLASS_NAME, 'lg-download')
-        download_button.click()
+    def query_search_box(self, character):
+        """Find the search box and enter text."""
+        search_box = self.get_search_box()
+        self.driver.execute_script('arguments[0].scrollIntoView();', search_box)
+        sleep(0.3)
+        search_box.clear()
+        search_box.send_keys(character)
+        sleep(0.3)
+        search_button = search_box.find_element(By.XPATH, 'following-sibling::*[1]')
+        search_button.click()
 
-        # Click the close button.
-        try:
-            sleep(3.33)
-            close_button = driver.find_element(By.CLASS_NAME, 'lg-close')
-            close_button.click()
-        except:
-            # Return unsuccessful completion.
-            print('LARGE FILE: %s' % file_name)
-            return False
-    
-    # Return successful completion.
-    return True
+    def get_search_box(self):
+        """Find the search box and enter text."""
+        inputs = self.driver.find_elements(By.TAG_NAME, 'input')
+        for input in inputs:
+            if input.get_attribute('placeholder') == 'Enter a keyword to search':
+                return input
+        return None
 
-
-# def get_results_terplife(
-#         url = 'https://www.terplifelabs.com/coa/',
-#     ):
-#     """Get lab results published by TerpLife Labs on the public web."""
-
-
-
-# DEV:
-# === Test ===
-if __name__ == '__main__' and False:
-
-    url = 'https://www.terplifelabs.com/coa/'
-
-
-    # Create an output directory.
-    datasets_dir = os.path.join(DATA_DIR, '.datasets')
-    if not os.path.exists(datasets_dir):
-        os.makedirs(datasets_dir)
-
-    # Create a directory for COA PDFs.
-    pdf_dir = os.path.join(datasets_dir, 'pdfs')
-    if not os.path.exists(pdf_dir):
-        os.makedirs(pdf_dir)
-
-    # Create a directory for TerpLife Labs.
-    license_pdf_dir = os.path.join(pdf_dir, 'terplife')
-    if not os.path.exists(license_pdf_dir):
-        os.makedirs(license_pdf_dir)
-
-    # Initialize Selenium.
-    try:
+    def initialize_selenium(self):
+        """Initialize Selenium."""
         service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        driver = webdriver.Chrome(options=options, service=service)
-    except:
-        options = EdgeOptions()
-        options.add_experimental_option('prefs', {
-            'download.default_directory': 'D:\\data\\florida\\lab_results\\.datasets\\pdfs\\terplife',
+        prefs = {
+            # FIXME: Does this need an absolute reference?
+            'download.default_directory': self.license_pdf_dir,
+            # 'download.default_directory': r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
             'download.prompt_for_download': False,
             'download.directory_upgrade': True,
-            'plugins.always_open_pdf_externally': True,
-        })
-        driver = webdriver.Edge(options=options)
+            'plugins.always_open_pdf_externally': True
+        }
+        # try:
+        #     options = Options()
+        #     options.add_argument('--window-size=1920,1200')
+        #     options.add_argument('--headless')
+        #     options.add_argument('--disable-gpu')
+        #     options.add_argument('--no-sandbox')
+        #     options.add_experimental_option('prefs', prefs)
+        #     service = Service()
+        #     driver = webdriver.Chrome(options=options, service=service)
+        # except:
+        options = EdgeOptions()
+        options.add_experimental_option('prefs', prefs)
+        # options.add_argument('--headless')
+        driver = webdriver.Edge(options=options, service=service)
+        return driver
 
-    # Open the website.
-    driver.get(url)
-    sleep(1)
+    def quit(self):
+        """Close the driver."""
+        self.driver.quit()
 
-    # FIXME: Iterate through the alphabet.
-    # alphabet = ['z']
-    # for character in alphabet:
-    character = 'z'
 
-    # Query the results.
-    query_search_box(driver, character)
+# === Test ===
+if __name__ == '__main__':
 
-    # Download files until all have been downloaded.
-    iterate = True
-    while iterate:
-
-        # Stop iteration once all rows are downloaded.
-        success = download_search_results(driver, license_pdf_dir)
-        if success:
-            iterate = False
-
-        # Otherwise, download large files.
-        drive_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, 'uc-download-link'))
-        )
-        drive_button.click()
-
-        # Go back.
-        driver.back()
-
-        # FIXME: Re-search.
-        query_search_box(driver, character)
-
-    # Close the browser
-    driver.quit()
-
-    # TODO: Return the COA PDF paths.
-    # return []
+    # Download TerpLife Labs COAs.
+    queries = [x for x in string.ascii_lowercase]
+    queries.reverse()
+    DATA_DIR = 'D://data/florida/lab_results'
+    downloader = TerpLifeLabs(DATA_DIR)
+    downloader.get_results_terplife(queries)
+    downloader.quit()
 
 
 # TODO: Search TerpLife for known strains.

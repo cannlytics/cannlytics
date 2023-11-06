@@ -15,19 +15,12 @@ Description:
 Data Points:
 
     - analyses
-    - {analysis}_method
-    - {analysis}_status
+    - methods
+    - status
     - coa_urls
     - date_collected
     - date_tested
     - date_received
-    - distributor
-    - distributor_address
-    - distributor_street
-    - distributor_city
-    - distributor_state
-    - distributor_zipcode
-    - distributor_license_number
     - images
     - lab_results_url
     - producer
@@ -53,10 +46,6 @@ Data Points:
     - total_cannabinoids
     - total_thc
     - total_cbd
-    - total_cbg
-    - total_thcv
-    - total_cbc
-    - total_cbdv
     - total_terpenes
     - sample_id
     - strain_name (augmented)
@@ -176,6 +165,29 @@ if __name__ == '__main__':
 
     # [ ] TEST: Identify LIMS.
     parser = CoADoc()
-    doc = ''
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229%20TLMB0216202301.pdf'
     lims = parser.identify_lims(doc, lims={'TerpLife Labs': TERPLIFE_LABS})
     assert lims == 'TerpLife Labs'
+
+    # [ ] TEST: Parse a full-panel COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229%20TLMB0216202301.pdf'
+
+
+    # [ ] TEST: Parse a cannabinoid and terpene COA.
+
+
+    # [ ] TEST: Parse a R&D COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
+
+
+    # [ ] TEST: Parse a COA that requires OCR.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU090222-9534DD.pdf'
+
+
+    # [ ] TEST: Parse a cannabinoid-only COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
+
+    # === DEV ===
+    report = pdfplumber.open(doc)
+    front_page_text = report.pages[0].extract_text()
+
