@@ -735,8 +735,8 @@ class TerpLifeLabs:
         service = Service()
         prefs = {
             # FIXME: Does this need an absolute reference?
-            'download.default_directory': self.license_pdf_dir,
-            # 'download.default_directory': r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
+            # 'download.default_directory': self.license_pdf_dir,
+            'download.default_directory': r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
             'download.prompt_for_download': False,
             'download.directory_upgrade': True,
             'plugins.always_open_pdf_externally': True
@@ -766,8 +766,15 @@ class TerpLifeLabs:
 if __name__ == '__main__':
 
     # Download TerpLife Labs COAs.
-    queries = [x for x in string.ascii_lowercase]
-    queries.reverse()
+    # queries = ['h' + x for x in string.ascii_lowercase]
+    # queries.extend(['d' + x for x in string.ascii_lowercase])
+    # queries.extend(['e' + x for x in string.ascii_lowercase])
+    # queries.extend(['f' + x for x in string.ascii_lowercase])
+    # queries.extend(['g' + x for x in string.ascii_lowercase])
+    specific_letters = [x for x in string.ascii_lowercase]
+    queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
+    queries = queries[78:]
+    # queries.reverse()
     DATA_DIR = 'D://data/florida/lab_results'
     downloader = TerpLifeLabs(DATA_DIR)
     downloader.get_results_terplife(queries)

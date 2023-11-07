@@ -164,13 +164,13 @@ if __name__ == '__main__':
     from dotenv import dotenv_values
 
     # [ ] TEST: Identify LIMS.
-    parser = CoADoc()
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229%20TLMB0216202301.pdf'
-    lims = parser.identify_lims(doc, lims={'TerpLife Labs': TERPLIFE_LABS})
-    assert lims == 'TerpLife Labs'
+    # parser = CoADoc()
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229%20TLMB0216202301.pdf'
+    # lims = parser.identify_lims(doc, lims={'TerpLife Labs': TERPLIFE_LABS})
+    # assert lims == 'TerpLife Labs'
 
     # [ ] TEST: Parse a full-panel COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229%20TLMB0216202301.pdf'
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
 
 
     # [ ] TEST: Parse a cannabinoid and terpene COA.
@@ -188,6 +188,26 @@ if __name__ == '__main__':
     doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
 
     # === DEV ===
+    import os
+
+    # Initialize the parser.
+    parser = CoADoc()
+
+    # Get the front page text.
     report = pdfplumber.open(doc)
+    front_page = report.pages[0]
     front_page_text = report.pages[0].extract_text()
+
+    # Get the image data.
+    image_file = doc.split('/')[-1].replace('.pdf', '.png')
+    image_dir = 'D:/data/florida/lab_results/.datasets/images/terplife'
+    images = front_page.images
+
+    # Determine the largest image by pixel area using width and height.
+    image_index, _ = max(
+        enumerate(front_page.images),
+        key=lambda img: img[1]['width'] * img[1]['height']
+    )
+    image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
+    parser.save_image_data(image_data, os.path.join(image_dir, image_file))
 
