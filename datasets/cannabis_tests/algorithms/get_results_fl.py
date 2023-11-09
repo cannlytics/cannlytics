@@ -387,7 +387,7 @@ def parse_results_kaycha(
 
 
 # === Test ===
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
@@ -613,7 +613,7 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 
 
 # === Test ===
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
@@ -645,7 +645,7 @@ class TerpLifeLabs:
             self,
             queries: list,
             url='https://www.terplifelabs.com/coa/',
-            wait=60,
+            wait=30,
         ):
         """Get lab results published by TerpLife Labs on the public web."""
         start = datetime.now()
@@ -659,7 +659,7 @@ class TerpLifeLabs:
         print('Finished downloading TerpLife Labs COAs.')
         print('Time elapsed: %s' % str(end - start))
 
-    def download_search_results(self, wait=60):
+    def download_search_results(self, wait=30):
         """Download the results of a search."""
         # FIXME: Wait for the table to load instead of simply waiting.
         sleep(wait)
@@ -730,7 +730,7 @@ class TerpLifeLabs:
                 return input
         return None
 
-    def initialize_selenium(self):
+    def initialize_selenium(self, headless=False):
         """Initialize Selenium."""
         service = Service()
         prefs = {
@@ -741,20 +741,21 @@ class TerpLifeLabs:
             'download.directory_upgrade': True,
             'plugins.always_open_pdf_externally': True
         }
-        # try:
-        #     options = Options()
-        #     options.add_argument('--window-size=1920,1200')
-        #     options.add_argument('--headless')
-        #     options.add_argument('--disable-gpu')
-        #     options.add_argument('--no-sandbox')
-        #     options.add_experimental_option('prefs', prefs)
-        #     service = Service()
-        #     driver = webdriver.Chrome(options=options, service=service)
-        # except:
-        options = EdgeOptions()
-        options.add_experimental_option('prefs', prefs)
-        # options.add_argument('--headless')
-        driver = webdriver.Edge(options=options, service=service)
+        try:
+            options = EdgeOptions()
+            options.add_experimental_option('prefs', prefs)
+            if headless:
+                options.add_argument('--headless')
+            driver = webdriver.Edge(options=options, service=service)
+        except:
+            options = Options()
+            options.add_argument('--window-size=1920,1200')
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--no-sandbox')
+            options.add_experimental_option('prefs', prefs)
+            service = Service()
+            driver = webdriver.Chrome(options=options, service=service)
         return driver
 
     def quit(self):
@@ -765,23 +766,28 @@ class TerpLifeLabs:
 # === Test ===
 if __name__ == '__main__':
 
-    # Download TerpLife Labs COAs.
-    # queries = ['h' + x for x in string.ascii_lowercase]
-    # queries.extend(['d' + x for x in string.ascii_lowercase])
-    # queries.extend(['e' + x for x in string.ascii_lowercase])
-    # queries.extend(['f' + x for x in string.ascii_lowercase])
-    # queries.extend(['g' + x for x in string.ascii_lowercase])
+    import itertools
+
+
+    # Download TerpLife Labs COAs by digit and alphabetic.
+    digits = [str(x) for x in range(10)]
+    combinations = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
     specific_letters = [x for x in string.ascii_lowercase]
     queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
-    queries = queries[78:]
+    # queries = queries[30:]
+    # combinations.reverse()
+    # queries = combinations + digits + queries
     # queries.reverse()
+    # Random list of queries.
+    # queries = [''.join(random.choices(string.ascii_lowercase, k=2)) for x in range(100)]
+    # queries = queries[200:300]
     DATA_DIR = 'D://data/florida/lab_results'
     downloader = TerpLifeLabs(DATA_DIR)
-    downloader.get_results_terplife(queries)
+    downloader.get_results_terplife(queries[18:])
     downloader.quit()
 
 
-# TODO: Search TerpLife for known strains.
+# Optional: Search TerpLife for known strains.
 
 # TODO: Parse TerpLife Labs COA PDF.
 
@@ -832,65 +838,65 @@ if __name__ == '__main__':
 # labels_dir = ''
 # qr_codes_dir = ''
 
-import os
-import requests
+# import os
+# import requests
 
-# List of URLs
-urls = [
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRTI3OV8yNDEyNzAwMDM4MjU0NzZfMDMwOTIwMjNfNjQwYTcyMTFmMTAyMA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRDk5MV81NzEwNjAwMDM3MTk4MzRfMDMwNjIwMjNfNjQwNjgyN2Y2ZjU4Mg==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDc5N18zMjE1NjAwMDM5ODYxMzZfMDQxMDIwMjNfNjQzNDlhNTJlMmRlYg==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTk5MF8yOTM1MzAwMDM5NDA2MjBfMDQyMTIwMjNfNjQ0MmFhNTJlYjcxMw==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjM5MV8yOTUyNzAwMDQxMzQ3ODZfMDQyNTIwMjNfNjQ0ODFlOTQ1NDBlNQ==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRjg3MV80OTQ0NzAwMDQwNDgxODVfMDMyMzIwMjNfNjQxY2FmNTllYjcxMA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQTU4NF81NTMxMjAwMDM3ODAxNTBfMDEzMDIwMjNfNjNkODZjNGI2MzQxZQ==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDSDEyMl8yNjU4LTE1OTQtNjk5NC0yNjg5XzEyMjgyMDIxXzYxY2I1MDA1M2YxZjk=",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjQ4OF81NTMwMDAwMDI4OTQ2MzNfMDIxMDIwMjNfNjNlNmM3N2Y1OWJjYw==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjE5OV8xODM2MTAwMDM3MDUzNzVfMDIwODIwMjNfNjNlM2M5ZmMyMzY4ZQ==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzAwOS1ETFItNDEtU1RQQS1MUkM1LTA1MDEyMDIz",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEWjQ5Ny0xMjE0MjItOTlQUi1SMzUtMDEyMTIwMjM=",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzI3Ny1JRDI0Mi1MUi1RU0ZHLUxSNS0wNTAzMjAyMw==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjU1Ml81NTc3MzAwMDQwOTUwNzJfMDQyODIwMjNfNjQ0YzFmNjc4YjM3Mg==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDkxMS0wMzA2MjMtREJTRC1TSC1TRzM1LTA0MTAyMDIz",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEUTY3MV80OTQ0NzAwMDM0NDUwMTlfMTEwMTIwMjJfNjM2MWM3Y2Q5MGM3MA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzc4M180OTQ0NzAwMDM4NzY5MzZfMDUwOTIwMjNfNjQ1YTUwNWE2OTFmNA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDWjkxNl8xODM2MzAwMDI0NDc4NzlSMl8wNjI3MjAyMl82MmI5Y2E4YTI5YmI3",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzcwM180OTQ0ODAwMDQxMzYyNjhfMDUwODIwMjNfNjQ1OTVkNjgxMzExZA==",
-    "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw==",
-    "https://salve-platform-production-pub-1.s3.amazonaws.com/10877/DA30425010-002-%28Original%29-%281%29.pdf",
-    "https://salve-platform-production-pub-1.s3.amazonaws.com/11319/DA30512010-006-%28Original%29.pdf",
-    "https://salve-platform-production-pub-1.s3.amazonaws.com/11432/DA30518009-001-%28Original%29.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30412005-002-Revision-2-1.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30330009-005-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/05/DA30429001-005-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30411005-004-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30309007-004-Original-1.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30225012-006-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/T304067-FTH-Dragon-Fruit-WF-3.5g-1-8oz.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30304005-002-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30309007-003-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30325005-007-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30223006-006-Revision-1.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30316004-009-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30316005-002-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30311007-004-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2022/01/DA11229005-002.pdf",
-    "https://getfluent.com/wp-content/uploads/2022/01/DA20104001-010.pdf",
-    "https://getfluent.com/wp-content/uploads/2022/01/Super-Jack-WF-3.5-g.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30407004-006-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/03/DA30314003-001-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30402002-002-Original.pdf",
-    "https://getfluent.com/wp-content/uploads/2023/04/DA30406008-001-Original.pdf",
-    "https://jungleboysflorida.com/wp-content/uploads/2023/04/Puro-Loco-Prem-Fl-02156-DA30415006-009-marketing.pdf",
-    "https://jungleboysflorida.com/wp-content/uploads/2023/04/Frozen-Grapes-Prem-Flower-02058-DA30414007-001-marketing.pdf",
-    "https://yourcoa.com/coa/coa-download?sample=DA20708002-010",
-    "https://yourcoa.com/coa/coa-download?sample=DA30314006-007-mrk",
-    "https://www.trulieve.com/files/lab-results/35603_0001748379.pdf",
-]
+# # List of URLs
+# urls = [
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRTI3OV8yNDEyNzAwMDM4MjU0NzZfMDMwOTIwMjNfNjQwYTcyMTFmMTAyMA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRDk5MV81NzEwNjAwMDM3MTk4MzRfMDMwNjIwMjNfNjQwNjgyN2Y2ZjU4Mg==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDc5N18zMjE1NjAwMDM5ODYxMzZfMDQxMDIwMjNfNjQzNDlhNTJlMmRlYg==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTk5MF8yOTM1MzAwMDM5NDA2MjBfMDQyMTIwMjNfNjQ0MmFhNTJlYjcxMw==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjM5MV8yOTUyNzAwMDQxMzQ3ODZfMDQyNTIwMjNfNjQ0ODFlOTQ1NDBlNQ==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFRjg3MV80OTQ0NzAwMDQwNDgxODVfMDMyMzIwMjNfNjQxY2FmNTllYjcxMA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQTU4NF81NTMxMjAwMDM3ODAxNTBfMDEzMDIwMjNfNjNkODZjNGI2MzQxZQ==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDSDEyMl8yNjU4LTE1OTQtNjk5NC0yNjg5XzEyMjgyMDIxXzYxY2I1MDA1M2YxZjk=",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjQ4OF81NTMwMDAwMDI4OTQ2MzNfMDIxMDIwMjNfNjNlNmM3N2Y1OWJjYw==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQjE5OV8xODM2MTAwMDM3MDUzNzVfMDIwODIwMjNfNjNlM2M5ZmMyMzY4ZQ==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzAwOS1ETFItNDEtU1RQQS1MUkM1LTA1MDEyMDIz",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEWjQ5Ny0xMjE0MjItOTlQUi1SMzUtMDEyMTIwMjM=",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzI3Ny1JRDI0Mi1MUi1RU0ZHLUxSNS0wNTAzMjAyMw==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSjU1Ml81NTc3MzAwMDQwOTUwNzJfMDQyODIwMjNfNjQ0YzFmNjc4YjM3Mg==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFESzE5NV8xODM2MjAwMDMwNTk0MTFfMDkxNTIwMjJfNjMyMzk5M2Y2NTU4MA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSTYyOF82MzQyMjAwMDQwNDU4MjFfMDQxOTIwMjNfNjQzZmVjNDliNzk4MQ==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSDkxMS0wMzA2MjMtREJTRC1TSC1TRzM1LTA0MTAyMDIz",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEUTY3MV80OTQ0NzAwMDM0NDUwMTlfMTEwMTIwMjJfNjM2MWM3Y2Q5MGM3MA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzc4M180OTQ0NzAwMDM4NzY5MzZfMDUwOTIwMjNfNjQ1YTUwNWE2OTFmNA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFDWjkxNl8xODM2MzAwMDI0NDc4NzlSMl8wNjI3MjAyMl82MmI5Y2E4YTI5YmI3",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFSzcwM180OTQ0ODAwMDQxMzYyNjhfMDUwODIwMjNfNjQ1OTVkNjgxMzExZA==",
+#     "https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw==",
+#     "https://salve-platform-production-pub-1.s3.amazonaws.com/10877/DA30425010-002-%28Original%29-%281%29.pdf",
+#     "https://salve-platform-production-pub-1.s3.amazonaws.com/11319/DA30512010-006-%28Original%29.pdf",
+#     "https://salve-platform-production-pub-1.s3.amazonaws.com/11432/DA30518009-001-%28Original%29.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30412005-002-Revision-2-1.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30330009-005-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/05/DA30429001-005-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30411005-004-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30309007-004-Original-1.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30225012-006-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/T304067-FTH-Dragon-Fruit-WF-3.5g-1-8oz.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30304005-002-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30309007-003-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30325005-007-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30223006-006-Revision-1.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30316004-009-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30316005-002-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30311007-004-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2022/01/DA11229005-002.pdf",
+#     "https://getfluent.com/wp-content/uploads/2022/01/DA20104001-010.pdf",
+#     "https://getfluent.com/wp-content/uploads/2022/01/Super-Jack-WF-3.5-g.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30407004-006-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/03/DA30314003-001-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30402002-002-Original.pdf",
+#     "https://getfluent.com/wp-content/uploads/2023/04/DA30406008-001-Original.pdf",
+#     "https://jungleboysflorida.com/wp-content/uploads/2023/04/Puro-Loco-Prem-Fl-02156-DA30415006-009-marketing.pdf",
+#     "https://jungleboysflorida.com/wp-content/uploads/2023/04/Frozen-Grapes-Prem-Flower-02058-DA30414007-001-marketing.pdf",
+#     "https://yourcoa.com/coa/coa-download?sample=DA20708002-010",
+#     "https://yourcoa.com/coa/coa-download?sample=DA30314006-007-mrk",
+#     "https://www.trulieve.com/files/lab-results/35603_0001748379.pdf",
+# ]
 
 # # Folder where you want to save the files
 # download_folder = r"../../../.datasets/coas/fl-coas"
