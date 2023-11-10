@@ -768,22 +768,68 @@ if __name__ == '__main__':
 
     import itertools
 
+    # # Drill down on:
+    # long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
+    #                 'io', 'ie', 'fm', 'bu', 'bf', 'at', 'aq', 'ao']
+    # long_digits = ['81', '61', '51', '41', '40', '30', '20']
+
+    # # Function to add digits 0-9 to each string in a list
+    # def add_digits(strings):
+    #     return [s + str(digit) for s in strings for digit in range(10)]
+
+    # # Function to add letters a-z to each string in a list
+    # def add_letters(strings):
+    #     return [s + letter for s in strings for letter in string.ascii_lowercase]
+
+    # # Create new lists with the combinations
+    # combined_letters = add_letters(long_letters)
+    # combined_digits = add_digits(long_digits)
+
+    # # Printing the result
+    # print("Combinations with letters:")
+    # print(combined_letters)
+    # print("\nCombinations with digits:")
+    # print(combined_digits)
+
+    def get_day_month_combinations():
+        """Get all day-month combinations."""
+        day_month_combinations = []
+        for month in range(1, 13):
+            if month in [4, 6, 9, 11]:
+                days_in_month = 30
+            elif month == 2:
+                days_in_month = 29
+            else:
+                days_in_month = 31
+            for day in range(1, days_in_month + 1):
+                formatted_month = f'{month:02d}'
+                formatted_day = f'{day:02d}'
+                combination = formatted_month + formatted_day
+                day_month_combinations.append(combination)
+        return day_month_combinations
+
+    # Printing the result
+    day_month_combinations = get_day_month_combinations()
+    print(day_month_combinations)
 
     # Download TerpLife Labs COAs by digit and alphabetic.
-    digits = [str(x) for x in range(10)]
-    combinations = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
-    specific_letters = [x for x in string.ascii_lowercase]
-    queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
+    queries = day_month_combinations
+    # digits = [str(x) for x in range(10)]
+    # combinations = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+    # specific_letters = [x for x in string.ascii_lowercase]
+    # queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
     # queries = queries[30:]
     # combinations.reverse()
     # queries = combinations + digits + queries
-    # queries.reverse()
+    queries.reverse()
     # Random list of queries.
     # queries = [''.join(random.choices(string.ascii_lowercase, k=2)) for x in range(100)]
     # queries = queries[200:300]
+    # queries = combined_digits + combined_letters
+
     DATA_DIR = 'D://data/florida/lab_results'
     downloader = TerpLifeLabs(DATA_DIR)
-    downloader.get_results_terplife(queries[18:])
+    downloader.get_results_terplife(queries)
     downloader.quit()
 
 
