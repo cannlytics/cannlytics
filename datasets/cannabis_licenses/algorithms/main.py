@@ -73,6 +73,7 @@ ALGORITHMS = {
     # Future:
     # 'va': 'get_licenses_va',
     # 'mn': 'get_licenses_mn',
+    # 'oh': 'get_licenses_oh',
     # Medical:
     # 'al': 'get_licenses_al',
     # 'ar': 'get_licenses_ar',
@@ -82,7 +83,6 @@ ALGORITHMS = {
     # 'ms': 'get_licenses_ms',
     # 'nd': 'get_licenses_nd',
     # 'nh': 'get_licenses_nh',
-    # 'oh': 'get_licenses_oh',
     # 'ok': 'get_licenses_ok',
     # 'pa': 'get_licenses_pa',
     # 'sd': 'get_licenses_sd',
