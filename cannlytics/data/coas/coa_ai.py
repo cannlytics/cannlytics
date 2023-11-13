@@ -132,6 +132,12 @@ Where:
 """
 
 
+# TODO: Add "strategy" argument:
+# - one-shot (default): Try to parse all fields at once.
+# - lines: Try to parse each line separately.
+# - rubric
+
+
 def parse_coa_with_ai(
         parser: Any,
         doc: str,
@@ -468,6 +474,26 @@ def parse_coa_with_ai(
 
     # Return the data.
     return obs, prompts, cost
+
+
+# TODO: Parse components:
+# - parse_analyses
+# - parse_methods
+# - parse_date_tested
+# - parse_images
+#   * Get images and use AI Vision to get captions.
+# - parse_producer (and producer_address fields)
+# - parse_product_name (and strain_name)
+# - parse_product_type (and product_subtype)
+# - parse_details
+#   * - product_name
+#   * - lab_id
+#   * - batch_number
+#   * - product_size
+#   * - serving_size
+#   * - servings_per_package
+#   * - sample_weight
+# - parse_result
 
 
 # === Tests ===

@@ -44,6 +44,13 @@
   // "python.linting.pylintArgs": [
   //   "--disable=W0614"
   // ],
+  "workbench.colorCustomizations": {
+
+    "editorGutter.addedBackground": "#333",
+    // "editorGutter.deletedBackground": "#333",
+    // "editorGutter.modifiedBackground": "#333",
+    // "editor.background": "#333",
+   },
   "[python]": {
     "editor.insertSpaces": true,
     "editor.tabSize": 4,
@@ -141,6 +148,7 @@
     "Boscalid",
     "bot",
     "boxplot",
+    "Broward",
     "btgn",
     "BTGN",
     "bulnesene",

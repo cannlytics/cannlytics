@@ -21,7 +21,7 @@ Data Points:
     - date_collected
     - date_tested
     - date_received
-    - images
+    - image_url
     - lab_results_url
     - producer
     - producer_address
@@ -213,18 +213,17 @@ if __name__ == '__main__':
     lines = front_page_text.split('\n')
     lines = [x for x in lines if x != '']
 
-    # Get the image data.
+    # Save the product image.
     image_file = doc.split('/')[-1].replace('.pdf', '.png')
     image_dir = 'D:/data/florida/lab_results/.datasets/images/terplife'
     images = front_page.images
-
-    # Determine the largest image by pixel area using width and height.
     image_index, _ = max(
         enumerate(front_page.images),
         key=lambda img: img[1]['width'] * img[1]['height']
     )
     image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
     parser.save_image_data(image_data, os.path.join(image_dir, image_file))
+    # FIXME: Implement saving image to Firebase storage.
 
 
     # === Parse with AI ===
