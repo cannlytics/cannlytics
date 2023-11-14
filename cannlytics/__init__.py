@@ -12,7 +12,6 @@ import cannlytics.data as data
 import cannlytics.firebase as firebase
 import cannlytics.lims as lims
 import cannlytics.metrc as metrc
-import cannlytics.models as models
 import cannlytics.stats as stats
 import cannlytics.utils as utils
 
@@ -24,7 +23,6 @@ __all__ = [
     firebase,
     lims,
     metrc,
-    models,
     stats,
     utils,
 ]

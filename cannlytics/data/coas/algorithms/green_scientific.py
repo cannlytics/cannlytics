@@ -111,8 +111,6 @@ GREEN_SCIENTIFIC_LABS = {
 }
 
 
-
-
 # === DEV ===
 from cannlytics.data.coas import CoADoc
 
