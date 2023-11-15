@@ -97,6 +97,7 @@ from cannlytics.data.coas.algorithms.mcrlabs import MCR_LABS
 from cannlytics.data.coas.algorithms.sclabs import SC_LABS
 from cannlytics.data.coas.algorithms.sonoma import SONOMA
 from cannlytics.data.coas.algorithms.tagleaf import TAGLEAF
+from cannlytics.data.coas.algorithms.terplife import TERPLIFE_LABS
 from cannlytics.data.coas.algorithms.steephill import STEEPHILL
 from cannlytics.data.coas.algorithms.veda import VEDA_SCIENTIFIC
 
@@ -113,6 +114,7 @@ LIMS = {
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
+    'TerpLife Labs': TERPLIFE_LABS,
     'Steep Hill': STEEPHILL,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
