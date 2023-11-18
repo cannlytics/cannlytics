@@ -132,6 +132,23 @@ cannabinoids = [
 ]
 
 
+def extract_text_from_region(
+        page,
+        region_coords,
+        split_str=None,
+        section_str=None,
+        split_at=None,
+    ):
+    cropped_page = page.crop(region_coords)
+    text = cropped_page.extract_text()
+    if split_str and section_str:
+        section = text.split(split_str)[1].split(section_str)[0]
+        if split_at:
+            section = section.split(split_at)[-1]
+        return [x for x in section.split('\n') if x]
+    return text
+
+
 def parse_terplife_coa(
         parser,
         doc: Any,
@@ -666,37 +683,39 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
 
-    # [✓] TEST: Identify LIMS.
+    # Initialize the parser.
     parser = CoADoc(lims={'TerpLife Labs': TERPLIFE_LABS})
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    lims = parser.identify_lims(doc)
-    assert lims == 'TerpLife Labs'
-    print('Identified LIMS as', lims)
 
-    # [✓] TEST: Parse a full-panel COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed full-panel COA:', doc)
+    # # [✓] TEST: Identify LIMS.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    # lims = parser.identify_lims(doc)
+    # assert lims == 'TerpLife Labs'
+    # print('Identified LIMS as', lims)
 
-    # [ ] TEST: Parse a cannabinoid-only COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed cannabinoid-only COA:', doc)
+    # # [✓] TEST: Parse a full-panel COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed full-panel COA:', doc)
 
-    # [ ] TEST: Parse a cannabinoid and terpene COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed cannabinoid and terpene COA:', doc)
+    # # [✓] TEST: Parse a cannabinoid-only COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed cannabinoid-only COA:', doc)
 
-    # [ ] TEST: Parse a R&D COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed R&D COA:', doc)
+    # # [✓] TEST: Parse a cannabinoid and terpene COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed cannabinoid and terpene COA:', doc)
 
-    # [ ] TEST: Parse a COA that requires OCR.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU090222-9534DD.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed COA with OCR:', doc)
+    # # [✓] TEST: Parse a R&D COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed R&D COA:', doc)
+
+    # # [✓] TEST: Parse a COA that requires OCR.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU090222-9534DD.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed COA with OCR:', doc)
 
     # [ ] TEST: Parse all COAs in a directory.
     all_data = []
@@ -704,18 +723,18 @@ if __name__ == '__main__':
     pdfs = [os.path.join(pdf_dir, x) for x in os.listdir(pdf_dir) if x.endswith('.pdf')]
     start = datetime.now()
     for pdf in pdfs:
-        try:
-            coa_data = parse_terplife_coa(
-                parser, pdf,
-                # save_to_firebase=True,
-                verbose=True,
-            )
-            all_data.append(coa_data)
-            print('Parsed:', pdf)
-        except Exception as e:
-            print('Error:', pdf)
-            print(e)
-            break
+        # try:
+        coa_data = parse_terplife_coa(
+            parser, pdf,
+            # save_to_firebase=True,
+            verbose=True,
+        )
+        all_data.append(coa_data)
+        print('Parsed:', pdf)
+        # except Exception as e:
+        #     print('Error:', pdf)
+        #     print(e)
+        #     break
 
     # Calculate parsing statistics.
     end = datetime.now()
