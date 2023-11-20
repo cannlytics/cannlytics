@@ -92,6 +92,7 @@ from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
 from cannlytics.data.coas.algorithms.confidence import CONFIDENCE
 from cannlytics.data.coas.algorithms.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.algorithms.greenleaflab import GREEN_LEAF_LAB
+from cannlytics.data.coas.algorithms.green_scientific import GREEN_SCIENTIFIC_LABS
 from cannlytics.data.coas.algorithms.kaycha import KAYCHA_LABS
 from cannlytics.data.coas.algorithms.mcrlabs import MCR_LABS
 from cannlytics.data.coas.algorithms.sclabs import SC_LABS
@@ -109,6 +110,7 @@ LIMS = {
     'Confidence Analytics': CONFIDENCE,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
+    'Green Scientific Labs': GREEN_SCIENTIFIC_LABS,
     'Kaycha Labs': KAYCHA_LABS,
     'MCR Labs': MCR_LABS,
     'SC Labs': SC_LABS,

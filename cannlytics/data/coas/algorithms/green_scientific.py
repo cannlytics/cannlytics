@@ -92,7 +92,8 @@ from cannlytics.utils.utils import (
 GREEN_SCIENTIFIC_LABS = {
     'coa_algorithm': 'green_scientific.py',
     'coa_algorithm_entry_point': 'parse_green_scientific_coa',
-    'url': 'https://www.greenscientificlabs.com',
+    # 'url': 'https://www.verifycbd.com',
+    'url': 'https://www.greenscienti', # The f parses incorrectly
     'lims': 'Green Scientific Labs',
     'lab': 'Green Scientific Labs',
     'lab_license_number': 'CMTL-0004',
@@ -111,123 +112,204 @@ GREEN_SCIENTIFIC_LABS = {
 }
 
 
-# === DEV ===
-from cannlytics.data.coas import CoADoc
+if __name__ == '__main__':
 
-# Parameters.
-doc = '70897.pdf'
-image_dir = './'
-image_starting_index = 2
-image_ending_index = -1
+    # === DEV ===
+    from cannlytics.data.coas import CoADoc
 
-
-# Define the observation.
-obs = {}
-
-# Parse a full-panel COA.
-report = pdfplumber.open(doc)
-front_page = report.pages[0]
-front_page_text = front_page.extract_text()
-
-# [ ] TEST: Identify the lab.
-parser = CoADoc()
-print(parser.identify_lims(doc))
-
-# TODO: Either use or find the COA URL.
-# - coa_url
-# - lab_results_url
-
-# Optional: Initialize Firebase.
-try:
-    from cannlytics import firebase
-    from firebase_admin import storage, get_app
-    firebase.initialize_firebase()
-    app = get_app()
-    bucket_name = f'{app.project_id}.appspot.com'
-except:
-    pass
-
-# Save the product image.
-try:
-    image_index, _ = max(
-        enumerate(front_page.images[image_starting_index:image_ending_index]),
-        key=lambda img: img[1]['width'] * img[1]['height']
-    )
-    image_data = parser.get_pdf_image_data(front_page, image_index=image_index + image_starting_index)
-    image_filename = doc.split('/')[-1].replace('.pdf', '.png')
-    image_file = os.path.join(image_dir, image_filename)
-    parser.save_image_data(image_data, image_file)
-    image_ref = f'data/lab_results/images/green-scientific-labs/{image_filename}'
-    firebase.upload_file(image_ref, image_file, bucket_name=bucket_name)
-    image_url = firebase.get_file_url(image_ref, bucket_name=bucket_name)
-    obs['image_url'] = image_url
-except:
-    obs['image_url'] = None
+    # Parameters.
+    doc = '70897.pdf'
+    doc = r"D:/data/florida/lab_results/.datasets/pdfs/MMTC-2017-0008/72619.pdf"
+    image_dir = './'
+    image_starting_index = 2
+    image_ending_index = -1
 
 
-# TODO: Find the analyses.
-# - analyses
+    # Define the observation.
+    obs = {}
+
+    # Parse a full-panel COA.
+    report = pdfplumber.open(doc)
+    front_page = report.pages[0]
+    front_page_text = front_page.extract_text()
+
+    # [ ] TEST: Identify the lab.
+    parser = CoADoc(lims={'Green Scientific Labs': GREEN_SCIENTIFIC_LABS})
+    print(parser.identify_lims(doc))
+
+    # TODO: Either use or find the COA URL.
+    # - coa_url
+    coa_url = parser.find_pdf_qr_code_url(doc)
+    # - lab_results_url
+
+    # Optional: Initialize Firebase.
+    try:
+        from cannlytics import firebase
+        from firebase_admin import storage, get_app
+        firebase.initialize_firebase()
+        app = get_app()
+        bucket_name = f'{app.project_id}.appspot.com'
+    except:
+        pass
+
+    # Save the product image.
+    try:
+        image_index, _ = max(
+            enumerate(front_page.images[image_starting_index:image_ending_index]),
+            key=lambda img: img[1]['width'] * img[1]['height']
+        )
+        image_data = parser.get_pdf_image_data(front_page, image_index=image_index + image_starting_index)
+        image_filename = doc.split('/')[-1].replace('.pdf', '.png')
+        image_file = os.path.join(image_dir, image_filename)
+        parser.save_image_data(image_data, image_file)
+        image_ref = f'data/lab_results/images/green-scientific-labs/{image_filename}'
+        firebase.upload_file(image_ref, image_file, bucket_name=bucket_name)
+        image_url = firebase.get_file_url(image_ref, bucket_name=bucket_name)
+        obs['image_url'] = image_url
+    except:
+        obs['image_url'] = None
+    
+    # Get the front page text.
+    front_page = report.pages[0]
+    number_of_pages = len(report.pages)
+    front_page_text = report.pages[0].extract_text()
+
+    # Process the text.
+    front_page_text = front_page_text.replace('█', '\n')
+    lines = front_page_text.split('\n')
+    lines = [x for x in lines if x != '']
+
+    # DEV
+    create_date_match = re.search(r'Create Date: (\d{2}/\d{2}/\d{4})', front_page_text)
+    obs['date_collected'] = create_date_match.group(1) if create_date_match else None
+
+    order_name_match = re.search(r'Order Name: (.+?)\n', front_page_text)
+    obs['product_name'] = order_name_match.group(1).strip() if order_name_match else None
+
+    size_match = re.search(r'Size: ([\d,]+)', front_page_text)
+    obs['product_size'] = size_match.group(1).replace(',', '') if size_match else None
+
+    received_date_match = re.search(r'Received: (\d{2}/\d{2}/\d{4})', front_page_text)
+    obs['date_received'] = received_date_match.group(1) if received_date_match else None
+
+    matrix_match = re.search(r'Matrix: (.+?)\n', front_page_text)
+    obs['product_type'] = matrix_match.group(1).strip() if matrix_match else None
 
 
-# TODO: Find the methods.
-# - methods
+    # Updated regular expressions
+    batch_regex_updated = r'Retail Batch #:\s*([\d\s]+)'  # Assuming batch number is numeric
+    product_name_regex_updated = r'Order Name:\s*([^\n]+)'  # Capture until the newline
+
+    # Re-extract batch number and product name with updated regular expressions
+    batch_number_updated = re.search(batch_regex_updated, front_page_text)
+    product_name_updated = re.search(product_name_regex_updated, front_page_text)
+
+    # Update the extracted data with refined results
+    obs['batch_number'] = batch_number_updated.group(1) if batch_number_updated else None
+    obs['product_name'] = product_name_updated.group(1) if product_name_updated else None
+
+    # Regular expressions to find specific information in the text
+    date_regex = r'(\d{2}/\d{2}/\d{4})'
+    order_regex = r'Order #:\s*(\d+)'
+    batch_regex = r'Retail Batch #:\s*([\w\s]+)'
+    product_name_regex = r'Order Name:\s*([\w\s]+)'
+    producer_regex = r'Facility:\s*([\w\s]+)'
+
+    # Extracting dates
+    dates = re.findall(date_regex, front_page_text)
+    date_labels = ['date_produced', 'date_expired', 'date_received', 'date_tested']
+    date_categorized = dict(zip(date_labels, dates))
+
+    # Extracting order number, batch number, and product name
+    order_number = re.search(order_regex, front_page_text)
+    batch_number = re.search(batch_regex, front_page_text)
+    product_name = re.search(product_name_regex, front_page_text)
+
+    # Extracting producer information
+    producer = re.search(producer_regex, front_page_text)
+
+    # Organizing extracted data
+    extracted_data = {
+        'order_number': order_number.group(1) if order_number else None,
+        'batch_number': batch_number.group(1) if batch_number else None,
+        'product_name': product_name.group(1) if product_name else None,
+        'producer': producer.group(1) if producer else None,
+    }
 
 
-# TODO: Find the dates.
-# - date_collected
-# - date_tested
-# - date_received
+    # TODO: Find the analyses.
+    # - analyses
 
 
-# TODO: Find the producer
-# - producer
-# - producer_address
-# - producer_street
-# - producer_city
-# - producer_state
-# - producer_zipcode
-# - producer_license_number
+    # TODO: Find the methods.
+    # - methods
 
 
-# TODO: Find the product details.
-# - product_name
-# - lab_id
-# - product_type
-# - batch_number
-# - product_size
-# - serving_size
-# - servings_per_package
-# - sample_weight
+    # TODO: Find the dates.
+    # - date_collected
+    # - date_tested
+    # - date_received
 
 
-# TODO: Find the product status.
-# - status
+    # TODO: Find the producer
+    # - producer
+    # - producer_address
+    # - producer_street
+    # - producer_city
+    # - producer_state
+    # - producer_zipcode
+    # - producer_license_number
 
 
-# TODO: Extract the totals.
-# - total_cannabinoids
-# - total_thc
-# - total_cbd
-# - total_terpenes
-# - sample_id
+    # TODO: Find the product details.
+    # - product_name
+    # - lab_id
+    # - product_type
+    # - batch_number
+    # - product_size
+    # - serving_size
+    # - servings_per_package
+    # - sample_weight
 
 
-# TODO: Find the results.
-# - results
+    # TODO: Find the product status.
+    # - status
+
+
+    # TODO: Extract the totals.
+    # - total_cannabinoids
+    # - total_thc
+    # - total_cbd
+    # - total_terpenes
+    # - sample_id
+    cannabinoid_pattern = r'Total THC\s+TESTED\s+([%\d.]+)\s+Total CBD\s+([%\d.]+)'
+    cannabinoid_match = re.search(cannabinoid_pattern, text)
+    if cannabinoid_match:
+        results['total_thc'] = cannabinoid_match.group(1)
+        results['total_cbd'] = cannabinoid_match.group(2)
+
+    terpenes_pattern = r'TERPENES\s+([%\d.]+)\s+'
+    terpenes_match = re.search(terpenes_pattern, text)
+    if terpenes_match:
+        results['total_terpenes'] = terpenes_match.group(1)
+
+
+    # TODO: Find the results.
+    # - results
 
 
 
-# TODO: Get the strain name.
-from cannlytics.data.strains.strains_ai import identify_strains
-# - strain_name (augmented)
+    # TODO: Get the strain name.
+    from cannlytics.data.strains.strains_ai import identify_strains
+    # - strain_name (augmented)
 
 
 
-# === Tests ===
+    # === Tests ===
 
-# Test URLS.
-# urls = [
-#     'https://www.verifycbd.com/reportv2/6e2dz13003',
-#     'https://www.verifycbd.com/reportv2/69a1z12218',
-#     'https://www.verifycbd.com/reportv2/6b0ez12649',
-# ]
+    # Test URLS.
+    # urls = [
+    #     'https://www.verifycbd.com/reportv2/6e2dz13003',
+    #     'https://www.verifycbd.com/reportv2/69a1z12218',
+    #     'https://www.verifycbd.com/reportv2/6b0ez12649',
+    # ]

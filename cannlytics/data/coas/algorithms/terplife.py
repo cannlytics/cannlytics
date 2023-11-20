@@ -441,6 +441,7 @@ def process_coa_pdf(
     obs['parsed_with_ocr'] = parsed_with_ocr
     return obs
 
+
 def parse_terplife_coa(
         parser,
         doc: Any,
