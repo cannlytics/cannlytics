@@ -350,7 +350,7 @@ def find_analyses(front_page_text):
     analyses = []
     if 'Potency Summary' in front_page_text:
         analyses.append('cannabinoids')
-    # Add other analysis types here...
+    # TODO: Add other analysis types here...
     return analyses
 
 
@@ -362,7 +362,8 @@ def extract_producer_address(front_page):
     address_text = address_text.split('Client Lic#:')[-1].split('\n', maxsplit=1)[-1]
     phone_pattern = r'\(\d{3}\) \d{3}-\d{4}'
     address = re.split(phone_pattern, address_text, maxsplit=1)[0].strip().replace('\n', ' ')
-    return parse_address(address)
+    # return parse_address(address)
+    return address
 
 
 def extract_product_details(lines, columns):

@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/12/2023
-Updated: 11/12/2023
+Updated: 11/20/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -79,10 +79,17 @@ except ImportError:
     print('Unable to import `Tesseract` library. This tool is used for OCR.')
 
 # Internal imports.
-from cannlytics.data.data import create_sample_id
-from cannlytics.utils.constants import STANDARD_UNITS
+from cannlytics import firebase
+from cannlytics import __version__
+from cannlytics.data.data import (
+    create_hash,
+    create_sample_id,
+    find_first_value,
+)
+from cannlytics.utils.constants import ANALYTES, STANDARD_UNITS
 from cannlytics.utils.utils import (
     convert_to_numeric,
+    download_file_from_url,
     snake_case,
     split_list,
     strip_whitespace,
@@ -110,8 +117,72 @@ GREEN_SCIENTIFIC_LABS = {
     'lab_latitude': 26.071350,
     'lab_longitude': -80.210750,
 }
+GREEN_SCIENTIFIC_LABS_COLUMNS = {
+    'Harvest/Lot ID': 'external_id',
+    'Seed-to-Sale #': 'traceability_id',
+    'Create Date': 'date_produced',
+    'Total Qty.': 'batch_size',
+    'Order #': 'project_id',
+    'Exp. Date': 'date_expired',
+    'Matrix': 'product_type',
+    'Order Name': 'product_name',
+    'Size': 'product_size',
+    'Pickup Weight': 'sample_weight',
+    'Retail Batch #': 'batch_number',
+    'Received': 'date_received',
+    'Cultivation Facility': 'producer',
+    'Cultivars(s)': 'strain_name',
+    'Complete': 'date_tested',
+    'Processing Facility': 'distributor',
+}
 
 
+class GreenScientificLabs:
+    """Green Scientific Labs COA parser."""
+
+    def __init__(self, parser: Any):
+        self.parser = parser
+        self.metadata = GREEN_SCIENTIFIC_LABS
+
+    def parse_coa(
+            self,
+            doc: str,
+            temp_path=None,
+            image_dir=None,
+            save_to_firebase=False,
+            verbose=False,
+            columns=None,
+        ) -> dict:
+        """
+        Parse a Green Scientific Labs COA.
+        """
+        # FIXME:
+        obs = {}
+        # temp_path, image_dir = initialize_paths(temp_path, image_dir)
+        # report = read_pdf(doc, temp_path)
+        # front_page_text, parsed_with_ocr = apply_ocr_if_needed(doc, report, verbose, temp_path)
+        # front_page_text = clean_front_page_text(front_page_text)
+        # lines = extract_front_page_data(report.pages[0])
+        # save_to_firebase_if_needed(save_to_firebase, doc, image_dir, report.pages[0], obs)
+        # analyses = find_analyses(front_page_text)
+        # address = extract_producer_address(report.pages[0])
+        # product_details = extract_product_details(lines, columns)
+        # total_compounds = extract_total_compounds(front_page_text, lines)
+        # obs = {**address, **product_details, **total_compounds}
+        # obs['parsed_with_ocr'] = parsed_with_ocr
+        return obs
+
+
+
+def parse_green_scientific_coa(doc: str, **kwargs) -> dict:
+    """
+    Identify the lab.
+    """
+    gsl = GreenScientificLabs(parser=CoADoc())
+    return gsl.parse_coa(doc, **kwargs)
+
+
+# === Tests ===
 if __name__ == '__main__':
 
     # === DEV ===
@@ -238,11 +309,11 @@ if __name__ == '__main__':
 
 
     # TODO: Find the analyses.
-    # - analyses
+    analyses = []
 
 
     # TODO: Find the methods.
-    # - methods
+    methods = []
 
 
     # TODO: Find the dates.
@@ -295,13 +366,42 @@ if __name__ == '__main__':
 
 
     # TODO: Find the results.
-    # - results
+    results = []
 
 
 
     # TODO: Get the strain name.
-    from cannlytics.data.strains.strains_ai import identify_strains
-    # - strain_name (augmented)
+    # from cannlytics.data.strains.strains_ai import identify_strains
+    # # - strain_name (augmented)
+
+
+
+    # Close the report.
+    report.close()
+
+    # Turn dates to ISO format.
+    date_columns = [x for x in obs.keys() if x.startswith('date')]
+    for date_column in date_columns:
+        try:
+            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
+        except:
+            pass
+
+    # Finish data collection with a freshly minted sample ID.
+    obs = {**GREEN_SCIENTIFIC_LABS, **obs}
+    obs['analyses'] = json.dumps(list(set(analyses)))
+    obs['coa_algorithm_version'] = __version__
+    obs['coa_parsed_at'] = datetime.now().isoformat()
+    obs['methods'] = json.dumps(methods)
+    obs['results'] = json.dumps(results)
+    obs['results_hash'] = create_hash(results)
+    obs['sample_id'] = create_sample_id(
+        private_key=json.dumps(results),
+        public_key=obs['product_name'],
+        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
+    )
+    obs['sample_hash'] = create_hash(obs)
+    # return obs
 
 
 
