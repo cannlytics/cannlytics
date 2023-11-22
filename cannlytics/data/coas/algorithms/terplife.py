@@ -152,296 +152,6 @@ cannabinoids = [
 ]
 
 
-def extract_text_from_region(
-        page,
-        region_coords,
-        split_str=None,
-        section_str=None,
-        split_at=None,
-    ):
-    """Extract text from a region of a COA PDF."""
-    cropped_page = page.crop(region_coords)
-    text = cropped_page.extract_text()
-    if split_str and section_str:
-        section = text.split(split_str)[1].split(section_str)[0]
-        if split_at:
-            section = section.split(split_at)[-1]
-        return [x for x in section.split('\n') if x]
-    return text
-
-
-def process_analysis_block(
-        page,
-        analysis_type,
-        region_coords,
-        split_str,
-        section_str,
-        units,
-    ):
-    """Process a block of text from a COA PDF."""
-    results_lines = extract_text_from_region(page, region_coords, split_str, section_str)
-    results = []
-    for line in results_lines:
-        result = parse_results_line(line, analysis_type, units)
-        results.append(result)
-    return results
-
-
-def parse_results_line(line, analysis_type, units):
-    """Parse a line of text from a COA PDF."""
-    first_value = find_first_value(line)
-    name = line[:first_value].strip()
-    key = snake_case(name)
-    key = ANALYTES.get(key, key)
-    values = [x.strip() for x in line[first_value:].split(' ') if x]
-    result = {
-        'analysis': analysis_type,
-        'key': key,
-        'name': name,
-        'units': units
-    }
-
-    # Add additional data based on analysis type
-    if analysis_type in ['pesticides', 'heavy_metals']:
-        result.update({
-            'dilution': convert_to_numeric(values[0]),
-            'limit': convert_to_numeric(values[1]),
-            'lod': convert_to_numeric(values[2]),
-            'value': convert_to_numeric(values[3]),
-            'status': values[-1]
-        })
-    elif analysis_type in ['mycotoxins', 'microbials', 'foreign_matter', 'water_activity', 'moisture_content']:
-        result.update({
-            'limit': convert_to_numeric(values[0]),
-            'value': convert_to_numeric(values[1]),
-            'status': values[-1]
-        })
-    elif analysis_type == 'terpenes':
-        result.update({
-            'dilution': convert_to_numeric(values[0]),
-            'lod': convert_to_numeric(values[1]),
-            'value': convert_to_numeric(values[2])
-        })
-
-    return result
-
-
-def process_report_pages(report, number_of_pages):
-    """Process the pages of a COA PDF."""
-    all_results = []
-    analyses = []
-
-    if number_of_pages > 1:
-        for page in report.pages[1:]:
-            text = page.extract_text()
-
-            # Example usage for pesticides
-            if 'Pesticides' in text and 'Heavy Metals & Pesticides' not in text:
-                analyses.append('pesticides')
-                midpoint = page.width * 0.475
-                left_half_coords = (0, 0, midpoint, page.height)
-                right_half_coords = (midpoint, 0, page.width, page.height * 0.75)
-
-                # Extract and process left half of the page
-                left_results = process_analysis_block(page, 'pesticides', left_half_coords, 'Status', 'LOD =', 'ppb')
-
-                # Extract and process right half of the page
-                right_results = process_analysis_block(page, 'pesticides', right_half_coords, 'Status', 'LOD =', 'ppb')
-
-                # Combine results from both halves
-                all_results.extend(left_results + right_results)
-                continue
-            # if 'Pesticides' in text and 'Heavy Metals & Pesticides' not in text:
-            #     analyses.append('pesticides')
-            #     midpoint = page.width * 0.475
-            #     results = process_analysis_block(page, 'pesticides', (0, 0, midpoint, page.height), 'Status', 'LOD =', 'ppb')
-            #     all_results.extend(results)
-
-            # Add similar blocks for other analysis types
-
-    return analyses, all_results
-
-
-def process_line_for_front_page(line, analytes, cannabinoids, terpenes):
-    """Process a line of text from the front page of a COA PDF."""
-    first_value = find_first_value(line)
-    name = line[:first_value].strip()
-    if name in analytes:
-        return []
-    key = snake_case(name)
-    key = ANALYTES.get(key, key)
-    values = [x.strip() for x in line[first_value:].split(' ') if x]
-    if len(values) == 2:
-        values.insert(0, None)
-    analysis = None
-    if name in cannabinoids:
-        analysis = 'cannabinoids'
-    elif name in terpenes:
-        analysis = 'terpenes'
-    return [{
-        'analysis': analysis,
-        'key': key,
-        'name': name,
-        'dilution': convert_to_numeric(values[0]),
-        'lod': convert_to_numeric(values[1]),
-        'value': convert_to_numeric(values[2]),
-        'units': 'percent',
-    }]
-
-
-def initialize_paths(temp_path, image_dir):
-    if temp_path is None:
-        temp_path = tempfile.gettempdir()
-    if image_dir is None:
-        image_dir = tempfile.gettempdir()
-    return temp_path, image_dir
-
-
-def read_pdf(doc, temp_path):
-    """Read a COA PDF."""
-    if doc.startswith('https'):
-        coa_pdf = download_file_from_url(doc, temp_path, ext='.pdf')
-        return pdfplumber.open(coa_pdf)
-    else:
-        return pdfplumber.open(doc)
-
-
-def apply_ocr_if_needed(doc, report, verbose, temp_path):
-    """Apply OCR when necessary."""
-    front_page_text = report.pages[0].extract_text()
-    if front_page_text:
-        return front_page_text, False
-
-    if verbose:
-        print('Applying OCR.')
-    temp = tempfile.mkstemp('.pdf')[1]
-    parser.pdf_ocr(doc, temp, temp_path=temp_path)
-    report = pdfplumber.open(temp)
-    front_page_text = report.pages[0].extract_text()
-    return front_page_text, True
-
-
-def clean_front_page_text(front_page_text):
-    """Clean extraneous text from the front page of a COA PDF."""
-    extras = [
-        'Unless otherwise stated all quality control samples',
-        ' performed within specifications established by the Laboratory.'
-    ]
-    text = front_page_text.split('The data contained')[0]
-    for extra in extras:
-        text = text.replace(extra, '')
-    return text
-
-
-def extract_front_page_data(front_page):
-    """Extract the data from the front page of a COA PDF."""
-    front_page_text = front_page.extract_text()
-    lines = front_page_text.replace('█', '\n').split('\n')
-    return [line for line in lines if line]
-
-
-def save_to_firebase_if_needed(save_to_firebase, doc, image_dir, front_page, obs):
-    """Save the product image and COA to Firebase Storage."""
-    if not save_to_firebase:
-        return
-    
-
-def find_analyses(front_page_text):
-    analyses = []
-    if 'Potency Summary' in front_page_text:
-        analyses.append('cannabinoids')
-    # TODO: Add other analysis types here...
-    return analyses
-
-
-def extract_producer_address(front_page):
-    """Extract the producer's address from the front page of a COA PDF."""
-    corner = (0, 0, front_page.width / 3, front_page.height / 4)
-    top_corner = front_page.crop(corner)
-    address_text = top_corner.extract_text()
-    address_text = address_text.split('Client Lic#:')[-1].split('\n', maxsplit=1)[-1]
-    phone_pattern = r'\(\d{3}\) \d{3}-\d{4}'
-    address = re.split(phone_pattern, address_text, maxsplit=1)[0].strip().replace('\n', ' ')
-    # return parse_address(address)
-    return address
-
-
-def extract_product_details(lines, columns):
-    """Extract product details from the front page of a COA PDF."""
-    obs = {}
-    for key, column in columns.items():
-        for line in lines:
-            if key in line:
-                obs[column] = extract_detail_from_line(line, key, columns.keys())
-                break
-    return obs
-
-
-def extract_total_compounds(front_page_text, lines):
-    """Extract total terpenes, THC, CBD, and/or cannabinoids from the front page of a COA PDF."""
-    # Extract total terpenes.
-    compounds = {}
-    if 'Terpenes Summary' in front_page_text:
-        # analyses.append('terpenes')
-        for line in lines:
-            if 'Total Terpenes' in line:
-                value = line.split('Total Terpenes')[-1].strip().split(' ')[0]
-                compounds['total_terpenes'] = convert_to_numeric(value)
-                break
-
-    # Extract total THC, CBD, and/or cannabinoids.
-    if 'Terpenes Summary' in front_page_text:
-        summary = front_page_text.split('Potency Summary')[-1].split('Terpenes Summary')[0]
-    elif 'Potency Summary' in front_page_text:
-        summary = front_page_text.split('Potency Summary')[-1].split('Cannabinoids')[0]
-    else:
-        summary = ''
-    for line in summary.split('\n'):
-        if '%' in line:
-            values = [x.strip() for x in line.split('%') if x]
-            if len(values) == 6:
-                compounds['total_thc'] = convert_to_numeric(values[0])
-                compounds['total_cbd'] = convert_to_numeric(values[1])
-                compounds['total_cannabinoids'] = convert_to_numeric(values[2])
-                compounds['total_thc_wet'] = convert_to_numeric(values[3])
-                compounds['total_cbd_wet'] = convert_to_numeric(values[4])
-                compounds['total_cannabinoids_wet'] = convert_to_numeric(values[5])
-            elif len(values) == 3:
-                compounds['total_thc'] = convert_to_numeric(values[0])
-                compounds['total_cbd'] = convert_to_numeric(values[1])
-                compounds['total_cannabinoids'] = convert_to_numeric(values[2])
-            elif len(values) >= 2:
-                compounds['total_thc'] = convert_to_numeric(values[0])
-                compounds['total_cbd'] = convert_to_numeric(values[1])
-            break
-    return compounds
-
-
-def process_coa_pdf(
-        doc,
-        temp_path=None,
-        image_dir=None,
-        save_to_firebase=False,
-        verbose=False,
-        columns=None,
-    ):
-    """Parse a TerpLife Labs COA PDF."""
-    if columns is None:
-        columns = TERPLIFE_LABS_COLUMNS
-    temp_path, image_dir = initialize_paths(temp_path, image_dir)
-    report = read_pdf(doc, temp_path)
-    front_page_text, parsed_with_ocr = apply_ocr_if_needed(doc, report, verbose, temp_path)
-    front_page_text = clean_front_page_text(front_page_text)
-    lines = extract_front_page_data(report.pages[0])
-    save_to_firebase_if_needed(save_to_firebase, doc, image_dir, report.pages[0], obs)
-    analyses = find_analyses(front_page_text)
-    address = extract_producer_address(report.pages[0])
-    product_details = extract_product_details(lines, columns)
-    total_compounds = extract_total_compounds(front_page_text, lines)
-    obs = {**address, **product_details, **total_compounds}
-    obs['parsed_with_ocr'] = parsed_with_ocr
-    return obs
-
 
 def parse_terplife_coa(
         parser,
@@ -890,75 +600,82 @@ def parse_terplife_coa(
 
             # Optional: Extract full-panel cannabinoids.
 
+    # Extract terpene results on the front page.
+    if 'Terpenes Summary' in front_page_text:
+        midpoint = front_page.width * 0.475
+        left = front_page.crop((0, 0, midpoint, front_page.height))
+        left_text = left.extract_text().split('% %')[-1]
+        left_text = left_text.replace('█', '')
+        if 'Total Terpenes' in left_text:
+            left_text = left_text.split('Total Terpenes')[0]
+        elif 'Terpene results' in left_text:
+            left_text = left_text.split('Terpene results')[0]
+        left_lines = left_text.split('\n')
+        left_lines = [x for x in left_lines if x]
+        for i, line in enumerate(left_lines):
+            first_value = find_first_value(line)
+            name = line[:first_value].strip()
+            if name in analytes or name == '1':
+                continue
+            key = snake_case(name)
+            key = ANALYTES.get(key, key)
+            values = [x.strip() for x in line[first_value:].split(' ') if x]
+            if not values:
+                continue
+            if len(values) == 1:
+                values.insert(0, None)
+                values.insert(0, None)
+            if values[-1] == name:
+                values = left_lines[i - 1].split(' ')
+            try:
+                results.append({
+                    'analysis': 'terpenes',
+                    'key': key,
+                    'name': name,
+                    'dilution': convert_to_numeric(values[0]),
+                    'lod': convert_to_numeric(values[1]),
+                    'value': convert_to_numeric(values[2]),
+                    'units': 'percent',
+                })
+            except:
+                pass
 
-    # Extract the results on the front page.
-    # FIXME: Read page half by half.
-    # Extract the results on the front page.
-    midpoint = front_page.width * 0.5
-    left_half = (0, 0, midpoint, front_page.height)
-    right_half = (midpoint, 0, front_page.width, front_page.height)
-    left_lines = extract_text_from_region(front_page, left_half)
-    left_results = []
-    for line in left_lines:
-        if 'Total' in line or 'Terpene results are' in line:
-            continue
-        left_results.extend(process_line_for_front_page(line, analytes, cannabinoids, terpenes))
-
-    # Process the right half
-    right_lines = extract_text_from_region(front_page, right_half)
-    right_results = []
-    for line in right_lines:
-        if 'Total' in line or 'Terpene results are' in line:
-            continue
-        right_results.extend(process_line_for_front_page(line, analytes, cannabinoids, terpenes))
-
-    # Combine results from both halves
-    front_page_results = left_results + right_results
-    # if 'Terpenes Summary' in front_page_text:
-    #     results_text = front_page_text.split('Terpenes Summary')[-1].split('Terpenes Summary')[0]
-    #     results_lines = results_text.split('Analyte Dilution')[-1].replace('Total', '\nTotal').split('\n')[2:]
-    # else:
-    #     results_text = front_page_text.split('Result\n')[-1].split('Total THC')[0]
-    #     results_lines = results_text.split('\n')[1:]
-    # results_lines = [x.strip() for x in results_lines if x.strip()]
-    # for line in results_lines:
-
-    #     # Skip totals.
-    #     if 'Total Terpenes' in line:
-    #         break
-    #     elif 'Total THC' in line or 'Total CBD' in line:
-    #         continue
-    #     if 'Total Cannabinoids' in line and 'Terpenes Summary' in front_page_text:
-    #         continue
-    #     elif 'Total Cannabinoids' in line:
-    #         break
-    #     elif 'Terpene results are' in line:
-    #         break
-
-    #     # Extract a result, if not already extracted.
-    #     first_value = find_first_value(line)
-    #     name = line[:first_value].strip()
-    #     if name in analytes:
-    #         continue
-    #     key = snake_case(name)
-    #     key = ANALYTES.get(key, key)
-    #     values = [x.strip() for x in line[first_value:].split(' ') if x]
-    #     if len(values) == 2:
-    #         values.insert(0, None)
-    #     analysis = None
-    #     if name in cannabinoids:
-    #         analysis = 'cannabinoids'
-    #     elif name in terpenes:
-    #         analysis = 'terpenes'
-    #     results.append({
-    #         'analysis': analysis,
-    #         'key': key,
-    #         'name': name,
-    #         'dilution': convert_to_numeric(values[0]),
-    #         'lod': convert_to_numeric(values[1]),
-    #         'value': convert_to_numeric(values[2]),
-    #         'units': 'percent',
-    #     })
+    # Extract cannabinoid results on the front page.
+    if 'Cannabinoids' in front_page_text:
+        midpoint = front_page.width * 0.475
+        right = front_page.crop((midpoint, 0, front_page.width, front_page.height))
+        right_text = right.extract_text().split('% % mg/g')[-1]
+        right_text = right_text.split('Total THC')[0]
+        right_lines = right_text.split('\n')
+        right_lines = [x for x in right_lines if x]
+        for i, line in enumerate(right_lines):
+            first_value = find_first_value(line)
+            name = line[:first_value].strip()
+            if name in analytes or name == '1':
+                continue
+            key = snake_case(name)
+            key = ANALYTES.get(key, key)
+            values = [x.strip() for x in line[first_value:].split(' ') if x]
+            if not values:
+                continue
+            if len(values) == 1:
+                values.insert(0, None)
+                values.insert(0, None)
+            if values[-1] == name:
+                print(name)
+                values = right_lines[i - 1].split(' ')
+            try:
+                results.append({
+                    'analysis': 'cannabinoids',
+                    'key': key,
+                    'name': name,
+                    'dilution': convert_to_numeric(values[0]),
+                    'lod': convert_to_numeric(values[1]),
+                    'value': convert_to_numeric(values[2]),
+                    'units': 'percent',
+                })
+            except:
+                pass
 
     # Close the report.
     report.close()
@@ -992,7 +709,7 @@ def parse_terplife_coa(
 
 
 # === Tests ===
-# Tested: 2023-11-16 by Keegan Skeate <keegan@cannlytics.com>
+# Tested: 2023-11-21 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
@@ -1001,55 +718,54 @@ if __name__ == '__main__':
     # Initialize the parser.
     parser = CoADoc(lims={'TerpLife Labs': TERPLIFE_LABS})
 
-    # # [✓] TEST: Identify LIMS.
-    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    # lims = parser.identify_lims(doc)
-    # assert lims == 'TerpLife Labs'
-    # print('Identified LIMS as', lims)
+    # [✓] TEST: Identify LIMS.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    lims = parser.identify_lims(doc)
+    assert lims == 'TerpLife Labs'
+    print('Identified LIMS as', lims)
 
-    # # [✓] TEST: Parse a full-panel COA.
-    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    # coa_data = parse_terplife_coa(parser, doc)
-    # print('Parsed full-panel COA:', doc)
+    # [✓] TEST: Parse a full-panel COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    coa_data = parse_terplife_coa(parser, doc)
+    print('Parsed full-panel COA:', doc)
 
-    # # [✓] TEST: Parse a cannabinoid-only COA.
-    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
-    # coa_data = parse_terplife_coa(parser, doc)
-    # print('Parsed cannabinoid-only COA:', doc)
+    # [✓] TEST: Parse a cannabinoid-only COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
+    coa_data = parse_terplife_coa(parser, doc)
+    print('Parsed cannabinoid-only COA:', doc)
 
-    # # [✓] TEST: Parse a cannabinoid and terpene COA.
-    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
-    # coa_data = parse_terplife_coa(parser, doc)
-    # print('Parsed cannabinoid and terpene COA:', doc)
+    # [✓] TEST: Parse a cannabinoid and terpene COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
+    coa_data = parse_terplife_coa(parser, doc)
+    print('Parsed cannabinoid and terpene COA:', doc)
 
-    # # [✓] TEST: Parse a R&D COA.
-    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
-    # coa_data = parse_terplife_coa(parser, doc)
-    # print('Parsed R&D COA:', doc)
+    # [✓] TEST: Parse a R&D COA.
+    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
+    coa_data = parse_terplife_coa(parser, doc)
+    print('Parsed R&D COA:', doc)
 
-    # # [✓] TEST: Parse a COA that requires OCR.
+    # # [ ] TEST: FIXME: Parse a COA that requires OCR.
     # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU090222-9534DD.pdf'
     # coa_data = parse_terplife_coa(parser, doc)
     # print('Parsed COA with OCR:', doc)
 
-    # [ ] TEST: Parse all COAs in a directory.
+    # [✓ TEST: Parse all COAs in a directory.
     all_data = []
     pdf_dir = 'D:/data/florida/lab_results/.datasets/pdfs/terplife'
     pdfs = [os.path.join(pdf_dir, x) for x in os.listdir(pdf_dir) if x.endswith('.pdf')]
     start = datetime.now()
     for pdf in pdfs:
-        # try:
-        coa_data = parse_terplife_coa(
-            parser, pdf,
-            # save_to_firebase=True,
-            verbose=True,
-        )
-        all_data.append(coa_data)
-        print('Parsed:', pdf)
-        # except Exception as e:
-        #     print('Error:', pdf)
-        #     print(e)
-        #     break
+        try:
+            coa_data = parse_terplife_coa(
+                parser, pdf,
+                # save_to_firebase=True,
+                verbose=True,
+            )
+            all_data.append(coa_data)
+            print('Parsed:', pdf)
+        except Exception as e:
+            print('Error:', pdf)
+            print(str(e))
 
     # Calculate parsing statistics.
     end = datetime.now()
@@ -1057,9 +773,9 @@ if __name__ == '__main__':
     print('Total Parsing Time:', end - start)
     print('Average Parsing Time per COA:', (end - start) / len(all_data))
 
-    # # Save the data.
-    # df = pd.DataFrame(all_data)
-    # timestamp = datetime.now().strftime('%Y-%m-%d')
-    # outfile = f'D:/data/florida/lab_results/.datasets/terplife-labs-coa-data-{timestamp}.xlsx'
-    # parser.save(df, outfile)
-    # print('Saved %i lab results to %s' % (len(df), outfile))
+    # Save the data.
+    df = pd.DataFrame(all_data)
+    timestamp = datetime.now().strftime('%Y-%m-%d')
+    outfile = f'D:/data/florida/lab_results/.datasets/terplife-labs-coa-data-{timestamp}.xlsx'
+    parser.save(df, outfile)
+    print('Saved %i lab results to %s' % (len(df), outfile))
