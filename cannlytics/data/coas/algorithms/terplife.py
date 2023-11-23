@@ -718,31 +718,31 @@ if __name__ == '__main__':
     # Initialize the parser.
     parser = CoADoc(lims={'TerpLife Labs': TERPLIFE_LABS})
 
-    # [✓] TEST: Identify LIMS.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    lims = parser.identify_lims(doc)
-    assert lims == 'TerpLife Labs'
-    print('Identified LIMS as', lims)
+    # # [✓] TEST: Identify LIMS.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    # lims = parser.identify_lims(doc)
+    # assert lims == 'TerpLife Labs'
+    # print('Identified LIMS as', lims)
 
-    # [✓] TEST: Parse a full-panel COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed full-panel COA:', doc)
+    # # [✓] TEST: Parse a full-panel COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/T302229 TLMB0216202301.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed full-panel COA:', doc)
 
-    # [✓] TEST: Parse a cannabinoid-only COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed cannabinoid-only COA:', doc)
+    # # [✓] TEST: Parse a cannabinoid-only COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/36782.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed cannabinoid-only COA:', doc)
 
-    # [✓] TEST: Parse a cannabinoid and terpene COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed cannabinoid and terpene COA:', doc)
+    # # [✓] TEST: Parse a cannabinoid and terpene COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU310823-2327TT.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed cannabinoid and terpene COA:', doc)
 
-    # [✓] TEST: Parse a R&D COA.
-    doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
-    coa_data = parse_terplife_coa(parser, doc)
-    print('Parsed R&D COA:', doc)
+    # # [✓] TEST: Parse a R&D COA.
+    # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU180222-6925CKC.pdf'
+    # coa_data = parse_terplife_coa(parser, doc)
+    # print('Parsed R&D COA:', doc)
 
     # # [ ] TEST: FIXME: Parse a COA that requires OCR.
     # doc = 'D:/data/florida/lab_results/.datasets/pdfs/terplife/BU090222-9534DD.pdf'

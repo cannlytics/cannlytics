@@ -810,8 +810,6 @@ if __name__ == '__main__':
 
     # Printing the result
     day_month_combinations = get_day_month_combinations()
-    print(day_month_combinations)
-
     # Download TerpLife Labs COAs by digit and alphabetic.
     # queries = day_month_combinations
     # digits = [str(x) for x in range(10)]
