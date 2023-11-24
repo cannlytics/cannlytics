@@ -52,7 +52,7 @@ COA_PROMPT = """Given text, extract JSON, where:
 | Field | Example | Description |
 |-------|---------|-------------|
 | `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
-| `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
+| `status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
 | `methods` | [{"analysis: "cannabinoids", "method": "HPLC"}] | The methods used for each analysis. |
 | `date_collected` | 2022-04-20T04:20 | An ISO-formatted time when the sample was collected. |
 | `date_tested` | 2022-04-20T16:20 | An ISO-formatted time when the sample was tested. |
@@ -91,7 +91,6 @@ COA_PROMPT = """Given text, extract JSON, where:
 | `total_thc` | 14.00 | The analytical total of THC and THCA. |
 | `total_cbd` | 0.20 | The analytical total of CBD and CBDA. |
 | `total_terpenes` | 0.42 | The sum of all terpenes measured. |
-| `sample_id` | "{sha256-hash}" | A generated ID to uniquely identify the `producer`, `product_name`, and `date_tested`. |
 | `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. |
 """
 
