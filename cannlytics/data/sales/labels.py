@@ -6,10 +6,11 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 11/23/2023
-Updated: 11/23/2023
+Updated: 11/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
+import base64
 from datetime import datetime
 import json
 import gc
@@ -39,7 +40,7 @@ EXTRACT_LABEL_DATA_PROMPT = """Given text from a product label, extract any of t
 | `batch_number` | "Batch-0001" | A batch number for the product. |
 | `product_name` | "Blue Rhino Pre-Roll" | The name of the product. |
 | `strain_name` | "Blue Rhino" | The strain name of the product. |
-| `product_type` | ["flower"] | The type of the product. |
+| `product_type` | "flower" | The type of the product. |
 | `total_cannabinoids` | 14.20 | The analytical total of all cannabinoids measured. |
 | `total_thc` | 14.00 | The analytical total of THC and THCA. |
 | `total_cbd` | 0.20 | The analytical total of CBD and CBDA. |
@@ -53,6 +54,7 @@ EXTRACT_LABEL_DATA_PROMPT = """Given text from a product label, extract any of t
 | `producer` | "Grow House" | The producer of the product. |
 | `producer_license_number` | "L2Calc" | The producer's license number. |
 | `date_produced` | 2022-04-20T12:20 | An ISO-formatted time when the product was produced. |
+| `{analyte}` | {"thcv": 0.20} | The percent of any listed cannabinoid or terpene in `snake_case`. |
 """
 
 
@@ -154,6 +156,63 @@ class DataParser(object):
         obs['id'] = create_hash(obs, private_key='')
         self.total_cost += cost
         return obs
+    
+    def parse_with_vision(
+            self,
+            doc: str,
+            extraction_prompt: str,
+            instructional_prompt: Optional[str] = None,
+            model: Optional[str] = 'gpt-4-vision-preview',
+            detail: Optional[str] = 'high',
+            max_tokens: Optional[int] = 4_000,
+            verbose: Optional[bool] = False,
+        ) -> dict:
+        """Parse data from a document with OpenAI's GPT vision model."""
+
+        # Format the prompt.
+        extraction_prompt = EXTRACT_LABEL_DATA_PROMPT
+        instructional_prompt = 'Return any fields from the product label image as JSON.'
+        base64_image = self.encode_image(doc)
+
+        # TODO: Upload image to Firebase Storage and get a download URL.
+
+        # Make request to GPT-4 Vision.
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                'role': 'user',
+                'content': [
+                    {'type': 'text', 'text': extraction_prompt},
+                    {'type': 'text', 'text': instructional_prompt},
+                    {
+                    'type': 'image_url',
+                    'image_url': {
+                        'url': f'data:image/jpeg;base64,{base64_image}',
+                        'detail': detail,
+                    },
+                    },
+                ],
+                }
+            ],
+            max_tokens=max_tokens,
+        )
+        content = response.choices[0].message.content
+        if verbose:
+            print(content)
+        extracted_json = content.lstrip('```json\n').split('\n```')[0]
+        clean_json = '\n'.join([line.split('//')[0].rstrip() for line in extracted_json.split('\n')])
+        obs = json.loads(clean_json)
+        usage = response.usage
+        cost = 0.01 / 1_000 * usage.prompt_tokens + 0.03 / 1_000 * usage.completion_tokens
+        if verbose:
+            print('Cost:', cost)
+        obs['parsed_at'] = datetime.now().isoformat()
+        obs['warning'] = AI_WARNING
+        obs['id'] = create_hash(obs, private_key='')
+        self.total_cost += cost
+        return obs
 
     def image_to_pdf_to_text(self, image_file: str) -> str:
         """Extract the text from an image by converting it to a PDF.
@@ -204,6 +263,11 @@ class DataParser(object):
         M = cv2.getRotationMatrix2D(center, angle, scale)
         rotated = cv2.warpAffine(image, M, (w, h))
         return rotated
+    
+    def encode_image(self, image_path):
+        """Encode an image as a base64 string."""
+        with open(image_path, 'rb') as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
 
     def save(self, obs, filename):
         """Save extracted data to a file."""
@@ -238,12 +302,12 @@ if __name__ == "__main__":
     config = dotenv_values('../../../.env')
     os.environ['OPENAI_API_KEY'] = config['OPENAI_API_KEY']
 
-    # Initialize a parser.
+    # Initialize a data parser.
     parser = DataParser(
         model='gpt-4-1106-preview',
     )
 
-    # [✓] TEST: Parse a label.
+    # [✓] TEST: Parse a label with OCR + AI.
     doc = '../../../.datasets/products/product-photos-2022/PXL_20220221_164104503.jpg'
     data = parser.parse(
         doc=doc,
@@ -257,4 +321,16 @@ if __name__ == "__main__":
     parser.save(data, outfile)
     print('Saved:', outfile)
 
-    # TODO: Try OpenAI vision vs. OCR.
+    # [✓] TEST: Parse a label image directly with GPT-4 vision.
+    doc = '../../../.datasets/products/product-photos-2022/PXL_20211011_171904976.jpg'
+    data = parser.parse_with_vision(
+        doc=doc,
+        extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
+        verbose=True,
+    )
+    print('Extracted:', data)
+    print('Cost:', parser.total_cost)
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    outfile = f'../../../.datasets/products/tests/label-2-{timestamp}.xlsx'
+    parser.save(data, outfile)
+    print('Saved:', outfile)
