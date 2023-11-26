@@ -358,4 +358,5 @@ if __name__ == "__main__":
         #     extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
         #     verbose=True,
         # )
+        obs['parsed_at'] = datetime.now().isoformat()
         all_data.append(obs)
