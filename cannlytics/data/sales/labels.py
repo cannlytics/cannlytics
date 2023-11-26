@@ -334,3 +334,28 @@ if __name__ == "__main__":
     outfile = f'../../../.datasets/products/tests/label-2-{timestamp}.xlsx'
     parser.save(data, outfile)
     print('Saved:', outfile)
+
+    # Parse a directory of product labels.
+    from cannlytics.data.tools import scan_qr_code
+
+    all_data = []
+    product_label_dir = '../../../.datasets/products/product-photos-2022'
+    product_label_files = os.listdir(product_label_dir)
+    for file in product_label_files:
+        obs = {}
+        doc = os.path.join(product_label_dir, file)
+
+        # TODO: Scan any QR codes.
+        obs['qr_code'] = scan_qr_code(doc)
+        print('QR code:', obs['qr_code'])
+
+        # TODO: Parse with OCR + AI.
+        obs['text'] = parser.image_to_text(doc)
+
+        # TODO: Parse with AI vision.
+        # data = parser.parse_with_vision(
+        #     doc=doc,
+        #     extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
+        #     verbose=True,
+        # )
+        all_data.append(obs)
