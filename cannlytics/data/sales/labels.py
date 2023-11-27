@@ -174,7 +174,11 @@ class DataParser(object):
         instructional_prompt = 'Return any fields from the product label image as JSON.'
         base64_image = self.encode_image(doc)
 
+        # Proactively rotate the image to be readable.
+        img = self.rotate(cv2.imread(str(doc), cv2.IMREAD_COLOR))
+
         # TODO: Upload image to Firebase Storage and get a download URL.
+        
 
         # Make request to GPT-4 Vision.
         client = OpenAI()
