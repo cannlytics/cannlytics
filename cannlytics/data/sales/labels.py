@@ -341,26 +341,38 @@ if __name__ == "__main__":
 
     # Parse a directory of product labels.
     from cannlytics.data.tools import scan_qr_code
+    from cannlytics.data.coas import CoADoc
 
     all_data = []
     product_label_dir = '../../../.datasets/products/product-photos-2022'
     product_label_files = os.listdir(product_label_dir)
+    coa_parser = CoADoc()
     for file in product_label_files:
         obs = {}
         doc = os.path.join(product_label_dir, file)
 
-        # TODO: Scan any QR codes.
+        # Scan any QR codes.
         obs['qr_code'] = scan_qr_code(doc)
         print('QR code:', obs['qr_code'])
 
-        # TODO: Parse with OCR + AI.
+        # Parse with OCR + AI.
         obs['text'] = parser.image_to_text(doc)
+        obs['ocr_data'] = parser.parse(
+            doc=doc,
+            extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
+            verbose=True,
+        )
 
-        # TODO: Parse with AI vision.
-        # data = parser.parse_with_vision(
-        #     doc=doc,
-        #     extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
-        #     verbose=True,
-        # )
-        obs['parsed_at'] = datetime.now().isoformat()
+        # Parse with AI vision.
+        obs['data'] = parser.parse_with_vision(
+            doc=doc,
+            extraction_prompt=EXTRACT_LABEL_DATA_PROMPT,
+            verbose=True,
+        )
         all_data.append(obs)
+
+        # Compare the label THC to the THC on the COA.
+        if obs['qr_code']:
+            coa_data = coa_parser.parse(obs['qr_code'])
+            print('Label THC:', obs['total_thc'])
+            print('COA THC:', coa_data['total_thc'])
