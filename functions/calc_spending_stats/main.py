@@ -28,6 +28,31 @@ initialize_app()
 # Set the region.
 options.set_global_options(region=options.SupportedRegion.US_CENTRAL1)
 
+# Define statistics to calculate.
+TOTALS = ['total_transactions', 'total_tax', 'total_price']
+
+
+def calc_product_type_proportions(data):
+    """Calculate the proportion of spend on each product type."""
+
+    # Explode the data frame on the product_types column
+    exploded_data = data.explode('product_types')
+
+    # Convert product_types to lowercase for case-insensitive grouping.
+    exploded_data['product_types'] = exploded_data['product_types'].str.lower()
+
+    # Calculate the proportion of spend by product type.
+    product_type_totals = exploded_data.groupby('product_types')['total_price'].sum()
+    total_spend = product_type_totals.sum()
+    product_type_proportions = product_type_totals / total_spend
+
+    # Group proportions less than 1% into "Other".
+    product_type_proportions = product_type_proportions[product_type_proportions >= 0.01]
+    product_type_proportions['other'] = 1 - product_type_proportions.sum()
+
+    # Create and return product type proportion dictionary.
+    return product_type_proportions.to_dict()
+
 
 @firestore_fn.on_document_written(
     document='users/{uid}/receipts/{receipt_id}',
@@ -57,25 +82,33 @@ def calc_receipts_stats(
 
     # Get the user's ID.
     uid = event.params['uid']
+    # resource_parts = context.resource.split('/')
+    # uid = resource_parts[resource_parts.index('users') + 1]
+    # print('User ID:', uid)
 
     # Get the user's receipts.
     docs = firebase.get_collection(f'users/{uid}/receipts')
     data = pd.DataFrame(docs)
     data['date'] = pd.to_datetime(data['date_sold'])
 
+    # TODO: Handle no receipts or deleted receipts.
+
     # Group data by month.
     monthly = data.groupby(pd.Grouper(key='date', freq='M'))
 
     # TODO: Calculate total transactions:
-    # - lifetime
-    # - by month
+    # ✓ lifetime
+    # ✓ by month
     # - by quarter
     # - by year
     # - by retailer
     # - by product type
     # - by strain
-    totals = ['total_transactions', 'total_tax', 'total_price']
-    monthly_totals = monthly[totals].sum()
+    monthly_totals = monthly[TOTALS].sum()
+
+    # Calculate lifetime totals.
+    lifetime_totals = data[TOTALS].sum()
+    lifetime_totals['updated_at'] = firestore.SERVER_TIMESTAMP
 
     # TODO: Calculate spending:
     # - lifetime
@@ -88,8 +121,8 @@ def calc_receipts_stats(
 
 
     # TODO: Calculate total tax:
-    # - lifetime
-    # - by month
+    # ✓ lifetime
+    # ✓ by month
     # - by quarter
     # - by year
 
@@ -112,7 +145,7 @@ def calc_receipts_stats(
     # TODO: Calculate average price per gram:
     # - flower
     # - concentrate
-    # - edible
+    # - edible (price per each)
 
     # TODO: Calculate proportion of spend on each product type:
     # - lifetime
@@ -128,10 +161,31 @@ def calc_receipts_stats(
         ref = f'users/{uid}/receipts_stats/{doc_id}'
         stats = row.to_dict()
         stats['updated_at'] = firestore.SERVER_TIMESTAMP
-        stats['date'] = index.isoformat()
+        stats['date'] = doc_id
+        stats['timestamp'] = index.isoformat()
         firebase.update_document(ref, stats)
         print('Saved monthly statistics:', ref)
 
     # TODO: Save annual statistics.
 
-    # TODO: Save lifetime statistics.
+    # TODO: Save retailer, product type, and strain spending statistics.
+    # Group data by product type and calculate total spend for each product type
+
+    # Calculate product type proportions.
+    product_type_proportions = calc_product_type_proportions(data)
+
+    # Save lifetime statistics.
+    lifetime_ref = f'users/{uid}/stats/spending'
+    lifetime_stats = lifetime_totals.to_dict()
+    lifetime_stats['product_type_proportions'] = product_type_proportions
+    firebase.update_document(lifetime_ref, lifetime_stats)
+
+
+# === Test ===
+if __name__ == '__main__':
+
+    # Update a user's receipt statistics.
+    # TODO: Mock the event.
+    event = {}
+    calc_receipts_stats(event)
+    print('Calculated receipt statistics.')
