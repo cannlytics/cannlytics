@@ -475,70 +475,157 @@ def parse_coa_with_ai(
     return obs, prompts, cost
 
 
-# TODO: Parse components:
-# - parse_analyses
-# - parse_methods
-# - parse_date_tested
-# - parse_images
-#   * Get images and use AI Vision to get captions.
-import base64
-from openai import OpenAI
-from dotenv import dotenv_values
-import os
-config = dotenv_values('../../../.env')
-os.environ['OPENAI_API_KEY'] = config['OPENAI_API_KEY']
+# === DEV ===
+if __name__ == '__main__':
+
+    # TODO: Parse components:
+    # - parse_analyses
+
+    # - parse_methods
+
+    # - parse_date_tested
 
 
-def encode_image(image_path):
-    """Encode an image as a base64 string."""
-    with open(image_path, 'rb') as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
-    
+    # - parse_images
+    #   * Get images and use AI Vision to get captions.
+    import base64
+    from openai import OpenAI
+    from dotenv import dotenv_values
+    import os
+    config = dotenv_values('../../../.env')
+    os.environ['OPENAI_API_KEY'] = config['OPENAI_API_KEY']
 
-image_file = '../../../.datasets/products/product-photos-2023-part-1/PXL_20230328_222923908.jpg'
-model = 'gpt-4-vision-preview'
-detail = 'high'
-max_tokens = 250
-verbose = True
-base64_image = encode_image(image_file)
-caption_prompt = 'Write a brief caption, 40 words or less, describing the image.'
-client = OpenAI()
-response = client.chat.completions.create(
-    model=model,
-    messages=[
-        {
-        'role': 'user',
-        'content': [
-            {'type': 'text', 'text': caption_prompt},
+
+    def encode_image(image_path):
+        """Encode an image as a base64 string."""
+        with open(image_path, 'rb') as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+        
+
+    image_file = '../../../.datasets/products/product-photos-2023-part-1/PXL_20230328_222923908.jpg'
+    model = 'gpt-4-vision-preview'
+    detail = 'high'
+    max_tokens = 250
+    verbose = True
+    base64_image = encode_image(image_file)
+    caption_prompt = 'Write a brief caption, 40 words or less, describing the image.'
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
             {
-            'type': 'image_url',
-            'image_url': {
-                'url': f'data:image/jpeg;base64,{base64_image}',
-                'detail': detail,
-            },
-            },
+            'role': 'user',
+            'content': [
+                {'type': 'text', 'text': caption_prompt},
+                {
+                'type': 'image_url',
+                'image_url': {
+                    'url': f'data:image/jpeg;base64,{base64_image}',
+                    'detail': detail,
+                },
+                },
+            ],
+            }
         ],
-        }
-    ],
-    max_tokens=max_tokens,
-)
-content = response.choices[0].message.content
-if verbose:
-    print(content)
-    # Close-up of Jack Herer cannabis strain in a container with labeled cannabinoid and terpene profiles.
+        max_tokens=max_tokens,
+    )
+    content = response.choices[0].message.content
+    if verbose:
+        print(content)
+        # Close-up of Jack Herer cannabis strain in a container with labeled cannabinoid and terpene profiles.
 
-# - parse_producer (and producer_address fields)
-# - parse_product_name (and strain_name)
-# - parse_product_type (and product_subtype)
-# - parse_details
-#   * - product_name
-#   * - lab_id
-#   * - batch_number
-#   * - product_size
-#   * - serving_size
-#   * - servings_per_package
-#   * - sample_weight
-# - parse_result
+    # - parse_producer (and producer_address fields)
+
+    # - parse_product_name (and strain_name)
+
+    # - parse_product_type (and product_subtype)
+
+    # - parse_details
+    #   * - product_name
+    #   * - lab_id
+    #   * - batch_number
+    #   * - product_size
+    #   * - serving_size
+    #   * - servings_per_package
+    #   * - sample_weight
+
+    # TODO: Try to parse with vision!
+    # - Turn PDF into images.
+    # - Parse images with AI Vision.
+
+    # - parse_result
+    import json
+    import pdfplumber
+
+
+    def parse_results(
+            doc,
+            model = 'gpt-4-1106-preview',
+            temperature = 0.0,
+            user = 'cannlytics',
+            max_tokens = 4_096,
+        ):
+        """Parse results from a document."""
+
+        # TODO: Handle text, images, PDFs, etc.
+        text = pdfplumber.open(doc).pages[0].extract_text()
+
+        # TODO: Chunk the text as needed.
+
+        # Format the prompt.
+        prompt = """Given the following text, extract any chemical or analyte results as JSON, e.g.:
+
+        {
+            "results": [
+                {
+                    "analysis": str, # E.g. "cannabinoids", "terpenes", "microbes", "mycotoxins", "pesticides", "heavy_metals", "residual_solvents", "water_activity", "moisture_content", "foreign_matter", etc.
+                    "key": str, # A standardized key for the result analyte, in snake_case.
+                    "name": str, # The name of the analyte as it appears on the COA.
+                    "value": float, # The value of the result.
+                    "units": str, # Prefer "percent" where applicable. Other units may include "ug/g", "mg/g", "ppm", "ppb", "cfu/g", "aW", etc.
+                    "limit": float, # (Optional) A pass / fail threshold for contaminant screening analyses.
+                    "status": str  # (Optional) The "pass" / "fail" status for contaminant screening analyses.
+                }
+            ]
+        }"""
+        prompt += f'\n\nText: {text}\n\nJSON:'
+        messages = [{'role': 'user', 'content': prompt}]
+        
+        # Prompt OpenAI.
+        client = OpenAI()
+        completion = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            user=user,
+        )
+        try:
+            usage = completion.model_dump()['usage']
+            cost = 0.01 / 1_000 * usage['prompt_tokens'] + 0.03 / 1_000 * usage['completion_tokens']
+        except:
+            cost = None
+        try:
+            content = completion.choices[0].message.content
+            extracted_json = content.lstrip('```json\n').split('\n```')[0]
+            extracted_data = json.loads(extracted_json)
+        except:
+            extracted_data = []
+            
+        # TODO: If results are in mg/g, convert them to percent.
+
+        # TODO: Standardize the `key`s.
+
+        # Return the extracted data and cost.
+        return {'data': extracted_data, 'cost': cost}
+
+
+    doc = './tests/assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf'
+    extract = parse_results(doc)
+    print('Cost:', extract['cost'])
+    # Cost: 0.058289999999999995
+    print('Data:', extract['data'])
+    # Data: {'results': [{'analysis': 'cannabinoids', 'key': 'cbdv', 'name': 'CBDV', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbda', 'name': 'CBDA', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbn', 'name': 'CBN', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbd', 'name': 'CBD', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbga', 'name': 'CBGA', 'value': 11.3803, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbg', 'name': 'CBG', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'thcv', 'name': 'THCV', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'delta_9_thc', 'name': 'Δ9-THC', 'value': 4.58797, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'delta_8_thc', 'name': 'Δ8-THC', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'thca', 'name': 'THCA', 'value': 202.615, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'cbc', 'name': 'CBC', 'value': 0.0, 'units': 'mg/g'}, {'analysis': 'cannabinoids', 'key': 'total_thc_percent', 'name': 'Total THC %', 'value': 18.2281, 'units': 'percent'}, {'analysis': 'cannabinoids', 'key': 'total_thc_mg_per_g', 'name': 'Total THC mg/g', 'value': 182.281, 'units': 'mg/g'}, {'analysis': 'terpenes', 'key': 'camphene', 'name': 'Camphene', 'value': 0.154525, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'myrcene', 'name': 'Myrcene', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'beta_pinene', 'name': 'β-pinene', 'value': 0.488117, 'units': 'percent'}, {'analysis': 'terpenes', 'key': '3_carene', 'name': '3-Carene', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'delta_limonene', 'name': 'Delta-limonene', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'cymene', 'name': 'Cymene', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'beta_ocimene', 'name': 'β-Ocimene', 'value': 0.249542, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'eucalyptol', 'name': 'Eucalyptol', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'gamma_terpinene', 'name': 'γ-Terpinene', 'value': 0.135087, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'alpha_terpinene', 'name': 'a-Terpinene', 'value': 0.116084, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'terpinolene', 'name': 'Terpinolene', 'value': 0.112175, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'linalool', 'name': 'Linalool', 'value': 0.134001, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'isopulegol', 'name': 'Isopulegol', 'value': 0.129332, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'geraniol', 'name': 'Geraniol', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'beta_caryophyllene', 'name': 'β-Caryophyllene', 'value': 0.139431, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'humulene', 'name': 'Humulene', 'value': 0.0510378, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'nerolidol', 'name': 'Nerolidol', 'value': 0.0147684, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'guaiol', 'name': 'Guaiol', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'caryophillene_oxide', 'name': 'Caryophillene oxide', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'alpha_bisabolol', 'name': 'α-Bisabolol', 'value': 0.0, 'units': 'percent'}, {'analysis': 'terpenes', 'key': 'total_terpene_percent', 'name': 'Total Terpene %', 'value': 1.7241, 'units': 'percent'}]}
 
 
 # === Tests ===
