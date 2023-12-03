@@ -481,6 +481,52 @@ def parse_coa_with_ai(
 # - parse_date_tested
 # - parse_images
 #   * Get images and use AI Vision to get captions.
+import base64
+from openai import OpenAI
+from dotenv import dotenv_values
+import os
+config = dotenv_values('../../../.env')
+os.environ['OPENAI_API_KEY'] = config['OPENAI_API_KEY']
+
+
+def encode_image(image_path):
+    """Encode an image as a base64 string."""
+    with open(image_path, 'rb') as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+    
+
+image_file = '../../../.datasets/products/product-photos-2023-part-1/PXL_20230328_222923908.jpg'
+model = 'gpt-4-vision-preview'
+detail = 'high'
+max_tokens = 250
+verbose = True
+base64_image = encode_image(image_file)
+caption_prompt = 'Write a brief caption, 40 words or less, describing the image.'
+client = OpenAI()
+response = client.chat.completions.create(
+    model=model,
+    messages=[
+        {
+        'role': 'user',
+        'content': [
+            {'type': 'text', 'text': caption_prompt},
+            {
+            'type': 'image_url',
+            'image_url': {
+                'url': f'data:image/jpeg;base64,{base64_image}',
+                'detail': detail,
+            },
+            },
+        ],
+        }
+    ],
+    max_tokens=max_tokens,
+)
+content = response.choices[0].message.content
+if verbose:
+    print(content)
+    # Close-up of Jack Herer cannabis strain in a container with labeled cannabinoid and terpene profiles.
+
 # - parse_producer (and producer_address fields)
 # - parse_product_name (and strain_name)
 # - parse_product_type (and product_subtype)
