@@ -4,7 +4,7 @@ Copyright (c) 2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/28/2023
-Updated: 5/28/2023
+Updated: 12/4/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -21,7 +21,7 @@ Notes:
     Thank you to arXiv for use of its open access interoperability.
 
 """
-# Internal imports.
+# Internal imports:
 import base64
 from datetime import datetime
 import json
@@ -30,7 +30,7 @@ import xml.etree.ElementTree as ET
 
 from dotenv import dotenv_values
 
-# External imports.
+# External imports:
 from cannlytics import firebase
 from firebase_admin import initialize_app, firestore
 import openai
@@ -98,6 +98,14 @@ def cannbot(event, context=None):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
+    # Set the parameters.
+    # TODO: Make these parameters configurable.
+    model = 'gpt-4-1106-preview'
+    temperature = 0.24
+    user = 'cannlytics'
+    max_tokens = 4_096
+    verbose = True
+
     # Run on successful Pub/Sub message.
     pubsub_message = base64.b64decode(event['data']).decode('utf-8')
     if pubsub_message != 'success':
@@ -113,9 +121,11 @@ def cannbot(event, context=None):
             pass
         database = firestore.client()
 
-    # FIXME: Initialize OpenAI.
-    config = dotenv_values('../../../.env')
-    openai.api_key = config['OPENAI_API_KEY']
+    # Initialize OpenAI.
+    try:
+        os.environ['OPENAI_API_KEY'] = dotenv_values('../../../.env')['OPENAI_API_KEY']
+    except:
+        os.environ['OPENAI_API_KEY'] = dotenv_values('.env')['OPENAI_API_KEY']
 
     # Get latest Cannabis Data Science material.
     latest_episode = get_latest_episode()
@@ -168,18 +178,27 @@ def cannbot(event, context=None):
     for source in sources:
         prompt += '\n\n' + source['summary']
 
+    # Format the messages.
+    messages = [
+        {'role': 'system', 'content': system_prompt},
+        {'role': 'user', 'content': prompt},
+    ]
+
     # Query OpenAI's GPT model.
-    # FIXME: Handle APIConnectionError
-    response = openai.ChatCompletion.create(
-        model='gpt-4',
-        temperature=0.2,
-        max_tokens=1000,
-        messages=[
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': prompt},
-            ]
+    client = openai.OpenAI()
+    completion = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        user=user,
     )
-    content = response['choices'][0]['message']['content']  
+    usage = completion.model_dump()['usage']
+    cost = 0.01 / 1_000 * usage['prompt_tokens'] + 0.03 / 1_000 * usage['completion_tokens']
+    content = completion.choices[0].message.content
+    if verbose:
+        print(f'Cost: ${cost:.2f}')
+        print('Content: ', content)
 
     # Format the sources.
     message = """Hello team, CannBot here.\n\nI have found the latest cannabis-related research on arXiv:\n"""
@@ -218,7 +237,7 @@ def cannbot(event, context=None):
         'timestamp': timestamp,
     }
     ref = f'ai/cannbot/research/{timestamp.replace(":", "-")}'
-    firebase.update_document(ref, doc)
+    firebase.update_document(ref, doc, database=database)
 
     # Optional: Email Admin.
 
