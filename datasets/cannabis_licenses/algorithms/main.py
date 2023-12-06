@@ -112,20 +112,20 @@ def main(data_dir, env_file):
         entry_point = getattr(module, algorithm)
 
         # Collect licenses for the state.
-        # try:
-        manager.create_log(f'Getting license data for {state.upper()}.')
-        data = entry_point(data_dir, env_file=env_file)
-        
-        state_data_dir = os.path.join(data_dir, state)
-        if not os.path.exists(state_data_dir):
-            os.makedirs(state_data_dir)
-        
-        state_data_file = os.path.join(state_data_dir, f'licenses-{state}-{date}.csv')
-        data.to_csv(state_data_file, index=False)
-        manager.create_log(f'Collected {state.upper()} licenses.')
-        licenses = pd.concat([licenses, data])
-        # except:
-        #     manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
+        try:
+            manager.create_log(f'Getting license data for {state.upper()}.')
+            data = entry_point(data_dir, env_file=env_file)
+            
+            state_data_dir = os.path.join(data_dir, state)
+            if not os.path.exists(state_data_dir):
+                os.makedirs(state_data_dir)
+            
+            state_data_file = os.path.join(state_data_dir, f'licenses-{state}-{date}.csv')
+            data.to_csv(state_data_file, index=False)
+            manager.create_log(f'Collected {state.upper()} licenses.')
+            licenses = pd.concat([licenses, data])
+        except:
+            manager.create_log(f'Failed to aggregate {state.upper()} licenses.')
 
     # Save all of the licenses.
     all_data_dir = os.path.join(data_dir, 'all')
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     env_file = args.get('env_file')
 
     # Get licenses for each state.
-    # all_licenses = main(data_dir, env_file)
+    all_licenses = main(data_dir, env_file)
 
     # Save all licenses.
     data_dir = '../data'

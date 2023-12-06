@@ -29,6 +29,7 @@ TODO:
 from datetime import datetime
 # from dotenv import dotenv_values
 import os
+import re
 from time import sleep
 from typing import List, Optional
 
@@ -49,10 +50,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 # except ImportError:
 #     pass # Otherwise, ChromeDriver should be in your path.
 
-
-# Specify where your data lives.
-DATA_DIR = '../data/az'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AZ'
@@ -89,18 +86,20 @@ def click_load_more(driver, container):
     """Click "Load more" until all of the licenses are visible."""
     more = True
     while(more):
-        button = container.find_element(by=By.TAG_NAME, value='button')
-        driver.execute_script('arguments[0].scrollIntoView(true);', button)
-        button.click()
-        counter = container.find_element(by=By.CLASS_NAME, value='count-text')
-        more = int(counter.text.replace(' more', ''))
+        try:
+            button = container.find_element(by=By.TAG_NAME, value='button')
+            driver.execute_script('arguments[0].scrollIntoView(true);', button)
+            button.click()
+            counter = container.find_element(by=By.CLASS_NAME, value='count-text')
+            only_digits = re.findall(r'\d+', counter.text)
+            more = int(only_digits[0]) if only_digits else False
+        except:
+            more = False
 
 
 def get_license_data_from_html(index, el):
     """Get a retailer's data."""
-    xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{index + 1}]/c-azcc-map-list-item/div'
-    list_item = el.find_element(by=By.XPATH, value=xpath)
-    body = list_item.find_element(by=By.CLASS_NAME, value='slds-media__body')
+    body = el.find_element(by=By.CLASS_NAME, value='slds-media__body')
     divs = body.find_elements(by=By.TAG_NAME, value='div')
     name = divs[0].text
     legal_name = divs[1].text
@@ -164,7 +163,7 @@ def get_licenses_az(
 
     # Get license data for each retailer.
     data = []
-    els = container.find_elements(by=By.CLASS_NAME, value='map-list__item')
+    els = container.find_elements(by=By.CLASS_NAME, value='map-item')
     for index, el in enumerate(els):
         data.append(get_license_data_from_html(index, el))
 
@@ -353,8 +352,12 @@ def get_licenses_az(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-05 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/az'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

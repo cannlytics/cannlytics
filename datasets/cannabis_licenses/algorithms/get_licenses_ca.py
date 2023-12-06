@@ -113,4 +113,4 @@ if __name__ == '__main__':
 
     # Get California licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))
-    get_licenses_ca(data_dir)
+    data = get_licenses_ca(data_dir)

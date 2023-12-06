@@ -75,6 +75,7 @@ The dataset is partitioned into 18 subsets for each state and the aggregate.
 |  [New Jersey](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nj) | `nj`  | ✅ |
 |  [New Mexico](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/nm) | `nm`  | ✅ |
 | [New York](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ny) | `ny` | ✅ |
+| Ohio | `oh` | ⏳ Expected 2024 |
 |  [Oregon](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/or) | `or`  | ✅  |
 |  [Rhode Island](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/ri) | `ri`  | ✅ |
 |  [Vermont](https://huggingface.co/datasets/cannlytics/cannabis_licenses/tree/main/data/vt) | `vt`  | ✅ |
