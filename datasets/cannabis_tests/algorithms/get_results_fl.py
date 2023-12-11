@@ -387,7 +387,7 @@ def parse_results_kaycha(
 
 
 # === Test ===
-if __name__ == '__main__' and False:
+if __name__ == '__main__':
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
@@ -613,7 +613,7 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 
 
 # === Test ===
-if __name__ == '__main__' and False:
+if __name__ == '__main__':
 
     # Specify where your data lives.
     DATA_DIR = 'D://data/florida/lab_results'
