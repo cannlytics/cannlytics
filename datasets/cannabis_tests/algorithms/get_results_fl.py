@@ -808,25 +808,22 @@ if __name__ == '__main__':
                 day_month_combinations.append(combination)
         return day_month_combinations
 
-    # Printing the result
-    day_month_combinations = get_day_month_combinations()
+    # Download TerpLife Labs COAs by digit combinations.
+    # day_month_combinations = get_day_month_combinations()
+    # queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+
     # Download TerpLife Labs COAs by digit and alphabetic.
+    specific_letters = [x for x in string.ascii_lowercase]
+    queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
     # queries = day_month_combinations
     # digits = [str(x) for x in range(10)]
-    combinations = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
-    # specific_letters = [x for x in string.ascii_lowercase]
-    # queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
-    # queries = queries[30:]
-    # combinations.reverse()
-    # queries = combinations + digits + queries
-    # queries.reverse()
     # Random list of queries.
     # queries = [''.join(random.choices(string.ascii_lowercase, k=2)) for x in range(100)]
     # queries = queries[200:300]
     # queries = combined_digits + combined_letters
     DATA_DIR = 'D://data/florida/lab_results'
     downloader = TerpLifeLabs(DATA_DIR)
-    downloader.get_results_terplife(combinations)
+    downloader.get_results_terplife(queries)
     downloader.quit()
 
 
