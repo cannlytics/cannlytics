@@ -217,6 +217,10 @@ def price_to_float(price_str):
 # === Test ===
 if __name__ == '__main__':
 
+    # Define where the data lives.
+    PDF_DIR = 'D:/data/california/lab_results/pdfs/flower-company'
+    DATA_DIR = 'D:/data/california/lab_results/datasets/flower-company'
+
     # Initialize the driver.
     driver = initialize_driver(headless=False)
 
@@ -433,13 +437,11 @@ if __name__ == '__main__':
     driver.close()
 
     # Save the product data.
-    DATA_DIR = 'D:/data/california/lab_results/datasets/flower-company'
     datafile = save_product_data(data, DATA_DIR, namespace='ca-products-flower-company')
     if verbose:
         print(f'Saved {len(data)} products to: {datafile}')
 
     # Download all of the COAs.
-    PDF_DIR = 'D:/data/california/lab_results/pdfs/flower-company'
     download_coa_pdfs(data, pdf_dir=PDF_DIR, verbose=verbose)
 
 
@@ -461,4 +463,4 @@ if __name__ == '__main__':
     timestamp = datetime.now().strftime('%Y-%m-%d')
     results_datafile = os.path.join(DATA_DIR, f'ca-results-flower-company-{timestamp}.xlsx')
     parser.save(results, results_datafile)
-    print(f'Saved parsed COA data to: {results_datafile}')
+    print(f'Saved {len(results)} parsed COAs to: {results_datafile}')

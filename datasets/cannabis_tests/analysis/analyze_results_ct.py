@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/11/2023
-Updated: 12/11/2023
+Updated: 12/12/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -91,7 +91,7 @@ NE_LABS = {
     'lab_latitude': 41.626190,
     'lab_longitude': -72.748250,
     'lab_phone': '860-828-9787',
-    'lab_email': '',
+    # 'lab_email': '',
 }
 
 
@@ -145,8 +145,14 @@ def parse_ne_labs_coa(
             obs['date_tested'] = line.split(': ')[-1]
         if 'Report ID' in line:
             obs['lab_id'] = line.split(': ')[-1]
-        elif 'ID' in line and 'Report ID' not in line:
+        
+    # Get the product ID.
+    top_half = page.crop((0, 0, page.width, page.height * 0.5))
+    top_lines = top_half.extract_text().split('\n')
+    for line in top_lines:
+        if 'Product ID' in line:
             obs['product_id'] = line.split(': ')[-1]
+            break
 
     # Get the tables.
     tables = []
@@ -310,8 +316,11 @@ def parse_ne_labs_coa(
 
         # Get the moisture content and water activity.
         elif table_name.startswith('Moisture'):
-            obs['moisture_content'] = convert_to_numeric(table[1][-1])
-            obs['water_activity'] = convert_to_numeric(table[2][-1])
+            for cells in table[1:]:
+                if 'Content' in cells[0]:
+                    obs['moisture_content'] = convert_to_numeric(cells[-1])
+                elif 'Activity' in cells[0]:
+                    obs['water_activity'] = convert_to_numeric(cells[-1])
 
         # Get the residual solvents results.
         elif 'Residual' in table_name:
@@ -417,6 +426,9 @@ if __name__ == '__main__':
     all_results = []
     for index, row in ct_results.iterrows():
 
+        if index < 100:
+            continue
+
         # Identify if the COA exists.
         pdf_file = os.path.join(PDF_DIR, row['id'] + '.pdf')
         if not os.path.exists(pdf_file):
@@ -450,12 +462,13 @@ if __name__ == '__main__':
         # Future work: Handle other labs, e.g. historic AltaSci.
         else:
             print('Unidentified lab:', pdf_file)
+            continue
 
         # Merge details with COA data.
         all_results.append({**row.to_dict(), **coa_data})
         print('Parsed:', pdf_file)
 
     # Save the augmented CT lab results data.
-    timestamp = datetime.now().strftime('%Y-%m-%d')
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     outfile = os.path.join(DATA_DIR, f'ct-coa-data-{timestamp}.xlsx')
     parser.save(pd.DataFrame(all_results), outfile)

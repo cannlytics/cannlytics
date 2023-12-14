@@ -815,6 +815,7 @@ if __name__ == '__main__':
     # Download TerpLife Labs COAs by digit and alphabetic.
     specific_letters = [x for x in string.ascii_lowercase]
     queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
+    queries.reverse()
     # queries = day_month_combinations
     # digits = [str(x) for x in range(10)]
     # Random list of queries.
