@@ -30,7 +30,7 @@ plt.rcParams.update({
 # === Read the data ===
 
 # Read the California lab results.
-datafile = './data/ca-results-flower-company-2023-12-09.xlsx'
+datafile = './data/ca-results-flower-company-2023-12-13.xlsx'
 results = pd.read_excel(datafile)
 
 
