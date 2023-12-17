@@ -1,12 +1,12 @@
 """
-CoADoc | Parse Northeast Laboratories COAs
+CoADoc | Parse Connecticut COAs
 Copyright (c) 2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/11/2023
-Updated: 12/15/2023
+Updated: 12/16/2023
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -763,9 +763,10 @@ def parse_ne_labs_coa(
                     else:
                         obs['total_cannabinoids'] = convert_to_numeric(cells[1].replace(' %', ''))
                     continue
-                if 'Total THC' in cells[0]:
+                if 'Total' in cells[0] and 'THC' in cells[0]:
                     values = cells[0].split('\n')
-                    obs['total_thc'] = convert_to_numeric(values[0].replace(' %', ''))
+                    value = values[0].split(':')[-1].replace(' %', '').strip()
+                    obs['total_thc'] = convert_to_numeric(value)
                     continue
                 key = ANALYTES.get(snake_case(cells[0]), snake_case(cells[0]))
                 results.append({
@@ -1137,6 +1138,7 @@ if __name__ == '__main__':
 
         # Identify the lab and extract the COA data.
         front_page_text = report.pages[0].extract_text()
+        report.close()
         if NE_LABS['url'] in front_page_text:
             try:
                 coa_data = parse_ne_labs_coa(parser, pdf_file)
@@ -1170,17 +1172,3 @@ if __name__ == '__main__':
     outfile = os.path.join(DATA_DIR, f'ct-coa-data-{timestamp}.xlsx')
     parser.save(pd.DataFrame(all_results), outfile)
     print('Saved CT lab results:', outfile)
-
-
-
-    # === DEV ===
-
-    # # De-bug a COA.
-    # from cannlytics.data.coas import CoADoc
-    # parser = CoADoc()
-    # pdf_file = 'file:///D:/data/connecticut/lab_results/pdfs/row-kg5u.wcfs.tuhy.pdf'
-    # pdf_file = pdf_file.replace('file:///', '')
-    # report = pdfplumber.open(pdf_file)
-    # front_page_text = report.pages[0].extract_text()
-    # assert NE_LABS['url'] in front_page_text
-    # coa_data = parse_ne_labs_coa(parser, pdf_file)

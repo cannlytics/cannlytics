@@ -176,9 +176,11 @@ def save_license_data(
         os.makedirs(data_dir)
     date = datetime.now().strftime('%Y-%m-%d')
     retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
+    labs = licenses.loc[licenses['license_type'] == 'Marijuana Testing Facility']
     licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{date}.csv', index=False)
     licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-latest.csv', index=False)
     retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{date}.csv', index=False)
+    labs.to_csv(f'{data_dir}/labs-{state.lower()}-{date}.csv', index=False)
 
 
 def get_licenses_ak(
@@ -192,7 +194,6 @@ def get_licenses_ak(
     google_maps_api_key = config.get('GOOGLE_MAPS_API_KEY')
 
     # Initiate a Selenium driver.
-    # FIXME: ChromeDriver is not working on Windows.
     try:
         options = Options()
         options.add_argument('--headless')
