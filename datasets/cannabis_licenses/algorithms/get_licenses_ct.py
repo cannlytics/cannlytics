@@ -32,10 +32,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/ct'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'CT'
 CONNECTICUT = {
@@ -51,6 +47,26 @@ CONNECTICUT = {
             'business_phone',
         ]
     }
+}
+
+NE_LABS = {
+    'coa_algorithm': 'ne_labs.py',
+    'coa_algorithm_entry_point': 'parse_ne_labs_coa',
+    'lims': 'Northeast Laboratories',
+    'url': 'www.nelabsct.com',
+    'lab': 'Northeast Laboratories',
+    'lab_website': 'www.nelabsct.com',
+    'lab_license_number': '#PH-0404',
+    'lab_image_url': 'https://www.nelabsct.com/images/Northeast-Laboratories.svg',
+    'lab_address': '129 Mill Street, Berlin, CT 06037',
+    'lab_street': '129 Mill Street',
+    'lab_city': 'Berlin',
+    'lab_county': 'Hartford',
+    'lab_state': 'CT',
+    'lab_zipcode': '06037',
+    'lab_latitude': 41.626190,
+    'lab_longitude': -72.748250,
+    'lab_phone': '860-828-9787',
 }
 
 
@@ -139,7 +155,9 @@ def get_licenses_ct(
     # Save the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        date = timestamp[:10]
+        date = datetime.now().strftime('%Y-%m-%d')
+        labs = pd.DataFrame([NE_LABS])
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-latest.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
@@ -149,8 +167,12 @@ def get_licenses_ct(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/ct'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -162,6 +184,9 @@ if __name__ == '__main__':
         args = arg_parser.parse_args()
     except SystemExit:
         args = {'d': DATA_DIR, 'env_file': ENV_FILE}
+
+    # FIXME: It appears the licenses are now listed in an iframe.
+    # ConnectionError: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
 
     # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))

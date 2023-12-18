@@ -32,10 +32,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/wa'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'WA'
 WASHINGTON = {
@@ -162,6 +158,7 @@ def get_licenses_wa(
     retailers['license_designation'] = 'Adult-Use'
     retailers['license_type'] = 'Adult-Use Retailer'
     
+    # FIXME: The labs list appears to be incomplete.
     labs = pd.read_excel(lab_source_file)
     labs.rename(columns=WASHINGTON['labs']['columns'], inplace=True)
     labs.drop(columns=WASHINGTON['labs']['drop_columns'], inplace=True)
@@ -254,8 +251,12 @@ def get_licenses_wa(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-09 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/wa'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

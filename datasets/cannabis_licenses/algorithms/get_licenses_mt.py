@@ -33,10 +33,6 @@ import pdfplumber
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/mt'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'MT'
 MONTANA = {
@@ -265,9 +261,16 @@ def get_licenses_mt(
     return retailers
 
 
+# TODO: Get Montana labs.
+
+
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/mt'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

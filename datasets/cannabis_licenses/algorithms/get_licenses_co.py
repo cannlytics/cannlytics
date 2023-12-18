@@ -34,10 +34,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/co'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'CO'
 COLORADO = {
@@ -210,7 +206,9 @@ def get_licenses_co(
     # Save and return the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        timestamp = datetime.now().strftime('%Y-%m-%d')
+        labs = licenses.loc[licenses['license_type'] == 'Testing Facilities']
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
@@ -218,8 +216,12 @@ def get_licenses_co(
 
 
 # === Test ===
-# [✓] Tested: 2023-09-20 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+    
+    # Specify where your data lives.
+    DATA_DIR = '../data/co'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

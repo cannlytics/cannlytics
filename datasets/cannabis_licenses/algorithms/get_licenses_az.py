@@ -45,10 +45,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# try:
-#     import chromedriver_binary  # Adds chromedriver binary to path.
-# except ImportError:
-#     pass # Otherwise, ChromeDriver should be in your path.
+try:
+    import chromedriver_binary  # Adds chromedriver binary to path.
+except ImportError:
+    pass # Otherwise, ChromeDriver should be in your path.
 
 
 # Specify state-specific constants.
@@ -341,18 +341,20 @@ def get_licenses_az(
     # Save and return the data.
     if data_dir is not None:
         date = timestamp[:10]
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
+        labs = licenses.loc[licenses['license_type'] == 'Marijuana Laboratory']
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
         cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{date}.csv', index=False)
         manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     # Return the licenses.
     return licenses
 
 
 # === Test ===
-# [✓] Tested: 2023-12-05 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.

@@ -331,6 +331,9 @@ def get_licenses_nm(
     return retailers
 
 
+# TODO: Get New Mexico labs.
+
+
 # === Test ===
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
