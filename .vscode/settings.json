@@ -815,7 +815,17 @@
     "zbar",
     "zipcode",
     "zipcodes",
-    "zoneinfo"
+    "zoneinfo",
+    "despine",
+    "linestyles",
+    "linestyle",
+    "mcolors",
+    "Unlotted",
+    "startangle",
+    "autopct",
+    "textprops",
+    "wedgeprops",
+    "fontweight"
   ],
   "todo-tree.tree.showBadges": false,
 }
