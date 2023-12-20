@@ -825,7 +825,14 @@
     "autopct",
     "textprops",
     "wedgeprops",
-    "fontweight"
+    "fontweight",
+    "Kaplan",
+    "Aalen",
+    "Neslon",
+    "vlines",
+    "logrank",
+    "verticalalignment",
+    "penalizer"
   ],
   "todo-tree.tree.showBadges": false,
 }
