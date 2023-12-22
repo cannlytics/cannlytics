@@ -527,6 +527,7 @@ class CoADoc:
             doc: Any,
             lims: Optional[Any] = None,
             temp_path: Optional[str] = '/tmp',
+            deep_search: Optional[bool] = True,
         ) -> str:
         """Identify if a CoA was created by a common LIMS.
         Search all of the text of the LIMS name or URL.
@@ -538,6 +539,7 @@ class CoADoc:
                 dictionary of known LIMS.
             temp_path (str): A temporary directory to store any online PDFs
                 if needed for identification, `/tmp` by default (optional).
+            deep_search (bool): Whether or not to search the second page.
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
@@ -601,6 +603,9 @@ class CoADoc:
         if not known:
             try:
                 qr_code_url = self.find_pdf_qr_code_url(doc)
+                # Experimental: Try to find QR codes on the second page.
+                if not qr_code_url and deep_search:
+                    qr_code_url = self.find_pdf_qr_code_url(doc, page_index=1)
             except:
                 qr_code_url = None
             if qr_code_url:
@@ -798,6 +803,7 @@ class CoADoc:
             self,
             pdf: Any,
             cleanup: Optional[bool] = True,
+            deep_search: Optional[bool] = True,
             headers: Optional[dict] = {},
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
@@ -813,6 +819,7 @@ class CoADoc:
             pdf (PDF): A file path to a PDF or a pdfplumber PDF.
             cleanup (bool): Whether or not to remove the files generated
                 during OCR, `True` by default (optional).
+            deep_search (bool): Whether or not to search the second page.
             headers (dict): Headers for HTTP requests (optional).
             lims (str or dict): Specific LIMS to parse CoAs (optional).
             max_delay (float): The maximum number of seconds to wait
@@ -892,6 +899,12 @@ class CoADoc:
                 url = self.find_pdf_qr_code_url(pdf_file)
         except IndexError:
             url = self.find_pdf_qr_code_url(pdf_file)
+        # Experimental: Try to find QR codes on the second page.
+        try:
+            if not url and deep_search:
+                url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
+        except:
+            pass
         if verbose:
             print(f'Found URL on PDF: {url}')
 

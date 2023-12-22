@@ -832,7 +832,10 @@
     "vlines",
     "logrank",
     "verticalalignment",
-    "penalizer"
+    "penalizer",
+    "coolwarm",
+    "covariates",
+    "cmap"
   ],
   "todo-tree.tree.showBadges": false,
 }

@@ -9,6 +9,7 @@ Updated: 12/7/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from datetime import datetime
+from matplotlib import pyplot as plt
 import pandas as pd
 import requests
 from time import sleep
@@ -23,11 +24,11 @@ plt.rcParams.update({
     'font.size': 24,
 })
 
-# Initialize OpenAI client.
-env_file = '../../../.env'
-os.environ['OPENAI_API_KEY'] = dotenv_values(env_file)['OPENAI_API_KEY']
-openai_api_key = os.environ['OPENAI_API_KEY']
-client = OpenAI()
+# # Initialize OpenAI client.
+# env_file = '../../../.env'
+# os.environ['OPENAI_API_KEY'] = dotenv_values(env_file)['OPENAI_API_KEY']
+# openai_api_key = os.environ['OPENAI_API_KEY']
+# client = OpenAI()
 
 
 
