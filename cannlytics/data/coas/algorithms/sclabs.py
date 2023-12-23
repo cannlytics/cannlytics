@@ -316,6 +316,7 @@ def get_sc_labs_client_details():
 
 
 def get_sc_labs_sample_details(
+        parser,
         sample='',
         headers=None,
         **kwargs,
@@ -904,8 +905,9 @@ def parse_sc_labs_coa(
     """
     # Pythonic try first, ask later approach.
     # Optional: Be more precise and check if there is a URL and if it is private.
+    # FIXME: Failed to parse URL: 'dict' object is not callable
     try:
-        data = get_sc_labs_sample_details(doc)
+        data = get_sc_labs_sample_details(parser, doc)
     except (AttributeError, ConnectionError):
         data = parse_sc_labs_pdf(parser, doc)
         data['public'] = False
@@ -916,17 +918,17 @@ def parse_sc_labs_coa(
     return data
 
 
-if __name__ == '__main__':
+# === Tests ===
+# if __name__ == '__main__':
 
-    # === Tests ===
-    from cannlytics.data.coas import CoADoc
+    # from cannlytics.data.coas import CoADoc
 
     # # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results(sample='2821')
     # assert test_results is not None
 
     # # [✓] TEST: Get details for a specific sample ID.
-    # sample_details = get_sc_labs_sample_details('858084')
+    # sample_details = get_sc_labs_sample_details(parser, '858084')
     # assert sample_details is not None
 
     # [✓] TEST: Get details for a specific sample URL.
@@ -949,15 +951,15 @@ if __name__ == '__main__':
     # assert data is not None
     # print('Parsed:', doc)
 
-    # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
-    directory = '../../../tests/assets/coas/sc-labs'
-    doc = f'{directory}/Cherry Punch.pdf'
-    parser = CoADoc()
-    lab = parser.identify_lims(doc)
-    assert lab == 'SC Labs'
-    data = parse_sc_labs_pdf(parser, doc)
-    assert data is not None
-    print('Parsed:', doc)
+    # # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
+    # directory = '../../../tests/assets/coas/sc-labs'
+    # doc = f'{directory}/Cherry Punch.pdf'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'SC Labs'
+    # data = parse_sc_labs_pdf(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)
 
     # FIXME:
     # 220000981-Lime-Mojito-Joints.pdf

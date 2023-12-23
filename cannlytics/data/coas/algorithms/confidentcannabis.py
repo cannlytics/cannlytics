@@ -290,12 +290,15 @@ def parse_cc_url(
 
         # Try to get screening data.
         if title == 'safety':
-            obs['status'] = el.find_element(
-                by=By.CLASS_NAME,
-                value='sample-status'
-            ).text
-            table = el.find_element(by=By.TAG_NAME, value='table')
-            rows = table.find_elements(by=By.TAG_NAME, value='tr')
+            try:
+                obs['status'] = el.find_element(by=By.CLASS_NAME, value='sample-status').text
+            except:
+                obs['status'] = None
+            try:
+                table = el.find_element(by=By.TAG_NAME, value='table')
+                rows = table.find_elements(by=By.TAG_NAME, value='tr')
+            except:
+                continue
             for row in rows[1:]:
 
                 # Get the screening analysis.
