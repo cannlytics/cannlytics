@@ -809,8 +809,8 @@ if __name__ == '__main__':
         return day_month_combinations
 
     # Download TerpLife Labs COAs by digit combinations.
-    # day_month_combinations = get_day_month_combinations()
-    # queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+    day_month_combinations = get_day_month_combinations()
+    queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
     # Download TerpLife Labs COAs by digit and alphabetic.
     specific_letters = [x for x in string.ascii_lowercase]

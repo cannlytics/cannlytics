@@ -835,7 +835,8 @@
     "penalizer",
     "coolwarm",
     "covariates",
-    "cmap"
+    "cmap",
+    "errornote"
   ],
   "todo-tree.tree.showBadges": false,
 }

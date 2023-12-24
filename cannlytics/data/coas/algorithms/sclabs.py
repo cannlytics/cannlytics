@@ -598,7 +598,7 @@ def get_sc_labs_sample_details(
 
         # Assign a `key` for the analyte.
         analyte = snake_case(result['name'])
-        result['key'] = parser.analytes(analyte, analyte)
+        result['key'] = parser.analytes.get(analyte, analyte)
 
         # Update the result.
         results[i] = result

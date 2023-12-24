@@ -674,7 +674,7 @@ CODINGS = {
 DECARB = 0.877 # Source: <https://www.conflabs.com/why-0-877/>
 
 # Default headers to use for HTTP requests, because we are AI and should not be treated as a bot.
-DEFAULT_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
+DEFAULT_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
 
 # Random characters to use in password generation.
 RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
