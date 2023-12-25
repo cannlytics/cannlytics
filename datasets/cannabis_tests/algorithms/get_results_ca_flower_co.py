@@ -392,9 +392,12 @@ if __name__ == '__main__':
 
         # Get compounds, if missing.
         if not product.get('total_thc'):
-            total_thc = driver.find_element(By.CSS_SELECTOR, '.product-card-thc').text
-            product['total_thc'] = float(total_thc.lower().replace('% thc', '').replace('mg thc', '').strip())
-            product['total_thc_units'] = 'percent' if '%' in total_thc else 'mg'
+            try:
+                total_thc = driver.find_element(By.CSS_SELECTOR, '.product-card-thc').text
+                product['total_thc'] = float(total_thc.lower().replace('% thc', '').replace('mg thc', '').strip())
+                product['total_thc_units'] = 'percent' if '%' in total_thc else 'mg'
+            except:
+                pass
         if not product.get('total_cbd'):
             try:
                 total_cbd = driver.find_element(By.CSS_SELECTOR, '.product-card-cbd').text

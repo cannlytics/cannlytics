@@ -613,8 +613,11 @@ def get_sc_labs_sample_details(
     for key in columns:
         obs[key] = obs[key].lower()
 
-    # Separate `batch_units` from `batch_size`.
-    obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
+    # Try to separate `batch_units` from `batch_size`.
+    try:
+        obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
+    except:
+        pass
 
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
