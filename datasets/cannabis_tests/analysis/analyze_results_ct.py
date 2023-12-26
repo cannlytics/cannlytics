@@ -632,7 +632,8 @@ def parse_ne_labs_historic_coa(
     report.close()
 
     # Standardize dates.
-    obs = standardize_dates(obs)
+    # FIXME:
+    # obs = standardize_dates(obs)
 
     # Finish data collection with a freshly minted sample ID.
     obs = {**NE_LABS, **obs}
@@ -905,7 +906,8 @@ def parse_ne_labs_coa(
     report.close()
 
     # Standardize dates.
-    obs = standardize_dates(obs)
+    # FIXME:
+    # obs = standardize_dates(obs)
 
     # Finish data collection with a freshly minted sample ID.
     obs = {**NE_LABS, **obs}
@@ -1033,7 +1035,8 @@ def parse_altasci_coa(
     report.close()
 
     # Standardize dates.
-    obs = standardize_dates(obs)
+    # FIXME:
+    # obs = standardize_dates(obs)
 
     # Finish data collection with a freshly minted sample ID.
     obs = {**ALTA_SCI, **obs}
@@ -1052,6 +1055,7 @@ def parse_altasci_coa(
 
 
 def standardize_dates(item: dict) -> dict:
+    # FIXME: The dates may not be correct.
     """Turn dates to ISO format."""
     date_columns = [x for x in item.keys() if x.startswith('date')]
     for date_column in date_columns:

@@ -135,6 +135,8 @@ SC_LABS = {
     'lab': 'SC Labs',
     'lab_image_url': 'https://www.sclabs.com/wp-content/uploads/2020/11/sc-labs-logo-white.png',
     # 'lab_license_number': '', # Get this data point dynamically.
+    # FIXME: Allow the address to be dynamic.
+    # E.g. SC Labs | 1001 S. Galapago St., Denver, CO 80223 | (720) 307-4924
     'lab_address': '100 Pioneer St., Ste. E, Santa Cruz, CA 95060',
     'lab_street': '100 Pioneer St., Ste. E',
     'lab_city': 'Santa Cruz',
@@ -426,7 +428,7 @@ def get_sc_labs_sample_details(
     except TypeError:
         obs['images'] = []
 
-    # Get the date tested.
+    # FIXME: Get the date tested.
     try:
         el = soup.find('div', attrs={'class': 'sdp-masthead-data'})
         mm, dd, yyyy = el.find('p').text.split('/')
@@ -922,9 +924,15 @@ def parse_sc_labs_coa(
 
 
 # === Tests ===
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-    # from cannlytics.data.coas import CoADoc
+    from cannlytics.data.coas import CoADoc
+
+    # FIXME:
+    parser = CoADoc()
+    # doc = 'https://client.sclabs.com/verify/231222L069/'
+    doc = 'https://client.sclabs.com/verify/231221L009/'
+    coa_data = parse_sc_labs_coa(parser, doc)
 
     # # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results(sample='2821')
