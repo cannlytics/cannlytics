@@ -833,57 +833,65 @@ if __name__ == '__main__':
     from time import sleep
     parser = CoADoc()
 
-    # [✓] TEST: Identify LIMS from a COA URL.
-    url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
-    lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
-    assert lims == 'ACS Labs'
-    print('Identified LIMS:', lims)
+    # FIXME:
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/49447_0003547911.pdf'
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/49447_0003580320.pdf'
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/49447_0003584957.pdf'
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/49447_0003644037.pdf'
+    doc = 'D://data/florida/lab_results/.datasets/pdfs/acs/AADZ497-121422-99PR-R35-01212023-COA_EN.pdf'
+    coa_data = parser.parse(doc, verbose=True)
 
-    # [✓] TEST: Identify LIMS from a COA PDF.
-    parser = CoADoc()
-    doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
-    lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
-    assert lims == 'ACS Labs'
-    print('Identified LIMS:', lims)
+    # # [✓] TEST: Identify LIMS from a COA URL.
+    # url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
+    # lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
+    # assert lims == 'ACS Labs'
+    # print('Identified LIMS:', lims)
 
-    # [✓] TEST: Parse partial COA.
-    doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Identify LIMS from a COA PDF.
+    # parser = CoADoc()
+    # doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
+    # lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
+    # assert lims == 'ACS Labs'
+    # print('Identified LIMS:', lims)
 
-    # [✓] TEST: Parse full panel COA for a concentrate.
-    doc = '../../../../tests/assets/coas/acs/27675_0002407047.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Parse partial COA.
+    # doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse a full panel COA for a flower.
-    doc = '../../../../tests/assets/coas/acs/49448_0004136268.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Parse full panel COA for a concentrate.
+    # doc = '../../../../tests/assets/coas/acs/27675_0002407047.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse partial COA from a URL.
-    urls = [
-        'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
-        'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
-    ]
-    for url in urls:
-        data = parse_acs_coa(parser, url)
-        assert data is not None
-        print('Parsed:', data)
-        sleep(3)
+    # # [✓] TEST: Parse a full panel COA for a flower.
+    # doc = '../../../../tests/assets/coas/acs/49448_0004136268.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse a full panel COA from a URL.
-    urls = [
-        'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
-    ]
-    for url in urls:
-        data = parse_acs_coa(parser, url)
-        assert data is not None
-        print('Parsed:', data)
-        sleep(3)
+    # # [✓] TEST: Parse partial COA from a URL.
+    # urls = [
+    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
+    #     'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
+    # ]
+    # for url in urls:
+    #     data = parse_acs_coa(parser, url)
+    #     assert data is not None
+    #     print('Parsed:', data)
+    #     sleep(3)
+
+    # # [✓] TEST: Parse a full panel COA from a URL.
+    # urls = [
+    #     'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
+    # ]
+    # for url in urls:
+    #     data = parse_acs_coa(parser, url)
+    #     assert data is not None
+    #     print('Parsed:', data)
+    #     sleep(3)
 
 """
 # EXAMPLE: Parse a folder of ACS labs COAs.

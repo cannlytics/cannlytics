@@ -263,4 +263,4 @@ if __name__ == '__main__':
     results.to_csv(f'{stats_dir}/ct-lab-results-latest.csv', index=False)
     print('Connecticut lab results archived:', stats_dir)
 
-    # Future work: Parse the PDFs with CoADoc (to train a custom GPT model).
+    # TODO: Integrate with `analyte_results_ct.py`.

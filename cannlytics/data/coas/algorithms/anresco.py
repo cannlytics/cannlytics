@@ -158,6 +158,8 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
     # Get the standard analyses, analytes, and fields.
     coa_parameters = ANRESCO_COA
 
+    # FIXME: Multi-line product names are not being read correctly.
+
     # Get the sample details based on page area.
     sample_details_area = coa_parameters['coa_sample_details_area']
     if isinstance(sample_details_area, str):
@@ -512,9 +514,14 @@ def parse_anresco_coa(parser, doc: Any, **kwargs) -> Any:
 
 
 # # === Tests ===
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     from cannlytics.data.coas import CoADoc
+    from cannlytics.data.coas import CoADoc
+
+    # FIXME:
+    doc = 'D:/data/california/lab_results/pdfs/flower-company/02e9f35827c97a218be4efab0e5926f97186c3b2d5f694b3e8a0087aa9392dc6.pdf'
+    parser = CoADoc()
+    coa_data = parser.parse(doc, verbose=True)
 
 #     # Test parsing Anresco Laboratories CoAs.
 #     parser = CoADoc()

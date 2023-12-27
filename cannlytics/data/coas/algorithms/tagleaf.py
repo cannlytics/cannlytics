@@ -13,8 +13,9 @@ Description:
 
     Parse a TagLeaf LIMS CoA PDF or URL. Labs include:
 
-        - 2 River Labs, Inc
-        - BelCosta Labs
+        * 2 River Labs, Inc
+        * BelCosta Labs
+        * Verity Analytics
 
 Data Points:
 
@@ -393,6 +394,9 @@ if __name__ == '__main__':
     DATA_DIR = '../../../tests/assets/coas/tagleaf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
+
+    # FIXME:
+    doc = 'D:/data/california/lab_results/pdfs/flower-company/6962af0bcd7f4596436b2facaf061d32dcf5713cceff5f069e9a71e8d1ecc52f.pdf'
 
     # [✓] TEST: Parse a COA URL.
     # parser = CoADoc()

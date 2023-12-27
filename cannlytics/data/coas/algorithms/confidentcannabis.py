@@ -179,14 +179,28 @@ def parse_cc_url(
         by=By.CLASS_NAME,
         value='product-desc',
     )
-    block = el.text.split('\n')
-    product_name = block[0]
-    strain_name, product_type = tuple(block[3].split(', '))
-    obs['product_name'] = product_name
-    obs['lab_id'] = block[1]
-    obs['classification'] = block[2]
-    obs['strain_name'] = strip_whitespace(strain_name)
-    obs['product_type'] = strip_whitespace(product_type)
+    try:
+        block = el.text.split('\n')
+        obs['product_name'] = block[0]
+    except:
+        obs['product_name'] = None
+    try:
+        obs['lab_id'] = block[1]
+    except:
+        obs['lab_id'] = None
+    try:
+        obs['classification'] = block[2]
+    except:
+        obs['classification'] = None
+    try:
+        parts = block[3].split(', ')
+        obs['strain_name'] = strip_whitespace(', '.join(parts[:-1]))
+    except:
+        obs['strain_name'] = None
+    try:
+        obs['product_type'] = strip_whitespace(parts[-1])
+    except:
+        obs['product_type'] = None
 
     # Get the date tested.
     el = parser.driver.find_element(by=By.CLASS_NAME, value='report')
@@ -462,7 +476,7 @@ def parse_cc_url(
     obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
-        public_key=product_name,
+        public_key=obs['product_name'],
         salt=producer,
     )
     obs['sample_hash'] = create_hash(obs)
@@ -482,6 +496,8 @@ def parse_cc_pdf(
     Returns:
         (dict): The sample data.
     """
+    # FIXME: Actually parse the PDF.
+    # Sometimes the data is not available through the URL.
     url = parser.find_pdf_qr_code_url(doc)
     return parse_cc_url(parser, url, **kwargs)
 
@@ -510,6 +526,11 @@ def parse_cc_coa(
         data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     elif isinstance(doc, PDF):
         data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
+    
+    # FIXME: Supplement data from the PDF.
+    if data.get('results') == '[]' and data.get('lab') == 'Encore Labs':
+        print('Parsing Encore Labs PDF...')
+    
     return data
 
 
@@ -518,6 +539,12 @@ if __name__ == '__main__':
 
     # Test Confident Cannabis CoAs parsing.
     from cannlytics.data.coas import CoADoc
+
+    # FIXME:
+    doc = 'D:/data/california/lab_results/pdfs/flower-company/f3cfd0f6923bafc349473e15adc10e1166551200899ec5ac78503fee9216c131.pdf'
+    parser = CoADoc()
+    coa_data = parser.parse(doc, verbose=True)
+    print('Parsed:', doc)
 
     # # [✓] Test: Ensure that the web driver works.
     # parser = CoADoc()

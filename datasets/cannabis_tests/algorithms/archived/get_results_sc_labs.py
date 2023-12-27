@@ -48,7 +48,7 @@ import pandas as pd
 
 # Internal imports.
 from cannlytics.data.coas.algorithms.sclabs import (
-    get_sc_labs_sample_details,
+    parse_sc_labs_url,
     get_sc_labs_test_results,
 )
 from cannlytics.firebase import initialize_firebase, update_documents
@@ -100,7 +100,7 @@ for index, values in subset.iterrows():
         continue
     percent = round((index  + 1) * 100 / total, 2)
     sample = values['lab_results_url'].split('/')[-2]
-    details = get_sc_labs_sample_details(sample)
+    details = parse_sc_labs_url(sample)
     rows.append({**values.to_dict(), **details})
     if details['results']:
         print('Results found (%.2f%%) (%i/%i):' % (percent, index + 1, total), sample)
