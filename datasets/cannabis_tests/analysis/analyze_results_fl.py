@@ -7,7 +7,7 @@ import os
 from cannlytics.data.coas import CoADoc
 import pandas as pd
 
-# TODO: Parse TerpLife Labs COA PDF.
+# TODO: Parse TerpLife Labs COA PDFs.
 
 
 #-----------------------------------------------------------------------

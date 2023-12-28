@@ -541,9 +541,10 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
 
     # FIXME:
-    doc = 'D:/data/california/lab_results/pdfs/flower-company/f3cfd0f6923bafc349473e15adc10e1166551200899ec5ac78503fee9216c131.pdf'
+    # doc = 'D:/data/california/lab_results/pdfs/flower-company/f3cfd0f6923bafc349473e15adc10e1166551200899ec5ac78503fee9216c131.pdf'
+    doc = 'D:/data/california/lab_results/pdfs/flower-company/c7701ae4e337d10f769e40071e0381f2623029af21d09bc0b342c34be4a12c5d.pdf'
     parser = CoADoc()
-    coa_data = parser.parse(doc, verbose=True)
+    coa_data = parse_cc_coa(parser, doc, verbose=True)
     print('Parsed:', doc)
 
     # # [✓] Test: Ensure that the web driver works.

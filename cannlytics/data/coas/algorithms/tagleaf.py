@@ -386,9 +386,9 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
 
-    # Set a Google Maps API key.
-    config = dotenv_values('../../../.env')
-    os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
+    # # Set a Google Maps API key.
+    # config = dotenv_values('../../../.env')
+    # os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
 
     # Specify where your test data lives.
     DATA_DIR = '../../../tests/assets/coas/tagleaf'
@@ -397,6 +397,10 @@ if __name__ == '__main__':
 
     # FIXME:
     doc = 'D:/data/california/lab_results/pdfs/flower-company/6962af0bcd7f4596436b2facaf061d32dcf5713cceff5f069e9a71e8d1ecc52f.pdf'
+    doc = 'D:/data/california/lab_results/pdfs/flower-company/720afa466c26ecd14a5ea801d4baa76acc365a9d09c5fc99e339719a864cd1eb.pdf'
+    # doc = 'D:/data/california/lab_results/pdfs/flower-company/fef15287b113e09988a125260d13a64a5897ddd1395df414aaeea65fcc9d4e8e.pdf'
+    parser = CoADoc()
+    coa_data = parse_tagleaf_coa(parser, doc, verbose=True)
 
     # [✓] TEST: Parse a COA URL.
     # parser = CoADoc()
