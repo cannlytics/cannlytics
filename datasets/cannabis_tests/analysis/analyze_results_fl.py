@@ -2,6 +2,8 @@
 # Standard imports:
 from datetime import datetime
 import os
+import tempfile
+from typing import Optional
 
 # External imports:
 from cannlytics.data.coas import CoADoc
@@ -138,30 +140,86 @@ print('Saved COA data:', outfile)
 # Aggregate all parsed COAs.
 #-----------------------------------------------------------------------
 
-# # === Tests ===
-# # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
-# if __name__ == '__main__':
+def parse_results_kaycha(
+        parser,
+        data_dir: str,
+        outfile: Optional[str] = None,
+        temp_path: Optional[str] = None,
+        reverse: Optional[bool] = True,
+        completed: Optional[list] = [],
+        license_number: Optional[str] = None,
+    ):
+    """Parse lab results from Kaycha Labs COAs."""
+    # Create the output data directory if it does not exist.
+    if outfile:
+        output_dir = os.path.dirname(outfile)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
+    # Get a temporary path for storing images.
+    if temp_path is None:
+        temp_path = tempfile.gettempdir()
 
+    # Iterate over PDF directory.
+    all_data = []
+    for path, _, files in os.walk(data_dir):
+        if reverse:
+            files = reversed(files)
 
-#     # [✓] TEST: Parse Kaycha COAs.
-#     # Note: This is a super, super long process
-#     pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
-#     date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-#     folders = os.listdir(pdf_dir)
-#     folders.reverse()
-#     for folder in folders:
-#         if folder.startswith('MMTC'):
-#             data_dir = os.path.join(pdf_dir, folder)
-#             outfile = os.path.join(DATA_DIR, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-#             print('Parsing:', folder)
-#             coa_data = parse_results_kaycha(
-#                 data_dir,
-#                 outfile,
-#                 reverse=True,
-#                 completed=[],
-#                 license_number=folder,
-#             )
+        # Iterate over all files.
+        for filename in list(iter(files))[550:1_000]:
+
+            # Skip all files except PDFs.
+            if not filename.endswith('.pdf'):
+                continue
+
+            # Skip parsed files.
+            if filename in completed:
+                continue
+
+            # Parse COA PDFs one by one.
+            try:
+                doc = os.path.join(path, filename)
+                data = parser.parse(doc, temp_path=temp_path)
+                if license_number is not None:
+                    data['license_number'] = license_number
+                all_data.extend(data)
+                print('Parsed:', doc)
+            except:
+                print('Error:', doc)
+
+    # Save the data.
+    if outfile:
+        try:
+            parser.save(all_data, outfile)
+            print('Saved COA data:', outfile)
+        except:
+            print('Failed to save COA data.')
+
+    # Return the data.
+    return all_data
+
+# [✓] TEST: Parse Kaycha COAs.
+# Note: This is a super, super long process
+pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
+data_dir = 'D://data/florida/lab_results/kaycha'
+date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+folders = os.listdir(pdf_dir)
+# folders.reverse()
+parser = CoADoc()
+for folder in folders:
+    if folder.startswith('MMTC'):
+        data_dir = os.path.join(pdf_dir, folder)
+        outfile = os.path.join(data_dir, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+        print('Parsing:', folder)
+        coa_data = parse_results_kaycha(
+            parser,
+            data_dir,
+            outfile,
+            reverse=True,
+            completed=[],
+            license_number=folder,
+        )
     
 #     # Lab result constants.
 #     CONSTANTS = {

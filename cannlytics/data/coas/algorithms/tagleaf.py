@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 3/21/2023
+Updated: 12/28/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -128,7 +128,11 @@ def parse_tagleaf_url(
     # Get the date tested.
     obs = {}
     el = soup.find('p', attrs={'class': 'produced-statement'})
-    date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
+    statement = el.text
+    if 'revised' in statement:
+        date_tested = pd.to_datetime(statement.split('issued')[-1].strip()).isoformat()
+    else:
+        date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
     obs['date_tested'] = date_tested
 
     # Get lab details.
@@ -377,9 +381,7 @@ def parse_tagleaf_coa(
 
 
 # === Tests ===
-# Uncomment tests to perform them.
-# Checked tests were successfully performed by Cannlytics on 3/21/2023.
-# Contact: <admin@cannlytics.com>.
+# Tested: 2023-12-28 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     # Test TagLeaf LIMS COA parsing.
@@ -391,33 +393,26 @@ if __name__ == '__main__':
     # os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
 
     # Specify where your test data lives.
-    DATA_DIR = '../../../tests/assets/coas/tagleaf'
+    DATA_DIR = '../../../../tests/assets/coas/tagleaf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
-    # FIXME:
-    doc = 'D:/data/california/lab_results/pdfs/flower-company/6962af0bcd7f4596436b2facaf061d32dcf5713cceff5f069e9a71e8d1ecc52f.pdf'
-    doc = 'D:/data/california/lab_results/pdfs/flower-company/720afa466c26ecd14a5ea801d4baa76acc365a9d09c5fc99e339719a864cd1eb.pdf'
-    # doc = 'D:/data/california/lab_results/pdfs/flower-company/fef15287b113e09988a125260d13a64a5897ddd1395df414aaeea65fcc9d4e8e.pdf'
-    parser = CoADoc()
-    coa_data = parse_tagleaf_coa(parser, doc, verbose=True)
-
     # [✓] TEST: Parse a COA URL.
-    # parser = CoADoc()
-    # data = parse_tagleaf_url(parser, tagleaf_coa_url)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    data = parse_tagleaf_url(parser, tagleaf_coa_url)
+    assert data is not None
+    print(data)
 
     # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
-    # parser = CoADoc()
-    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
-    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    assert data is not None
+    print(data)
 
     # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
-    # parser = CoADoc()
-    # tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
-    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
+    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    assert data is not None
+    print(data)

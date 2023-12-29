@@ -627,6 +627,16 @@ def parse_ne_labs_historic_coa(
         value = text.split('Moisture')[-1].split('\n')[0]
         value = value.replace('%', '').strip()
         obs['moisture_content'] = convert_to_numeric(value)
+    
+    # Get the reviewer data.
+    last_page = report.pages[-1]
+    last_page_text = last_page.extract_text()
+    reviewer_text = last_page_text.split('Approved By:')[-1].split('Date:')[0]
+    reviewer_text = reviewer_text.replace('\n', '')
+    values = reviewer_text.split('QA / QC')
+    obs['reviewed_by'] = values[0] + 'QA / QC'
+    obs['released_by'] = values[-1]
+    obs['date_reviewed'] = last_page_text.split('Approved By:')[-1].split('Date:')[-1].split('\n')[0]
 
     # Close the report.
     report.close()
@@ -902,6 +912,14 @@ def parse_ne_labs_coa(
         elif table_name.startswith('Density'):
             obs['sample_weight'] = convert_to_numeric(table[1][-1])
 
+    # Get the reviewer data.
+    last_page = report.pages[-1]
+    last_table = last_page.extract_tables()[-1]
+    row = last_table[1]
+    obs['date_reviewed'] = row[0]
+    obs['reviewed_by'] = row[1]
+    obs['released_by'] = row[2]
+    
     # Close the report.
     report.close()
 
@@ -1030,6 +1048,15 @@ def parse_altasci_coa(
 
     # Determine all unique analyses.
     analyses = list(set(x['analysis'] for x in results))
+
+    # Get the reviewer data.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Results Approved by:' in text:
+            reviewer = text.split('Results Approved by:')[-1].split('\n')[0].strip()
+            obs['reviewed_by'] = reviewer
+            obs['released_by'] = reviewer
+            break
 
     # Close the report.
     report.close()
