@@ -16,30 +16,30 @@ import pandas as pd
 # Parse ACS labs COAs.
 #-----------------------------------------------------------------------
 
-# Initialize CoADoc.
-parser = CoADoc()
+# # Initialize CoADoc.
+# parser = CoADoc()
 
-# Specify where your ACS Labs COAs live.
-all_data = []
-data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
-coa_pdfs = os.listdir(data_dir)
-for coa_pdf in coa_pdfs:
-    filename = os.path.join(data_dir, coa_pdf)
-    try:
-        data = parser.parse(filename)
-        all_data.extend(data)
-        print('Parsed:', filename)
-    except Exception as e:
-        print('Failed to parse:', filename)
+# # Specify where your ACS Labs COAs live.
+# all_data = []
+# data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
+# coa_pdfs = os.listdir(data_dir)
+# for coa_pdf in coa_pdfs:
+#     filename = os.path.join(data_dir, coa_pdf)
+#     try:
+#         data = parser.parse(filename)
+#         all_data.extend(data)
+#         print('Parsed:', filename)
+#     except Exception as e:
+#         print('Failed to parse:', filename)
 
-# Save the data.
-date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
-df = pd.DataFrame(all_data)
-# FIXME: Make this replacement as the data is being parsed.
-df.replace(r'\\u0000', '', regex=True, inplace=True)
-parser.save(df, outfile)
-print('Saved COA data:', outfile)
+# # Save the data.
+# date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+# outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
+# df = pd.DataFrame(all_data)
+# # FIXME: Make this replacement as the data is being parsed.
+# df.replace(r'\\u0000', '', regex=True, inplace=True)
+# parser.save(df, outfile)
+# print('Saved COA data:', outfile)
 
 
 #-----------------------------------------------------------------------
@@ -167,7 +167,7 @@ def parse_results_kaycha(
             files = reversed(files)
 
         # Iterate over all files.
-        for filename in list(iter(files))[550:1_000]:
+        for filename in list(iter(files)):
 
             # Skip all files except PDFs.
             if not filename.endswith('.pdf'):
@@ -205,21 +205,21 @@ pdf_dir = 'D://data/florida/lab_results/.datasets/pdfs'
 data_dir = 'D://data/florida/lab_results/kaycha'
 date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 folders = os.listdir(pdf_dir)
-# folders.reverse()
+folders.reverse()
 parser = CoADoc()
 for folder in folders:
-    if folder.startswith('MMTC'):
-        data_dir = os.path.join(pdf_dir, folder)
-        outfile = os.path.join(data_dir, '.datasets', f'{folder}-lab-results-{date}.xlsx')
-        print('Parsing:', folder)
-        coa_data = parse_results_kaycha(
-            parser,
-            data_dir,
-            outfile,
-            reverse=True,
-            completed=[],
-            license_number=folder,
-        )
+    # if folder.startswith('MMTC'):
+    data_dir = os.path.join(pdf_dir, folder)
+    outfile = os.path.join(data_dir, '.datasets', f'{folder}-lab-results-{date}.xlsx')
+    print('Parsing:', folder)
+    coa_data = parse_results_kaycha(
+        parser,
+        data_dir,
+        outfile,
+        reverse=True,
+        completed=[],
+        license_number=folder,
+    )
     
 #     # Lab result constants.
 #     CONSTANTS = {
@@ -289,3 +289,4 @@ for folder in folders:
 #     print('Saved aggregated COAs data:', outfile)
 
 #     # TODO: Merge with unparsed COA URLs.
+    

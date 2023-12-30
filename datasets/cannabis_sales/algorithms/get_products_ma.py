@@ -24,13 +24,6 @@ plt.rcParams.update({
     'font.size': 24,
 })
 
-# # Initialize OpenAI client.
-# env_file = '../../../.env'
-# os.environ['OPENAI_API_KEY'] = dotenv_values(env_file)['OPENAI_API_KEY']
-# openai_api_key = os.environ['OPENAI_API_KEY']
-# client = OpenAI()
-
-
 
 # Define product columns.
 MA_PRODUCT_COLUMNS = {
@@ -91,6 +84,7 @@ def query_metrc_products(
 def get_metrc_products(
         items_per_page=24,
         verbose=True,
+        outfile=None,
     ):
     """Get all products from the Metrc product catalog API."""
 
@@ -130,10 +124,10 @@ def get_metrc_products(
     df['image_url'] = df.apply(lambda x: 'https://catalog.metrc.com' + x['image_url'] if not pd.isna(x['image_url']) else x['image_url'], axis=1)
 
     # Save to a CSV file
-    timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    df.to_csv(f'ma-products-{timestamp}.csv', index=False)
-    if verbose:
-        print(f'Saved {len(df)} products to CSV file.')
+    if outfile:
+        df.to_csv(outfile, index=False)
+        if verbose:
+            print(f'Saved {len(df)} products to CSV file.')
 
     # Return the data.
     return df
@@ -143,4 +137,6 @@ def get_metrc_products(
 if __name__ == '__main__':
 
     # Get all products.
-    df = get_metrc_products()
+    date = datetime.now().strftime('%Y-%m-%d')
+    outfile = f'../data/ma/ma-products-{date}.csv'
+    df = get_metrc_products(outfile=outfile)
