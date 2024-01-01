@@ -28,15 +28,10 @@ from typing import Optional
 
 # External imports:
 from cannlytics.data.gis import geocode_addresses
+from cannlytics.data.web import initialize_selenium
 from dotenv import dotenv_values
 import pandas as pd
-
-# Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 
 
 # Specify state-specific constants.
@@ -48,40 +43,6 @@ MISSISSIPPI = {
     'licenses_url': 'https://www.mmcp.ms.gov/search_business',
 }
 
-
-def initialize_selenium(
-        headless=True,
-        download_dir=None
-    ):
-    """Initialize Selenium."""
-    service = Service()
-    if download_dir is not None:
-        default_directory = os.path.join(os.getcwd(), download_dir)
-        default_directory = os.path.normpath(default_directory)
-    prefs = {
-        'download.default_directory': default_directory,
-        'profile.default_content_settings.popups': 0,
-        'directory_upgrade': True,
-        'download.prompt_for_download': False,
-        'download.directory_upgrade': True,
-        'plugins.always_open_pdf_externally': True
-    }
-    try:
-        options = EdgeOptions()
-        options.add_experimental_option('prefs', prefs)
-        if headless:
-            options.add_argument('--headless')
-        driver = webdriver.Edge(options=options, service=service)
-    except:
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        options.add_experimental_option('prefs', prefs)
-        service = Service()
-        driver = webdriver.Chrome(options=options, service=service)
-    return driver
 
 
 def find_most_recent_file(download_dir):

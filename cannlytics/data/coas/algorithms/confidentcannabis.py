@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/28/2023
+Updated: 12/31/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -65,10 +65,7 @@ from typing import Any, Optional
 # External imports.
 import pandas as pd
 from pdfplumber.pdf import PDF
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import (
     ElementNotInteractableException,
     NoSuchElementException,
@@ -76,14 +73,12 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+
 
 # Internal imports.
 from cannlytics import __version__
 from cannlytics.data.data import create_hash, create_sample_id
+from cannlytics.data.web import initialize_selenium
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -122,27 +117,9 @@ def parse_cc_url(
     Returns:
         (dict): The sample data.
     """
-
-    # Load the lab results with Selenium.
-    if parser.service is None:
-        parser.service = Service()
-        parser.options = Options()
-        parser.options.add_argument('--window-size=1920,1200')
-
-        # DEV: Uncomment for development / comment for production.
-        # parser.options.headless = False
-
-        # PRODUCTION: Uncomment for production / comment for development.
-        parser.options.add_argument('--headless')
-        parser.options.add_argument('--disable-gpu')
-        parser.options.add_argument('--no-sandbox')
-
-    # Create a driver.
+    # Initialize a web driver.
     if parser.driver is None:
-        parser.driver = webdriver.Chrome(
-            options=parser.options,
-            service=parser.service,
-        )
+        parser.driver = initialize_selenium()
 
     # Get the URL.
     parser.driver.get(url)
@@ -535,17 +512,12 @@ def parse_cc_coa(
 
 
 # === Tests ===
+# Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
+    pass
 
     # Test Confident Cannabis CoAs parsing.
-    from cannlytics.data.coas import CoADoc
-
-    # FIXME:
-    # doc = 'D:/data/california/lab_results/pdfs/flower-company/f3cfd0f6923bafc349473e15adc10e1166551200899ec5ac78503fee9216c131.pdf'
-    doc = 'D:/data/california/lab_results/pdfs/flower-company/c7701ae4e337d10f769e40071e0381f2623029af21d09bc0b342c34be4a12c5d.pdf'
-    parser = CoADoc()
-    coa_data = parse_cc_coa(parser, doc, verbose=True)
-    print('Parsed:', doc)
+    # from cannlytics.data.coas import CoADoc
 
     # # [✓] Test: Ensure that the web driver works.
     # parser = CoADoc()

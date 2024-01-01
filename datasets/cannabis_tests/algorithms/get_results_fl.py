@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 11/5/2023
+Updated: 12/31/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -37,7 +37,6 @@ Resources:
 from datetime import datetime
 import os
 import random
-import string
 import tempfile
 from time import sleep
 from typing import Optional
@@ -45,18 +44,13 @@ from typing import Optional
 # External imports:
 from bs4 import BeautifulSoup
 from cannlytics.data.coas.coas import CoADoc
-from cannlytics.data.gis import geocode_addresses
+from cannlytics.data.web import initialize_selenium
 from cannlytics.utils.constants import DEFAULT_HEADERS
-from dotenv import dotenv_values
 import pandas as pd
 import requests
 
 # Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -427,19 +421,8 @@ def get_results_the_flowery(
     ):
     """Get lab results published by The Flowery on the public web."""
 
-    # Initialize Selenium.
-    try:
-        service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        driver = webdriver.Chrome(options=options, service=service)
-    except:
-        options = EdgeOptions()
-        options.add_argument('--headless')
-        driver = webdriver.Edge(options=options)
+    # Initialize the web driver.
+    driver = initialize_selenium()
 
     # Load the lists page to get each list of COAs.
     coa_lists = []
@@ -452,7 +435,7 @@ def get_results_the_flowery(
     # Get COA URLs.
     coa_urls = []
     for coa_list in coa_lists:
-        driver = webdriver.Edge()
+        driver = initialize_selenium()
         driver.get(coa_list)
         links = driver.find_elements(by=By.TAG_NAME, value='a')
         for link in links:
@@ -506,17 +489,8 @@ def get_results_the_flowery(
 
 def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
     """Get product results from The Flowery website."""
-    # Initialize Selenium.
-    try:
-        service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        driver = webdriver.Chrome(options=options, service=service)
-    except:
-        driver = webdriver.Edge()
+    # Initialize a web driver.
+    driver = initialize_selenium()
 
     # Iterate over all of the product types.
     observations = []
@@ -639,7 +613,9 @@ class TerpLifeLabs:
         if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
         if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
         if not os.path.exists(self.license_pdf_dir): os.makedirs(self.license_pdf_dir)
-        self.driver = self.initialize_selenium()
+        self.driver = initialize_selenium(
+            download_dir=r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
+        )
 
     def get_results_terplife(
             self,
@@ -729,34 +705,6 @@ class TerpLifeLabs:
             if input.get_attribute('placeholder') == 'Enter a keyword to search':
                 return input
         return None
-
-    def initialize_selenium(self, headless=False):
-        """Initialize Selenium."""
-        service = Service()
-        prefs = {
-            # FIXME: Does this need an absolute reference?
-            # 'download.default_directory': self.license_pdf_dir,
-            'download.default_directory': r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
-            'download.prompt_for_download': False,
-            'download.directory_upgrade': True,
-            'plugins.always_open_pdf_externally': True
-        }
-        try:
-            options = EdgeOptions()
-            options.add_experimental_option('prefs', prefs)
-            if headless:
-                options.add_argument('--headless')
-            driver = webdriver.Edge(options=options, service=service)
-        except:
-            options = Options()
-            options.add_argument('--window-size=1920,1200')
-            options.add_argument('--headless')
-            options.add_argument('--disable-gpu')
-            options.add_argument('--no-sandbox')
-            options.add_experimental_option('prefs', prefs)
-            service = Service()
-            driver = webdriver.Chrome(options=options, service=service)
-        return driver
 
     def quit(self):
         """Close the driver."""

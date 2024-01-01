@@ -119,10 +119,20 @@ pd.DataFrame(docs, columns=['url']).to_excel(outfile, index=False)
 print(f'Saved URLS: {outfile}')
 
 # Optional: Read the list of URLs.
-# urls_file = 'D://data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-urls-all.xlsx'
-# urls_file = r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-29-07-53-39.xlsx"
-urls_file = 'D://data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-urls-2023-12-24-15-39-06.xlsx'
-urls = pd.read_excel(urls_file)
+urls = []
+url_files = [
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-29-07-53-39.xlsx",
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-15-39-06.xlsx",
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-00-52-02.xlsx",
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-23-11-42-37.xlsx",
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-all.xlsx",
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-30-21-15-44.xlsx",
+]
+for url_file in url_files:
+    url_data = pd.read_excel(url_file)
+    urls.append(url_data)
+urls = pd.concat(urls)
+urls.drop_duplicates(subset=['url'], inplace=True)
 docs = urls['url'].tolist()
 docs.reverse()
 print(f'Parsing {len(docs)} URLs.')
@@ -132,7 +142,7 @@ all_data = []
 errors = []
 parser = CoADoc()
 for doc in docs:
-    sleep(10)
+    sleep(3.3)
     try:
         coa_data = sclabs.parse_sc_labs_coa(parser, doc, verbose=True)
         all_data.append(coa_data)
@@ -146,5 +156,6 @@ for doc in docs:
 DATA_DIR = 'D:/data/california/lab_results/datasets/sclabs'
 timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
 outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-{timestamp}.xlsx')
-parser.save(pd.DataFrame(all_data), outfile)
-print(f'Saved results: {outfile}')
+# parser.save(pd.DataFrame(all_data), outfile)
+pd.DataFrame(all_data).to_excel(outfile, index=False)
+print(f'Saved {len(all_data)} results: {outfile}')

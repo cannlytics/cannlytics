@@ -77,7 +77,7 @@ Data Points:
     ✓ lab_longitude (augmented)
 
 """
-# Internal imports.
+# Standard imports.
 from ast import literal_eval
 from datetime import datetime
 import json
@@ -326,23 +326,26 @@ def parse_sc_labs_url(
         obs['date_tested'] = ''
 
     # Get the overall status: Pass / Fail.
-    # FIXME: This is not correctly flagging failures.
     try:
         status = soup.find('p', attrs={'class': 'sdp-result-pass'}).text
         obs['status'] = status.replace('\n', '').strip()
     except AttributeError:
-        obs['status'] = ''
+        try:
+            status = soup.find('p', attrs={'class': 'sdp-result-fail'}).text
+            obs['status'] = status.replace('\n', '').strip()
+        except AttributeError:
+            obs['status'] = ''
 
     # Format the dates.
     try:
         mm, dd, yyyy = obs['date_collected'].split('/')
         obs['date_collected'] = '-'.join([yyyy, mm, dd]) 
-    except KeyError:
+    except:
         obs['date_collected'] = ''
     try:
         mm, dd, yyyy = obs['date_received'].split('/')
         obs['date_received'] = '-'.join([yyyy, mm, dd])
-    except KeyError:
+    except:
         obs['date_received'] = ''
     
     # Rename desired fields.
@@ -957,13 +960,13 @@ def get_sc_labs_test_results(
 
 
 # === Tests ===
-# Tested: 2023-12-27 by Keegan Skeate <keegan@cannlytics.com>
+# Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
+    pass
 
-    from cannlytics.data.coas import CoADoc
-
-    # Initialize tests.
-    parser = CoADoc()
+    # # Initialize tests.
+    # from cannlytics.data.coas import CoADoc
+    # parser = CoADoc()
 
     # # [✓] TEST: Get all test results for a specific client.
     # test_results = get_sc_labs_test_results(sample='2821')
@@ -973,22 +976,21 @@ if __name__ == '__main__':
     # sample_details = parse_sc_labs_url(parser, '220525L001')
     # assert sample_details is not None
 
-    # FIXME: Test: Parse a failing COA.
-    # https://client.sclabs.com/verify/231122T001/
-    doc = 'https://client.sclabs.com/verify/231221R001/'
-    parser = CoADoc()
-    data = parse_sc_labs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', doc)
+    # # [✓] TEST: Get details for a specific sample URL.
+    # doc = 'https://client.sclabs.com/verify/210727L001/'
+    # parser = CoADoc()
+    # lab = parser.identify_lims(doc)
+    # assert lab == 'SC Labs'
+    # data = parse_sc_labs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)
 
-    # [✓] TEST: Get details for a specific sample URL.
-    doc = 'https://client.sclabs.com/verify/210727L001/'
-    parser = CoADoc()
-    lab = parser.identify_lims(doc)
-    assert lab == 'SC Labs'
-    data = parse_sc_labs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', doc)
+    # # [✓] TEST: Test: Parse a failing COA.
+    # doc = 'https://client.sclabs.com/verify/231221R001/'
+    # parser = CoADoc()
+    # data = parse_sc_labs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', doc)
 
     # # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
     # directory = '../../../tests/assets/coas/sc-labs'

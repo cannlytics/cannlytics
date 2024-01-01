@@ -35,20 +35,12 @@ from typing import List, Optional
 
 # External imports.
 # from cannlytics.data.gis import geocode_addresses
+from cannlytics.data.web import initialize_selenium
 import pandas as pd
-import zipcodes
-
-# Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+import zipcodes
 
 
 # Specify state-specific constants.
@@ -66,20 +58,6 @@ def get_county_from_zip(x):
         return zipcodes.matching(x)[0]['county']
     except KeyError:
         return None
-
-
-def initialize_selenium():
-    """Initialize a web driver."""
-    try:
-        service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        return webdriver.Chrome(options=options, service=service)
-    except:
-        return webdriver.Edge()
     
 
 def click_load_more(driver, container):

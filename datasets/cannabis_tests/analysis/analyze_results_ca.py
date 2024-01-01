@@ -33,6 +33,18 @@ plt.rcParams.update({
 datafile = './data/ca-results-flower-company-2023-12-13.xlsx'
 results = pd.read_excel(datafile)
 
+# TODO: Aggregate all California datasets.
+CA_LAB_RESULTS = {
+    'Flower Company': [],
+    'Glass House Farms': [],
+    'SC Labs': [
+        r'D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx'
+    ],
+}
+
+
+# TODO: Remove duplicates.
+
 
 # === Environment analysis ===
 

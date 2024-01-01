@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/10/2021
-Updated: 10/8/2022
+Updated: 12/31/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Resources:
@@ -18,13 +18,90 @@ TODO:
     - Search for text (prices/analyses)
         r.html.search('Python is a {} language')[0]
 """
+# Standard imports:
+import os
 import re
 from typing import Any, Optional, Tuple
+
+# External imports:
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
+try:
+    import chromedriver_binary  # Adds chromedriver binary to path.
+except ImportError:
+    pass # Otherwise, ChromeDriver should be in your path.
 
 
-# === General Web Scraping Tools ===
+# === Dynamic HTML Scraping Tools ===
+
+def initialize_selenium(
+        browser=None,
+        headless=True,
+        download_dir=None
+    ) -> Any:
+    """
+    Initialize a Selenium WebDriver with preference for Chrome, falling back to Edge.
+
+    The function attempts to initialize Chrome first; if it fails, it tries Edge.
+    Users can specify a browser if desired.
+
+    Args:
+        browser (str, optional): The preferred browser to use ('chrome' or 'edge'). If None, tries Chrome first, then Edge.
+        headless (bool): Whether to run the browser in headless mode. Defaults to True.
+        download_dir (str, optional): Path to the directory for automatic file downloads. Defaults to None.
+
+    Returns:
+        webdriver: An instance of a Selenium WebDriver.
+
+    Raises:
+        RuntimeError: If it fails to initialize both Chrome and Edge drivers.
+    """
+    browsers = ['chrome', 'edge']
+    if browser: browsers = [browser]
+    for browser in browsers:
+        try:
+            # Default to Chrome, or Edge if specified, then Edge as a fallback.
+            if browser.lower() == 'chrome':
+                service = Service()
+                options = ChromeOptions()
+                options.add_argument('--window-size=1920,1200')
+                options.add_argument('--disable-gpu')
+                options.add_argument('--no-sandbox')
+                if headless:
+                    options.add_argument('--headless')
+            else:
+                service = Service()
+                options = EdgeOptions()
+                if headless:
+                    options.add_argument('--headless')
+
+            # Set download preferences if a download directory is provided.
+            if download_dir:
+                default_directory = os.path.normpath(os.path.join(os.getcwd(), download_dir))
+                prefs = {
+                    'download.default_directory': default_directory,
+                    'download.prompt_for_download': False,
+                    'download.directory_upgrade': True,
+                    'plugins.always_open_pdf_externally': True
+                }
+                options.add_experimental_option('prefs', prefs)
+
+            if browser.lower() == 'chrome':
+                return webdriver.Chrome(options=options, service=service)
+            else:
+                return webdriver.Edge(options=options, service=service)
+
+        except Exception as e:
+            print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
+
+    raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
+
+
+# === Static HTML Scraping Tools ===
 
 def format_params(parameters, **kwargs):
     """Format given keyword arguments HTTP request parameters.

@@ -515,13 +515,9 @@ def parse_anresco_coa(parser, doc: Any, **kwargs) -> Any:
 
 # # === Tests ===
 if __name__ == '__main__':
+    pass
 
-    from cannlytics.data.coas import CoADoc
-
-    # FIXME:
-    doc = 'D:/data/california/lab_results/pdfs/flower-company/02e9f35827c97a218be4efab0e5926f97186c3b2d5f694b3e8a0087aa9392dc6.pdf'
-    parser = CoADoc()
-    coa_data = parser.parse(doc, verbose=True)
+    # from cannlytics.data.coas import CoADoc
 
 #     # Test parsing Anresco Laboratories CoAs.
 #     parser = CoADoc()
