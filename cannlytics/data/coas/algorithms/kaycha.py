@@ -150,6 +150,8 @@ KAYCHA_LABS_COA = {
         'Sampled': 'date_collected',
         'Completed': 'date_tested',
         # 'Sampling Method': 'method_sampling',
+        # TODO: Also get `date_revised` if it exists.
+        # TODO: Get `revision_reason` if it is revised.
     },
     'screening_analyses': [
         'pesticides',
@@ -413,7 +415,7 @@ def parse_kaycha_coa(
     cells = [x .replace('*', '').replace('Not Present', 'ND') for x in cells]
 
     # Define contaminants.
-    microbes = ['ASPERGILLUS', 'SALMONELLA', 'ESCHERICHIA', 'TOTAL YEAST']
+    microbes = ['ASPERGILLUS', 'SALMONELLA', 'ESCHERICHIA', 'TOTAL YEAST', 'ECOLI SHIGELLA']
     mycotoxins = ['AFLATOXIN', 'OCHRATOXIN']
     heavy_metals = ['TOTAL CONTAMINANT LOAD METALS', 'ARSENIC', 'CADMIUM', 'MERCURY', 'LEAD']
     contaminants = [{'name': microbe, 'analysis': 'microbes', 'units': 'CFU/g'} for microbe in microbes] + \
@@ -459,6 +461,10 @@ def parse_kaycha_coa(
 
     # Remove collected cells.
     cells = [x for x in cells if x not in remove]
+
+    # Remove non-result cells.
+    cells = [x for x in cells if 'Accreditation' not in x \
+              and 'Fisher Scientific' not in x]
 
     # Get any pesticides analyzed.
     if cells:
@@ -558,6 +564,7 @@ def parse_kaycha_coa(
 
 
 # === Tests ===
+# Tested: 2024-01-01 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
@@ -571,8 +578,10 @@ if __name__ == '__main__':
         lims = parser.identify_lims(doc, lims={'Kaycha Labs': KAYCHA_LABS})
         assert lims == 'Kaycha Labs'
 
-    # [ ] TEST: Parse a full panel COA PDF.
+    # [✓] TEST: Parse a full panel COA PDF.
     doc = '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf'
+    temp_path = None
+    coa_parameters = KAYCHA_LABS_COA
     data = parse_kaycha_coa(parser, doc)
     assert data is not None
 

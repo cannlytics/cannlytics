@@ -121,7 +121,7 @@ FLORIDA_LICENSES = {
     'MMTC-2019-0016': {
         'business_dba_name': 'Insa - Cannabis for Real Life',
         'slug': 'Insa',
-        'total': 0,
+        'total': 9,
     },
     'MMTC-2019-0015': {
         'business_dba_name': 'Jungle Boys',
@@ -297,10 +297,10 @@ def get_results_kaycha(data_dir: str, licenses=None, **kwargs):
     # Iterate over each producer.
     coa_urls = []
     for license_number, licensee in licenses.items():
-        expected_total = licensee['total']
-        if expected_total == 0:
-            continue
-        print('Preparing to download %i+ COAs for %s' % (expected_total, licensee['business_dba_name']))
+        # expected_total = licensee['total']
+        # if expected_total == 0:
+        #     continue
+        print('Preparing to download COAs for %s' % licensee['business_dba_name'])
         urls = download_coas_kaycha(
             data_dir,
             slug=licensee['slug'],
