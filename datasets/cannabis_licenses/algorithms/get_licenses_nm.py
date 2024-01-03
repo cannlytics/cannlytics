@@ -294,29 +294,29 @@ def get_licenses_nm(
     retailers['data_refreshed_date'] = datetime.now().isoformat()
 
     # Geocode licenses.
-    if geocode:
-
-        # FIXME: This is not working as intended.
-        # Perhaps try `search_for_address`?
-        retailers = geocode_addresses(retailers, api_key=api_key, address_field='address')
-        retailers['premise_street_address'] = retailers['formatted_address'].apply(
-            lambda x: x.split(',')[0] if STATE in str(x) else x
-        )
-        retailers['premise_city'] = retailers['formatted_address'].apply(
-            lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
-        )
-        retailers['premise_zip_code'] = retailers['formatted_address'].apply(
-            lambda x: x.split(', ')[2].split(',')[0].split(' ')[-1] if STATE in str(x) else x
-        )
-        drop_cols = ['state', 'state_name', 'address', 'formatted_address',
-            'details_url']
-        gis_cols = {
-            'county': 'premise_county',
-            'latitude': 'premise_latitude',
-            'longitude': 'premise_longitude'
-        }
-        retailers.drop(columns=drop_cols, inplace=True)
-        retailers.rename(columns=gis_cols, inplace=True)
+    # FIXME: This my be expensive.
+    # if geocode:
+    #     # FIXME: This is not working as intended.
+    #     # Perhaps try `search_for_address`?
+    #     retailers = geocode_addresses(retailers, api_key=api_key, address_field='address')
+    #     retailers['premise_street_address'] = retailers['formatted_address'].apply(
+    #         lambda x: x.split(',')[0] if STATE in str(x) else x
+    #     )
+    #     retailers['premise_city'] = retailers['formatted_address'].apply(
+    #         lambda x: x.split(', ')[1].split(',')[0] if STATE in str(x) else x
+    #     )
+    #     retailers['premise_zip_code'] = retailers['formatted_address'].apply(
+    #         lambda x: x.split(', ')[2].split(',')[0].split(' ')[-1] if STATE in str(x) else x
+    #     )
+    #     drop_cols = ['state', 'state_name', 'address', 'formatted_address',
+    #         'details_url']
+    #     gis_cols = {
+    #         'county': 'premise_county',
+    #         'latitude': 'premise_latitude',
+    #         'longitude': 'premise_longitude'
+    #     }
+    #     retailers.drop(columns=drop_cols, inplace=True)
+    #     retailers.rename(columns=gis_cols, inplace=True)
 
     # Save and return the data.
     if data_dir is not None:

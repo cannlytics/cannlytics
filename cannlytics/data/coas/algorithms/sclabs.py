@@ -808,6 +808,12 @@ def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
         except:
             pass
 
+    # FIXME: `total` is being included as a terpene.
+
+    # FIXME: Results are not properly JSON-encoded and raise this error:
+    # json.loads(obs['results'])
+    # JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+
     # Finish data collection with a freshly minted sample ID.
     obs = {**SC_LABS, **obs}
     obs['analyses'] = json.dumps(analyses)

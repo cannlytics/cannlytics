@@ -389,19 +389,21 @@ def parse_confidence_pdf(
         obs['producer_county'] = licensee['premise_county']
         obs['producer_latitude'] = licensee['premise_latitude']
         obs['producer_longitude'] = licensee['premise_longitude']
-    else:
-        try:
-            google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
-            location = search_for_address(
-                obs['producer_address'],
-                api_key=google_maps_api_key
-            )
-            for key, value in location.items():
-                obs[f'producer_{key}'] = value
-        except:
-            print("""Set `GOOGLE_MAPS_API_KEY` environment variable to
-            get the producer's latitude and longitude.""")
-            pass
+    
+    # FIXME: This my be expensive.
+    # else:
+    #     try:
+    #         google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+    #         location = search_for_address(
+    #             obs['producer_address'],
+    #             api_key=google_maps_api_key
+    #         )
+    #         for key, value in location.items():
+    #             obs[f'producer_{key}'] = value
+    #     except:
+    #         print("""Set `GOOGLE_MAPS_API_KEY` environment variable to
+    #         get the producer's latitude and longitude.""")
+    #         pass
 
     # Get the methods.
     methods = []

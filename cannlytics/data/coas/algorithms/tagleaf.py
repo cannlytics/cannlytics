@@ -146,19 +146,20 @@ def parse_tagleaf_url(
     obs['lab_image_url'] = img.attrs['src']
     obs['lab_phone'] = details[2].replace('PH: ', '')
 
-    # Try to get lab address details.
-    try:
-        google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
-        location = search_for_address(address, google_maps_api_key)
-        obs['lab_street'] = location['street']
-        obs['lab_city'] = location['city']
-        obs['lab_county'] = location['county']
-        obs['lab_state'] = location['state']
-        obs['lab_zipcode'] = location['zipcode']
-        obs['lab_latitude'] = location['latitude']
-        obs['lab_longitude'] = location['longitude']
-    except:
-        pass
+    # # Try to get lab address details.
+    # FIXME: This my be expensive.
+    # try:
+    #     google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+    #     location = search_for_address(address, google_maps_api_key)
+    #     obs['lab_street'] = location['street']
+    #     obs['lab_city'] = location['city']
+    #     obs['lab_county'] = location['county']
+    #     obs['lab_state'] = location['state']
+    #     obs['lab_zipcode'] = location['zipcode']
+    #     obs['lab_latitude'] = location['latitude']
+    #     obs['lab_longitude'] = location['longitude']
+    # except:
+    #     pass
 
     # Get data from headings.
     text = soup.find_all('p', attrs={'class': 'h5'}, limit=2)

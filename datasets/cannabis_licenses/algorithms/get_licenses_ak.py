@@ -133,26 +133,27 @@ def search_for_license_addresses(
         business_website=None,
     )
 
-    # Iterate over each license, search for the address, and record the results in the DataFrame.
-    for index, row in licenses.iterrows():
-        query = ', '.join([row['business_dba_name'], row['address']])
-        gis_data = queries.get(query)
+    # # Iterate over each license, search for the address, and record the results in the DataFrame.
+    # FIXME: This my be expensive.
+    # for index, row in licenses.iterrows():
+    #     query = ', '.join([row['business_dba_name'], row['address']])
+    #     gis_data = queries.get(query)
 
-        # Query Google Place API, if necessary.
-        if gis_data is None:
-            try:
-                gis_data = search_for_address(query, api_key=api_key, fields=fields)
-            except:
-                gis_data = {}
-            queries[query] = gis_data
+    #     # Query Google Place API, if necessary.
+    #     if gis_data is None:
+    #         try:
+    #             gis_data = search_for_address(query, api_key=api_key, fields=fields)
+    #         except:
+    #             gis_data = {}
+    #         queries[query] = gis_data
 
-        # Record the query results.
-        licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
-        licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
-        licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
-        licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
-        licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
-        licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
+    #     # Record the query results.
+    #     licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
+    #     licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
+    #     licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
 
     return licenses
 

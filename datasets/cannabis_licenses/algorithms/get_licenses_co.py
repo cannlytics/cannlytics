@@ -169,21 +169,24 @@ def get_licenses_co(
         business_website=None,
         business_phone=None,
     )
-    for index, row in retailers.iterrows():
-        query = row['query']
-        gis_data = queries.get(query)
-        if gis_data is None:
-            try:
-                gis_data = search_for_address(query, api_key=api_key, fields=fields)
-            except:
-                gis_data = {}
-            queries[query] = gis_data
-        retailers.iat[index, retailers.columns.get_loc('premise_street_address')] = gis_data.get('street')
-        retailers.iat[index, retailers.columns.get_loc('premise_county')] = gis_data.get('county')
-        retailers.iat[index, retailers.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
-        retailers.iat[index, retailers.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
-        retailers.iat[index, retailers.columns.get_loc('business_website')] = gis_data.get('website')
-        retailers.iat[index, retailers.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
+
+    # Geocode the licenses.
+    # FIXME: This my be expensive.
+    # for index, row in retailers.iterrows():
+    #     query = row['query']
+    #     gis_data = queries.get(query)
+    #     if gis_data is None:
+    #         try:
+    #             gis_data = search_for_address(query, api_key=api_key, fields=fields)
+    #         except:
+    #             gis_data = {}
+    #         queries[query] = gis_data
+    #     retailers.iat[index, retailers.columns.get_loc('premise_street_address')] = gis_data.get('street')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_county')] = gis_data.get('county')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
+    #     retailers.iat[index, retailers.columns.get_loc('business_website')] = gis_data.get('website')
+    #     retailers.iat[index, retailers.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
     
     # Clean-up after getting GIS data.
     retailers.drop(columns=['query'], inplace=True)
