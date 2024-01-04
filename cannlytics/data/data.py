@@ -23,26 +23,8 @@ import pandas as pd
 from cannlytics.utils import rmerge
 from cannlytics.utils.utils import snake_case
 
-# Constants.
-DATA_PROVIDER = 'cannlytics'
-DATA_URL = 'https://cannlytics.com/api/data'
-HASH_ERROR = """Unrecognized `public_key`. Expecting a str, list, dict,
-int, bytes, or DataFrame."""
-
-# Library of Cannlytics datasets.
-CANNLYTICS_DATASETS = [
-    'aggregated-cannabis-test-results',
-]
 
 # === Data collection tools. ===
-
-def list_datasets() -> list:
-    """Get the Cannlytics Hugging Face data catalogue.
-    Returns:
-        (list): A list of dataset names.
-    """
-    return CANNLYTICS_DATASETS
-
 
 def load_google_sheet(
         sheet_key,
@@ -207,7 +189,7 @@ def create_hash(
     elif isinstance(public_key, int) or isinstance(public_key, float):
         msg = str(public_key)
     else:
-        raise ValueError(HASH_ERROR)
+        raise ValueError('Unrecognized `public_key`. Expecting a str, list, dict, int, bytes, or DataFrame.')
     try:
         msg = msg.encode()
     except AttributeError:
@@ -234,20 +216,6 @@ def create_sample_id(private_key, public_key, salt='') -> str:
     return sample_id
 
 
-# === Data analysis tools. ===
-
-def random_sample(data, count=10_000):
-    """Create a random sample of a given dataset."""
-    # TODO: Implement !
-    raise NotImplementedError
-
-
-def shard_datasets(data, directory, count=10_000):
-    """Shard a dataset for ease of use."""
-    # TODO: Implement !
-    raise NotImplementedError
-
-
 # === Data saving tools. ===
 
 def write_to_worksheet(ws, values):
@@ -267,43 +235,6 @@ def write_to_worksheet(ws, values):
                 ws.cell(row=r_idx, column=c_idx, value=str(value))
 
 
+# === Tests ===
 if __name__ == '__main__':
-
-    # === Tests ===
-    import cannlytics.data
-
-    # [✓] TEST: List all of the available datasets.
-    # dataset_names = list_datasets()
-    # for name in dataset_names:
-    #     assert name in CANNLYTICS_DATASETS
-
-    # [✓] TEST: `aggregate_datasets` with MCR Labs data.
-    # data_dir = '../../../.datasets/lab_results/raw_data/mcr_labs'
-    # data = aggregate_datasets(data_dir, concat=True)
-    # subset = data.loc[~data['results'].isnull()]
-    # subset.drop_duplicates(
-    #     subset=['sample_id', 'total_cannabinoids'],
-    #     keep='last',
-    #     inplace=True
-    # )
-    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    # datafile = f'../../../.datasets/lab_results/mcr_labs_test_results-{timestamp}.xlsx'
-    # subset.to_excel(datafile, sheet_name='mcr_labs_raw_data')
-    # print('Aggregated %i samples.' % len(subset))
-
-    # [✓] TEST: `aggregate_datasets` with PSI Labs data.
-    # data_dir = '../../.datasets/lab_results/raw_data/psi_labs'
-    # data = aggregate_datasets(data_dir)
-    # subset = data.loc[~data['results'].isnull()]
-    # subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-    # subset.to_excel('../../.datasets/lab_results/psi_labs_test_results.xlsx')
-
-    # [✓] TEST: `aggregate_datasets` with SC Labs data.
-    # data_dir = '../../.datasets/lab_results/raw_data/sc_labs'
-    # data = aggregate_datasets(data_dir, concat=True)
-    # subset = data.loc[~data['results'].isnull()]
-    # subset.drop_duplicates(subset='sample_id', keep='first', inplace=True)
-    # timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-    # datafile = f'../../.datasets/lab_results/sc_labs_test_results-{timestamp}.xlsx'
-    # subset.to_excel(datafile)
-    # print(len(subset))
+    pass

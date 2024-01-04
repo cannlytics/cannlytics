@@ -27,15 +27,12 @@ from typing import Optional
 
 # External imports.
 from dotenv import dotenv_values
+from bs4 import BeautifulSoup
 from cannlytics.data.gis import geocode_addresses
 import pandas as pd
 import pdfplumber
 import requests
 
-
-# Specify where your data lives.
-DATA_DIR = '../data/il'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'IL'
@@ -53,8 +50,19 @@ ILLINOIS = {
             'license_number', 
         ],
     },
-    # Alt: https://idfpr.illinois.gov/content/dam/soi/en/web/idfpr/forms/auc/2022-10-11-conditional-licenses-list.pdf
-    # Medical: https://idfpr.illinois.gov/content/dam/soi/en/web/idfpr/forms/mc/listoflicenseddispensaries.pdf
+    'labs': {
+        'url': 'https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/labs.html',
+    },
+    # TODO: Get cultivators.
+    # https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/cultivation-centers.html
+    # https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/craft-growers.html
+    
+    # TODO: Get processors.
+    # https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/infusers.html
+
+    # Optional: Get transporters.
+    # https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/transporters.html
+    
 }
 
 
@@ -65,33 +73,36 @@ def get_licenses_il(
     ):
     """Get Illinois cannabis license data."""
 
-    # Create necessary directories.
-    pdf_dir = f'{data_dir}/pdfs'
-    if not os.path.exists(data_dir): os.makedirs(data_dir)
-    if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
+    # FIXME: This code needs to be re-done.
 
-    # Download the retailers PDF.
-    retailers_url = ILLINOIS['retailers']['url']
-    filename = f'{pdf_dir}/illinois_retailers.pdf'
-    response = requests.get(retailers_url)
-    with open(filename, 'wb') as f:
-        f.write(response.content)
+    # # Create necessary directories.
+    # pdf_dir = f'{data_dir}/pdfs'
+    # if not os.path.exists(data_dir): os.makedirs(data_dir)
+    # if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
 
-    # Read the retailers PDF.
-    pdf = pdfplumber.open(filename)
+    # # Download the retailers PDF.
+    # retailers_url = ILLINOIS['retailers']['url']
+    # filename = f'{pdf_dir}/illinois_retailers.pdf'
+    # response = requests.get(retailers_url)
+    # with open(filename, 'wb') as f:
+    #     f.write(response.content)
 
-    # Get the table data, excluding the headers and removing empty cells.
-    table_data = []
-    for i, page in enumerate(pdf.pages):
-        table = page.extract_table()
-        if i == 0:
-            table = table[4:]
-            table = [c for row in table
-                if (c := [elem for elem in row if elem is not None])]
-        table_data += table
+    # # Read the retailers PDF.
+    # pdf = pdfplumber.open(filename)
+
+    # # Get the table data, excluding the headers and removing empty cells.
+    # table_data = []
+    # for i, page in enumerate(pdf.pages):
+    #     table = page.extract_table()
+    #     if i == 0:
+    #         table = table[4:]
+    #         table = [c for row in table
+    #             if (c := [elem for elem in row if elem is not None])]
+    #     table_data += table
         
     # Standardize the data.
     # rows = [[x for x in row if x] for row in table_data]
+    table_data = []
     licensee_columns = ILLINOIS['retailers']['columns']
     retailers = pd.DataFrame(table_data, columns=licensee_columns)
     retailers = retailers.assign(
@@ -123,53 +134,53 @@ def get_licenses_il(
     retailers['business_legal_name'] = retailers['business_legal_name'].str.replace('\n', '', regex=False)
     retailers['business_dba_name'] = retailers['business_dba_name'].str.replace('*', '', regex=False)
 
-    # Separate address into 'street', 'city', 'state', 'zip_code', 'phone_number'.
-    streets, cities, states, zip_codes, phone_numbers = [], [], [], [], []
-    for _, row in retailers.iterrows():
-        parts = row.address.split('\n')
-        parts = [part.strip() for part in parts]
-        streets.append(parts[0])
-        phone_numbers.append(parts[-1])
-        locales = parts[1]
-        city_locales = locales.split(', ')
-        state_locales = city_locales[-1].split(' ')
-        cities.append(city_locales[0])
-        states.append(state_locales[0])
-        zip_codes.append(state_locales[-1])
-    retailers['premise_street_address'] = pd.Series(streets)
-    retailers['premise_city'] = pd.Series(cities)
-    retailers['premise_state'] = pd.Series(states)
-    retailers['premise_zip_code'] = pd.Series(zip_codes)
-    retailers['business_phone'] = pd.Series(phone_numbers)
+    # # Separate address into 'street', 'city', 'state', 'zip_code', 'phone_number'.
+    # streets, cities, states, zip_codes, phone_numbers = [], [], [], [], []
+    # for _, row in retailers.iterrows():
+    #     parts = row.address.split('\n')
+    #     parts = [part.strip() for part in parts]
+    #     streets.append(parts[0])
+    #     phone_numbers.append(parts[-1])
+    #     locales = parts[1]
+    #     city_locales = locales.split(', ')
+    #     state_locales = city_locales[-1].split(' ')
+    #     cities.append(city_locales[0])
+    #     states.append(state_locales[0])
+    #     zip_codes.append(state_locales[-1])
+    # retailers['premise_street_address'] = pd.Series(streets)
+    # retailers['premise_city'] = pd.Series(cities)
+    # retailers['premise_state'] = pd.Series(states)
+    # retailers['premise_zip_code'] = pd.Series(zip_codes)
+    # retailers['business_phone'] = pd.Series(phone_numbers)
 
-    # Convert the issue date to ISO format.
-    retailers['issue_date'] = retailers['issue_date'].apply(
-        lambda x: pd.to_datetime(x).isoformat()
-    )
+    # # Convert the issue date to ISO format.
+    # retailers['issue_date'] = retailers['issue_date'].apply(
+    #     lambda x: pd.to_datetime(x).isoformat()
+    # )
 
-    # Get the refreshed date.
-    date = pdf.metadata['ModDate'].replace('D:', '')
-    date = date[:4] + '-' + date[4:6] + '-' + date[6:8] + 'T' + date[8:10] + \
-        ':' + date[10:12] + ':' + date[12:].replace("'", ':').rstrip(':')
-    retailers['data_refreshed_date'] = date
+    # # Get the refreshed date.
+    # date = pdf.metadata['ModDate'].replace('D:', '')
+    # date = date[:4] + '-' + date[4:6] + '-' + date[6:8] + 'T' + date[8:10] + \
+    #     ':' + date[10:12] + ':' + date[12:].replace("'", ':').rstrip(':')
+    # retailers['data_refreshed_date'] = date
 
-    # Geocode licenses to get `premise_latitude` and `premise_longitude`.
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
-    retailers['address'] = retailers['address'].str.replace('*', '', regex=False)
-    retailers = geocode_addresses(
-        retailers,
-        api_key=google_maps_api_key,
-        address_field='address',
-    )
-    drop_cols = ['state', 'state_name', 'address', 'formatted_address']
-    retailers.drop(columns=drop_cols, inplace=True)
-    gis_cols = {
-        'county': 'premise_county',
-        'latitude': 'premise_latitude',
-        'longitude': 'premise_longitude'
-    }
-    retailers.rename(columns=gis_cols, inplace=True)
+    # # Geocode licenses to get `premise_latitude` and `premise_longitude`.
+    # config = dotenv_values(env_file)
+    # google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
+    # retailers['address'] = retailers['address'].str.replace('*', '', regex=False)
+    # retailers = geocode_addresses(
+    #     retailers,
+    #     api_key=google_maps_api_key,
+    #     address_field='address',
+    # )
+    # drop_cols = ['state', 'state_name', 'address', 'formatted_address']
+    # retailers.drop(columns=drop_cols, inplace=True)
+    # gis_cols = {
+    #     'county': 'premise_county',
+    #     'latitude': 'premise_latitude',
+    #     'longitude': 'premise_longitude'
+    # }
+    # retailers.rename(columns=gis_cols, inplace=True)
 
     # Save and return the data.
     if data_dir is not None:
@@ -180,9 +191,61 @@ def get_licenses_il(
     return retailers
 
 
+def get_labs_il(url):
+    """Get Illinois lab data from the Illinois website."""
+    # Get the webpage.
+    response = requests.get(url)
+    if response.status_code != 200:
+        print("Failed to retrieve the website.")
+        return []
+
+    # Find the table.
+    soup = BeautifulSoup(response.content, 'html.parser')
+    table = soup.find('table')
+    if not table:
+        print("Table not found.")
+        return []
+
+    # Extract data from each row of the table.
+    lab_data = []
+    for row in table.find_all('tr')[1:]:  # Skip the header row
+        cols = row.find_all('td')
+        if len(cols) != 3:
+            continue
+        lab_name = cols[0].get_text(strip=True)
+        city_state = cols[1].get_text(strip=True).split(", ")
+        phone_number = cols[2].get_text(strip=True)
+        lab_city = city_state[0] if len(city_state) > 0 else ''
+        lab_state = city_state[1] if len(city_state) > 1 else ''
+        lab_data.append({
+            'lab': lab_name,
+            'lab_city': lab_city,
+            'lab_state': lab_state,
+            'lab_phone_number': phone_number
+        })
+    labs = pd.DataFrame(lab_data)
+    return labs.assign(
+        licensing_authority_id=ILLINOIS['licensing_authority_id'],
+        licensing_authority=ILLINOIS['licensing_authority'],
+        license_designation='Adult-Use',
+        premise_state=STATE,
+        license_status='Active',
+        license_status_date=None,
+        license_type='Lab',
+        license_term=None,
+        expiration_date=None,
+        business_legal_name=labs['lab'],
+        id=labs.index,
+    )
+
+
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/il'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -195,7 +258,16 @@ if __name__ == '__main__':
     except SystemExit:
         args = {'d': DATA_DIR, 'env_file': ENV_FILE}
 
+    # Get labs.
+    url = 'https://cannabis.illinois.gov/agencies/cannabis-idoa/cannabis-business-licensees/labs.html'
+    labs = get_labs_il(url)
+    timestamp = datetime.now().strftime('%Y-%m-%d')
+    outfile = f'{DATA_DIR}/labs-{STATE.lower()}-{timestamp}.csv'
+    labs.to_csv(outfile, index=False)
+    print('Labs saved to:', outfile)
+
+    # FIXME:
     # Get licenses, saving them to the specified directory.
-    data_dir = args.get('d', args.get('data_dir'))
-    env_file = args.get('env_file')
-    data = get_licenses_il(data_dir, env_file=env_file)
+    # data_dir = args.get('d', args.get('data_dir'))
+    # env_file = args.get('env_file')
+    # data = get_licenses_il(data_dir, env_file=env_file)

@@ -8,9 +8,11 @@
 // License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 // Flutter imports:
+import 'package:cannlytics_data/common/buttons/primary_button.dart';
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 
 // Package imports:
 import 'package:dotted_border/dotted_border.dart';
@@ -221,7 +223,7 @@ class ResultsParserInterface extends HookConsumerWidget {
 
             // Upload COAs button.
             // TODO: Make disabled when parsing.
-            SecondaryButton(
+            PrimaryButton(
               text: 'Upload COAs',
               onPressed: () async {
                 FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -232,7 +234,19 @@ class ResultsParserInterface extends HookConsumerWidget {
                 );
                 if (result != null) {
                   // Parse COAs.
-                  ref.read(coaParser.notifier).parseCOAs(result.files);
+                  // ref.read(coaParser.notifier).parseCOAs(result.files);
+                  List<String> extensions = result.files
+                      .map((file) => path.extension(file.name).substring(1))
+                      .toList();
+                  List<String> fileNames =
+                      result.files.map((file) => file.name).toList();
+                  List<List<int>> imageFiles =
+                      result.files.map((file) => file.bytes!).toList();
+                  ref.read(coaParser.notifier).parseCOAs(
+                        imageFiles,
+                        fileNames: fileNames,
+                        extensions: extensions,
+                      );
                 } else {
                   // User canceled the picker
                 }

@@ -98,13 +98,12 @@ git commit -m "Added `csv` files"
 git add --all
 git status
 git commit -m "Updated `cannabis_licenses` dataset."
-git push
 ```
 
 Finally, make the pull request:
 
 ```bash
-git push origin pr/2:refs/pr/2
+git push origin pr/x:refs/pr/x
 ```
 
 🎉 Congratulations, your pull request is now ready to be reviewed and merged by the repository admin!

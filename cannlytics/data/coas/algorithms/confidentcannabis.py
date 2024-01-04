@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 8/28/2023
+Updated: 12/31/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -65,10 +65,7 @@ from typing import Any, Optional
 # External imports.
 import pandas as pd
 from pdfplumber.pdf import PDF
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import (
     ElementNotInteractableException,
     NoSuchElementException,
@@ -76,14 +73,12 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
+
 
 # Internal imports.
 from cannlytics import __version__
 from cannlytics.data.data import create_hash, create_sample_id
+from cannlytics.data.web import initialize_selenium
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
@@ -122,27 +117,9 @@ def parse_cc_url(
     Returns:
         (dict): The sample data.
     """
-
-    # Load the lab results with Selenium.
-    if parser.service is None:
-        parser.service = Service()
-        parser.options = Options()
-        parser.options.add_argument('--window-size=1920,1200')
-
-        # DEV: Uncomment for development / comment for production.
-        # parser.options.headless = False
-
-        # PRODUCTION: Uncomment for production / comment for development.
-        parser.options.add_argument('--headless')
-        parser.options.add_argument('--disable-gpu')
-        parser.options.add_argument('--no-sandbox')
-
-    # Create a driver.
+    # Initialize a web driver.
     if parser.driver is None:
-        parser.driver = webdriver.Chrome(
-            options=parser.options,
-            service=parser.service,
-        )
+        parser.driver = initialize_selenium()
 
     # Get the URL.
     parser.driver.get(url)
@@ -160,6 +137,8 @@ def parse_cc_url(
     obs = {'lims': 'Confident Cannabis'}
 
     # Find the sample image.
+    # FIXME: Need to find the image with URL like this:
+    # https://orders-confidentcannabis.imgix.net/samples/1909CH0015.0074/images/52de710b-5875-4903-b7f0-8b87f132ebf7?auto=enhance&fit=fill&bg=ffffff&w=287&h=260
     try:
         el = parser.driver.find_element(
             by=By.CLASS_NAME,
@@ -177,14 +156,28 @@ def parse_cc_url(
         by=By.CLASS_NAME,
         value='product-desc',
     )
-    block = el.text.split('\n')
-    product_name = block[0]
-    strain_name, product_type = tuple(block[3].split(', '))
-    obs['product_name'] = product_name
-    obs['lab_id'] = block[1]
-    obs['classification'] = block[2]
-    obs['strain_name'] = strip_whitespace(strain_name)
-    obs['product_type'] = strip_whitespace(product_type)
+    try:
+        block = el.text.split('\n')
+        obs['product_name'] = block[0]
+    except:
+        obs['product_name'] = None
+    try:
+        obs['lab_id'] = block[1]
+    except:
+        obs['lab_id'] = None
+    try:
+        obs['classification'] = block[2]
+    except:
+        obs['classification'] = None
+    try:
+        parts = block[3].split(', ')
+        obs['strain_name'] = strip_whitespace(', '.join(parts[:-1]))
+    except:
+        obs['strain_name'] = None
+    try:
+        obs['product_type'] = strip_whitespace(parts[-1])
+    except:
+        obs['product_type'] = None
 
     # Get the date tested.
     el = parser.driver.find_element(by=By.CLASS_NAME, value='report')
@@ -288,12 +281,15 @@ def parse_cc_url(
 
         # Try to get screening data.
         if title == 'safety':
-            obs['status'] = el.find_element(
-                by=By.CLASS_NAME,
-                value='sample-status'
-            ).text
-            table = el.find_element(by=By.TAG_NAME, value='table')
-            rows = table.find_elements(by=By.TAG_NAME, value='tr')
+            try:
+                obs['status'] = el.find_element(by=By.CLASS_NAME, value='sample-status').text
+            except:
+                obs['status'] = None
+            try:
+                table = el.find_element(by=By.TAG_NAME, value='table')
+                rows = table.find_elements(by=By.TAG_NAME, value='tr')
+            except:
+                continue
             for row in rows[1:]:
 
                 # Get the screening analysis.
@@ -457,7 +453,7 @@ def parse_cc_url(
     obs['results_hash'] = create_hash(results)
     obs['sample_id'] = create_sample_id(
         private_key=json.dumps(results),
-        public_key=product_name,
+        public_key=obs['product_name'],
         salt=producer,
     )
     obs['sample_hash'] = create_hash(obs)
@@ -477,6 +473,8 @@ def parse_cc_pdf(
     Returns:
         (dict): The sample data.
     """
+    # FIXME: Actually parse the PDF.
+    # Sometimes the data is not available through the URL.
     url = parser.find_pdf_qr_code_url(doc)
     return parse_cc_url(parser, url, **kwargs)
 
@@ -505,14 +503,21 @@ def parse_cc_coa(
         data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
     elif isinstance(doc, PDF):
         data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
+    
+    # FIXME: Supplement data from the PDF.
+    if data.get('results') == '[]' and data.get('lab') == 'Encore Labs':
+        print('Parsing Encore Labs PDF...')
+    
     return data
 
 
 # === Tests ===
+# Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
+    pass
 
     # Test Confident Cannabis CoAs parsing.
-    from cannlytics.data.coas import CoADoc
+    # from cannlytics.data.coas import CoADoc
 
     # # [✓] Test: Ensure that the web driver works.
     # parser = CoADoc()

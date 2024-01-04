@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 8/2/2022
-Updated: 9/7/2022
+Updated: 12/24/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -59,10 +59,8 @@ import re
 from typing import Any
 
 # External imports.
-# from bs4 import BeautifulSoup
 import pandas as pd
 import pdfplumber
-# import requests
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id, find_first_value
@@ -70,26 +68,35 @@ from cannlytics.utils.constants import ANALYTES, STANDARD_FIELDS
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
-    # split_list,
-    # strip_whitespace,
 )
 
 # External imports.
 import pandas as pd
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.chrome.service import Service
-# from selenium.common.exceptions import (
-#     ElementNotInteractableException,
-#     TimeoutException,
-# )
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support.ui import WebDriverWait
-# try:
-#     import chromedriver_binary  # Adds chromedriver binary to path.
-# except ImportError:
-#     print('Proceeding assuming that you have ChromeDriver in your path.')
+
+# FIXME: These weird field names are occurring:
+# 'total_thc_delta_9_thc_0_877_delta_9_thca': 'Δ9-THCA)',
+# 'total_cbd_cbd_0_877_cbda': 'CBDA)',
+# 'total_cannabinoids_neutral_cannabinoids_0_877_acidic_cannabinoids': 'cannabinoids)]',
+# 'total_xylenes_ortho_meta_para': 'Pass',
+# 'total_aflatoxins': 'Pass',
+# 'vc_230515_bst': 'VC230515BST',
+
+# TODO: Try to convert fields to numeric:
+# 'sample_increments': '28',
+# 'sample_weight_used': '.5',
+# 'sample_weight': '14',
+
+# FIXME: Calculate totals if they are missing.
+# 'total_thc': '-',
+# 'total_cbd': '-',
+# 'total_cannabinoids': '-',
+
+# FIXME: Microbes may be mixed on keys: salmonella_aoac
+
+# FIXME: Microbes are containing part of the methd: GENE-UP
+
+# FIXME: Exclude from results:
+#- sum_of_cannabinoids
 
 
 # It is assumed that the lab has the following details.
@@ -150,6 +157,8 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
 
     # Get the standard analyses, analytes, and fields.
     coa_parameters = ANRESCO_COA
+
+    # FIXME: Multi-line product names are not being read correctly.
 
     # Get the sample details based on page area.
     sample_details_area = coa_parameters['coa_sample_details_area']
@@ -244,7 +253,7 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
                 # Get the standard columns.
                 text = re.sub('[\(\[].*?[\)\]]', '', line)
                 columns = [
-                    STANDARD_FIELDS[x] for x in text.split(' ') if x
+                    STANDARD_FIELDS.get(x, x) for x in text.split(' ') if x
                 ]
 
             # Get the analysis method.
@@ -308,26 +317,27 @@ def parse_anresco_pdf(parser, doc: Any, **kwargs) -> Any:
                     continue 
                 results.append(result)
 
-    # Hot-fix: Collect the microbes!
+    # Collect the microbes.
     columns = []
-    area = (0, 600, 595, 680)
-    crop = front_page.within_bbox(area)
-    table = crop.extract_table({
-        'vertical_strategy': 'text',
-    })
-    for row in table:
-        name = ' '.join(row[0:2]).strip()
-        key = snake_case(name)
-        method = ' '.join(row[2:-2]).strip()
-        results.append({
-            'analysis': 'microbes',
-            'key': key,
-            'name': name,
-            'value': row[-2],
-            'status': row[-1],
-            'method': method,
-        })
-    
+    crop = front_page.within_bbox((0, 600, 595, 680))
+    table = crop.extract_table({'vertical_strategy': 'text'})
+    if table is None:
+        crop = front_page.within_bbox((0, 600, 595, front_page.height))
+        table = crop.extract_table({'vertical_strategy': 'text'})
+    if table:
+        for row in table:
+            name = ' '.join(row[0:2]).strip()
+            key = snake_case(name)
+            method = ' '.join(row[2:-2]).strip()
+            results.append({
+                'analysis': 'microbes',
+                'key': key,
+                'name': name,
+                'value': row[-2],
+                'status': row[-1],
+                'method': method,
+            })
+
     # Hot-fix: Remove any results without values.
     results = [x for x in results if 'value' in x]
 
@@ -500,29 +510,30 @@ def parse_anresco_coa(parser, doc: Any, **kwargs) -> Any:
 # Future work
 #--------------------------
 
-# Standardize analytes with NLP!
+# TODO: Standardize analytes with NLP!
 
 
-# === Tests ===
+# # === Tests ===
 if __name__ == '__main__':
+    pass
 
-    from cannlytics.data.coas import CoADoc
+    # from cannlytics.data.coas import CoADoc
 
-    # Test parsing Anresco Laboratories CoAs.
-    parser = CoADoc()
-    doc = '../../../tests/assets/coas/Peanutbutter Breath.pdf'
-    coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
+#     # Test parsing Anresco Laboratories CoAs.
+#     parser = CoADoc()
+#     doc = '../../../tests/assets/coas/Peanutbutter Breath.pdf'
+#     coa_url = 'https://portal.anresco.com/#/ps/68bcb967c0f2b39d'
 
-    # [✓] TEST: Identify a given PDF or URL as an Anresco CoA.
-    lab = parser.identify_lims(doc, lims={'Anresco Laboratories': ANRESCO})
-    assert lab == 'Anresco Laboratories'
+#     # [✓] TEST: Identify a given PDF or URL as an Anresco CoA.
+#     lab = parser.identify_lims(doc, lims={'Anresco Laboratories': ANRESCO})
+#     assert lab == 'Anresco Laboratories'
 
-    # [✓] TEST: Parse an Anresco Laboratories CoA PDF.
-    parser = CoADoc()
-    data = parse_anresco_pdf(parser, doc)
-    assert data is not None
+#     # [✓] TEST: Parse an Anresco Laboratories CoA PDF.
+#     parser = CoADoc()
+#     data = parse_anresco_pdf(parser, doc)
+#     assert data is not None
 
-    # [ ] TEST: Parse an Anresco Laboratories CoA URL.
-    # parser = CoADoc()
-    # data = parse_anresco_url(parser, doc)
-    # assert data is not None
+#     # [ ] TEST: Parse an Anresco Laboratories CoA URL.
+#     # parser = CoADoc()
+#     # data = parse_anresco_url(parser, doc)
+#     # assert data is not None

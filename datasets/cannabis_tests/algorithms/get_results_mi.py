@@ -1,719 +1,430 @@
 """
-Cannabis Tests | Get PSI Labs Test Result Data
-Copyright (c) 2022 Cannlytics
+Analyze Results from MI PRR
+Copyright (c) 2023 Cannlytics
 
-Authors:
-    Keegan Skeate <https://github.com/keeganskeate>
-    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
-Created: July 4th, 2022
-Updated: 9/16/2022
-License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
-
-Description:
-
-    1. Archive all of the PSI Labs test results.
-
-    2. Analyze all of the PSI Labs test results, separating
-    training and testing data to use for prediction models.
-
-    3. Create and use re-usable prediction models.
-
-Data Sources:
-
-    - PSI Labs Test Results
-    URL: <https://results.psilabs.org/test-results/>
-
-Resources:
-
-    - ChromeDriver
-    URL: <https://chromedriver.chromium.org/home>
-
-    - Automation Cartoon
-    URL: https://xkcd.com/1319/
-
-    - Efficiency Cartoon
-    URL: https://xkcd.com/1445/
-
-    - SHA in Python
-    URL: https://www.geeksforgeeks.org/sha-in-python/
-
-    - Split / Explode a column of dictionaries into separate columns with pandas
-    URL: https://stackoverflow.com/questions/38231591/split-explode-a-column-of-dictionaries-into-separate-columns-with-pandas
-
-    - Tidyverse: Wide and Long Data Tables
-    URL: https://rstudio-education.github.io/tidyverse-cookbook/tidy.html
-
-    - Web Scraping using Selenium and Python
-    URL: <https://www.scrapingbee.com/blog/selenium-python/>
-
-Setup:
-
-    1. Create a data folder `../../.datasets/lab_results/psi_labs/raw_data`.
-
-    2. Download ChromeDriver and put it in your `C:\Python39\Scripts` folder
-    or pass the `executable_path` to the `Service`.
-
-    3. Specify the `PAGES` that you want to collect.
-
-Note:
-
-    It does not appear that new lab results are being added to the
-    PSI Labs test results website as of 2022-01-01.
-
+Authors: Keegan Skeate <https://github.com/keeganskeate>
+Created: 10/23/2023
+Updated: 10/25/2023
+License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
-# Standard imports.
-from ast import literal_eval
+# External imports:
 from datetime import datetime
-from hashlib import sha256
-import hmac
-from time import sleep
-
-# External imports.
-from cannlytics.utils.utils import snake_case
+import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
+from matplotlib import cm
+import numpy as np
 import pandas as pd
-
-# Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import ElementNotInteractableException, TimeoutException
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+import re
+import seaborn as sns
+from scipy import stats
 
 
-# Setup.
-DATA_DIR = '../../.datasets/lab_results/raw_data/psi_labs'
-TRAINING_DATA = '../../../.datasets/lab_results/training_data'
+# Setup plotting style.
+plt.style.use('fivethirtyeight')
+plt.rcParams.update({
+    'figure.figsize': (12, 8),
+    'font.family': 'Times New Roman',
+    'font.size': 24,
+})
 
-# API Constants
-BASE = 'https://results.psilabs.org/test-results/?page={}'
-PAGES = range(1, 10) # 4921 total!
 
-# Desired order for output columns.
-COLUMNS = [
-    'sample_id',
-    'date_tested',
-    'analyses',
-    'producer',
-    'product_name',
-    'product_type',
-    'results',
-    'coa_urls',
-    'images',
-    'lab_results_url',
-    'date_received',
-    'method',
-    'qr_code',
-    'sample_weight',
+def save_figure(filename, dpi=300, bbox_inches='tight'):
+    """Save a figure to the figures directory."""
+    plt.savefig(f'figures/{filename}', bbox_inches=bbox_inches, dpi=dpi)
+
+
+# === Get the data ===
+
+# Read MA lab results.
+mi_results = pd.read_excel('./data/Metrc_Flower_Potency_Final_2.17.23.xlsx')
+
+
+# === Clean the data ===
+
+# Rename certain columns.
+mi_results = mi_results.rename(columns={
+    'ProductName': 'product_name',
+    'ProductCategory': 'product_type',
+    'TestType': 'test_type',
+    'Quantity': 'total_thc',
+    'Licensee': 'lab',
+    'TestPerformedDate': 'date_tested',
+    'Comment': 'notes',
+    'Med AU': 'medical',
+})
+
+# Add a date column.
+mi_results['date'] = pd.to_datetime(mi_results['date_tested'])
+mi_results['month_year'] = mi_results['date'].dt.to_period('M')
+
+# Exclude outliers.
+sample = mi_results.loc[
+    (mi_results['total_thc'] > 0) &
+    (mi_results['total_thc'] < 100) &
+    (mi_results['product_type'] == 'Flower')
 ]
-
-
-def create_sample_id(private_key, public_key, salt='') -> str:
-    """Create a hash to be used as a sample ID.
-    The standard is to use:
-        1. `private_key = producer`
-        2. `public_key = product_name`
-        3. `salt = date_tested`
-    Args:
-        private_key (str): A string to be used as the private key.
-        public_key (str): A string to be used as the public key.
-        salt (str): A string to be used as the salt, '' by default (optional).
-    Returns:
-        (str): A sample ID hash.
-    """
-    secret = bytes(private_key, 'UTF-8')
-    message = snake_case(public_key) + snake_case(salt)
-    sample_id = hmac.new(secret, message.encode(), sha256).hexdigest()
-    return sample_id
-
-
-#-----------------------------------------------------------------------
-# Getting ALL the data.
-#-----------------------------------------------------------------------
-
-def get_psi_labs_test_results(driver, max_delay=5, reverse=True) -> list:
-    """Get all test results for PSI labs.
-    Args:
-        driver (WebDriver): A Selenium Chrome WebDiver.
-        max_delay (float): The maximum number of seconds to wait for rendering (optional).
-        reverse (bool): Whether to collect in reverse order, True by default (optional).
-    Returns:
-        (list): A list of dictionaries of sample data.
-    """
-
-    # Get all the samples on the page.
-    samples = []
-    try:
-        detect = EC.presence_of_element_located((By.TAG_NAME, 'sample-card'))
-        WebDriverWait(driver, max_delay).until(detect)
-    except TimeoutException:
-        print('Failed to load page within %i seconds.' % max_delay)
-        return samples
-    cards = driver.find_elements(by=By.TAG_NAME, value='sample-card')
-    if reverse:
-        cards.reverse()
-    for card in cards:
-
-        # Begin getting sample details from the card.
-        details = card.find_element(by=By.TAG_NAME, value='md-card-title')
-
-        # Get images.
-        image_elements = details.find_elements(by=By.TAG_NAME, value='img')
-        images = []
-        for image in image_elements:
-            src = image.get_attribute('src')
-            filename = src.split('/')[-1]
-            images.append({'url': src, 'filename': filename})
-
-        # Get the product name.
-        product_name = details.find_element(by=By.CLASS_NAME, value='md-title').text
-
-        # Get the producer, date tested, and product type.
-        headers = details.find_elements(by=By.CLASS_NAME, value='md-subhead')
-        producer = headers[0].text
-        try:
-            mm, dd, yy = tuple(headers[1].text.split(': ')[-1].split('/'))
-            date_tested = f'20{yy}-{mm}-{dd}'
-        except ValueError:
-            date_tested = headers[1].text.split(': ')[-1]
-        product_type = headers[2].text.split(' ')[-1]
-
-        # Create a sample ID.
-        private_key = bytes(date_tested, 'UTF-8')
-        public_key = snake_case(product_name)
-        salt = snake_case(producer)
-        sample_id = hmac.new(private_key, (public_key + salt).encode(), sha256).hexdigest()
-
-        # Get the analyses.
-        analyses = []
-        container = details.find_element(by=By.CLASS_NAME, value='layout-row')
-        chips = container.find_elements(by=By.TAG_NAME, value='md-chip')
-        for chip in chips:
-            hidden = chip.get_attribute('aria-hidden')
-            if hidden == 'false':
-                analyses.append(chip.text)
-
-        # Get the lab results URL.
-        links = card.find_elements(by=By.TAG_NAME, value='a')
-        lab_results_url = links[0].get_attribute('href')
-
-        # Aggregate sample data.
-        sample = {
-            'analyses': analyses,
-            'date_tested': date_tested,
-            'images': images,
-            'lab_results_url': lab_results_url,
-            'producer': producer,
-            'product_name': product_name,
-            'product_type': product_type,
-            'sample_id': sample_id,
-        }
-        samples.append(sample)
-
-    return samples
-
-
-def get_psi_labs_test_result_details(driver, max_delay=5) -> dict:
-    """Get the test result details for a specific PSI lab result.
-    Args:
-        driver (WebDriver): A Selenium Chrome WebDiver.
-        max_delay (float): The maximum number of seconds to wait for rendering.
-    Returns:
-        (dict): A dictionary of sample details.
-    """
-
-    # Deemed optional:
-    # Wait for elements to load, after a maximum delay of X seconds.
-    qr_code, coa_urls = None, []
-    # try:
-
-    #     # Wait for the QR code to load.
-    #     detect = EC.presence_of_element_located((By.CLASS_NAME, 'qrcode-link'))
-    #     qr_code_link = WebDriverWait(driver, max_delay).until(detect)
-
-    #     # Get the QR code.
-    #     qr_code = qr_code_link.get_attribute('href')
-
-    #     # Get CoA URLs by finding all links with with `analytics-event="PDF View"`.
-    #     actions = driver.find_elements(by=By.TAG_NAME, value='a')
-    #     coa_urls = []
-    #     for action in actions:
-    #         event = action.get_attribute('analytics-event')
-    #         if event == 'PDF View':
-    #             href = action.get_attribute('href')
-    #             coa_urls.append({'filename': action.text, 'url': href})
-
-    # except TimeoutException:
-    #     print('QR Code not loaded within %i seconds.' % max_delay)
-
-
-    # Wait for the results to load.
-    try:
-        detect = EC.presence_of_element_located((By.TAG_NAME, 'ng-include'))
-        WebDriverWait(driver, max_delay).until(detect)
-    except TimeoutException:
-        print('Results not loaded within %i seconds.' % max_delay)
-
-    # Get results for each analysis.
-    results = []
-    date_received, sample_weight, method = None, None, None
-    values = ['name', 'value', 'margin_of_error']
-    analysis_cards = driver.find_elements(by=By.TAG_NAME, value='ng-include')
-    for analysis in analysis_cards:
-        try:
-            analysis.click()
-        except ElementNotInteractableException:
-            continue
-        rows = analysis.find_elements(by=By.TAG_NAME, value='tr')
-        if rows:
-            for row in rows:
-                result = {}
-                cells = row.find_elements(by=By.TAG_NAME, value='td')
-                for i, cell in enumerate(cells):
-                    key = values[i]
-                    result[key] = cell.text
-                if result:
-                    results.append(result)
-
-        # Get the last few sample details: method, sample_weight, and received_at
-        if analysis == 'potency':
-            extra = analysis.find_element(by=By.TAG_NAME, value='md-card-content')
-            headings = extra.find_elements(by=By.TAG_NAME, value='h3')
-            mm, dd, yy = tuple(headings[0].text.split('/'))
-            date_received = f'20{yy}-{mm}-{dd}'
-            sample_weight = headings[1].text
-            method = headings[-1].text
-
-    # Aggregate sample details.
-    details = {
-        'coa_urls': coa_urls,
-        'date_received': date_received,
-        'method': method,
-        'qr_code': qr_code,
-        'results': results,
-        'sample_weight': sample_weight,
-    }
-    return details
-
-
-# FIXME: This function doesn't work well.
-def get_all_psi_labs_test_results(service, pages, pause=0.125, verbose=True):
-    """Get ALL of PSI Labs test results.
-    Args:
-        service (ChromeDriver): A ChromeDriver service.
-        pages (iterable): A range of pages to get lab results from.
-        pause (float): A pause between requests to respect PSI Labs' server.
-        verbose (bool): Whether or not to print out progress, True by default (optional).
-    Returns:
-        (list): A list of collected lab results.
-    """
-
-    # Create a headless Chrome browser.
-    options = Options()
-    options.headless = True
-    options.add_argument('--window-size=1920,1200')
-    driver = webdriver.Chrome(options=options, service=service)
-
-    # Iterate over all of the pages to get all of the samples.
-    test_results = []
-    for page in pages:
-        if verbose:
-            print('Getting samples on page:', page)
-        driver.get(BASE.format(str(page)))
-        results = get_psi_labs_test_results(driver)
-        if results:
-            test_results += results
-        else:
-            print('Failed to find samples on page:', page)
-        sleep(pause)
-
-    # Get the details for each sample.
-    for i, test_result in enumerate(test_results):
-        if verbose:
-            print('Getting details for:', test_result['product_name'])
-        driver.get(test_result['lab_results_url'])
-        details = get_psi_labs_test_result_details(driver)
-        test_results[i] = {**test_result, **details}
-        sleep(pause)
-
-    # Close the browser and return the results.
-    driver.quit()
-    return test_results
-
-
-#-----------------------------------------------------------------------
-# Test: Data aggregation with `get_all_psi_labs_test_results`.
-#-----------------------------------------------------------------------
-
-# if __name__ == '__main__':
-
-#     # Specify the full-path to your chromedriver.
-#     # You can also put your chromedriver in `C:\Python39\Scripts`.
-#     # DRIVER_PATH = '../assets/tools/chromedriver_win32/chromedriver'
-#     # full_driver_path = os.path.abspath(DRIVER_PATH)
-#     start = datetime.now()
-#     service = Service()
-
-#     # Create a headless Chrome browser.
-#     options = Options()
-#     options.headless = True
-#     options.add_argument('--window-size=1920,1200')
-#     driver = webdriver.Chrome(options=options, service=service)
-
-#     # Iterate over all of the pages to get all of the samples.
-#     errors = []
-#     test_results = []
-#     pages = list(PAGES)
-#     pages.reverse()
-#     for page in pages:
-#         print('Getting samples on page:', page)
-#         driver.get(BASE.format(str(page)))
-#         results = get_psi_labs_test_results(driver)
-#         if results:
-#             test_results += results
-#         else:
-#             print('Failed to find samples on page:', page)
-#             errors.append(page)
-
-#     # Get the details for each sample.
-#     rows = []
-#     samples = pd.DataFrame(test_results)
-#     total = len(samples)
-#     for index, values in samples.iterrows():
-#         percent = round((index  + 1) / total * 100, 2)
-#         print('Collecting (%.2f%%) (%i/%i):' % (percent, index + 1, total), values['product_name'])
-#         driver.get(values['lab_results_url'])
-#         details = get_psi_labs_test_result_details(driver)
-#         rows.append({**values.to_dict(), **details})
-            
-#     # Save the results.
-#     data = pd.DataFrame(rows)
-#     timestamp = datetime.now().isoformat()[:19].replace(':', '-')
-#     datafile = f'{DATA_DIR}/psi-lab-results-{timestamp}.xlsx'
-#     data.to_excel(datafile, index=False)
-#     end = datetime.now()
-#     print('Runtime took:', end - start)
-
-#     # Close the browser.
-#     driver.quit()
-
-
-#-----------------------------------------------------------------------
-# TODO: Preprocessing the Data
-#-----------------------------------------------------------------------
-
-ANALYSES = {
-    'cannabinoids': ['potency', 'POT'],
-    'terpenes': ['terpene', 'TERP'],
-    'residual_solvents': ['solvent', 'RST'],
-    'pesticides': ['pesticide', 'PEST'],
-    'microbes': ['microbial', 'MICRO'],
-    'heavy_metals': ['metal', 'MET'],
-}
-ANALYTES = {
-    # TODO: Define all of the known analytes from the Cannlytics library.
-}
-DECODINGS = {
-    '<LOQ': 0,
-    '<LOD': 0,
-    'ND': 0,
-}
-
-
-# Read in the saved results.
-datafile = f'{DATA_DIR}/aggregated-cannabis-test-results.xlsx'
-data = pd.read_excel(datafile, sheet_name='psi_labs_raw_data')
-
-# Optional: Drop rows with no analyses at this point.
-drop = ['coa_urls', 'date_received', 'method', 'qr_code', 'sample_weight']
-data.drop(drop, axis=1, inplace=True)
-
-# Isolate a training sample.
-sample = data.sample(100, random_state=420)
-
-
-# Create both wide and long data for ease of use.
-# See: https://rstudio-education.github.io/tidyverse-cookbook/tidy.html
-# Normalize and clean the data. In particular, flatten:
-# ✓ `analyses`
-# ✓ `results`
-# - `images`
-wide_data = pd.DataFrame()
-long_data = pd.DataFrame()
-for index, row in sample.iterrows():
-    series = row.copy()
-    analyses = literal_eval(series['analyses'])
-    images = literal_eval(series['images'])
-    results = literal_eval(series['results'])
-    series.drop(['analyses', 'images', 'results'], inplace=True)
-
-    # Code analyses.
-    if not analyses:
-        continue
-    for analysis in analyses:
-        series[analysis] = 1
-    
-    # Add to wide data.
-    wide_data = pd.concat([wide_data, pd.DataFrame([series])])
-
-    # Iterate over results, cleaning results and adding columns.
-    # Future work: Augment results with key, limit, and CAS.
-    for result in results:
-
-        # Clean the values.
-        analyte_name = result['name']
-        measurements = result['value'].split(' ')
-        try:
-            measurement = float(measurements[0])
-        except:
-            measurement = None
-        try:
-            units = measurements[1]
-        except:
-            units = None
-        key = snake_case(analyte_name)
-        try:
-            margin_of_error = float(result['margin_of_error'].split(' ')[-1])
-        except:
-            margin_of_error = None
-
-        # Format long data.
-        entry = series.copy()
-        entry['analyte'] = key
-        entry['analyte_name'] = analyte_name
-        entry['result'] = measurement
-        entry['units'] = units
-        entry['margin_of_error'] = margin_of_error
-
-        # Add to long data.
-        long_data = pd.concat([long_data, pd.DataFrame([entry])])
-
-
-# Fill null observations.
-wide_data = wide_data.fillna(0)
-
-# Rename columns
-analyses = {
-    'POT': 'cannabinoids',
-    'RST': 'residual_solvents',
-    'TERP': 'terpenes',
-    'PEST': 'pesticides',
-    'MICRO': 'micro',
-    'MET': 'heavy_metals',
-}
-wide_data.rename(columns=analyses, inplace=True)
-long_data.rename(columns=analyses, inplace=True)
-
-
-#------------------------------------------------------------------------------
-# Processing the data.
-#------------------------------------------------------------------------------
-
-# Calculate totals:
-# - `total_cbd`
-# - `total_thc`
-# - `total_terpenes`
-# - `total_cannabinoids`
-# - `total_cbg`
-# - `total_thcv`
-# - `total_cbc`
-# - `total_cbdv`
-
-
-# Optional: Add `status` variables for pass / fail tests.
-
-
-# TODO: Augment with:
-# - lab details: lab, lab_url, lab_license_number, etc.
-# - lab_latitude, lab_longitude
-
-# Future work: Calculate average results by state, county, and zip code.
-
-
-#------------------------------------------------------------------------------
-# Exploring the data.
-#------------------------------------------------------------------------------
-
-# Count the number of various tests.
-terpenes = wide_data.loc[wide_data['terpenes'] == 1]
-
-# Find all of the analytes.
-analytes = list(long_data.analyte.unique())
-
-# Find all of the product types.
-product_types = list(long_data.product_type.unique())
-
-# Look at cannabinoid distributions by type.
-flower = long_data.loc[long_data['product_type'] == 'Flower']
-flower.loc[flower['analyte'] == '9_thc']['result'].hist(bins=100)
-
-concentrates = long_data.loc[long_data['product_type'] == 'Concentrate']
-concentrates.loc[concentrates['analyte'] == '9_thc']['result'].hist(bins=100)
-
-
-# Look at terpene distributions by type!
-terpene = flower.loc[flower['analyte'] == 'dlimonene']
-terpene['result'].hist(bins=100)
-
-terpene = concentrates.loc[concentrates['analyte'] == 'dlimonene']
-terpene['result'].hist(bins=100)
-
-
-# Find the first occurrences of famous strains.
-gorilla_glue = flower.loc[
-    (flower['product_name'].str.contains('gorilla', case=False)) |
-    (flower['product_name'].str.contains('glu', case=False))    
-]
-
-# Create strain fingerprints: histograms of dominant terpenes.
-compound = gorilla_glue.loc[gorilla_glue['analyte'] == '9_thc']
-compound['result'].hist(bins=100)
-
-
-#------------------------------------------------------------------------------
-# Exploring the data.
-#------------------------------------------------------------------------------
-
-# Future work: Augment results with key, limit, and CAS.
-
-# TODO: Save the curated data, both wide and long data.
-
-
-# TODO: Standardize the `analyte` names! Ideally with a re-usable function.
-
-
-# TODO: Standardize `analyses`.
-
-
-# TODO: Standardize the `product_type`.
-
-
-# TODO: Standardize `strain_name`.
-
-
-# TODO: Add any new entries to the Cannlypedia:
-# - New `analyses`
-# - New `analytes`
-# - New `strains`
-# - New `product_types`
-
-
-# Optional: Create data / CoA NFTs for the lab results!!!
-
-
-#------------------------------------------------------------------------------
-# Exploring the data.
-#------------------------------------------------------------------------------
-
-# TODO: Count the number of lab results scraped!
-
-
-# TODO: Count the number of unique data points scraped!
-
-
-# TODO: Look at cannabinoid concentrations over time.
-
-
-# TODO: Look at cannabinoid distributions by type.
-
-
-# TODO: Look at terpene distributions by type!
-
-
-#-----------------------------------------------------------------------
-# Modeling the data.
-#-----------------------------------------------------------------------
-
-# TODO: Given a lab result, predict if it's in the Xth percentile.
-
-
-# TODO: Use in ARIMA model to approach the question:
-# Are terpene or cannabinoid concentrations increasing over time by sample type?
-# - total_terpenes
-# - D-limonene
-# - beta-pinene
-# - myrcene
-# - caryophyllene
-# - linalool
-# - cbg
-# - thcv
-# - total_thc
-# - total_cbd
-# - total_cannabinoids
-
-
-# Calculate THC to CBD ratio.
-
-
-# Calculate average terpene ratios by strain:
-# - beta-pinene to d-limonene ratio
-# - humulene to caryophyllene
-# - linalool and myrcene? (Research these!)
-
-
-# Future work: Add description of why the ratio is meaningful.
-
-
-# Future work: Calculator to determine the number of mg's of each
-# compound are in a given unit of weight.
-# E.g. How much total THC in mg is in an eighth given that it tests X%.
-# mg = percent * 10 * grams
-# mg_per_serving = percent * 10 * grams_per_serving (0.33 suggested?)
-
-
-# TODO: Find parents and crosses of particular strains.
-# E.g. Find all Jack crosses.
-
-
-#-----------------------------------------------------------------------
-# Training and testing the model.
-#-----------------------------------------------------------------------
-
-# TODO: Separate results after 2020 as test data.
-
-
-# TODO: Estimate a large number of ARIMA models on the training data,
-# use the models to predict the test data, and measure the accuracies.
-
-
-# TODO: Pick the model that predicts the test data the best.
-
-
-#-----------------------------------------------------------------------
-# Evaluating the model.
-#-----------------------------------------------------------------------
-
-# TODO: Re-estimate the model with the entire dataset.
-
-
-# TODO: Predict if cannabinoid and terpene concentrations are trending
-# up or down and to what degree if so.
-
-
-# TODO: Take away an insight: Is there statistical evidence that
-# cannabis cultivated in Michigan is successfully being bred to, on average,
-# have higher levels of cannabinoids or terpenes? If so, which compounds?
-
-
-# TODO: Forecast: If the trend continues, what would cannabis look like
-# in 10 years? What average cannabinoid and terpene concentration can
-# we expect to see in Michigan in 2025 and 2030?
-
-
-
-#-----------------------------------------------------------------------
-# Saving the data, statistics, and model.
-#-----------------------------------------------------------------------
-# Note: The data, statistics, and model are only useful if we can get
-# them # in front of people's eyeballs. Therefore, saving the data and
-# making them available to people is arguably the most important step.
-#-----------------------------------------------------------------------
-
-# TODO: Upload the data to Firestore.
-
-
-# TODO: Test getting the data and statistics through the Cannlytics API.
-
-
-# TODO: Test using the statistical model through the Cannlytics API.
+print('Number of samples:', len(sample))
+
+
+# === Analyze tests by month. ===
+
+# Visualize the frequency of tests by month/year.
+test_frequency = sample['month_year'].value_counts().sort_index()
+subsample = test_frequency[2:-1]
+subsample.index = subsample.index.to_timestamp()
+plt.figure(figsize=(12, 8))
+sns.lineplot(
+    x=subsample.index,
+    y=subsample.values,
+    marker="o",
+    color="mediumblue"
+)
+plt.title('Monthly Number of Lab Tests in MI')
+plt.ylabel('Number of Tests')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.tight_layout()
+save_figure('mi-tests-by-month.png')
+plt.show()
+
+
+# === Analyze medical vs. adult-use testing. ===
+
+# Visualize adult-use vs. medical tests over time.
+grouped = sample.groupby(['month_year', 'medical']).size().reset_index(name='counts')
+pivot_grouped = grouped.pivot(index='month_year', columns='medical', values='counts').fillna(0)
+pivot_grouped = pivot_grouped.apply(pd.to_numeric, errors='coerce')
+pivot_grouped.index = pivot_grouped.index.to_timestamp()
+pivot_grouped = pivot_grouped[2:-1]
+plt.figure(figsize=(15, 10))
+for column in pivot_grouped.columns:
+    sns.lineplot(data=pivot_grouped, x=pivot_grouped.index, y=column, marker='o', label=column)
+plt.title('Number of Adult Use vs Medical Tests by Month in MI')
+plt.ylabel('Number of Lab Tests')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.legend(title='Adult Use / Medical')
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.tight_layout()
+save_figure('mi-med-au-tests-by-month.png')
+plt.show()
+
+# Visualize the frequency distribution for medical.
+subsample = sample[(sample['date'] >= datetime(2022, 1, 1)) &
+                (sample['date'] < datetime(2023, 1, 1))]
+med_au_distribution = subsample['medical'].value_counts()
+plt.figure(figsize=(5, 8))
+bar_plot = sns.barplot(x=med_au_distribution.index, y=med_au_distribution.values, palette='tab10')
+plt.title('Adult-Use to Medical Lab Tests in MI in 2022', fontsize=21)
+plt.ylabel('Number of Lab Tests')
+plt.xlabel('')
+for index, value in enumerate(med_au_distribution.values):
+    bar_plot.text(index, value + 0.1, str(value), color='black', ha='center')
+plt.tight_layout()
+save_figure('mi-med-au-frequency.png')
+plt.show()
+
+
+# === Analyze lab market share. ===
+
+# Count the number of labs.
+labs = sample['lab'].unique()
+print('Number of labs:', len(labs))
+
+# Visualize the number of tests by lab.
+subsample = sample[(sample['date'] >= datetime(2021, 1, 1)) &
+                (sample['date'] < datetime(2022, 1, 1))]
+lab_results = subsample.groupby('lab')
+tests_by_lab = lab_results['total_thc'].count().sort_values(ascending=False)
+sns.barplot(x=tests_by_lab.index, y=tests_by_lab.values, palette='tab20')
+plt.xticks(rotation=45, ha='right')
+plt.title('Lab Tests in MI in 2022')
+plt.ylabel('Number of Lab Tests')
+plt.xlabel('')
+plt.tight_layout()
+save_figure('mi-tests-by-lab.png')
+plt.show()
+
+# Visualize market share by lab in 2021.
+subsample = sample[(sample['date'] >= datetime(2021, 1, 1)) &
+                (sample['date'] < datetime(2022, 1, 1))]
+lab_results = subsample.groupby('lab')
+tests_by_lab = lab_results['total_thc'].count().sort_values(ascending=False)
+market_share = tests_by_lab.div(tests_by_lab.sum()).mul(100).round(2)
+sns.barplot(x=market_share.index, y=market_share.values, palette='tab20')
+plt.title('Lab Market Share in MI in 2021')
+plt.ylabel('Market Share (%)')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+save_figure('mi-market-share-by-lab-2021.png')
+plt.show()
+
+# Visualize market share by lab in 2022.
+subsample = sample[(sample['date'] >= datetime(2022, 1, 1)) &
+                (sample['date'] < datetime(2023, 1, 1))]
+lab_results = subsample.groupby('lab')
+tests_by_lab = lab_results['total_thc'].count().sort_values(ascending=False)
+market_share = tests_by_lab.div(tests_by_lab.sum()).mul(100).round(2)
+sns.barplot(x=market_share.index, y=market_share.values, palette='tab20')
+plt.title('Lab Market Share in MI in 2022')
+plt.ylabel('Market Share (%)')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+save_figure('mi-market-share-by-lab-2022.png')
+plt.show()
+
+
+# === Analyze total THC. ===
+
+# Get a sub-sample.
+subsample = sample[(sample['date'] >= datetime(2022, 1, 1)) &
+                (sample['date'] < datetime(2023, 1, 1))]
+
+# Visualize the distribution of THC.
+mean_value = subsample['total_thc'].mean()
+quantile_1 = subsample['total_thc'].quantile(0.01)
+quantile_25 = subsample['total_thc'].quantile(0.25)
+quantile_75 = subsample['total_thc'].quantile(0.75)
+quantile_99 = subsample['total_thc'].quantile(0.99)
+plt.figure(figsize=(12, 7))
+sns.histplot(subsample['total_thc'], bins=100, color='lightblue', kde=True)
+plt.axvline(quantile_1, color='blue', linestyle='dashed', linewidth=2, label=f'1st percentile: {quantile_1:.2f}%')
+plt.axvline(quantile_25, color='green', linestyle='dashed', linewidth=2, label=f'25th percentile: {quantile_25:.2f}%')
+plt.axvline(mean_value, color='red', linestyle='dashed', linewidth=2, label=f'Mean: {mean_value:.2f}%')
+plt.axvline(quantile_75, color='darkgreen', linestyle='dashed', linewidth=2, label=f'75th percentile: {quantile_75:.2f}%')
+plt.axvline(quantile_99, color='blue', linestyle='dashed', linewidth=2, label=f'99th percentile: {quantile_99:.2f}%')
+plt.title('Total THC in MI Cannabis Flower in 2022', pad=15)
+plt.xlabel('Total THC (%)')
+plt.ylabel('Number of Tests')
+plt.legend()
+plt.tight_layout()
+save_figure('mi-total-thc-distribution.png')
+plt.show()
+
+# Visualize the difference between medical and adult-use THC.
+plt.figure(figsize=(12, 7))
+sns.histplot(
+    data=subsample,
+    x='total_thc',
+    hue='medical',
+    bins=100,
+    kde=True,
+    palette={'Med': 'blue', 'AU': 'green'},
+    stat='density',
+)
+median_med = subsample[subsample['medical'] == 'Med']['total_thc'].median()
+median_au = subsample[subsample['medical'] == 'AU']['total_thc'].median()
+plt.axvline(median_med, color='blue', linestyle='--', linewidth=1.5, label=f'Medical Median: {median_med:.2f}%')
+plt.axvline(median_au, color='green', linestyle='--', linewidth=1.5, label=f'Adult-Use Median: {median_au:.2f}%')
+plt.title('Total THC for Medical and Adult-Use in MI in 2022', pad=15)
+plt.xlabel('Total THC (%)')
+plt.ylabel('Frequency (%)')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.tight_layout()
+save_figure('mi-med-au-total-thc-distribution.png')
+plt.show()
+
+# Perform a t-test to determine if the difference between medical and adult-use THC is significant.
+med_thc = subsample[subsample['medical'] == 'Med']['total_thc']
+au_thc = subsample[subsample['medical'] == 'AU']['total_thc']
+t_stat, p_val = stats.ttest_ind(med_thc, au_thc, equal_var=True) # You can set equal_var to False for Welch's t-test
+print(f'T-statistic: {t_stat}')
+print(f'P-value: {p_val}')
+alpha = 0.05
+if p_val < alpha:
+    print('The difference between medical and adult-use THC is statistically significant.')
+else:
+    print('The difference between medical and adult-use THC is not statistically significant.')
+
+
+# === Analyze THC by lab. ===
+
+# Visualize average THC percentage for each licensee.
+average_thc_by_licensee = subsample.groupby('lab')['total_thc'].mean()
+average_thc_by_licensee = average_thc_by_licensee.sort_values(ascending=False)
+plt.figure(figsize=(25, 8))
+bar_plot = sns.barplot(x=average_thc_by_licensee.index, y=average_thc_by_licensee.values, palette='tab20')
+plt.title('Average Total THC by Lab in MI in 2022', pad=15)
+plt.ylabel('Average Total THC (%)')
+plt.xlabel('Lab')
+plt.xticks(rotation=45, ha='right')
+for index, value in enumerate(average_thc_by_licensee.values):
+    bar_plot.text(index, value + 0.2, f'{value:.0f}%', color='black', ha='center')
+mean = average_thc_by_licensee.mean()
+plt.axhline(
+    y=mean,
+    color='red',
+    linestyle='--',
+    label=f'MI Avg Total THC: {mean:.2f}%',
+)
+plt.tight_layout()
+save_figure('mi-total-thc-by-lab.png')
+plt.show()
+
+
+# === Augment strain data. ===
+
+def extract_strain_name(product_name):
+    """Extract the strain name from the product name."""
+    name = str(product_name)
+    strain_name = re.split(r' - | \| | _ | x | – | — |:|\(|\)|/', name)[0]
+    strain_name = strain_name.split('Buds')[0].strip()
+    strain_name = strain_name.split('Bulk')[0].strip()
+    strain_name = strain_name.split('Flower')[0].strip()
+    strain_name = strain_name.split('Pre-Roll')[0].strip()
+    return strain_name
+
+
+# Augment strain names.
+sample['strain_name'] = sample['product_name'].apply(extract_strain_name)
+print(sample.sample(10)['strain_name'])
+
+
+# === Analyze strains. ===
+
+# Exclude samples with strain_name set to None, '' or 'Unprocessed'
+sample = sample[sample['strain_name'].notna()]
+sample = sample[~sample['strain_name'].isin(['', 'Unprocessed'])]
+
+# Standardize strain names
+sample['strain_name'] = sample['strain_name'].replace({
+    'Gorilla Glue': 'Gorilla Glue #4',
+    'GG4': 'Gorilla Glue #4'
+})
+
+# Restrict the timeframe to 2022.
+subsample = sample[(sample['date'] >= datetime(2022, 1, 1)) &
+                (sample['date'] < datetime(2023, 1, 1))]
+
+# Visualize the frequency of each strain
+strain_counts = subsample['strain_name'].value_counts()
+counts = strain_counts.head(20)
+plt.figure(figsize=(13, 13))
+bar_plot = sns.barplot(
+    y=counts.index,
+    x=counts.values,
+    palette='tab20',
+)
+plt.title('Number of Lab Tests for the Top 20 Strains in MI in 2022', pad=15)
+plt.xlabel('')
+plt.ylabel('')
+for index, value in enumerate(counts.values):
+    bar_plot.text(value, index, str(value), color='black', ha='left', va='center')
+plt.tight_layout()
+save_figure('mi-top-strains.png')
+plt.show()
+
+# Visualize the average THC for the top strains.
+avg_thc_per_strain = subsample.groupby('strain_name')['total_thc'].mean().sort_values(ascending=False)
+overall_avg_thc = subsample['total_thc'].mean()
+print('Overall average THC:', round(overall_avg_thc, 2))
+print('99th percentile THC:', round(sample['total_thc'].quantile(0.99), 2))
+top_20_strains = strain_counts.head(20).index
+avg_thc_top_20_strains = avg_thc_per_strain[avg_thc_per_strain.index.isin(top_20_strains)]
+avg_thc_top_20_strains = avg_thc_top_20_strains.loc[top_20_strains]
+print('Average THC for top 20 strains:', round(avg_thc_top_20_strains.mean(), 2))
+plt.figure(figsize=(26, 10))
+bar_plot = sns.barplot(
+    x=avg_thc_top_20_strains.index,
+    y=avg_thc_top_20_strains.values,
+    palette='tab20'
+)
+plt.axhline(
+    y=overall_avg_thc,
+    color='red',
+    linestyle='--',
+    label=f'MI Avg Total THC: {overall_avg_thc:.2f}%',
+)
+plt.title('Average Total THC for the Top 20 Strains in MI in 2022', fontsize=36, pad=15)
+plt.ylabel('Total THC (%)')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.legend()
+for p in bar_plot.patches:
+    bar_plot.annotate(format(p.get_height(), '.2f') + '%', 
+                      (p.get_x() + p.get_width() / 2., p.get_height()), 
+                      ha='center', va='center', 
+                      xytext=(0, 9), 
+                      textcoords='offset points')
+plt.tight_layout()
+save_figure('mi-avg-thc-by-top-20-strains.png')
+plt.show()
+
+# Look at the top adult-use strains.
+adult_use = subsample.loc[subsample['medical'] == 'AU']
+strain_counts = adult_use['strain_name'].value_counts()
+avg_thc_per_strain = adult_use.groupby('strain_name')['total_thc'].mean().sort_values(ascending=False)
+overall_avg_thc = adult_use['total_thc'].mean()
+print('Adult-use average THC:', round(overall_avg_thc, 2))
+print('Adult-use 99th percentile THC:', round(sample['total_thc'].quantile(0.99), 2))
+top_20_strains = strain_counts.head(20).index
+avg_thc_top_20_strains = avg_thc_per_strain[avg_thc_per_strain.index.isin(top_20_strains)]
+avg_thc_top_20_strains = avg_thc_top_20_strains.loc[top_20_strains]
+print('Average THC for top 20 adult-use strains:', round(avg_thc_top_20_strains.mean(), 2))
+plt.figure(figsize=(26, 10))
+bar_plot = sns.barplot(
+    x=avg_thc_top_20_strains.index,
+    y=avg_thc_top_20_strains.values,
+    palette='tab20'
+)
+plt.axhline(
+    y=overall_avg_thc,
+    color='red',
+    linestyle='--',
+    label=f'MI Adult-Use Avg Total THC: {overall_avg_thc:.2f}%',
+)
+plt.title('Average Total THC for the Top 20 Adult-Use Strains in MI in 2022', fontsize=36, pad=15)
+plt.ylabel('Total THC (%)')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.legend()
+for p in bar_plot.patches:
+    bar_plot.annotate(format(p.get_height(), '.2f') + '%', 
+                      (p.get_x() + p.get_width() / 2., p.get_height()), 
+                      ha='center', va='center', 
+                      xytext=(0, 9), 
+                      textcoords='offset points')
+plt.tight_layout()
+save_figure('mi-avg-thc-by-top-20-strains-adult-use.png')
+plt.show()
+
+# Look at the top medical strains.
+medical = subsample.loc[subsample['medical'] == 'Med']
+strain_counts = medical['strain_name'].value_counts()
+avg_thc_per_strain = medical.groupby('strain_name')['total_thc'].mean().sort_values(ascending=False)
+overall_avg_thc = medical['total_thc'].mean()
+print('Medical average THC:', round(overall_avg_thc, 2))
+print('Medical 99th percentile THC:', round(sample['total_thc'].quantile(0.99), 2))
+top_20_strains = strain_counts.head(20).index
+avg_thc_top_20_strains = avg_thc_per_strain[avg_thc_per_strain.index.isin(top_20_strains)]
+avg_thc_top_20_strains = avg_thc_top_20_strains.loc[top_20_strains]
+print('Average THC for top 20 medical strains:', round(avg_thc_top_20_strains.mean(), 2))
+plt.figure(figsize=(26, 10))
+bar_plot = sns.barplot(
+    x=avg_thc_top_20_strains.index,
+    y=avg_thc_top_20_strains.values,
+    palette='tab20'
+)
+plt.axhline(
+    y=overall_avg_thc,
+    color='red',
+    linestyle='--',
+    label=f'MI Medical Avg Total THC: {overall_avg_thc:.2f}%',
+)
+plt.title('Average Total THC for the Top 20 Medical Strains in MI in 2022', fontsize=36, pad=15)
+plt.ylabel('Total THC (%)')
+plt.xlabel('')
+plt.xticks(rotation=45, ha='right')
+plt.legend()
+for p in bar_plot.patches:
+    bar_plot.annotate(format(p.get_height(), '.2f') + '%', 
+                      (p.get_x() + p.get_width() / 2., p.get_height()), 
+                      ha='center', va='center', 
+                      xytext=(0, 9), 
+                      textcoords='offset points')
+plt.tight_layout()
+save_figure('mi-avg-thc-by-top-20-strains-med.png')
+plt.show()

@@ -1,0 +1,2 @@
+coa_algorithm,coa_algorithm_entry_point,lims,url,lab,lab_website,lab_license_number,lab_image_url,lab_address,lab_street,lab_city,lab_county,lab_state,lab_zipcode,lab_latitude,lab_longitude,lab_phone
+ne_labs.py,parse_ne_labs_coa,Northeast Laboratories,www.nelabsct.com,Northeast Laboratories,www.nelabsct.com,#PH-0404,https://www.nelabsct.com/images/Northeast-Laboratories.svg,"129 Mill Street, Berlin, CT 06037",129 Mill Street,Berlin,Hartford,CT,06037,41.62619,-72.74825,860-828-9787

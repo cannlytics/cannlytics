@@ -45,10 +45,6 @@ import requests
 import zipcodes
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/mo'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'MO'
 MISSOURI = {
@@ -68,6 +64,13 @@ MISSOURI = {
         'Contact \nInformation 1': 'first_name',
         'Contact \nInformation 2': 'last_name',
         'Contact \nPhone': 'business_phone'
+    },
+    'license_types': {
+        'cultivation': 'cultivator',
+        'dispensary': 'retailer',
+        'infused-product-manufacturing': 'processor',
+        'laboratory-testing': 'lab',
+        'transportation': 'delivery',
     },
     'drop': ['first_name', 'last_name'],
 }
@@ -139,6 +142,9 @@ def get_licenses_mo(
         license_type = datafile.split('\\')[-1].replace('.xlsx', '') \
             .replace('licensed-', '') \
             .replace('-facilities', '')
+    
+        # Standardize the license type.
+        license_type = MISSOURI['license_types'].get(license_type, license_type)
 
         # Open the workbook.
         data = pd.read_excel(datafile, skiprows=1)
@@ -219,9 +225,10 @@ def get_licenses_mo(
             if not os.path.exists(data_dir):
                 os.makedirs(data_dir)
             date = datetime.now().isoformat()[:10]
-            outfile = f'{data_dir}/{license_type}-{STATE.lower()}-{date}.csv'
+            plural = f'{license_type.replace("y", "")}ies' if license_type.endswith('y') else f'{license_type}s'
+            outfile = f'{data_dir}/{plural}-{STATE.lower()}-{date}.csv'
             data.to_csv(outfile, index=False)
-        
+
         # Record the licenses.
         licenses.append(data)
 
@@ -237,8 +244,12 @@ def get_licenses_mo(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/mo'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -250,6 +261,9 @@ if __name__ == '__main__':
         args = arg_parser.parse_args()
     except SystemExit:
         args = {'data_dir': DATA_DIR, 'env_file': ENV_FILE}
+
+    # FIXME:
+    # ValueError: Invalid format, zipcode must be of the format: "#####" or "#####-####"
 
     # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))

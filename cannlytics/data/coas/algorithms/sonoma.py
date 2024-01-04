@@ -276,21 +276,22 @@ def parse_sonoma_coa(
         except:
             pass
 
-    # Try to get the producer's address.
-    try:
-        location = search_for_address(obs['producer_address'], api_key=google_maps_api_key)
-        for key, value in location.items():
-            obs[f'producer_{key}'] = value
-    except:
-        pass
+    # FIXME: This my be expensive.
+    # # Try to get the producer's address.
+    # try:
+    #     location = search_for_address(obs['producer_address'], api_key=google_maps_api_key)
+    #     for key, value in location.items():
+    #         obs[f'producer_{key}'] = value
+    # except:
+    #     pass
 
-    # Try to get the distributor's address.
-    try:
-        location = search_for_address(obs['distributor_address'], api_key=google_maps_api_key)
-        for key, value in location.items():
-            obs[f'distributor_{key}'] = value
-    except:
-        pass
+    # # Try to get the distributor's address.
+    # try:
+    #     location = search_for_address(obs['distributor_address'], api_key=google_maps_api_key)
+    #     for key, value in location.items():
+    #         obs[f'distributor_{key}'] = value
+    # except:
+    #     pass
 
     # Future work: Standardize `product_type`.
 

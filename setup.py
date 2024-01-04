@@ -11,7 +11,7 @@ License: MIT <https://opensource.org/licenses/MIT>
 from setuptools import find_packages, setup
 
 # Define the package version.
-version = '0.0.16'
+version = '0.0.17'
 
 # Get the project description.
 README = ''

@@ -51,7 +51,8 @@ def get_results_mcrlabs(
     ):
     """Get all of the MCR Labs test results."""
 
-    # Get all of the results!
+    # Get all of the results.
+    # FIXME: Fix the errors that are being skipped.
     all_results = get_mcr_labs_test_results(
         starting_page=starting_page,
         pause=pause,
@@ -68,6 +69,10 @@ def get_results_mcrlabs(
     except:
         data.to_excel(datafile)
 
+    # Save the results to CSV.
+    datafile = f'{data_dir}/ma-lab-results-latest.csv'
+    data.to_csv(datafile, index=False)
+
     # Optionally upload the data to Firestore.
     if upload:
         upload_results(data)
@@ -81,7 +86,8 @@ def get_results_mcrlabs(
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/massachusetts/lab_results/mcr_labs'
+    # DATA_DIR = '../data/ma'
+    DATA_DIR = 'D://data/massachusetts/lab_results'
 
     # Get all of the MCR Labs test results.
     ma_results = get_results_mcrlabs(DATA_DIR)

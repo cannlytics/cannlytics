@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg preserveAspectRatio="xMidYMid" viewBox="234.8 414.43 139.33 70.375" xmlns="http://www.w3.org/2000/svg">
+  <path d="M248.83 432.995l-.3.17-.3-.17v-14.18h.6z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M236.4 440.515l-.6-.34 12.43-7.18.3.17v.35z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M235.8 440.175l.6.34v14.06l-.6.34z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)" stroke="#000">
+    <path d="M284.51 440.69l.3-.17.3.17v14.01l-.3.17-.3-.17z" fill-rule="evenodd" shape-rendering="geometricPrecision" stroke="none"/>
+    <path d="M287.39 442.01v11.37" stroke-width=".6"/>
+  </g>
+  <path d="M285.81 455.045v-.35l.3-.17 12.13 6.99v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)" stroke="#000">
+    <path d="M297.24 462.39v-.7l12.13-6.99.3.17v.35z" fill-rule="evenodd" shape-rendering="geometricPrecision" stroke="none"/>
+    <path d="M297.24 459.06l9.85-5.68" stroke-width=".6"/>
+  </g>
+  <path d="M310.97 454.525l-.3.17-.3-.17v-14.01l.3-.17.3.17z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)" stroke="#000">
+    <path d="M309.67 440.17v.35l-.3.17-12.13-7v-.35l.3-.17z" fill-rule="evenodd" shape-rendering="geometricPrecision" stroke="none"/>
+    <path d="M307.09 442.01l-9.85-5.69" stroke-width=".6"/>
+  </g>
+  <path d="M297.94 432.995l.3.17v.35l-12.13 7-.3-.17v-.35z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)">
+    <path d="M324.38 434.73l.947.24q-.298 1.166-1.074 1.782-.77.61-1.89.61-1.157 0-1.884-.47-.726-.472-1.107-1.366-.376-.894-.376-1.92 0-1.117.424-1.947.43-.838 1.217-1.268.79-.434 1.738-.434 1.074 0 1.807.545t1.02 1.54l-.932.218q-.25-.78-.722-1.136-.474-.357-1.19-.357-.827 0-1.383.395-.552.395-.777 1.064-.224.663-.224 1.37 0 .914.263 1.598.268.678.83 1.014.56.337 1.215.337.796 0 1.348-.46t.747-1.36z"/>
+    <path d="M326.21 433.75q0-1.782.957-2.788.957-1.01 2.47-1.01.992 0 1.788.473t1.21 1.323q.42.845.42 1.92 0 1.088-.44 1.947-.438.86-1.244 1.304-.803.436-1.735.436-1.01 0-1.807-.488t-1.206-1.334q-.41-.845-.41-1.787zm.977.015q0 1.294.693 2.04.698.743 1.748.743 1.07 0 1.758-.752.693-.752.693-2.133 0-.875-.3-1.524-.294-.657-.865-1.014-.566-.36-1.274-.36-1.005 0-1.733.692-.724.69-.724 2.304z"/>
+    <path d="M333.98 433.75q0-1.782.957-2.788.957-1.01 2.47-1.01.992 0 1.788.473t1.21 1.323q.42.845.42 1.92 0 1.088-.44 1.947-.438.86-1.244 1.304-.802.436-1.735.436-1.01 0-1.807-.488t-1.206-1.334q-.41-.845-.41-1.787zm.977.015q0 1.294.693 2.04.698.743 1.748.743 1.07 0 1.758-.752.693-.752.693-2.133 0-.875-.3-1.524-.294-.657-.865-1.014-.566-.36-1.274-.36-1.005 0-1.733.692-.723.69-.723 2.304z"/>
+    <path d="M342.07 437.24v-7.158h.947v2.94h3.72v-2.94h.948v7.158h-.947v-3.374h-3.72v3.374z"/>
+  </g>
+  <path d="M310.97 440.515l-.3-.17v-.35l7.99-4.61.3.52z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)">
+    <path d="M293.82 419.4q0-1.782.957-2.788.957-1.01 2.47-1.01.992 0 1.788.473t1.21 1.323q.42.845.42 1.92 0 1.088-.44 1.947-.438.86-1.244 1.304-.802.436-1.735.436-1.01 0-1.807-.488t-1.206-1.334q-.41-.845-.41-1.787zm.977.015q0 1.294.693 2.04.698.743 1.748.743 1.07 0 1.758-.752.693-.752.693-2.134 0-.874-.3-1.523-.294-.657-.865-1.014-.566-.36-1.274-.36-1.005 0-1.733.692-.723.69-.723 2.304z"/>
+    <path d="M301.91 422.89v-7.158h.947v2.94h3.72v-2.94h.948v7.158h-.947v-3.374h-3.72v3.374z"/>
+  </g>
+  <path d="M298.54 432.995l-.3.17-.3-.17v-8.47h.6z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)">
+    <path d="M262.09 465.94v-7.158h.947v2.94h3.72v-2.94h.948v7.158h-.947v-3.374h-3.72v3.374z"/>
+    <path d="M269 462.45q0-1.782.957-2.788.957-1.01 2.47-1.01.992 0 1.788.473t1.21 1.323q.42.845.42 1.92 0 1.088-.44 1.947-.438.86-1.244 1.304-.803.436-1.735.436-1.01 0-1.807-.488t-1.206-1.334q-.41-.845-.41-1.787zm.977.015q0 1.294.693 2.04.698.743 1.748.743 1.07 0 1.758-.752.693-.752.693-2.133 0-.874-.3-1.524-.294-.657-.865-1.014-.566-.36-1.274-.36-1.005 0-1.733.692-.724.69-.724 2.304z"/>
+  </g>
+  <path d="M285.51 454.525l.3.17v.35l-7.77 4.48-.3-.52z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M310.67 455.045v-.35l.3-.17 12.13 6.99v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M273.39 433.515v-.7l12.42 7.18v.35l-.3.17z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M260.96 440.695v-.7l12.43-7.18v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <g transform="translate(1 -.17486)" stroke="#000">
+    <path d="M247.53 433.69v-.35l.3-.17 12.13 7v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision" stroke="none"/>
+    <path d="M250.11 431.85l9.85 5.69" stroke-width=".6"/>
+  </g>
+  <g transform="translate(1 -.17486)" stroke="#000">
+    <path d="M247.27 462.29l.6-.34v14.4l-.3.17-.3-.17z" fill-rule="evenodd" shape-rendering="geometricPrecision" stroke="none"/>
+    <path d="M244.98 463.62v11.4" stroke-width=".6"/>
+  </g>
+  <path d="M235.8 454.915l.6-.34 12.47 7.2-.6.34z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M323.1 462.215v-.7l12.47-7.2v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M335.57 455.015v-.7l12.47 7.2v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M348.04 462.215v-.7l12.47-7.2v.7z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M360.51 455.015v-.7l12.62 7.29-.3.52z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M248.27 476.175l.3.17v.35l-12.32 7.11-.3-.52z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+  <path d="M248.57 476.695v-.35l.3-.17 12.33 7.11-.3.52z" fill-rule="evenodd" shape-rendering="geometricPrecision"/>
+</svg>

@@ -36,9 +36,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
-# Specify where your data lives.
-DATA_DIR = '../data/ak'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AK'
@@ -136,26 +133,27 @@ def search_for_license_addresses(
         business_website=None,
     )
 
-    # Iterate over each license, search for the address, and record the results in the DataFrame.
-    for index, row in licenses.iterrows():
-        query = ', '.join([row['business_dba_name'], row['address']])
-        gis_data = queries.get(query)
+    # # Iterate over each license, search for the address, and record the results in the DataFrame.
+    # FIXME: This my be expensive.
+    # for index, row in licenses.iterrows():
+    #     query = ', '.join([row['business_dba_name'], row['address']])
+    #     gis_data = queries.get(query)
 
-        # Query Google Place API, if necessary.
-        if gis_data is None:
-            try:
-                gis_data = search_for_address(query, api_key=api_key, fields=fields)
-            except:
-                gis_data = {}
-            queries[query] = gis_data
+    #     # Query Google Place API, if necessary.
+    #     if gis_data is None:
+    #         try:
+    #             gis_data = search_for_address(query, api_key=api_key, fields=fields)
+    #         except:
+    #             gis_data = {}
+    #         queries[query] = gis_data
 
-        # Record the query results.
-        licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
-        licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
-        licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
-        licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
-        licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
-        licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
+    #     # Record the query results.
+    #     licenses.iat[index, licenses.columns.get_loc('premise_street_address')] = gis_data.get('street')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_county')] = gis_data.get('county')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
+    #     licenses.iat[index, licenses.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
+    #     licenses.iat[index, licenses.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
+    #     licenses.iat[index, licenses.columns.get_loc('business_website')] = gis_data.get('website')
 
     return licenses
 
@@ -176,9 +174,11 @@ def save_license_data(
         os.makedirs(data_dir)
     date = datetime.now().strftime('%Y-%m-%d')
     retailers = licenses.loc[licenses['license_type'] == 'Retail Marijuana Store']
+    labs = licenses.loc[licenses['license_type'] == 'Marijuana Testing Facility']
     licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-{date}.csv', index=False)
     licenses.to_csv(f'{data_dir}/licenses-{state.lower()}-latest.csv', index=False)
     retailers.to_csv(f'{data_dir}/retailers-{state.lower()}-{date}.csv', index=False)
+    labs.to_csv(f'{data_dir}/labs-{state.lower()}-{date}.csv', index=False)
 
 
 def get_licenses_ak(
@@ -192,7 +192,6 @@ def get_licenses_ak(
     google_maps_api_key = config.get('GOOGLE_MAPS_API_KEY')
 
     # Initiate a Selenium driver.
-    # FIXME: ChromeDriver is not working on Windows.
     try:
         options = Options()
         options.add_argument('--headless')
@@ -273,8 +272,12 @@ def get_licenses_ak(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-12 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/ak'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

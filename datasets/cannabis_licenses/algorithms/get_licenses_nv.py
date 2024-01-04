@@ -32,9 +32,6 @@ from dotenv import dotenv_values
 import pandas as pd
 import requests
 
-# Specify where your data lives.
-DATA_DIR = '../data/nv'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'NV'
@@ -130,7 +127,9 @@ def get_licenses_nv(
 
     # Save the licenses    
     if data_dir is not None:
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        timestamp = datetime.now().strftime('%Y-%m-%d')
+        labs = licenses.loc[licenses['license_type'].str.contains('Laboratory')]
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
@@ -213,7 +212,7 @@ def get_licenses_nv(
 
     # Save the retailers    
     if data_dir is not None:
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        timestamp = datetime.now().strftime('%Y-%m-%d')
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-latest.csv', index=False)
 
@@ -222,8 +221,12 @@ def get_licenses_nv(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/nv'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

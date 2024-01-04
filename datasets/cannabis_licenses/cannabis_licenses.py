@@ -6,17 +6,17 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 9/19/2023
+Updated: 9/30/2023
 License: <https://huggingface.co/datasets/cannlytics/cannabis_licenses/blob/main/LICENSE>
 """
-# External imports.
+# External imports:
 import datasets
 import pandas as pd
 
 
 # Constants.
 _SCRIPT = 'cannabis_licenses.py'
-_VERSION = '1.0.1'
+_VERSION = '1.0.2'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_licenses'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
@@ -35,7 +35,7 @@ _CITATION = """\
 """
 
 
-# Read subsets from local source.
+# Define subsets.
 SUBSETS = [
     'all',
     'ak',
@@ -52,7 +52,7 @@ SUBSETS = [
     'mt',
     'nj',
     'nm',
-    # 'ny',
+    'ny',
     'nv',
     'or',
     'ri',
@@ -107,7 +107,7 @@ class CannabisLicensesConfig(datasets.BuilderConfig):
         description = _DESCRIPTION
         description += f'This configuration is for the `{name}` subset.'
         super().__init__(
-            data_dir='./data',
+            data_dir='data',
             description=description,
             name=name,
             **kwargs,
@@ -137,11 +137,7 @@ class CannabisLicenses(datasets.GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         """Returns SplitGenerators."""
         subset = self.config.name
-        # Deprecated: Use the data from the Cannlytics Hugging Face repository.
-        # https://huggingface.co/datasets/cannlytics/cannabis_licenses/raw/main/
-        # data_url = SUBSETS[config_name]['data_url']
-        # TEST: Use local data.
-        data_url = f'./data/{subset}/licenses-{subset}-latest.csv'
+        data_url = f'data/{subset}/licenses-{subset}-latest.csv'
         urls = {subset: data_url}
         downloaded_files = dl_manager.download_and_extract(urls)
         params = {'filepath': downloaded_files[subset]}

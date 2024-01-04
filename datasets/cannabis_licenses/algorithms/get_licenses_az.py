@@ -29,30 +29,19 @@ TODO:
 from datetime import datetime
 # from dotenv import dotenv_values
 import os
+import re
 from time import sleep
 from typing import List, Optional
 
 # External imports.
 # from cannlytics.data.gis import geocode_addresses
+from cannlytics.data.web import initialize_selenium
 import pandas as pd
-import zipcodes
-
-# Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# try:
-#     import chromedriver_binary  # Adds chromedriver binary to path.
-# except ImportError:
-#     pass # Otherwise, ChromeDriver should be in your path.
+import zipcodes
 
-
-# Specify where your data lives.
-DATA_DIR = '../data/az'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 STATE = 'AZ'
@@ -69,38 +58,26 @@ def get_county_from_zip(x):
         return zipcodes.matching(x)[0]['county']
     except KeyError:
         return None
-
-
-def initialize_selenium():
-    """Initialize a web driver."""
-    try:
-        service = Service()
-        options = Options()
-        options.add_argument('--window-size=1920,1200')
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
-        return webdriver.Chrome(options=options, service=service)
-    except:
-        return webdriver.Edge()
     
 
 def click_load_more(driver, container):
     """Click "Load more" until all of the licenses are visible."""
     more = True
     while(more):
-        button = container.find_element(by=By.TAG_NAME, value='button')
-        driver.execute_script('arguments[0].scrollIntoView(true);', button)
-        button.click()
-        counter = container.find_element(by=By.CLASS_NAME, value='count-text')
-        more = int(counter.text.replace(' more', ''))
+        try:
+            button = container.find_element(by=By.TAG_NAME, value='button')
+            driver.execute_script('arguments[0].scrollIntoView(true);', button)
+            button.click()
+            counter = container.find_element(by=By.CLASS_NAME, value='count-text')
+            only_digits = re.findall(r'\d+', counter.text)
+            more = int(only_digits[0]) if only_digits else False
+        except:
+            more = False
 
 
 def get_license_data_from_html(index, el):
     """Get a retailer's data."""
-    xpath = f'/html/body/div[3]/div[2]/div/div[2]/div[2]/div/div/c-azcc-portal-home/c-azcc-map/div/div[2]/div[2]/div[2]/div[{index + 1}]/c-azcc-map-list-item/div'
-    list_item = el.find_element(by=By.XPATH, value=xpath)
-    body = list_item.find_element(by=By.CLASS_NAME, value='slds-media__body')
+    body = el.find_element(by=By.CLASS_NAME, value='slds-media__body')
     divs = body.find_elements(by=By.TAG_NAME, value='div')
     name = divs[0].text
     legal_name = divs[1].text
@@ -164,7 +141,7 @@ def get_licenses_az(
 
     # Get license data for each retailer.
     data = []
-    els = container.find_elements(by=By.CLASS_NAME, value='map-list__item')
+    els = container.find_elements(by=By.CLASS_NAME, value='map-item')
     for index, el in enumerate(els):
         data.append(get_license_data_from_html(index, el))
 
@@ -342,19 +319,25 @@ def get_licenses_az(
     # Save and return the data.
     if data_dir is not None:
         date = timestamp[:10]
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
-        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
+        labs = licenses.loc[licenses['license_type'] == 'Marijuana Laboratory']
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
         cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{date}.csv', index=False)
         manufacturers.to_csv(f'{data_dir}/manufacturers-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
+        licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
 
     # Return the licenses.
     return licenses
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/az'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

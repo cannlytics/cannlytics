@@ -6,15 +6,16 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 3/21/2023
+Updated: 12/28/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
     Parse a TagLeaf LIMS CoA PDF or URL. Labs include:
 
-        - 2 River Labs, Inc
-        - BelCosta Labs
+        * 2 River Labs, Inc
+        * BelCosta Labs
+        * Verity Analytics
 
 Data Points:
 
@@ -127,7 +128,11 @@ def parse_tagleaf_url(
     # Get the date tested.
     obs = {}
     el = soup.find('p', attrs={'class': 'produced-statement'})
-    date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
+    statement = el.text
+    if 'revised' in statement:
+        date_tested = pd.to_datetime(statement.split('issued')[-1].strip()).isoformat()
+    else:
+        date_tested = pd.to_datetime(el.text.split(': ')[-1]).isoformat()
     obs['date_tested'] = date_tested
 
     # Get lab details.
@@ -141,19 +146,20 @@ def parse_tagleaf_url(
     obs['lab_image_url'] = img.attrs['src']
     obs['lab_phone'] = details[2].replace('PH: ', '')
 
-    # Try to get lab address details.
-    try:
-        google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
-        location = search_for_address(address, google_maps_api_key)
-        obs['lab_street'] = location['street']
-        obs['lab_city'] = location['city']
-        obs['lab_county'] = location['county']
-        obs['lab_state'] = location['state']
-        obs['lab_zipcode'] = location['zipcode']
-        obs['lab_latitude'] = location['latitude']
-        obs['lab_longitude'] = location['longitude']
-    except:
-        pass
+    # # Try to get lab address details.
+    # FIXME: This my be expensive.
+    # try:
+    #     google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
+    #     location = search_for_address(address, google_maps_api_key)
+    #     obs['lab_street'] = location['street']
+    #     obs['lab_city'] = location['city']
+    #     obs['lab_county'] = location['county']
+    #     obs['lab_state'] = location['state']
+    #     obs['lab_zipcode'] = location['zipcode']
+    #     obs['lab_latitude'] = location['latitude']
+    #     obs['lab_longitude'] = location['longitude']
+    # except:
+    #     pass
 
     # Get data from headings.
     text = soup.find_all('p', attrs={'class': 'h5'}, limit=2)
@@ -376,40 +382,38 @@ def parse_tagleaf_coa(
 
 
 # === Tests ===
-# Uncomment tests to perform them.
-# Checked tests were successfully performed by Cannlytics on 3/21/2023.
-# Contact: <admin@cannlytics.com>.
+# Tested: 2023-12-28 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     # Test TagLeaf LIMS COA parsing.
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
 
-    # Set a Google Maps API key.
-    config = dotenv_values('../../../.env')
-    os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
+    # # Set a Google Maps API key.
+    # config = dotenv_values('../../../.env')
+    # os.environ['GOOGLE_MAPS_API_KEY'] = config['GOOGLE_MAPS_API_KEY']
 
     # Specify where your test data lives.
-    DATA_DIR = '../../../tests/assets/coas/tagleaf'
+    DATA_DIR = '../../../../tests/assets/coas/tagleaf'
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
     # [✓] TEST: Parse a COA URL.
-    # parser = CoADoc()
-    # data = parse_tagleaf_url(parser, tagleaf_coa_url)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    data = parse_tagleaf_url(parser, tagleaf_coa_url)
+    assert data is not None
+    print(data)
 
     # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
-    # parser = CoADoc()
-    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
-    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    assert data is not None
+    print(data)
 
     # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
-    # parser = CoADoc()
-    # tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
-    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    # assert data is not None
-    # print(data)
+    parser = CoADoc()
+    tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
+    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    assert data is not None
+    print(data)

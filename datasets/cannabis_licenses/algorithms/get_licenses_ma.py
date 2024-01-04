@@ -29,9 +29,6 @@ from cannlytics.data import OpenData
 from cannlytics.utils import snake_case
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/ma'
-
 # Specify state-specific constants.
 STATE = 'MA'
 MASSACHUSETTS = {
@@ -148,6 +145,8 @@ def get_licenses_ma(
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         date = datetime.now().strftime('%Y-%m-%d')
         retailers = licenses.loc[licenses['license_type'].str.contains('Retailer')]
+        labs = licenses.loc[licenses['license_type'].str.contains('Independent Testing Laboratory')]
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{date}.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
@@ -155,8 +154,11 @@ def get_licenses_ma(
 
 
 # === Test ===
-# [✓] Tested: 2023-09-19 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/ma'
 
     # Support command line usage.
     import argparse

@@ -115,9 +115,7 @@ class FirestoreService {
     });
   }
 
-  /// 
-
-  /// Add a document data to a given collection.
+  /// Add a document to a given collection.
   Future<String> addDocument({
     required String path,
     required Map<String, dynamic> data,

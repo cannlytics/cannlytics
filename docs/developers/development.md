@@ -292,20 +292,37 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 │   ├── firestore.indexes # Available database queries.
 │   ├── firestore.rules # Database access control and data validation.
 |   └── storage.rules # File storage access control and validation.
+├── ai # AI models that are in development.
 ├── api
 │   ├── {endpoint}
 │   |   └── {endpoint}.py # Implementation of specific API endpoints.
 │   ├── urls.py # Defined API endpoints.
 |   └── views.py # Implementation of general API endpoints.
+├── app
+│   ├── android # Android distribution.
+│   ├── assets # Static files, like images.
+│   ├── lib # App user interface code.
+│   ├── web # Web app distribution.
+|   └── pubspec.yaml # App configuration.
 ├── cannlytics
-│   ├── lims # All LIMS logic.
-│   ├── traceability
-│   |   ├── leaf # Leaf Data Systems API module.
-|   |   └── metrc # Metrc API module.
+│   ├── ai # AI logic.
+│   ├── auth # Authentication logic.
+│   ├── firebase # Firebase module.
+│   ├── lims # LIMS module.
+│   ├── metrc # Metrc API module.
+│   ├── models # Standard Cannlytics models.
+│   ├── stats # Statistics.
 │   ├── utils # General utility functions.
-│   ├── firebase.py # Firebase module.
-|   └── models.py # Main data entities.
-├── console
+|   └── cannlytics.py # Main Cannlytics module.
+├── datasets
+
+├── docs
+│   ├── src # The documentation text.
+│   ├── theme # The style of the documentation.
+|   └── Dockerfile # Documentation container configuration.
+├── functions
+
+├── lims
 │   ├── assets
 │   |   ├── css # Core style, minified and bundled.
 │   |   └── js # JavaScript bundled into a `cannlytics` module.
@@ -317,15 +334,19 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 │   ├── urls.py # Console navigation.
 │   ├── utils.py # General console utility functions.
 |   └── views.py # Implementation of user interfaces and their context.
-├── docs
-│   ├── src # The documentation text.
-│   ├── theme # The style of the documentation.
-|   └── Dockerfile # Documentation container configuration.
+├── metrc
+│   ├── android # Android distribution.
+│   ├── assets # Static files, like images.
+│   ├── lib # Metrc app user interface code.
+│   ├── web # Metrc web app distribution.
+|   └── pubspec.yaml # App configuration.
 ├── node_modules
 ├── public
 |   └── static # Files hosted with Firebase hosting.
 ├── tests # Tests for all features and functionality.
-├── tools # Development tools.
+├── tools
+│   ├── admin # Administrative and development tools.
+│   └── dev # Development tools.
 ├── website # A company website.
 ├── .env # Your secrets.
 ├── .firebasesrc # Firebase hosting sources.
@@ -338,7 +359,7 @@ Cannlytics favors a [domain-style code structure](https://stackoverflow.com/ques
 ├── package.json # Node.js dependencies and scripts.
 ├── README.md
 ├── requirements.txt # Python requirements.
-└── webpack.config.js # JavaScript and CSS bundle configuration.
+└── setup.py # Python package configuration.
 ```
 
 ## Development <a name="development"></a>

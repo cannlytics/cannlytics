@@ -34,10 +34,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/md'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'MD'
 MARYLAND = {
@@ -231,9 +227,16 @@ def get_licenses_md(
     return retailers
 
 
+# TODO: Get Maryland labs.
+
+
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/md'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

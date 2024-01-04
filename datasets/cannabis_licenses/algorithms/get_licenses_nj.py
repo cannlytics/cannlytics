@@ -29,9 +29,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/nj'
-
 # Specify state-specific constants.
 STATE = 'NJ'
 NEW_JERSEY = {
@@ -113,9 +110,16 @@ def get_licenses_nj(
     return data
 
 
+# TODO: Get New Jersey Labs.
+# https://www.nj.gov/cannabis/businesses/testing-labs/
+
+
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/nj'
 
     # Support command line usage.
     import argparse

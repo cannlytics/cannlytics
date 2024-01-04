@@ -21,19 +21,18 @@ Data Source:
 """
 # Standard imports.
 from datetime import datetime
+from io import BytesIO
 import os
+import re
 from typing import Optional
 
 # External imports.
 from dotenv import dotenv_values
 import pandas as pd
+import pdfplumber
 import requests
 from cannlytics.data.gis import geocode_addresses
 
-
-# Specify where your data lives.
-DATA_DIR = '../data/or'
-ENV_FILE = '../../../.env'
 
 # Specify state-specific constants.
 OREGON = {
@@ -66,7 +65,7 @@ def get_licenses_or(
         # Optional: Add print statements.
         # verbose: Optional[bool] = False,
     ):
-    """Get California cannabis license data."""
+    """Get Oregon cannabis license data."""
 
     # Create the necessary directories.
     file_dir = f'{data_dir}/.datasets'
@@ -195,9 +194,20 @@ def get_licenses_or(
     return data
 
 
+# TODO: Add get cultivators, etc.
+
+
+# TODO: Get Oregon labs.
+# https://www.oregon.gov/oha/PH/LABORATORYSERVICES/ENVIRONMENTALLABORATORYACCREDITATION/Documents/canna-list.pdf
+
+
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/or'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -210,7 +220,7 @@ if __name__ == '__main__':
     except SystemExit:
         args = {'d': DATA_DIR, 'env_file': ENV_FILE}
 
-    # Get California licenses, saving them to the specified directory.
+    # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))
     env_file = args.get('env_file')
     get_licenses_or(data_dir, env_file=env_file)

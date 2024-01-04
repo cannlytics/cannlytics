@@ -19,6 +19,7 @@ try:
         find_company_address,
         find_company_linkedin,
         find_company_url,
+        initialize_selenium,
         download_google_drive_file,
     )
 
@@ -34,6 +35,7 @@ try:
         find_company_address,
         find_company_linkedin,
         find_company_url,
+        initialize_selenium,
         download_google_drive_file,
     ]
 except ImportError:

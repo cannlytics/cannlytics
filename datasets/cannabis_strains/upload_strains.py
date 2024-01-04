@@ -286,6 +286,19 @@ strain_data['keywords'] = strain_data['strain_name'].apply(
 )
 
 
+#----------------------------------------------------------------------#
+# Images
+#----------------------------------------------------------------------#
+
+# Upload all images to strain gallery.
+
+
+# Create cutouts of each strain image.
+
+
+# Pick the most recent image as a thumbnail.
+
+
 def upload_strains(collection: str = 'public/data/strains') -> list:
     """Upload strain data to Firestore."""
 

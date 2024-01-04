@@ -204,10 +204,19 @@ def curate_ccrs_lab_results(
     # Curate all lab results.
     lab_results = augment_lab_results(manager, lab_results)
 
+    # Standardize the lab results.
+    # TODO: Add producer
+    columns = {
+        'ExternalIdentifier': 'lab_id',
+        'inventory_type': 'product_type',
+        'test_date': 'date_tested',
+    }
+    lab_results.rename(columns=columns, inplace=True)
+
     # Save the curated lab results.
+    # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
     lab_results_dir = os.path.join(stats_dir, 'lab_results')
     lab_results = anonymize(lab_results)
-    lab_results.rename(columns={'ExternalIdentifier': 'lab_id'}, inplace=True)
     lab_results.rename(columns=lambda x: camel_to_snake(x), inplace=True)
     save_dataset(lab_results, lab_results_dir, 'lab_results')
 
@@ -223,8 +232,8 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
-    stats_dir = f'{base}/ccrs-stats/'
+    data_dir = f'{base}/CCRS PRR (9-5-23)/CCRS PRR (9-5-23)/'
+    stats_dir = f'../data/wa'
     manager = CCRS()
     lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
     manager.create_log('Curated %i WA lab results.' % len(lab_results))

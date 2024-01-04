@@ -194,6 +194,23 @@ ANALYTES = {
     'cbl_3': 'cbl',
     'THCA-A': 'thca',
     'thca_a': 'thca',
+    'tetrahydrocannabinolic_acid_thca': 'thca',
+    'delta_9_tetrahydrocannabinol_delta_9_thc': 'delta_9_thc',
+    'cannabichromenic_acid_cbca': 'cbca',
+    'tetrahydrocannabivarinic_acid_thcva': 'thcva',
+    'cannabidiolic_acid_cbda': 'cbda',
+    'cannabigerol_cbg': 'cbg',
+    '8_tetrahydrocannabinol_delta_8_thc': 'delta_8_thc',
+    'tetrahydrocannabivarin_thcv': 'thcv',
+    'cannabidiol_cbd': 'cbd',
+    'cannabidivarin_cbdv': 'cbdv',
+    'cannabidivarinic_acid_cbdva': 'cbdva',
+    'cannabicyclol_cbl': 'cbl',
+    'cannabinol_cbn': 'cbn',
+    'cannabichromene_cbc': 'cbc',
+    'exo_tetrahydrocannabinol_exo_thc': 'exo_thc',
+    '6_ar_9_s_delta_10_tetrahydrocannabinol_6_ar_9_s_delta_10_thc': 'delta_10_thc_s',
+    '6_ar_9_r_delta_10_tetrahydrocannabinol_6_ar_9_r_delta_10_thc': 'delta_10_thc_r',
     'ddvp_dichlorvous': 'dichlorvos',
     'Dichlorvos (DDVP)': 'dichlorvos',
     'dichlorvos_ddvp': 'dichlorvos',
@@ -349,6 +366,7 @@ ANALYTES = {
     'Cannabinol': 'cbn',
     'Cannabichromene': 'cbc',
     'Cannabigerolic acid': 'cbga',
+    'cannabigerolic_acid_cbga': 'cbga',
     'Cannabigerol': 'cbg',
     'Cannabidivarin': 'cbdv',
     'Tetrahydrocannabivarin': 'thcv',
@@ -674,7 +692,7 @@ CODINGS = {
 DECARB = 0.877 # Source: <https://www.conflabs.com/why-0-877/>
 
 # Default headers to use for HTTP requests, because we are AI and should not be treated as a bot.
-DEFAULT_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36'}
+DEFAULT_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'}
 
 # Random characters to use in password generation.
 RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'

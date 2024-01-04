@@ -15,19 +15,11 @@ Description:
 Data Points:
 
     - analyses
-    - {analysis}_method
-    - {analysis}_status
-    - coa_urls
+    - methods
+    - coa_url
     - date_collected
     - date_tested
     - date_received
-    - distributor
-    - distributor_address
-    - distributor_street
-    - distributor_city
-    - distributor_state
-    - distributor_zipcode
-    - distributor_license_number
     - images
     - lab_results_url
     - producer
@@ -41,9 +33,6 @@ Data Points:
     - lab_id
     - product_type
     - batch_number
-    - metrc_ids
-    - metrc_lab_id
-    - metrc_source_id
     - product_size
     - serving_size
     - servings_per_package
@@ -53,10 +42,6 @@ Data Points:
     - total_cannabinoids
     - total_thc
     - total_cbd
-    - total_cbg
-    - total_thcv
-    - total_cbc
-    - total_cbdv
     - total_terpenes
     - sample_id
     - strain_name (augmented)
@@ -84,8 +69,13 @@ import re
 from typing import Any, Optional
 
 # External imports.
+import cv2
 import pandas as pd
 import pdfplumber
+try:
+    import pytesseract
+except ImportError:
+    print('Unable to import `Tesseract` library. This tool is used for OCR.')
 
 # Internal imports.
 from cannlytics.data.data import create_sample_id
@@ -104,18 +94,18 @@ MTL_LABS = {
     'url': 'http://mete.labdrive.net',
     'lims': 'Method Testing Labs',
     'lab': 'Method Testing Labs',
-    'lab_image_url': '',
-    'lab_address': '',
-    'lab_street': '',
-    'lab_city': '',
-    'lab_county': '',
+    'lab_image_url': 'https://methodtestinglabs.com/wp-content/uploads/2020/08/method-logo-resize-b.png',
+    'lab_address': '2720 Broadway Center Blvd, Brandon, FL 33510',
+    'lab_street': '2720 Broadway Center Blvd',
+    'lab_city': 'Brandon',
+    'lab_county': 'Hillsborough',
     'lab_state': 'FL',
-    'lab_zipcode': '',
-    'lab_phone': '',
-    'lab_email': '',
-    'lab_website': '',
-    'lab_latitude': 0,
-    'lab_longitude': 0,
+    'lab_zipcode': '33510',
+    'lab_phone': '813-769-9567',
+    'lab_email': 'info@methodtestinglabs.com',
+    'lab_website': 'methodtestinglabs.com',
+    'lab_latitude': 27.967740,
+    'lab_longitude': -82.324950,
 }
 
 
@@ -175,25 +165,112 @@ if __name__ == '__main__':
     from cannlytics.data.coas import CoADoc
     from dotenv import dotenv_values
 
-    # [✓] TEST: Identify LIMS from a COA URL.
-    parser = CoADoc()
-    url = 'http://mete.labdrive.net/s/KmXMdYTFR3dsceG'
-    lims = parser.identify_lims(url, lims={'Method Testing Labs': MTL_LABS})
-    assert lims == 'Method Testing Labs'
+    # # [✓] TEST: Identify LIMS from a COA URL.
+    # parser = CoADoc()
+    # url = 'http://mete.labdrive.net/s/KmXMdYTFR3dsceG'
+    # lims = parser.identify_lims(url, lims={'Method Testing Labs': MTL_LABS})
+    # assert lims == 'Method Testing Labs'
 
-    # [✓] TEST: Identify LIMS from a COA PDF.
-    parser = CoADoc()
-    doc = 'D://data/florida/lab_results/.datasets/pdfs/mtl/COA_2305CBR0001-004.pdf'
-    lims = parser.identify_lims(doc, lims={'Method Testing Labs': MTL_LABS})
-    assert lims == 'Method Testing Labs'
+    # # [✓] TEST: Identify LIMS from a COA PDF.
+    # parser = CoADoc()
+    # doc = 'D://data/florida/lab_results/.datasets/pdfs/mtl/COA_2305CBR0001-004.pdf'
+    # lims = parser.identify_lims(doc, lims={'Method Testing Labs': MTL_LABS})
+    # assert lims == 'Method Testing Labs'
 
-    # [ ] TEST: Parse a Method Testing Labs COA from a URL.
-    urls = [
-        'http://mete.labdrive.net/s/KmXMdYTFR3dsceG',
-        'http://mete.labdrive.net/s/KmXMdYTFR3dsceG/download/COA_2305CBR0001-004.pdf',
-        'https://mete.labdrive.net/s/se8BcYZJAMqaYrE',
-        'https://coaportal.com/sunburn/report/?search=0524324712189959',
-        'https://coaportal.com/sunburn/report/?search=9586770498778201',
-        'https://coaportal.com/sunburn/report/?search=8315430847060831',
-        'https://coaportal.com/sunburn/report/?search=Sunburn-3807806169682269-2303CTB0044-003',
-    ]
+    # # [ ] TEST: Parse a Method Testing Labs COA from a URL.
+    # urls = [
+    #     'http://mete.labdrive.net/s/KmXMdYTFR3dsceG',
+    #     'http://mete.labdrive.net/s/KmXMdYTFR3dsceG/download/COA_2305CBR0001-004.pdf',
+    #     'https://mete.labdrive.net/s/se8BcYZJAMqaYrE',
+    #     'https://coaportal.com/sunburn/report/?search=0524324712189959',
+    #     'https://coaportal.com/sunburn/report/?search=9586770498778201',
+    #     'https://coaportal.com/sunburn/report/?search=8315430847060831',
+    #     'https://coaportal.com/sunburn/report/?search=Sunburn-3807806169682269-2303CTB0044-003',
+    # ]
+
+
+    import cv2
+    import pytesseract
+    import re
+
+    # Define the image of the COA.
+    doc = "3hmIuam.png"
+
+    # Load the image
+    image = cv2.imread(doc, 0)
+
+    # Resize the image for better recognition.
+    resized_img = cv2.resize(image, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+
+    # Perform OCR.
+    text = pytesseract.image_to_string(resized_img)
+    print(text)
+
+
+    def parse_mtl_coa_report(text):
+        data = {}
+        
+        # Extracting Producer or Lab Information
+        lab_info = re.search(r"(\w+ TESTING LABS)\n([^\|]+)\|", text)
+        if lab_info:
+            data['producer'] = lab_info.group(1).strip()
+            address_parts = lab_info.group(2).strip().split(", ")
+            data['producer_address'] = ", ".join(address_parts)
+            data['producer_street'] = address_parts[0]
+            data['producer_city'], data['producer_state'], data['producer_zipcode'] = re.split(r" |, ", address_parts[1])
+            
+        # Extracting Date Tested
+        date_tested = re.search(r"(\d{1,2}/\d{1,2}/\d{4}, \d{1,2}:\d{2}:\d{2} (AM|PM))", text)
+        if date_tested:
+            data['date_tested'] = date_tested.group(1)
+            
+        # Extracting Product Name
+        product_name = re.search(r"Product Name: ([^\n]+)", text)
+        if product_name:
+            data['product_name'] = product_name.group(1).strip()
+            
+        # Extracting Sample ID or Lot ID
+        sample_id = re.search(r"Lot ID: (\d+ \d+ \d+ \d+)", text)
+        if sample_id:
+            data['sample_id'] = sample_id.group(1).replace(" ", "")
+            
+        # Extracting Results
+        results_section = re.search(r"(ANALYTE .+?)(Total Terpenes: .+%)", text, re.DOTALL)
+        if results_section:
+            results_text = results_section.group(1)
+            results_lines = results_text.split("\n")[1:]  # Skipping the "ANALYTE" header
+            
+            results = []
+            for line in results_lines:
+                line_parts = re.split(r"\s+", line.strip())
+                if len(line_parts) >= 5:
+                    result = {
+                        "analysis": "cannabinoids",
+                        "key": line_parts[0].lower(),
+                        "name": line_parts[0],
+                        "value": float(line_parts[2]) if line_parts[2] != "ND" else None,
+                        "units": "percent",
+                        "limit": None,
+                        "lod": float(line_parts[1]),
+                        "loq": None,
+                        "status": None,
+                    }
+                    results.append(result)
+            data['results'] = results
+        
+        # Extracting Total Cannabinoids, THC, CBD, and Terpenes
+        total_values = re.search(r"Total THC: (.+%) Total CBD: (.+%) Total Cannabinoids: (.+%)", text)
+        if total_values:
+            data['total_thc'] = float(total_values.group(1).strip('%'))
+            data['total_cbd'] = float(total_values.group(2).strip('%'))
+            data['total_cannabinoids'] = float(total_values.group(3).strip('%'))
+            
+        total_terpenes = re.search(r"Total Terpenes: (.+%)", text)
+        if total_terpenes:
+            data['total_terpenes'] = float(total_terpenes.group(1).strip('%'))
+        
+        return data
+
+    # TODO: Parse the COA!
+    coa_data = parse_mtl_coa_report(text)
+

@@ -11,6 +11,7 @@
 import 'package:cannlytics_data/utils/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 
 // Package imports:
 import 'package:dotted_border/dotted_border.dart';
@@ -332,7 +333,22 @@ class ReceiptsParserInterface extends HookConsumerWidget {
                   withReadStream: false,
                 );
                 if (result != null) {
-                  ref.read(receiptParser.notifier).parseImages(result.files);
+                  List<String> extensions = result.files
+                      .map((file) => path.extension(file.name).substring(1))
+                      .toList();
+
+                  List<String> fileNames =
+                      result.files.map((file) => file.name).toList();
+
+                  // This gives a list of Uint8List for each file
+                  List<List<int>> imageFiles =
+                      result.files.map((file) => file.bytes!).toList();
+
+                  ref.read(receiptParser.notifier).parseImages(
+                        imageFiles,
+                        fileNames: fileNames,
+                        extensions: extensions,
+                      );
                 } else {
                   // User canceled the picker
                 }

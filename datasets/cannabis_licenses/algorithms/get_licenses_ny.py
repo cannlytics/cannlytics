@@ -34,10 +34,6 @@ import pdfplumber
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/ny'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'NY'
 NEW_YORK = {
@@ -425,8 +421,12 @@ def get_licenses_ny(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/ny'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -438,6 +438,9 @@ if __name__ == '__main__':
         args = arg_parser.parse_args()
     except SystemExit:
         args = {'d': DATA_DIR, 'env_file': ENV_FILE}
+
+    # FIXME:
+    # PDFSyntaxError: No /Root object! - Is this really a PDF?
 
     # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))

@@ -32,10 +32,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/ca'
-
-
 def get_licenses_ca(
         data_dir: Optional[str] = None,
         page_size: Optional[int] = 50,
@@ -48,8 +44,13 @@ def get_licenses_ca(
     ):
     """Get California cannabis license data."""
 
+    # FIXME: This URL may be deprecated.
+
     # Define the license data API.
-    base = 'https://as-cdt-pub-vip-cannabis-ww-p-002.azurewebsites.net'
+    # https://as-dcc-pub-cann-w-p-002.azurewebsites.net/licenses/AdvancedSearch?
+    # licenseStatus=Active&pageNumber=1&pageSize=10
+    # base = 'https://as-cdt-pub-vip-cannabis-ww-p-002.azurewebsites.net'
+    base = 'https://as-dcc-pub-cann-w-p-002.azurewebsites.net'
     endpoint = '/licenses/filteredSearch'
     query = f'{base}{endpoint}'
     params = {'pageSize': page_size, 'searchQuery': search}
@@ -91,14 +92,19 @@ def get_licenses_ca(
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
         date = datetime.now().strftime('%Y-%m-%d')
+        labs = license_data.loc[license_data['license_type'] == 'Commercial -  Testing Laboratory']
+        labs.to_csv(f'{data_dir}/labs-ca-{date}.csv', index=False)
         license_data.to_csv(f'{data_dir}/licenses-ca-{date}.csv', index=False)
         license_data.to_csv(f'{data_dir}/licenses-ca-latest.csv', index=False)
     return license_data
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/ca'
 
     # Support command line usage.
     import argparse
@@ -113,4 +119,4 @@ if __name__ == '__main__':
 
     # Get California licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))
-    get_licenses_ca(data_dir)
+    data = get_licenses_ca(data_dir)

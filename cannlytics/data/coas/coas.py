@@ -92,11 +92,13 @@ from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
 from cannlytics.data.coas.algorithms.confidence import CONFIDENCE
 from cannlytics.data.coas.algorithms.confidentcannabis import CONFIDENT_CANNABIS
 from cannlytics.data.coas.algorithms.greenleaflab import GREEN_LEAF_LAB
+from cannlytics.data.coas.algorithms.green_scientific import GREEN_SCIENTIFIC_LABS
 from cannlytics.data.coas.algorithms.kaycha import KAYCHA_LABS
 from cannlytics.data.coas.algorithms.mcrlabs import MCR_LABS
 from cannlytics.data.coas.algorithms.sclabs import SC_LABS
 from cannlytics.data.coas.algorithms.sonoma import SONOMA
 from cannlytics.data.coas.algorithms.tagleaf import TAGLEAF
+from cannlytics.data.coas.algorithms.terplife import TERPLIFE_LABS
 from cannlytics.data.coas.algorithms.steephill import STEEPHILL
 from cannlytics.data.coas.algorithms.veda import VEDA_SCIENTIFIC
 
@@ -108,11 +110,13 @@ LIMS = {
     'Confidence Analytics': CONFIDENCE,
     'Confident Cannabis': CONFIDENT_CANNABIS,
     'Green Leaf Lab': GREEN_LEAF_LAB,
+    'Green Scientific Labs': GREEN_SCIENTIFIC_LABS,
     'Kaycha Labs': KAYCHA_LABS,
     'MCR Labs': MCR_LABS,
     'SC Labs': SC_LABS,
     'Sonoma Lab Works': SONOMA,
     'TagLeaf LIMS': TAGLEAF,
+    'TerpLife Labs': TERPLIFE_LABS,
     'Steep Hill': STEEPHILL,
     'Veda Scientific': VEDA_SCIENTIFIC,
 }
@@ -523,6 +527,7 @@ class CoADoc:
             doc: Any,
             lims: Optional[Any] = None,
             temp_path: Optional[str] = '/tmp',
+            deep_search: Optional[bool] = True,
         ) -> str:
         """Identify if a CoA was created by a common LIMS.
         Search all of the text of the LIMS name or URL.
@@ -534,6 +539,7 @@ class CoADoc:
                 dictionary of known LIMS.
             temp_path (str): A temporary directory to store any online PDFs
                 if needed for identification, `/tmp` by default (optional).
+            deep_search (bool): Whether or not to search the second page.
         Returns:
             (str): Returns LIMS name if found, otherwise returns `None`.
         """
@@ -597,6 +603,9 @@ class CoADoc:
         if not known:
             try:
                 qr_code_url = self.find_pdf_qr_code_url(doc)
+                # Experimental: Try to find QR codes on the second page.
+                if not qr_code_url and deep_search:
+                    qr_code_url = self.find_pdf_qr_code_url(doc, page_index=1)
             except:
                 qr_code_url = None
             if qr_code_url:
@@ -794,6 +803,7 @@ class CoADoc:
             self,
             pdf: Any,
             cleanup: Optional[bool] = True,
+            deep_search: Optional[bool] = True,
             headers: Optional[dict] = {},
             lims: Optional[Any] = None,
             max_delay: Optional[float] = 7,
@@ -809,6 +819,7 @@ class CoADoc:
             pdf (PDF): A file path to a PDF or a pdfplumber PDF.
             cleanup (bool): Whether or not to remove the files generated
                 during OCR, `True` by default (optional).
+            deep_search (bool): Whether or not to search the second page.
             headers (dict): Headers for HTTP requests (optional).
             lims (str or dict): Specific LIMS to parse CoAs (optional).
             max_delay (float): The maximum number of seconds to wait
@@ -888,6 +899,12 @@ class CoADoc:
                 url = self.find_pdf_qr_code_url(pdf_file)
         except IndexError:
             url = self.find_pdf_qr_code_url(pdf_file)
+        # Experimental: Try to find QR codes on the second page.
+        try:
+            if not url and deep_search:
+                url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
+        except:
+            pass
         if verbose:
             print(f'Found URL on PDF: {url}')
 
@@ -1713,6 +1730,10 @@ class CoADoc:
                 image = cv2.imread(filename.filename)
             except:
                 raise ValueError('`filename` must be a string or Image.')
+        
+        # Handle invalid images.
+        if image is None:
+            raise ValueError('`filename` must be a valid image.')
 
         # If the temp path has any extension, then use it as the outfile.
         if os.path.splitext(temp_path)[1] != '':

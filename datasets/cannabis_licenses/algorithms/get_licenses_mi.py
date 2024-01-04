@@ -248,6 +248,9 @@ def get_licenses_mi(
     return licenses
 
 
+# TODO: Get Michigan labs.
+
+
 # === Test ===
 # [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':

@@ -39,10 +39,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/me'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'ME'
 MAINE = {
@@ -174,17 +170,28 @@ def get_licenses_me(
     # Save and return the data.
     if data_dir is not None:
         date = datetime.now().strftime('%Y-%m-%d')
+        labs = licenses[licenses['license_type'] == 'Testing']
+        retailers = licenses[licenses['license_type'] == 'Store']
+        cultivators = licenses[licenses['license_type'] == 'Cultivation']
+        processors = licenses[licenses['license_type'] == 'Manufacturing']
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{date}.csv', index=False)
+        retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{date}.csv', index=False)
+        cultivators.to_csv(f'{data_dir}/cultivators-{STATE.lower()}-{date}.csv', index=False)
+        processors.to_csv(f'{data_dir}/processors-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{date}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
-        # TODO: Save the retailers in a stand-alone data file.
 
     # Return the licenses.
     return licenses
 
 
 # === Test ===
-# [✓] Tested: 2023-08-13 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # Specify where your data lives.
+    DATA_DIR = '../data/me'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse
@@ -196,6 +203,9 @@ if __name__ == '__main__':
         args = arg_parser.parse_args()
     except SystemExit:
         args = {'d': DATA_DIR, 'env_file': ENV_FILE}
+
+    # FIXME:
+    # MissingSchema: Invalid URL '/dafs/ocp/sites/maine.gov.dafs.ocp/files/inline-files/Adult_Use_Establishments_And_Contacts_2023_10_01.xlsx': No scheme supplied. Perhaps you meant https:///dafs/ocp/sites/maine.gov.dafs.ocp/files/inline-files/Adult_Use_Establishments_And_Contacts_2023_10_01.xlsx?
 
     # Get licenses, saving them to the specified directory.
     data_dir = args.get('d', args.get('data_dir'))

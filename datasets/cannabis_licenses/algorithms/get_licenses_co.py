@@ -34,10 +34,6 @@ import pandas as pd
 import requests
 
 
-# Specify where your data lives.
-DATA_DIR = '../data/co'
-ENV_FILE = '../../../.env'
-
 # Specify state-specific constants.
 STATE = 'CO'
 COLORADO = {
@@ -173,21 +169,24 @@ def get_licenses_co(
         business_website=None,
         business_phone=None,
     )
-    for index, row in retailers.iterrows():
-        query = row['query']
-        gis_data = queries.get(query)
-        if gis_data is None:
-            try:
-                gis_data = search_for_address(query, api_key=api_key, fields=fields)
-            except:
-                gis_data = {}
-            queries[query] = gis_data
-        retailers.iat[index, retailers.columns.get_loc('premise_street_address')] = gis_data.get('street')
-        retailers.iat[index, retailers.columns.get_loc('premise_county')] = gis_data.get('county')
-        retailers.iat[index, retailers.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
-        retailers.iat[index, retailers.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
-        retailers.iat[index, retailers.columns.get_loc('business_website')] = gis_data.get('website')
-        retailers.iat[index, retailers.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
+
+    # Geocode the licenses.
+    # FIXME: This my be expensive.
+    # for index, row in retailers.iterrows():
+    #     query = row['query']
+    #     gis_data = queries.get(query)
+    #     if gis_data is None:
+    #         try:
+    #             gis_data = search_for_address(query, api_key=api_key, fields=fields)
+    #         except:
+    #             gis_data = {}
+    #         queries[query] = gis_data
+    #     retailers.iat[index, retailers.columns.get_loc('premise_street_address')] = gis_data.get('street')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_county')] = gis_data.get('county')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_latitude')] = gis_data.get('latitude')
+    #     retailers.iat[index, retailers.columns.get_loc('premise_longitude')] = gis_data.get('longitude')
+    #     retailers.iat[index, retailers.columns.get_loc('business_website')] = gis_data.get('website')
+    #     retailers.iat[index, retailers.columns.get_loc('business_phone')] = gis_data.get('formatted_phone_number')
     
     # Clean-up after getting GIS data.
     retailers.drop(columns=['query'], inplace=True)
@@ -210,7 +209,9 @@ def get_licenses_co(
     # Save and return the data.
     if data_dir is not None:
         if not os.path.exists(data_dir): os.makedirs(data_dir)
-        timestamp = datetime.now().isoformat()[:19].replace(':', '-')
+        timestamp = datetime.now().strftime('%Y-%m-%d')
+        labs = licenses.loc[licenses['license_type'] == 'Testing Facilities']
+        labs.to_csv(f'{data_dir}/labs-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-{timestamp}.csv', index=False)
         licenses.to_csv(f'{data_dir}/licenses-{STATE.lower()}-latest.csv', index=False)
         retailers.to_csv(f'{data_dir}/retailers-{STATE.lower()}-{timestamp}.csv', index=False)
@@ -218,8 +219,12 @@ def get_licenses_co(
 
 
 # === Test ===
-# [✓] Tested: 2023-09-20 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2023-12-17 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+    
+    # Specify where your data lives.
+    DATA_DIR = '../data/co'
+    ENV_FILE = '../../../.env'
 
     # Support command line usage.
     import argparse

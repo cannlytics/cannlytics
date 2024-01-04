@@ -5,7 +5,7 @@ Copyright (c) 2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 6/5/2023
+Updated: 12/27/2023
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -39,11 +39,11 @@ Data Points:
     ✓ lab_latitude (augmented)
     ✓ lab_longitude (augmented)
     ✓ producer
-    - producer_address
-    - producer_street
-    - producer_city
-    - producer_state
-    - producer_zipcode
+    ✓ producer_address
+    ✓ producer_street
+    ✓ producer_city
+    ✓ producer_state
+    ✓ producer_zipcode
     - producer_license_number
     ✓ distributor
     - distributor_address
@@ -111,68 +111,6 @@ from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
 )
-
-
-def save_image_data(image_data, image_file='image.png'):
-    """Save image data to a file."""
-    image_bytes = base64.b64decode(image_data)
-    image_io = io.BytesIO(image_bytes)
-    image = Image.open(image_io)
-    image.save(image_file)
-
-
-def upload_image_data(storage_ref, image_file):
-    """Upload image data to Firebase Storage."""
-    firebase.initialize_firebase()
-    firebase.upload_file(storage_ref, image_file)
-
-
-def get_rows_between_values(
-        original_list,
-        start: Optional[str] = '',
-        stop: Optional[str] = '',
-    ):
-    """Get rows between two values."""
-    start_index = None
-    end_index = None
-    for index, line in enumerate(original_list):
-        if line.startswith(start) and start_index is None:
-            start_index = index + 1
-        elif line.startswith(stop) and start_index is not None:
-            end_index = index
-            break
-    if start_index is not None and end_index is not None:
-        return original_list[start_index:end_index]
-    elif start_index is not None:
-        return original_list[start_index:]
-    elif end_index is not None:
-        return original_list[:end_index]
-    else:
-        return []
-
-
-def split_elements(elements: list, split_words: List[str]):
-    """Split elements in a list by a list of words, extending the list."""
-    cells = []
-    for element in elements:
-        was_split = False
-        temp_cells = []
-        for word_index, split_word in enumerate(split_words):
-            splits = element.split(split_word)
-            if len(splits) > 1:  # if the element was split
-                was_split = True
-                for split_index, split in enumerate(splits):
-                    # if it's not the first split, add split_word back
-                    if split_index != 0:
-                        split = split_word + split
-                    temp_cells.append(split.strip())
-        if was_split:  # if the element was split by any split word
-            cells.extend(temp_cells)
-        else:
-            cells.append(element.strip())
-        # remove empty strings
-        cells = [i for i in cells if i]
-    return cells
 
 
 # It is assumed that the lab has the following details.
@@ -338,13 +276,23 @@ def parse_acs_coa(
                     values = values[0].split(n)
             obs[key] = values[0]
 
-    # TODO: Augment producer / distributor data.
-    # - producer_address
-    # - producer_street
-    # - producer_city
-    # - producer_state
-    # - producer_zipcode
-    # - producer_license_number (augment)
+    # Get client address.
+    try:
+        top_left_corner = page.within_bbox((0, 0, page.width * 0.25, page.height * 0.25))
+        top_left_lines = top_left_corner.extract_text().replace('\x00', 'fi').split('\n')
+        top_left_lines = get_rows_between_values(
+            top_left_lines,
+            start='CLIA No',
+            stop='Order #'
+        )
+        obs['retailer'] = top_left_lines[0]
+        obs['producer_street'] = top_left_lines[1]
+        obs['producer_city'] = top_left_lines[-1].split(', ')[0]
+        obs['producer_state'] = top_left_lines[-1].split(', ')[1].split(' ')[0]
+        obs['producer_zipcode'] = top_left_lines[-1].split(', ')[1].split(' ')[1]
+        obs['producer_address'] = ', '.join(top_left_lines[1:])
+    except:
+        pass
 
     # Get the analyses and statuses.
     tests = 'Potency' + page_text.split('Potency')[1].split('Product Image')[0]
@@ -402,7 +350,12 @@ def parse_acs_coa(
     crop = page.within_bbox((0, 0.4 * page.height, page.width * 0.5, page.height * 0.8))
     cells = crop.extract_text().split('\n')
     if 'Potency' in page_text:
-        stop = 'Sample Prepared By' if 'Sample Prepared By' in page_text else 'Total'
+        if 'Prep. By' in page_text:
+            stop = 'Prep. By'
+        elif 'Sample Prepared By' in page_text:
+            stop = 'Sample Prepared By'
+        else:
+            stop = 'Total'
         elements = get_rows_between_values(
             rows,
             start='Analyte',
@@ -490,7 +443,6 @@ def parse_acs_coa(
             rows = left.extract_text().split('\n') + right.extract_text().split('\n')
 
         # Get residual solvents (concentrates).
-        # FIXME: Test on recent COAs.
         if 'Residual Solvents' in page_text:
             q3 = page.within_bbox((page.width * .5, 0, page.width * .72, page.height))
             q4 = page.within_bbox((page.width * .71, 0, page.width, page.height))
@@ -825,94 +777,126 @@ def parse_acs_coa(
     return obs
 
 
+def save_image_data(image_data, image_file='image.png'):
+    """Save image data to a file."""
+    image_bytes = base64.b64decode(image_data)
+    image_io = io.BytesIO(image_bytes)
+    image = Image.open(image_io)
+    image.save(image_file)
+
+
+def upload_image_data(storage_ref, image_file):
+    """Upload image data to Firebase Storage."""
+    firebase.initialize_firebase()
+    firebase.upload_file(storage_ref, image_file)
+
+
+def get_rows_between_values(
+        original_list,
+        start: Optional[str] = '',
+        stop: Optional[str] = '',
+    ):
+    """Get all rows between rows that may `start` and `stop` with given values."""
+    start_index = None
+    end_index = None
+    for index, line in enumerate(original_list):
+        if line.startswith(start) and start_index is None:
+            start_index = index + 1
+        elif line.startswith(stop) and start_index is not None:
+            end_index = index
+            break
+    if start_index is not None and end_index is not None:
+        return original_list[start_index:end_index]
+    elif start_index is not None:
+        return original_list[start_index:]
+    elif end_index is not None:
+        return original_list[:end_index]
+    else:
+        return []
+
+
+def split_elements(elements: list, split_words: List[str]):
+    """Split elements in a list by a list of words, extending the list."""
+    cells = []
+    for element in elements:
+        was_split = False
+        temp_cells = []
+        for word_index, split_word in enumerate(split_words):
+            splits = element.split(split_word)
+            if len(splits) > 1:  # if the element was split
+                was_split = True
+                for split_index, split in enumerate(splits):
+                    # if it's not the first split, add split_word back
+                    if split_index != 0:
+                        split = split_word + split
+                    temp_cells.append(split.strip())
+        if was_split:  # if the element was split by any split word
+            cells.extend(temp_cells)
+        else:
+            cells.append(element.strip())
+        # remove empty strings
+        cells = [i for i in cells if i]
+    return cells
+
+
 # === Tests ===
+# Tested: 2023-12-27 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
+    pass
 
-    # Initialize CoADoc.
-    from cannlytics.data.coas import CoADoc
-    from time import sleep
-    parser = CoADoc()
+    # # Initialize CoADoc.
+    # from cannlytics.data.coas import CoADoc
+    # from time import sleep
+    # parser = CoADoc()
 
-    # [✓] TEST: Identify LIMS from a COA URL.
-    url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
-    lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
-    assert lims == 'ACS Labs'
-    print('Identified LIMS:', lims)
+    # # [✓] TEST: Identify LIMS from a COA URL.
+    # url = 'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFFQzc0OS0wMTA1MjMtU0dMQzEyLVIzNS0wMjIxMjAyMw=='
+    # lims = parser.identify_lims(url, lims={'ACS Labs': ACS_LABS})
+    # assert lims == 'ACS Labs'
+    # print('Identified LIMS:', lims)
 
-    # [✓] TEST: Identify LIMS from a COA PDF.
-    parser = CoADoc()
-    doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
-    lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
-    assert lims == 'ACS Labs'
-    print('Identified LIMS:', lims)
+    # # [✓] TEST: Identify LIMS from a COA PDF.
+    # parser = CoADoc()
+    # doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
+    # lims = parser.identify_lims(doc, lims={'ACS Labs': ACS_LABS})
+    # assert lims == 'ACS Labs'
+    # print('Identified LIMS:', lims)
 
-    # [✓] TEST: Parse partial COA.
-    doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Parse partial COA.
+    # doc = '../../../../tests/assets/coas/acs/AAEC749-010523-SGLC12-R35-02212023-COA_EN.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse full panel COA for a concentrate.
-    doc = '../../../../tests/assets/coas/acs/27675_0002407047.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Parse full panel COA for a concentrate.
+    # doc = '../../../../tests/assets/coas/acs/27675_0002407047.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse a full panel COA for a flower.
-    doc = '../../../../tests/assets/coas/acs/49448_0004136268.pdf'
-    data = parse_acs_coa(parser, doc)
-    assert data is not None
-    print('Parsed:', data)
+    # # [✓] TEST: Parse a full panel COA for a flower.
+    # doc = '../../../../tests/assets/coas/acs/49448_0004136268.pdf'
+    # data = parse_acs_coa(parser, doc)
+    # assert data is not None
+    # print('Parsed:', data)
 
-    # [✓] TEST: Parse partial COA from a URL.
-    urls = [
-        'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
-        'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
-    ]
-    for url in urls:
-        data = parse_acs_coa(parser, url)
-        assert data is not None
-        print('Parsed:', data)
-        sleep(3)
+    # # [✓] TEST: Parse partial COA from a URL.
+    # urls = [
+    #     'https://portal.acslabcannabis.com/qr-coa-view?salt=QUFEVjIxMC0xMDI1MjItREJGSy1SMzUtMTIxMTIwMjI=',
+    #     'https://www.trulieve.com/files/lab-results/18362_0003059411.pdf',
+    # ]
+    # for url in urls:
+    #     data = parse_acs_coa(parser, url)
+    #     assert data is not None
+    #     print('Parsed:', data)
+    #     sleep(3)
 
-    # [✓] TEST: Parse a full panel COA from a URL.
-    urls = [
-        'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
-    ]
-    for url in urls:
-        data = parse_acs_coa(parser, url)
-        assert data is not None
-        print('Parsed:', data)
-        sleep(3)
-
-"""
-# EXAMPLE: Parse a folder of ACS labs COAs.
-
-from datetime import datetime
-import os
-import pandas as pd
-from cannlytics.data.coas import CoADoc
-
-# Initialize CoADoc.
-parser = CoADoc()
-
-# Specify where your ACS Labs COAs live.
-all_data = []
-data_dir = 'D://data/florida/lab_results/.datasets/pdfs/acs'
-coa_pdfs = os.listdir(data_dir)
-for coa_pdf in coa_pdfs:
-    filename = os.path.join(data_dir, coa_pdf)
-    try:
-        data = parser.parse(filename)
-        all_data.extend(data)
-        print('Parsed:', filename)
-    except:
-        print('Failed to parse:', filename)
-
-# Save the data.
-date = datetime.now().isoformat()[:19].replace(':', '-')
-outfile = f'D://data/florida/lab_results/.datasets/acs-lab-results-{date}.xlsx'
-df = pd.DataFrame(all_data)
-df.replace(r'\\u0000', '', regex=True, inplace=True)
-parser.save(df, outfile)
-"""
+    # # [✓] TEST: Parse a full panel COA from a URL.
+    # urls = [
+    #     'https://www.trulieve.com/files/lab-results/27675_0002407047.pdf',
+    # ]
+    # for url in urls:
+    #     data = parse_acs_coa(parser, url)
+    #     assert data is not None
+    #     print('Parsed:', data)
+    #     sleep(3)
