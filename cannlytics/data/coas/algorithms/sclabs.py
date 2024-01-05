@@ -562,6 +562,7 @@ def parse_sc_labs_url(
     obs['analyses'] = analyses
     obs['coa_algorithm_version'] = __version__
     obs['coa_parsed_at'] = datetime.now().isoformat()
+    # FIXME: The `lab_results_url` is nan.
     obs['lab_results_url'] = url
     obs['notes'] = notes
     obs['results'] = results

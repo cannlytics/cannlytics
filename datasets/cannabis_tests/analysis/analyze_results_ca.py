@@ -97,6 +97,7 @@ CA_LAB_RESULTS = {
     'SC Labs':{
         'datafiles': [
             'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
+            'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
         ],
     },
 }
@@ -111,6 +112,9 @@ for source in CA_LAB_RESULTS:
 
 # Aggregate results.
 results = pd.concat(all_results)
+results.drop_duplicates(subset=['coa_id'], inplace=True)
+print('Number of results:', len(results))
+# results.to_excel('data/ca-lab-results-sclabs-2023-12-31.xlsx')
 
 
 # === Look at the Emerald Cup results ===
@@ -123,6 +127,13 @@ emerald_2020['year'] = 2020
 emerald = pd.concat([emerald_2023, emerald_2022, emerald_2020])
 
 # TODO: Merge with ranking data.
+winners_2022 = pd.read_excel('data/emerald-cup-winners-2022.xlsx')
+winners_2023 = pd.read_excel('data/emerald-cup-winners-2023.xlsx')
+
+winners_2022['product_name'] = winners_2022['entry_name'].apply(
+    lambda x: x.split(' – ')[-1]
+)
+
 
 cannabinoids = [
     'thca',
@@ -193,15 +204,29 @@ for a in cannabinoids + terpenes:
 
 
 # TODO: See which strain has the highest terpenes.
+# 2022:
+# Highest Terpene Content – Flower	Woodwide Farms – Mendo Crumble
+# Highest Terpene Content – Solventless	Have Hash – Rainbow Belts
+# Highest Terpene Content – Solvent (Hydrocarbon)	Errl Hill – Gazberries
+
 
 
 # TODO: See which strain has the most diverse terpene profile.
+# 2022: Most Unique Terpene Profile	Atrium Cultivation – Juice Z
 
 
 # TODO: See which strain has the most diverse cannabinoid profile.
+# 2022: Most Unique Cannabinoid Profile	Emerald Spirit Botanicals – Pink Boost Goddess
+
 
 
 # TODO: Build an ordered probit model to back-cast 2020 winners.
+
+
+# Most Innovative Product – Consumable	Compound Genetics x Node Labs x The Original Resinator x Industry Processing Solutions – Perzimmon #2 Flower
+
+
+# TODO: Is there any interesting analysis that can be done with the images?
 
 
 

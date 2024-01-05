@@ -90,9 +90,9 @@ def get_sc_labs_results_by_month(
 prefixes = [
     # 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'O',
     # 'J', 'K', 'L', 'M', 'N', 'P',
-    # 'Q', 'R', 'S', 'T',
-    'U',
-    # 'V', 'W', 'X', 'Y', 'Z',
+    # 'Q', 'R', 'S', 'T', 'U',
+    # 'V', 'X', 'Y', 'Z',
+     'W',
     ]
 docs = []
 for y in reversed(range(2019, 2025)):
@@ -103,10 +103,10 @@ for y in reversed(range(2019, 2025)):
         #     continue
         if y == 2024 and m > 1:
             continue
-        if y == 2024:
-            days = 3
-        else:
-            days = 31
+        # if y == 2024:
+        #     days = 5
+        # else:
+        #     days = 31
 
         for prefix in prefixes:
             print(f'=== {y}-{m:02d} ({prefix}) ===')
@@ -114,7 +114,7 @@ for y in reversed(range(2019, 2025)):
                 prefix=prefix,
                 year=y,
                 month=m,
-                days=days,
+                # days=days,
                 pause=1.0,
             )
             docs.extend(results)
