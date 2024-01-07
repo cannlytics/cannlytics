@@ -48,7 +48,10 @@ def get_sc_labs_results_by_month(
     docs = []
     # TODO: Allow for starting at the end of the month and going backwards.
     start_date = datetime(year, month, 1)
-    end_date = (start_date + timedelta(days=days)).replace(day=1)
+    end_date = (start_date + timedelta(days=days))
+    # .replace(day=1)
+    print('Start date:', start_date)
+    print('End date:', end_date)
     while start_date < end_date:
 
         # Iterate through all possible sample IDs for the day.
@@ -99,25 +102,17 @@ def get_sc_labs_results_by_month(
 # Get all valid URLS, iterating over prefixes, years, and months.
 prefixes = [
     # Used prefixes
-    # 'J', 'K', 'L', 'M', 'N', 'P',
-    # 'Q', 'R', 'S', 'T', 'U',
-    # 'W', 'V', 'X', 'Y',
+    'J', 'K', 'L', 'M', 'N', 'P',
+    'Q', 'R', 'S', 'T', 'U',
+    'W', 'V', 'X', 'Y',
+    'H', 'Z',
     # Unknown if used
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'O', 'Z',
+    # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 docs = []
-for y in reversed(range(2019, 2024)):
-    for m in reversed(range(1, 13)):
-
-        # DEV: Restrict to desired timeframe.
-        # if y == 2023 and m < 12:
-        #     continue
-        if y == 2024 and m > 1:
-            continue
-        # if y == 2024:
-        #     days = 5
-        # else:
-        #     days = 31
+days = 7
+for y in reversed(range(2024, 2025)):
+    for m in reversed(range(1, 2)):
 
         for prefix in prefixes:
             print(f'=== {y}-{m:02d} ({prefix}) ===')
@@ -125,7 +120,8 @@ for y in reversed(range(2019, 2024)):
                 prefix=prefix,
                 year=y,
                 month=m,
-                # days=days,
+                # FIXME: Figure out how to specify the number of days.
+                days=days,
                 pause=3.3,
             )
             docs.extend(results)
@@ -137,50 +133,52 @@ outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-urls-{timestamp}.xlsx')
 pd.DataFrame(docs, columns=['url']).to_excel(outfile, index=False)
 print(f'Saved URLS: {outfile}')
 
-# Optional: Read the list of URLs.
-urls = []
-url_files = [
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-23-11-42-37.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-00-52-02.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-15-39-06.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-29-07-53-39.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-30-21-15-44.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-02-20-22-30.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-03-03-40-42.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-04-17-48-13.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-04-18-09-29.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-00-57-43.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-07-23-55.xlsx",
-    "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-15-43-00.xlsx",
-]
-for url_file in url_files:
-    url_data = pd.read_excel(url_file)
-    urls.append(url_data)
-urls = pd.concat(urls)
-urls.drop_duplicates(subset=['url'], inplace=True)
-docs = urls['url'].tolist()
-docs.reverse()
+# # Optional: Read the list of URLs.
+# urls = []
+# url_files = [
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-23-11-42-37.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-00-52-02.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-24-15-39-06.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-29-07-53-39.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2023-12-30-21-15-44.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-02-20-22-30.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-03-03-40-42.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-04-17-48-13.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-04-18-09-29.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-00-57-43.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-07-23-55.xlsx",
+#     "D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-urls-2024-01-05-15-43-00.xlsx",
+# ]
+# for url_file in url_files:
+#     url_data = pd.read_excel(url_file)
+#     urls.append(url_data)
+# urls = pd.concat(urls)
+# urls.drop_duplicates(subset=['url'], inplace=True)
+# docs = urls['url'].tolist()
+# docs.reverse()
 
-# Read all parsed COA datafiles.
-datafiles = [
-    'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
-    'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
-    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
-]
-all_results = []
-for datafile in datafiles:
-    data = pd.read_excel(datafile)
-    all_results.append(data)
-results = pd.concat(all_results)
-results.drop_duplicates(subset=['coa_id'], inplace=True)
-results['lab_result_url'] = results['coa_id'].astype(str).apply(
-    lambda x: urljoin(BASE_URL, x.split('-')[0].strip() + '/')
-)
-print('Number of results:', len(results))
+# # Read all parsed COA datafiles.
+# datafiles = [
+#     'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
+#     'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
+#     r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
+#     r"D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
+#     r'D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx',
+# ]
+# all_results = []
+# for datafile in datafiles:
+#     data = pd.read_excel(datafile)
+#     all_results.append(data)
+# results = pd.concat(all_results)
+# results.drop_duplicates(subset=['coa_id'], inplace=True)
+# results['lab_result_url'] = results['coa_id'].astype(str).apply(
+#     lambda x: urljoin(BASE_URL, x.split('-')[0].strip() + '/')
+# )
+# print('Number of results:', len(results))
 
-# Determine un-parsed COAs (all docs not in results['lab_result_url'] column).
-docs = list(set(docs) - set(results['lab_result_url'].tolist()))
-print('Number of un-parsed COAs:', len(docs))
+# # Determine un-parsed COAs (all docs not in results['lab_result_url'] column).
+# docs = list(set(docs) - set(results['lab_result_url'].tolist()))
+# print('Number of un-parsed COAs:', len(docs))
 
 # Parse each COA.
 all_data = []

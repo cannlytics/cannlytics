@@ -88,7 +88,8 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
-            # './data/ca-results-flower-company-2023-12-13.xlsx',
+            r'D:/data/california/lab_results/datasets/flower-company\ca-results-flower-company-2024-01-06.xlsx',
+
         ],
     },
     'Glass House Farms': {
@@ -98,6 +99,7 @@ CA_LAB_RESULTS = {
         'datafiles': [
             'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
             'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
+            'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx',
         ],
     },
 }
