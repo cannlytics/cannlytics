@@ -88,8 +88,21 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
-            r'D:/data/california/lab_results/datasets/flower-company\ca-results-flower-company-2024-01-06.xlsx',
-
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
         ],
     },
     'Glass House Farms': {
@@ -97,9 +110,9 @@ CA_LAB_RESULTS = {
     },
     'SC Labs':{
         'datafiles': [
-            'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
-            'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
-            'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx',
+            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
+            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
+            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx',
         ],
     },
 }
@@ -114,9 +127,9 @@ for source in CA_LAB_RESULTS:
 
 # Aggregate results.
 results = pd.concat(all_results)
-results.drop_duplicates(subset=['coa_id'], inplace=True)
+results.drop_duplicates(subset=['sample_id'], inplace=True)
 print('Number of results:', len(results))
-# results.to_excel('data/ca-lab-results-sclabs-2023-12-31.xlsx')
+# results.to_excel(r"D:\data\california\lab_results\datasets\flower-company\aggregated-ca-results-flower-company-2024-01-07.xlsx", index=False)
 
 
 # === Look at the Emerald Cup results ===
