@@ -110,7 +110,7 @@ prefixes = [
     # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 docs = []
-days = 7
+days = 9
 for y in reversed(range(2024, 2025)):
     for m in reversed(range(1, 2)):
 
@@ -157,24 +157,25 @@ print(f'Saved URLS: {outfile}')
 # docs = urls['url'].tolist()
 # docs.reverse()
 
-# # Read all parsed COA datafiles.
-# datafiles = [
-#     'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
-#     'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
-#     r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
-#     r"D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
-#     r'D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx',
-# ]
-# all_results = []
-# for datafile in datafiles:
-#     data = pd.read_excel(datafile)
-#     all_results.append(data)
-# results = pd.concat(all_results)
-# results.drop_duplicates(subset=['coa_id'], inplace=True)
-# results['lab_result_url'] = results['coa_id'].astype(str).apply(
-#     lambda x: urljoin(BASE_URL, x.split('-')[0].strip() + '/')
-# )
-# print('Number of results:', len(results))
+# Read all parsed COA datafiles.
+datafiles = [
+    'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
+    'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
+    r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
+    r"D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
+    r'D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx',
+    r'D:/data/california/lab_results/datasets/sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx',
+]
+all_results = []
+for datafile in datafiles:
+    data = pd.read_excel(datafile)
+    all_results.append(data)
+results = pd.concat(all_results)
+results.drop_duplicates(subset=['coa_id'], inplace=True)
+results['lab_result_url'] = results['coa_id'].astype(str).apply(
+    lambda x: urljoin(BASE_URL, x.split('-')[0].strip() + '/')
+)
+print('Number of results:', len(results))
 
 # # Determine un-parsed COAs (all docs not in results['lab_result_url'] column).
 # docs = list(set(docs) - set(results['lab_result_url'].tolist()))
