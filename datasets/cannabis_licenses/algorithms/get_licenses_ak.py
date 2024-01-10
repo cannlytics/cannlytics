@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/29/2022
-Updated: 8/17/2023
+Updated: 1/9/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -244,19 +244,20 @@ def get_licenses_ak(
         lambda x: x.split(', ')[2].replace(STATE, '').strip()
     )
 
+    # FIXME: This my be expensive.
     # Search for address for each retail license.
-    if google_maps_api_key:
-        fields = [
-            'formatted_address',
-            'formatted_phone_number',
-            'geometry/location/lat',
-            'geometry/location/lng',
-            'website',
-        ]
-        licenses = search_for_license_addresses(licenses, google_maps_api_key, fields)
+    # if google_maps_api_key:
+    #     fields = [
+    #         'formatted_address',
+    #         'formatted_phone_number',
+    #         'geometry/location/lat',
+    #         'geometry/location/lng',
+    #         'website',
+    #     ]
+    #     licenses = search_for_license_addresses(licenses, google_maps_api_key, fields)
 
-        # Clean-up after adding GIS data.
-        licenses.drop(columns=['address'], inplace=True)
+    #     # Clean-up after adding GIS data.
+    #     licenses.drop(columns=['address'], inplace=True)
 
     # Optional: Search for business website for email and a photo.
     licenses['business_email'] = None

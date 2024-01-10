@@ -37,6 +37,7 @@ Resources:
 from datetime import datetime
 import os
 import random
+import string
 import tempfile
 from time import sleep
 from typing import Optional
@@ -761,8 +762,8 @@ if __name__ == '__main__':
     queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
     # Download TerpLife Labs COAs by alphabetic combinations.
-    # specific_letters = [x for x in string.ascii_lowercase]
-    # queries = [a + b for a in specific_letters for b in string.ascii_lowercase]
+    specific_letters = [x for x in string.ascii_lowercase]
+    queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
     # queries.reverse()
 
     DATA_DIR = 'D://data/florida/lab_results'
