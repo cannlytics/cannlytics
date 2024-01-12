@@ -339,6 +339,8 @@ if __name__ == '__main__':
             product_type = types[0].text.strip()
         if len(types) >= 2:
             product_subtype = types[1].text.strip()
+        else:
+            product_subtype = None
         product_description = driver.find_element(By.CSS_SELECTOR, '.product-view-description').text.strip()
 
         # Skip accessories.
