@@ -96,6 +96,7 @@ urlpatterns = [
     path('videos', videos.VideosView.as_view(), name='videos'),
     path('videos/<video_id>', videos.VideosView.as_view(), name='video'),
     path('meetup', main.meetup, name='meetup'),
+    # TODO: Add donation redirect!
     path('community', RedirectView.as_view(url='/testing', permanent=False)),
     path('effects', RedirectView.as_view(url='/stats/effects', permanent=False)),
     path('labs', RedirectView.as_view(url='/testing/labs', permanent=False)),
