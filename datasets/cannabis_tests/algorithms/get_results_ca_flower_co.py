@@ -221,6 +221,9 @@ if __name__ == '__main__':
     PDF_DIR = 'D:/data/california/lab_results/pdfs/flower-company'
     DATA_DIR = 'D:/data/california/lab_results/datasets/flower-company'
 
+    # TODO: Turn the following into a re-usable function.
+    # TODO: Implement logging.
+
     # Initialize the driver.
     driver = initialize_driver(headless=False)
 

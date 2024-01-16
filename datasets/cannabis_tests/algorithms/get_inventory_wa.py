@@ -1,12 +1,12 @@
 """
 Curate CCRS Inventory
-Copyright (c) 2022-2023 Cannabis Data
+Copyright (c) 2023-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 8/29/2023
+Updated: 1/15/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -276,7 +276,11 @@ def merge_strains(items, strain_files):
     return items
 
 
-def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
+def curate_ccrs_inventory(
+        manager: CCRS,
+        data_dir: str,
+        stats_dir: str
+    ):
     """Curate CCRS inventory by merging additional datasets."""
     manager.create_log('Curating inventory...')
     start = datetime.now()
@@ -285,7 +289,8 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
     unzip_datafiles(data_dir)
 
     # Create stats directory if it doesn't already exist.
-    inventory_dir = os.path.join(stats_dir, 'inventory')
+    release = os.path.basename(data_dir)
+    inventory_dir = os.path.join(stats_dir, 'inventory-' + release)
     if not os.path.exists(inventory_dir): os.makedirs(inventory_dir)
 
     # Read licensees data.
@@ -354,14 +359,17 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
     # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
     try:
         manager.create_log('Merging lab results...')
-        inventory_dir = os.path.join(stats_dir, 'inventory')
         inventory_files = sorted_nicely(os.listdir(inventory_dir))
         lab_results_dir = os.path.join(stats_dir, 'lab_results')
-        results_file = os.path.join(lab_results_dir, 'lab_results_0.xlsx')
+
+        # Match with aggregate lab results.
+        results_file = os.path.join(lab_results_dir, 'wa-lab-results-aggregate.xlsx')
         matched = merge_lab_results(manager, results_file, inventory_dir)
         matched.rename(columns=lambda x: camel_to_snake(x), inplace=True)
-        save_dataset(matched, lab_results_dir, 'inventory_lab_results')
-        manager.create_log('Merged inventory items with curated lab results.')
+
+        # Save the matched inventory lab results.
+        outfile = save_dataset(matched, lab_results_dir, 'wa-inventory-lab-results-' + release)
+        manager.create_log('Saved inventory lab results: ' + str(outfile))
     except:
         manager.create_log('Failed to merge lab results. Curate lab results first.')
 
@@ -427,9 +435,22 @@ def curate_ccrs_inventory(manager: CCRS, data_dir: str, stats_dir: str):
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # Specify where your data lives.
+    # Initialize.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (9-5-23)/CCRS PRR (9-5-23)/'
-    stats_dir = f'../data/wa'
+    stats_dir = 'D://data/washington/stats'
     manager = CCRS()
-    curate_ccrs_inventory(manager, data_dir, stats_dir)
+
+    # Curate the inventory for each release.
+    releases = [
+        # 'CCRS PRR (4-4-23)',
+        # 'CCRS PRR (5-7-23)',
+        # 'CCRS PRR (6-6-23)',
+        # 'CCRS PRR (8-4-23)',
+        # 'CCRS PRR (9-5-23)',
+        # 'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+    ]
+    for release in releases:
+        data_dir = os.path.join(base, release, release)
+        curate_ccrs_inventory(manager, data_dir, stats_dir)
+        manager.create_log('✓ Finished curating inventory for ' + release)

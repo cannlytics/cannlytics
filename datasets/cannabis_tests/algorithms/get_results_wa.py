@@ -1,12 +1,12 @@
 """
 Curate CCRS Lab Results
-Copyright (c) 2022-2023 Cannabis Data
+Copyright (c) 2023-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 8/29/2023
+Updated: 1/15/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
@@ -162,8 +162,8 @@ def augment_lab_results(
         del test_names, known_analytes, missing
         gc.collect()
     except:
-        manager.create_log('Unidentified analytes: ' + str(len(missing)))
-        raise ValueError('Unidentified analytes. Standardize with `CCRS_ANALYTES`.')
+        manager.create_log('Unidentified analytes: ' + ', '.join(missing))
+        raise ValueError(f'Unidentified analytes. Add missing analytes to `CCRS_ANALYTES`: {", ".join(missing)}')
 
     # Augment lab results with standard analyses and analyte keys.
     analyte_data = results[analysis_name].map(CCRS_ANALYTES).values.tolist()
@@ -213,12 +213,18 @@ def curate_ccrs_lab_results(
     }
     lab_results.rename(columns=columns, inplace=True)
 
+    # Anonymize the data.
+    lab_results = anonymize(lab_results)
+
+    # Standardize the column names.
+    lab_results.rename(columns=lambda x: camel_to_snake(x), inplace=True)
+
     # Save the curated lab results.
     # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
+    timestamp = lab_results['created_date'].max().strftime('%Y-%m-%d')
     lab_results_dir = os.path.join(stats_dir, 'lab_results')
-    lab_results = anonymize(lab_results)
-    lab_results.rename(columns=lambda x: camel_to_snake(x), inplace=True)
-    save_dataset(lab_results, lab_results_dir, 'lab_results')
+    outfile = save_dataset(lab_results, lab_results_dir, f'wa-lab-results-{timestamp}')
+    manager.create_log('Saved lab results: ' + str(outfile))
 
     # Finish curating lab results.
     end = datetime.now()
@@ -227,13 +233,51 @@ def curate_ccrs_lab_results(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-29 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-01-15 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # Specify where your data lives.
+    # Debug variables.
+    item_key = 'InventoryId'
+    analysis_name = 'TestName'
+    analysis_key = 'TestValue'
+    value_key = 'TestValue'
+    verbose = True
+    drop = []
+
+    # Initialize.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (9-5-23)/CCRS PRR (9-5-23)/'
-    stats_dir = f'../data/wa'
+    stats_dir = 'D://data/washington/stats'
     manager = CCRS()
-    lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
-    manager.create_log('Curated %i WA lab results.' % len(lab_results))
+
+    # Curate lab results for each release.
+    releases = [
+        'CCRS PRR (4-4-23)',
+        'CCRS PRR (5-7-23)',
+        'CCRS PRR (6-6-23)',
+        'CCRS PRR (8-4-23)',
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+    ]
+    for release in releases:
+        data_dir = os.path.join(base, release, release)
+        lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
+        manager.create_log('Curated %i WA lab results.' % len(lab_results))
+
+    # Aggregate lab results.
+    all_results = []
+    datafiles = os.listdir(os.path.join(stats_dir, 'lab_results'))
+    datafiles = [os.path.join(stats_dir, 'lab_results', x) for x in datafiles if \
+                  not x.startswith('~') and \
+                  not 'aggregate' in x and \
+                  not 'inventory' in x]
+    for datafile in datafiles:
+        data = pd.read_excel(datafile)
+        all_results.append(data)
+    results = pd.concat(all_results)
+    results.drop_duplicates(subset=['lab_result_id', 'updated_date'], inplace=True)
+    results.sort_values(by=['created_date'], inplace=True)
+    print('Number of results:', len(results))
+    outfile = os.path.join(stats_dir, 'lab_results', 'wa-lab-results-aggregate.xlsx')
+    results.to_excel(outfile, index=False)
+    manager.log('Saved aggregate lab results to: ' + outfile)

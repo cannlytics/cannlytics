@@ -5,7 +5,7 @@ Copyright (c) 2023-2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/30/2023
-Updated: 1/5/2024
+Updated: 1/15/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -31,11 +31,13 @@ BASE_URL = 'https://client.sclabs.com/verify/'
 def get_sc_labs_results_by_month(
         year: int,
         month: int,
+        start_day: int = 1,
         days: int = 31,
         max_samples: int = 199,
         prefix: Optional[str] = 'P',
         pause: float = 3.33,
         verbose: bool = True,
+        reverse: bool = False,
     ) -> list:
     """Get SC Labs results for a given month and year.
     Args:
@@ -46,10 +48,11 @@ def get_sc_labs_results_by_month(
         docs (list): A list of URLs to the COAs.
     """
     docs = []
-    # TODO: Allow for starting at the end of the month and going backwards.
-    start_date = datetime(year, month, 1)
-    end_date = (start_date + timedelta(days=days))
-    # .replace(day=1)
+    start_date = datetime(year, month, start_day)
+    if reverse:
+        end_date = (start_date - timedelta(days=days))
+    else:
+        end_date = (start_date + timedelta(days=days))
     print('Start date:', start_date)
     print('End date:', end_date)
     while start_date < end_date:
@@ -99,7 +102,7 @@ def get_sc_labs_results_by_month(
     return docs
 
 
-# Get all valid URLS, iterating over prefixes, years, and months.
+# Define parameters for data collection.
 prefixes = [
     # Used prefixes
     'J', 'K', 'L', 'M', 'N', 'P',
@@ -109,20 +112,27 @@ prefixes = [
     # Unknown if used
     # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
-docs = []
-days = 12
-for y in reversed(range(2024, 2025)):
-    for m in reversed(range(1, 2)):
+start_day = 10
+days = 7
+start_year = 2024
+end_year = 2024
+start_month = 1
+end_month = 2
+pause = 3.33
 
+# Get all valid URLS, iterating over prefixes, years, and months.
+docs = []
+for y in reversed(range(start_year, end_year + 1)):
+    for m in reversed(range(start_month, end_month)):
         for prefix in prefixes:
-            print(f'=== {y}-{m:02d} ({prefix}) ===')
+            print(f'=== Querying {y}-{m:02d} ({prefix}) ===')
             results = get_sc_labs_results_by_month(
                 prefix=prefix,
                 year=y,
                 month=m,
-                # FIXME: Figure out how to specify the number of days.
                 days=days,
-                pause=1,
+                start_day=start_day,
+                pause=pause,
             )
             docs.extend(results)
 
@@ -132,6 +142,9 @@ timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
 outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-urls-{timestamp}.xlsx')
 pd.DataFrame(docs, columns=['url']).to_excel(outfile, index=False)
 print(f'Saved URLS: {outfile}')
+
+
+# TODO: Implement functions for aggregation.
 
 # # Optional: Read the list of URLs.
 # urls = []
@@ -201,6 +214,5 @@ for doc in docs:
 DATA_DIR = 'D:/data/california/lab_results/datasets/sclabs'
 timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
 outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-{timestamp}.xlsx')
-# parser.save(pd.DataFrame(all_data), outfile)
 pd.DataFrame(all_data).to_excel(outfile, index=False)
 print(f'Saved {len(all_data)} results: {outfile}')
