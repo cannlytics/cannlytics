@@ -251,13 +251,14 @@ if __name__ == '__main__':
 
     # Curate lab results for each release.
     releases = [
-        'CCRS PRR (4-4-23)',
-        'CCRS PRR (5-7-23)',
-        'CCRS PRR (6-6-23)',
-        'CCRS PRR (8-4-23)',
-        'CCRS PRR (9-5-23)',
-        'CCRS PRR (11-2-23)',
-        'CCRS PRR (12-2-23)',
+        # 'CCRS PRR (4-4-23)',
+        # 'CCRS PRR (5-7-23)',
+        # 'CCRS PRR (6-6-23)',
+        # 'CCRS PRR (8-4-23)',
+        # 'CCRS PRR (9-5-23)',
+        # 'CCRS PRR (11-2-23)',
+        # 'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
     ]
     for release in releases:
         data_dir = os.path.join(base, release, release)
@@ -280,4 +281,4 @@ if __name__ == '__main__':
     print('Number of results:', len(results))
     outfile = os.path.join(stats_dir, 'lab_results', 'wa-lab-results-aggregate.xlsx')
     results.to_excel(outfile, index=False)
-    manager.log('Saved aggregate lab results to: ' + outfile)
+    manager.create_log('Saved aggregate lab results to: ' + outfile)

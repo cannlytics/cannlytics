@@ -120,18 +120,22 @@ def read_products(
 
 def merge_areas(items, area_files):
     """Merge areas with inventory items using `AreaId`."""
-    return merge_datasets(
-        items,
-        area_files,
-        dataset='areas',
-        on='AreaId',
-        target='AreaId',
-        how='left',
-        validate='m:1',
-        rename={'Name': 'area_name'},
-        drop=['LicenseeId', 'IsQuarantine', 'ExternalIdentifier',
-        'IsDeleted', 'CreatedBy', 'CreatedDate', 'UpdatedBy', 'UpdatedDate']
-    )
+    # FIXME: The new areas file needs text-to-columns applied in Excel.
+    try:
+        return merge_datasets(
+            items,
+            area_files,
+            dataset='areas',
+            on='AreaId',
+            target='AreaId',
+            how='left',
+            validate='m:1',
+            rename={'Name': 'area_name'},
+            drop=['LicenseeId', 'IsQuarantine', 'ExternalIdentifier',
+            'IsDeleted', 'CreatedBy', 'CreatedDate', 'UpdatedBy', 'UpdatedDate']
+        )
+    except:
+        raise ValueError('The new areas file needs text-to-columns applied in Excel.')
 
 
 def merge_licensees(items, licensees):
@@ -148,12 +152,14 @@ def merge_licensees(items, licensees):
 def merge_lab_results(
         manager: CCRS,
         results_file: str,
-        directory: str,
+        root_directory: str,
         on: Optional[str] = 'inventory_id',
         target: Optional[str] = 'lab_result_id',
         verbose: Optional[bool] = True,
     ) -> pd.DataFrame:
     """Merge lab results with items in a given directory."""
+
+    # FIXME: This does not appear to be matching very many lab results.
 
     # Read the standardized lab results.
     lab_results = pd.read_excel(results_file)
@@ -162,44 +168,53 @@ def merge_lab_results(
         'lab_result_id': target,
     }, inplace=True)
     lab_results[on] = lab_results[on].astype(str)
+    lab_results.drop_duplicates(subset=target, inplace=True)
 
     # Get inventory item fields.
     fields = CURATED_CCRS_DATASETS['inventory']['fields']
     parse_dates = CURATED_CCRS_DATASETS['inventory']['date_fields']
     use_cols = list(fields.keys()) + parse_dates
 
-    # Iterate over all datafiles in the directory.
+    # Iterate over all inventory datafiles in the directory.
     matched = pd.DataFrame()
-    datafiles = sorted_nicely(os.listdir(directory))
-    for datafile in datafiles:
-        if datafile.startswith('~$') or not datafile.endswith('.xlsx'):
-            continue
+    # datafiles = sorted_nicely(os.listdir(directory))
+    # FIXME: Walk this directory.
+    # root_directory = r"D:\data\washington\stats"
+    for directory, _, files in os.walk(root_directory):
+        for datafile in files:
+            if 'inventory' in datafile.lower() and datafile.endswith('.xlsx'):
+                if datafile.startswith('~$'):
+                    continue
 
-        # Read the standardized inventory.
-        filename = os.path.join(directory, datafile)
-        data = pd.read_excel(
-            filename,
-            dtype=fields,
-            parse_dates=parse_dates,
-            usecols=use_cols,
-        )
-        data[on] = data[on].astype(str)
-        
-        # Merge the lab results with the datafile.
-        match = rmerge(
-            data,
-            lab_results,
-            on=on,
-            how='left',
-            validate='m:1',
-        )
+                # Construct the full file path
+                filename = os.path.join(directory, datafile)
 
-        # Record rows with matching lab results.
-        match = match.loc[~match[target].isna()]
-        matched = pd.concat([matched, match], ignore_index=True)
-        if verbose:
-            manager.create_log('Matched ' + str(len(matched)) + ' lab results...')
-    
+                # Read the standardized inventory.
+                data = pd.read_excel(
+                    filename,
+                    dtype=fields,
+                    parse_dates=parse_dates,
+                    usecols=use_cols,
+                )
+                data[on] = data[on].astype(str)
+                data.drop_duplicates(subset=on, inplace=True)
+                
+                # Merge the lab results with the datafile.
+                match = rmerge(
+                    data,
+                    lab_results,
+                    on=on,
+                    how='left',
+                    validate='m:1',
+                )
+
+                # Record rows with matching lab results.
+                if len(match):
+                    match = match.loc[~match[target].isna()]
+                    matched = pd.concat([matched, match], ignore_index=True)
+                    if verbose:
+                        manager.create_log('Matched ' + str(len(matched)) + ' lab results...')
+
     # Return the matched lab results.
     return matched
 
@@ -355,23 +370,25 @@ def curate_ccrs_inventory(
         # Perform garbage cleaning.
         gc.collect()
 
+    # FIXME:
     # Merge and save inventory data with curated lab result data.
     # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
     try:
         manager.create_log('Merging lab results...')
-        inventory_files = sorted_nicely(os.listdir(inventory_dir))
-        lab_results_dir = os.path.join(stats_dir, 'lab_results')
+        # inventory_files = sorted_nicely(os.listdir(inventory_dir))
 
         # Match with aggregate lab results.
+        lab_results_dir = os.path.join(stats_dir, 'lab_results')
         results_file = os.path.join(lab_results_dir, 'wa-lab-results-aggregate.xlsx')
-        matched = merge_lab_results(manager, results_file, inventory_dir)
+        matched = merge_lab_results(manager, results_file, stats_dir)
         matched.rename(columns=lambda x: camel_to_snake(x), inplace=True)
 
         # Save the matched inventory lab results.
         outfile = save_dataset(matched, lab_results_dir, 'wa-inventory-lab-results-' + release)
         manager.create_log('Saved inventory lab results: ' + str(outfile))
-    except:
+    except Exception as e:
         manager.create_log('Failed to merge lab results. Curate lab results first.')
+        manager.create_log(str(e))
 
     # FIXME: Attach lab results to products.
     # matched = pd.DataFrame()
@@ -446,9 +463,10 @@ if __name__ == '__main__':
         # 'CCRS PRR (5-7-23)',
         # 'CCRS PRR (6-6-23)',
         'CCRS PRR (8-4-23)',
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
     ]
     for release in releases:
         data_dir = os.path.join(base, release, release)
