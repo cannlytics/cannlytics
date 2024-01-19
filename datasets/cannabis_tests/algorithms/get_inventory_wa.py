@@ -169,6 +169,7 @@ def merge_lab_results(
     }, inplace=True)
     lab_results[on] = lab_results[on].astype(str)
     lab_results.drop_duplicates(subset=target, inplace=True)
+    lab_results.drop_duplicates(subset=on, inplace=True)
 
     # Get inventory item fields.
     fields = CURATED_CCRS_DATASETS['inventory']['fields']
@@ -214,6 +215,9 @@ def merge_lab_results(
                     matched = pd.concat([matched, match], ignore_index=True)
                     if verbose:
                         manager.create_log('Matched ' + str(len(matched)) + ' lab results...')
+
+                # Perform garbage cleaning.
+                gc.collect()
 
     # Return the matched lab results.
     return matched
