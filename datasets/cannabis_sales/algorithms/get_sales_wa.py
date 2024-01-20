@@ -37,10 +37,6 @@ from cannlytics.utils import rmerge, sorted_nicely
 import pandas as pd
 
 
-# TODO: Integrate Google Cloud Storage.
-# Please see pricing: https://cloud.google.com/storage/pricing
-
-
 def aggregate_monthly_sales(
         data_dir: str,
         start: Optional[datetime] = None,
@@ -212,6 +208,7 @@ def curate_ccrs_sales(
         first_file: Optional[int] = 0,
         last_file: Optional[int] = None,
         manager: Optional[CCRS] = None,
+        release: Optional[str] = '',
     ):
     """Curate CCRS sales by merging additional datasets."""
 
@@ -226,8 +223,8 @@ def curate_ccrs_sales(
 
     # Create stats directory if it doesn't already exist.
     licensees_dir = os.path.join(stats_dir, 'licensee_stats')
-    sales_stats_dir = os.path.join(stats_dir, 'sales_stats')
-    sales_dir = os.path.join(stats_dir, 'sales')
+    sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
+    sales_dir = os.path.join(stats_dir, f'sales-{release}')
     if not os.path.exists(licensees_dir): os.makedirs(licensees_dir)
     if not os.path.exists(sales_dir): os.makedirs(sales_dir)
     if not os.path.exists(sales_stats_dir): os.makedirs(sales_stats_dir)
@@ -241,7 +238,7 @@ def curate_ccrs_sales(
     item_types['IsDeleted'] = 'string'
 
     # Get all datafiles.
-    inventory_dir = os.path.join(stats_dir, 'inventory')
+    inventory_dir = os.path.join(stats_dir, f'inventory-{release}')
     inventory_files = sorted_nicely(os.listdir(inventory_dir))
     sales_items_files = get_datafiles(data_dir, 'SalesDetail_')
     # lab_results_dir = os.path.join(stats_dir, 'lab_results')
@@ -465,39 +462,54 @@ if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = 65
-    last_file = 75
+    first_file = None
+    last_file = None
     reverse = False
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    data_dir = f'{base}/CCRS PRR (8-4-23)/CCRS PRR (8-4-23)/'
-    stats_dir = f'{base}/ccrs-stats/'
-    sales_dir = os.path.join(stats_dir, 'sales')
-    sales_stats_dir = os.path.join(stats_dir, 'sales_stats')
+    # release = 'CCRS PRR (1-2-24)'
+    releases = [
+        # 'CCRS PRR (3-6-23)',
+        'CCRS PRR (4-4-23)',
+        'CCRS PRR (5-7-23)',
+        'CCRS PRR (6-6-23)',
+        'CCRS PRR (8-4-23)',
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        # 'CCRS PRR (1-2-24)',
+    ]
+    for release in reversed(releases):
 
-    # Curate CCRS sales.
-    curate_ccrs_sales(
-        data_dir,
-        stats_dir,
-        reverse=reverse,
-        first_file=first_file,
-        last_file=last_file,
-        manager=manager,
-    )
+        data_dir = f'{base}/{release}/{release}/'
+        stats_dir = f'{base}/stats/'
+        sales_dir = os.path.join(stats_dir, f'sales-{release}')
+        sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
 
-    # Aggregate monthly sales items.
-    aggregate_monthly_sales(
-        data_dir=f'{base}/ccrs-stats/sales_stats',
-        start=pd.to_datetime('2023-01-01'),
-        end=pd.to_datetime('2023-08-01'),
-    )
+        # Curate CCRS sales.
+        curate_ccrs_sales(
+            data_dir,
+            stats_dir,
+            reverse=reverse,
+            first_file=first_file,
+            last_file=last_file,
+            manager=manager,
+            release=release,
+        )
 
-    # Calculate sales by licensee by day.
-    augmented_files = sorted_nicely(os.listdir(sales_dir))
-    augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
-    daily_licensee_sales = calculate_and_save_stats(
-        manager=manager,
-        file_paths=augmented_files,
-        sales_stats_dir=sales_stats_dir,
-    )
+        # Aggregate monthly sales items.
+        # aggregate_monthly_sales(
+        #     data_dir=f'{base}/ccrs-stats/sales_stats',
+        #     start=pd.to_datetime('2023-01-01'),
+        #     end=pd.to_datetime('2023-08-01'),
+        # )
+
+        # Calculate sales by licensee by day.
+        augmented_files = sorted_nicely(os.listdir(sales_dir))
+        augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
+        daily_licensee_sales = calculate_and_save_stats(
+            manager=manager,
+            file_paths=augmented_files,
+            sales_stats_dir=sales_stats_dir,
+        )

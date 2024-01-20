@@ -463,16 +463,17 @@ if __name__ == '__main__':
 
     # Curate the inventory for each release.
     releases = [
-        # 'CCRS PRR (4-4-23)',
-        # 'CCRS PRR (5-7-23)',
-        # 'CCRS PRR (6-6-23)',
+        # 'CCRS PRR (3-6-23)',
+        'CCRS PRR (4-4-23)',
+        'CCRS PRR (5-7-23)',
+        'CCRS PRR (6-6-23)',
         'CCRS PRR (8-4-23)',
         'CCRS PRR (9-5-23)',
         'CCRS PRR (11-2-23)',
-        'CCRS PRR (12-2-23)',
-        'CCRS PRR (1-2-24)',
+        # 'CCRS PRR (12-2-23)',
+        # 'CCRS PRR (1-2-24)',
     ]
-    for release in releases:
+    for release in reversed(releases):
         data_dir = os.path.join(base, release, release)
         curate_ccrs_inventory(manager, data_dir, stats_dir)
         manager.create_log('✓ Finished curating inventory for ' + release)
