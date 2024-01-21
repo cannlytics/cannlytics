@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/8/2023
-Updated: 12/9/2023
+Updated: 1/20/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -98,10 +98,6 @@ indica_percentages = {
     'Sativa': 0,
 }
 
-# Parameters.
-verbose = True
-headless = False
-
 
 def initialize_driver(headless=False):
     """Initialize Selenium, using Chrome first and Edge if Chrome fails."""
@@ -178,7 +174,13 @@ def download_coa_pdfs(
         sleep(pause)
 
 
-def parse_coa_pdfs(parser, data, pdf_dir, id_key='product_id', verbose=True):
+def parse_coa_pdfs(
+        parser,
+        data,
+        pdf_dir,
+        id_key='product_id',
+        verbose=True,
+    ):
     """Parse corresponding COAs from a DataFrame in a PDF directory.
     The `id_key` is used to match the PDF filename to the DataFrame.
     """
@@ -224,8 +226,12 @@ if __name__ == '__main__':
     # TODO: Turn the following into a re-usable function.
     # TODO: Implement logging.
 
+    # Parameters.
+    verbose = True
+    headless = False
+
     # Initialize the driver.
-    driver = initialize_driver(headless=False)
+    driver = initialize_driver(headless=True)
 
     # Get all of the brand pages.
     driver.get(base_url + 'menu')
