@@ -1,8 +1,8 @@
 """
-CannPatent
-Copyright (c) 2022
+CannPatent - Cannabis Plant Patents
+Copyright (c) 2022 - 2024
 Created: 5/21/2022
-Updated: 5/25/2022
+Updated: 1/21/2024
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 
@@ -377,12 +377,16 @@ def get_strain_name(x):
         return ''
 
 
+# === Tests ===
+# Tested: 1/21/2024 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     #-------------------------------------------------------------------
     # 1. Find cannabis plant patents.
     # Future work: Download PDFs for the patents found.
     #-------------------------------------------------------------------
+
+    # 
 
     # Search for cannabis patents.
     queries = [
@@ -518,3 +522,40 @@ if __name__ == '__main__':
 
     # Regression plots of ratios with all strains colored by strain.
 
+
+    #-----------------------------------------------------------------------
+    # Example: Demonstration of cannabis plant patent API.
+    #-----------------------------------------------------------------------
+
+    # # Search for a term in USPTO patents.
+    # query = 'cannabis plant'
+    # patents = search_patents(query, limit=50, term='TTL%2F')
+    # print('Found %i patents.' % len(patents))
+
+    # # Restrict to plant patents.
+    # cultivars = patents.loc[
+    #     (patents['patent_title'].str.contains('plant', case=False)) |
+    #     (patents['patent_title'].str.contains('cultivar', case=False))
+    # ]
+    # print('Found %i cultivar patents.' % len(cultivars))
+
+    # # Look up a specific plant patent.
+    # patent = get_patent_details(pd.Series({
+    #     'patent_number': '11240978',
+    #     'patent_title': 'Hemp variety NBS CBD-1',
+    #     'patent_url': 'https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=3&f=G&l=50&co1=AND&d=PTXT&s1=%22hemp+cultivar%22&OS=%22hemp+cultivar%22&RS=%22hemp+cultivar%22',
+    # }))
+
+
+    # Lookup referenced cultivars:
+    # # - Santhica 27
+    # # - BLK03
+    # # - AVI-1
+    # patent = get_patent_details(pd.Series({
+    #     'patent_number': 'PP34051',
+    #     'patent_number_formatted': 'PP34,051',
+    #     'patent_title': 'Cannabis plant named `AVI-1`',
+    #     'patent_url': 'https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=7&f=G&l=50&d=PTXT&p=1&S1=%22marijuana+plant%22&OS=%22marijuana+plant%22&RS=%22marijuana+plant%22',
+    #     'strain_name': 'AVI-1',
+        
+    # }))

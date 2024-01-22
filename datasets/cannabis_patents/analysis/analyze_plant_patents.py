@@ -29,13 +29,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-# Internal imports.
-from cannpatent import (
-    curate_lab_results,
-    get_patent_details,
-    search_patents,
-)
-
 
 # Setup plotting style.
 plt.style.use('fivethirtyeight')
@@ -47,36 +40,13 @@ plt.rcParams.update({
 
 
 #-----------------------------------------------------------------------
-# Demonstration of cannabis plant patent API.
-#-----------------------------------------------------------------------
-
-# Search for a term in USPTO patents.
-query = 'cannabis plant'
-patents = search_patents(query, limit=50, term='TTL%2F')
-print('Found %i patents.' % len(patents))
-
-# Restrict to plant patents.
-cultivars = patents.loc[
-    (patents['patent_title'].str.contains('plant', case=False)) |
-    (patents['patent_title'].str.contains('cultivar', case=False))
-]
-print('Found %i cultivar patents.' % len(cultivars))
-
-# Look up a specific plant patent.
-patent = get_patent_details(pd.Series({
-    'patent_number': '11240978',
-    'patent_title': 'Hemp variety NBS CBD-1',
-    'patent_url': 'https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=3&f=G&l=50&co1=AND&d=PTXT&s1=%22hemp+cultivar%22&OS=%22hemp+cultivar%22&RS=%22hemp+cultivar%22',
-}))
-
-
-#-----------------------------------------------------------------------
 # Aggregate the data.
 #-----------------------------------------------------------------------
 
-# Read in all lab results from subjective effects paper.
+# FIXME: Read in all lab results from subjective effects paper.
 data_dir = '../.datasets/subjective-effects'
-lab_results = curate_lab_results(data_dir)
+# lab_results = curate_lab_results(data_dir)
+lab_results = pd.DataFrame()
 
 # Read programmatically collected plant patent data.
 datafile = '../.datasets/plant-patents/plant-patents.xlsx'

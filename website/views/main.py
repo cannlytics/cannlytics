@@ -43,3 +43,8 @@ def handler500(request, *args, **argv): #pylint: disable=unused-argument
 def meetup(request): #pylint: disable=unused-argument
     """Redirect the user to the Cannabis Data Science meetup."""
     return HttpResponseRedirect('https://meet.google.com/ifq-jtmc-nuh')
+
+
+def donate(request): #pylint: disable=unused-argument
+    """Redirect the Cannlytics donate page."""
+    return HttpResponseRedirect('https://opencollective.com/cannlytics-company')
