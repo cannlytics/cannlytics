@@ -1,6 +1,6 @@
 # Python Requirements | Cannlytics
 # Created 3/14/2022
-# Updated: 7/4/2023
+# Updated: 1/22/2024
 
 beautifulsoup4
 firebase-admin
@@ -17,7 +17,6 @@ pandas
 pdfplumber
 Pillow
 pyarrow
-pydantic
 pypdf
 pytesseract
 python-dateutil

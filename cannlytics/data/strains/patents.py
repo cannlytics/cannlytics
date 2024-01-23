@@ -42,7 +42,6 @@ from typing import Any, Optional, Union
 from bs4 import BeautifulSoup
 import pdfplumber
 import pandas as pd
-# from pydantic import BaseModel
 from pytesseract import  image_to_string
 import requests
 
@@ -207,7 +206,7 @@ def get_patent_details(
         data: Optional[Any] = None,
         patent_number: Optional[str] = None,
         patent_url: Optional[str] = None,
-        user_agent: Optional[str] = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0',
+        headers = None,
         fields: Optional[Union[str, list]] = None,
         search_field: Optional[str] = 'patentNumber',
         search_fields: Optional[str] = 'patentNumber',
@@ -244,29 +243,37 @@ def get_patent_details(
 
     # Specify the fields to return.
     if fields is None:
-        fields = ['appType', 'appFilingDate', 'inventorName',
-                  'inventors', 'patentIssueDate'] # 'attrnyAddr',
+        fields = [
+            'appType',
+            'appFilingDate',
+            # 'inventorName',
+            # 'inventors',
+            # 'patentIssueDate',
+        ] # 'attrnyAddr',
     if isinstance(fields, str):
         field_list = fields
     else:
         field_list = ','.join(fields)
 
-    # TODO: Simply use DEFAULT_HEADERS if no headers provided.
-        
-    # Request fields for the patent.
+    # FIXME: Request fields for the patent.
     base = 'https://ped.uspto.gov/api/queries'
-    headers = {'User-Agent': user_agent}
+    if headers is None:
+        # headers = DEFAULT_HEADERS
+        headers = headers = {'Content-Type': 'application/json'}
+    patent_id = patent_number.replace('US-', '').replace(',', '').split('-')[0]
     data = {
-        'searchText': f'{query}:({patent_number})',
+        'searchText': f'{query}:({patent_id})',
         'fl': field_list, # field list
         'df': search_field, # default field to search
         'qf': search_fields, # multiple fields to search
         'facet': 'false',
-        'mm': '100%', # minimum match
+        'mm': '80%', # minimum match
         'sort': f'{search_field} asc',
         'start': '0',
     }
+    print('Querying:', data)
     response = requests.post(base, json=data, headers=headers)
+    print(response.text)
 
     # Add the patent details.
     data = response.json()
@@ -320,31 +327,31 @@ def get_patent_details(
     claims[0] = claims[0].replace('1.  ', '')
     patent['claims'] = [x.replace('\n', ' ').strip() for x in claims]
 
-    # TODO: Download the PDF for the patent.
-    # - Upload the PDF to Firebase Storage, saving the ref with the data.
-
-    # Optional: Get plant details.
+    # TODO: Get plant details.
 
     # '\nSeeds\n '
     # Market Class: 
     # patent['parentage'] = soup.text.split('Parentage: ')[1].split(':')[0]
     # patent['classification'] = soup.text.split('Classification: ')[1].split(':')[0]
 
-    # Optional: Get lab results?
+    # TODO: Get lab results?
     # soup.text.split('TABLE-US-')[1]
 
-    # Optional: Get more patent details.
+    # TODO: Get more patent details.
     # - citations_applicant_count
     # - full text (description)
 
-    # Optional: Extract links to references.
+    # TODO: Extract links to references.
     # tables[8].text
-
-    # Bonus: Crop all images for each patent.
-    # Upload the images to Firebase Storage for access online / through the API.
 
     # Return the augmented patent data.
     return patent
+
+# DEV:
+# get_patent_details(patent)
+get_patent_details(pd.Series({
+    'patent_number': '*'
+}),)
 
 
 def get_strain_name(x):
@@ -369,168 +376,33 @@ if __name__ == '__main__':
 
 
     #-------------------------------------------------------------------
-    # 1. Find cannabis plant patents.
-    # Future work: Download PDFs for the patents found.
+    # Find cannabis plant patents.
     #-------------------------------------------------------------------
 
-    # # Search for cannabis patents.
+    # TODO: Iterate over search terms.
     queries = [
-        # 'cannabis',
-        # 'cannabis plant',
-        'cannabis cultivar',
-        # 'cannabis variety',
-        # 'hemp plant',
-        # 'hemp cultivar',
-        # 'hemp variety',
-        # 'marijuana plant',
+        ('cannabis', ''),
+        ('cannabis', 'plant'),
+        ('cannabis', 'cultivar'),
+        ('cannabis', 'variety'),
+        ('hemp', ''),
+        ('hemp', 'plant'),
+        ('hemp', 'cultivar'),
+        ('hemp', 'variety'),
+        ('marijuana', ''),
+        ('marijuana', 'plant'),
+        ('marijuana', 'cultivar'),
+        ('marijuana', 'variety'),
     ]
-    limit = 10
-    for query in queries:
-
-        # Search for patents by keyword(s).
-        patents = search_patents(query, limit, term='TTL%2F')
-        print('Found %i patents.' % len(patents))
-
-        # Save the patents.
-        key = kebab_case(query)
-        filename = f'{key}-patents.xlsx'
-        datafile = os.path.join(data_dir, filename)
-        patents.to_excel(datafile, sheet_name='Patents')
-
-        # Isolate plant patents.
-        # Note: There is probably a better way to identify plant patents.
-        cultivars = patents.loc[
-            (patents['patent_title'].str.contains('plant', case=False)) |
-            (patents['patent_title'].str.contains('cultivar', case=False))
-        ]
-        print('Found %i cultivar patents.' % len(cultivars))
-
-        # Get strain names.
-        strain_names = cultivars['patent_title'].apply(get_strain_name)
-        cultivars = cultivars.assign(strain_name=strain_names)
-
-        # FIXME: Remove duplicates because patents can be renewed.
-
-        # Get details for each row.
-        # Note: This could probably be done more efficiently.
-        cultivar_data = []
-        for _, cultivar in cultivars.iterrows():
-            patent_details = get_patent_details(cultivar)
-            cultivar_data.append(patent_details)
-        cultivar_data = pd.concat(cultivar_data, axis=1)
-        if isinstance(cultivar_data, pd.Series):
-            cultivar_data = cultivar_data.to_frame()
-        cultivar_data = cultivar_data.transpose()
-
-        # Save the plant patent data.
-        today = kebab_case(datetime.now().isoformat()[:16])
-        filename = f'plant-patents-{today}.xlsx'
-        datafile = os.path.join(data_dir, filename)
-        cultivar_data.to_excel(datafile, sheet_name='Patent Details')
-
-
-    #-------------------------------------------------------------------
-    # 3. Organize all plant patent data points.
-    # At this stage, a data guide can be written, with:
-    # - Key
-    # - Type
-    # - Description
-    # - Possible values
-    # - Relation to other variables?
-    #-------------------------------------------------------------------
-
-    # # Read manually collected plant patent data.
-    # datafile = '../../.datasets/ai/plant-patents/plant-patents.xlsx'
-    # results = pd.read_excel(datafile, sheet_name='Patent Lab Results')
-    # results['patent_number'] = results['patent_number'].astype(str)
-
-    # Read programmatically collected plant patent data.
-    filename = 'plant-patents.xlsx'
-    datafile = os.path.join(data_dir, filename)
-    details = pd.read_excel(datafile, sheet_name='Patent Details')
-    details['patent_type'] = 'Plant'
-    details['patent_link'] = 'http://www.pat2pdf.org/pat2pdf/foo.pl?number=' + details['patent_number'].astype(str)
-    details['patent_number'] = details['patent_number'].astype(str)
-
-    # # Merge average lab results with details.
-    # avg_results = results.groupby('patent_number', as_index=False).mean()
-    # details = pd.merge(
-    #     left=details,
-    #     right=avg_results,
-    #     left_on='patent_number',
-    #     right_on='patent_number',
-    # )
-
-    # Count plant patents over time.
-    details['date'] = pd.to_datetime(details['patent_issue_date'])
-    group = details.groupby(pd.Grouper(key='date', freq='Y'), as_index=True)
-    yearly = group['patent_number'].count()
-    yearly = yearly.to_frame()
-    yearly['year'] = pd.to_datetime(yearly.index).strftime('%Y')
-    yearly.rename(columns={'patent_number': 'plant_patents'}, inplace=True)
-    annual_stats = yearly[['plant_patents', 'year']].to_dict(orient='records')
-
-    # Optional: Calculate statistics from patent data.
-    # - THCV to THC ratio.
-    # - THCV to total cannabinoid ratio.
-    # - THC / CBD ratio.
-    # - CBD / CBC / THC ratio.
-    # - All terpene ratios!!!
-
-    # Ridge plots for cultivars with cannabinoid terpene data.
-    # BONUS: Use as an image for the patent (chemotype fingerprint)!
-
-
-    # Regression plots of ratios with all strains colored by strain.
-
-
-    #-------------------------------------------------------------------
-    # 4. Upload the patent data.
-    #-------------------------------------------------------------------
-
-    # # Initialize Firebase!
-    # initialize_firebase(env_file=env_file)
-
-    # # Update the base patents document with statistics.
-    # update_document('public/stats/patents/plant_patents', {
-    #     'annual_plant_patents': annual_stats,
-    # })
-
-    # # Upload the plant patent data to Firestore for API access.
-    # col = 'public/data/patents'
-    # refs = [f'{col}/{x}' for x in details['patent_number']]
-    # data = details.to_dict(orient='records')
-    # update_documents(refs, data)
-
-    # # Upload the patent lab results data to Firestore for API access.
-    # results['id'] = results.index
-    # values = results[['patent_number', 'id']].values
-    # refs = [f'{col}/{x[0]}/patent_lab_results/lab_result_{x[1]}' for x in values]
-    # data = results.to_dict(orient='records')
-    # update_documents(refs, data)
-
-
-    #-------------------------------------------------------------------
-    # 5. TODO: Access the patent data through the Cannlytics API!
-    #-------------------------------------------------------------------
-
-    # import seaborn as sns
-
-    # sample = results.groupby('strain_name').mean()
-    # sns.regplot(
-    #     x='d_limonene',
-    #     y='beta_pinene',
-    #     data=sample,
-    #     ci=95,
-    # )
 
     # Initialize a web driver.
-    driver = initialize_selenium()
+    driver = initialize_selenium(headless=False)
 
     # Get the patent search page.
     driver.get(PATENT_SEARCH_URL)
 
     # Search for patents.
+    # TODO: Iterate over all search terms.
     search_terms = {
         'searchText1': 'cannabis',
         'searchText2': 'cultivar'
@@ -601,44 +473,11 @@ if __name__ == '__main__':
 
     # Save the patent metadata.
     print('Saving patent metadata...')
-    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    date = datetime.now().strftime('%Y-%m-%d')
     metadata_file = f'D://data/strains/patents/patent-metadata-{date}.xlsx'
     patent_data = pd.DataFrame(patents)
     patent_data.to_excel(metadata_file)
     print('Patent metadata saved:', metadata_file)
-
-    # Download patent images.
-    print('Downloading patent images.')
-    for patent in patents:
-        outfile = os.path.join(pdf_dir, patent['patent_number'] + '.pdf')
-        if os.path.exists(outfile):
-            print('Cached:', outfile)
-            continue
-        response = requests.get(patent['patent_url'])
-        with open(outfile, 'wb') as file:
-            file.write(response.content)
-        print('Downloaded:', outfile)
-
-
-    #------------------------------------------------------------
-    # Use re-usable patent search function.
-    #------------------------------------------------------------
-
-    # TODO: Iterate over search terms.
-    queries = [
-        ('cannabis', ''),
-        ('cannabis', 'plant'),
-        ('cannabis', 'cultivar'),
-        ('cannabis', 'variety'),
-        ('hemp', ''),
-        ('hemp', 'plant'),
-        ('hemp', 'cultivar'),
-        ('hemp', 'variety'),
-        ('marijuana', ''),
-        ('marijuana', 'plant'),
-        ('marijuana', 'cultivar'),
-        ('marijuana', 'variety'),
-    ]
 
 
     #-----------------------------------------------------------------------
@@ -673,6 +512,18 @@ if __name__ == '__main__':
     # Extract data from downloaded patents.
     #------------------------------------------------------------
 
+    # Download patent images.
+    print('Downloading patent images...')
+    for index, patent in strains.iterrows():
+        outfile = os.path.join(pdf_dir, patent['patent_number'] + '.pdf')
+        if os.path.exists(outfile):
+            print('Cached:', outfile)
+            continue
+        response = requests.get(patent['patent_url'])
+        with open(outfile, 'wb') as file:
+            file.write(response.content)
+        print('Downloaded:', outfile)
+
     # Extract the text from all strain patents.
     extracted_data = {}
     for index, strain in strains.iterrows():
@@ -706,82 +557,15 @@ if __name__ == '__main__':
     for patent_number, obs in extracted_data.items():
         print(len(obs['abstract'].split(' ')))
 
+    # Get additional patent details.
+    for index, patent in strains.iterrows():
+        patent_number = patent['patent_number']
+        patent_detail = get_patent_details(patent)
+        extracted_data[patent_number] = {**extracted_data[patent_number], **patent_detail.to_dict()}
+        print('Extracted details for patent:', patent_number)
 
-    # TODO: Save parsed PDFs and make them available though Cannlytics!
-
-
-    # pdf = image_to_pdf_or_hocr(original_file, extension='pdf')
-
-    # Read the text of the first page.
-    # texts = []
-    # images = convert_from_path(
-    #     original_file,
-    #     output_folder=output_folder,
-    #     dpi=90,
-    # )
-    # for image in images[:1]:
-    #     texts.append(image_to_string(image))
-
-        # images[i].save('image_name'+ str(i) +'.jpg', 'JPEG')
-    # with tempfile.TemporaryDirectory() as path:
-    #     images = convert_from_path(original_file, output_folder=path)
-    #     for img in images[:1]:
-    #         texts.append(image_to_string(img))
-
-
-    # doc = convert_from_path(original_file)
-    # path, fileName = os.path.split(original_file)
-    # fileBaseName, fileExtension = os.path.splitext(fileName)
-
-    # for page_number, page_data in enumerate(doc):
-    #     txt = image_to_string(Image.fromarray(page_data)).encode('utf-8')
-    #     print("Page # {} - {}".format(str(page_number),txt))
-
-    # # Convert PDF to images.
-    # images = convert_from_path(pdf_path)
-    # text = []
-
-    # # Apply OCR to each image
-    # for i, img in enumerate(images):
-    #     text.append(image_to_string(img))
-
-    # return text
-
-
-    #-----------------------------------------------------------------------
-    # TODO: Apply OCR to downloaded images.
-    #-----------------------------------------------------------------------
-
-    # def ocr_pdf(pdf_path):
-    #     # Convert PDF to images
-    #     images = convert_from_path(pdf_path)
-    #     text = []
-        
-    #     # Apply OCR to each image
-    #     for i, img in enumerate(images):
-    #         text.append(pytesseract.image_to_string(img))
-        
-    #     return text
-
-    #-----------------------------------------------------------------------
-    # TODO: Extract data from generated PDFs.
-    #-----------------------------------------------------------------------
-
-    # def extract_data_from_pdfs(pdf_dir):
-    #     for filename in os.listdir(pdf_dir):
-    #         if filename.endswith(".pdf"):
-    #             pdf_path = os.path.join(pdf_dir, filename)
-                
-    #             # Get metadata
-    #             metadata = get_patent_metadata(pdf_path)
-    #             print(f"Metadata for {filename}:", metadata)
-                
-    #             # Apply OCR and print text
-    #             text = ocr_pdf(pdf_path)
-    #             print(f"Text for {filename}:", text)
-
-
-    # Data points sought:
+    
+    # TODO: Extract data points:
     # - patent_number_formatted
     # - patent_type
     # - patent_link
@@ -812,52 +596,93 @@ if __name__ == '__main__':
 
 
     # TODO: Save the extracted patent data.
-
-
-    #-------------------------------------------------------------------
-    # Bonus: Visualize the patent data.
-    #-------------------------------------------------------------------
-
-    # Ridge plots for cultivars with terpene data.
-
-
-    # Regression plots of ratios with all strains colored by strain.
-
-
-
-    #-------------------------------------------------------------------
-    # Example: Demonstration of cannabis plant patent API.
-    #-------------------------------------------------------------------
-
-    # # Search for a term in USPTO patents.
-    # query = 'cannabis plant'
-    # patents = search_patents(query, limit=50, term='TTL%2F')
-    # print('Found %i patents.' % len(patents))
-
-    # # Restrict to plant patents.
-    # cultivars = patents.loc[
-    #     (patents['patent_title'].str.contains('plant', case=False)) |
-    #     (patents['patent_title'].str.contains('cultivar', case=False))
-    # ]
-    # print('Found %i cultivar patents.' % len(cultivars))
-
-    # # Look up a specific plant patent.
-    # patent = get_patent_details(pd.Series({
-    #     'patent_number': '11240978',
-    #     'patent_title': 'Hemp variety NBS CBD-1',
-    #     'patent_url': 'https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=3&f=G&l=50&co1=AND&d=PTXT&s1=%22hemp+cultivar%22&OS=%22hemp+cultivar%22&RS=%22hemp+cultivar%22',
-    # }))
-
-
-    # Lookup referenced cultivars:
-    # # - Santhica 27
-    # # - BLK03
-    # # - AVI-1
-    # patent = get_patent_details(pd.Series({
-    #     'patent_number': 'PP34051',
-    #     'patent_number_formatted': 'PP34,051',
-    #     'patent_title': 'Cannabis plant named `AVI-1`',
-    #     'patent_url': 'https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=7&f=G&l=50&d=PTXT&p=1&S1=%22marijuana+plant%22&OS=%22marijuana+plant%22&RS=%22marijuana+plant%22',
-    #     'strain_name': 'AVI-1',
         
-    # }))
+
+    
+    # #-------------------------------------------------------------------
+    # # 3. Organize all plant patent data points.
+    # # - Key
+    # # - Type
+    # # - Description
+    # # - Possible values
+    # # - Relation to other variables?
+    # #-------------------------------------------------------------------
+        
+    # FIXME: Refactor statistics.
+
+    # # # Read manually collected plant patent data.
+    # # datafile = '../../.datasets/ai/plant-patents/plant-patents.xlsx'
+    # # results = pd.read_excel(datafile, sheet_name='Patent Lab Results')
+    # # results['patent_number'] = results['patent_number'].astype(str)
+
+    # # Read programmatically collected plant patent data.
+    # filename = 'plant-patents.xlsx'
+    # datafile = os.path.join(data_dir, filename)
+    # details = pd.read_excel(datafile, sheet_name='Patent Details')
+    # details['patent_type'] = 'Plant'
+    # details['patent_link'] = 'http://www.pat2pdf.org/pat2pdf/foo.pl?number=' + details['patent_number'].astype(str)
+    # details['patent_number'] = details['patent_number'].astype(str)
+
+    # # # Merge average lab results with details.
+    # # avg_results = results.groupby('patent_number', as_index=False).mean()
+    # # details = pd.merge(
+    # #     left=details,
+    # #     right=avg_results,
+    # #     left_on='patent_number',
+    # #     right_on='patent_number',
+    # # )
+
+    # # Count plant patents over time.
+    # details['date'] = pd.to_datetime(details['patent_issue_date'])
+    # group = details.groupby(pd.Grouper(key='date', freq='Y'), as_index=True)
+    # yearly = group['patent_number'].count()
+    # yearly = yearly.to_frame()
+    # yearly['year'] = pd.to_datetime(yearly.index).strftime('%Y')
+    # yearly.rename(columns={'patent_number': 'plant_patents'}, inplace=True)
+    # annual_stats = yearly[['plant_patents', 'year']].to_dict(orient='records')
+
+    # # Optional: Calculate statistics from patent data.
+    # # - THCV to THC ratio.
+    # # - THCV to total cannabinoid ratio.
+    # # - THC / CBD ratio.
+    # # - CBD / CBC / THC ratio.
+    # # - All terpene ratios!!!
+
+    # # Ridge plots for cultivars with cannabinoid terpene data.
+    # # BONUS: Use as an image for the patent (chemotype fingerprint)!
+
+
+    # # Regression plots of ratios with all strains colored by strain.
+
+
+    # #-------------------------------------------------------------------
+    # # 4. Upload the patent data.
+    # #-------------------------------------------------------------------
+
+    # # # Initialize Firebase!
+    # # initialize_firebase(env_file=env_file)
+        
+    # TODO: Download the PDF for the patent.
+    # - Upload the PDF to Firebase Storage, saving the ref with the data.
+        
+    # TODO: Crop all images for each patent.
+    # Upload the images to Firebase Storage for access online / through the API.
+
+    # # # Update the base patents document with statistics.
+    # # update_document('public/stats/patents/plant_patents', {
+    # #     'annual_plant_patents': annual_stats,
+    # # })
+
+    # # # Upload the plant patent data to Firestore for API access.
+    # # col = 'public/data/patents'
+    # # refs = [f'{col}/{x}' for x in details['patent_number']]
+    # # data = details.to_dict(orient='records')
+    # # update_documents(refs, data)
+
+    # # # Upload the patent lab results data to Firestore for API access.
+    # # results['id'] = results.index
+    # # values = results[['patent_number', 'id']].values
+    # # refs = [f'{col}/{x[0]}/patent_lab_results/lab_result_{x[1]}' for x in values]
+    # # data = results.to_dict(orient='records')
+    # # update_documents(refs, data)
+

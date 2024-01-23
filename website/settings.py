@@ -87,6 +87,7 @@ if PRODUCTION == 'True':
     DEBUG = False
 else:
     DEBUG = True
+    print('WARNING: Debug mode is enabled.')
 
 #----------------------------------------------------------------------#
 # Apps
