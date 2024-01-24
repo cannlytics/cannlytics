@@ -14,45 +14,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # External imports:
+from cannlytics.data.coas import get_result_value
+from cannlytics.utils import convert_to_numeric
 import pandas as pd
 import statsmodels.api as sm
 
-from cannlytics.utils import convert_to_numeric
-
-
-# TODO: Make these standard functions.
-
-
-def get_result_value(
-        results,
-        analyte,
-        key='key',
-        value='value',
-    ):
-    """Get the value for an analyte from a list of standardized results."""
-    # Ensure that the results are a list.
-    try:
-        result_list = json.loads(results)
-    except:
-        try:
-            result_list = ast.literal_eval(results)
-        except:
-            result_list = []
-    if not isinstance(result_list, list):
-        return None
-
-    # Get the value of interest from the list of results.
-    result_data = pd.DataFrame(result_list)
-    if result_data.empty:
-        return None
-    try:
-        result = result_data.loc[result_data[key] == analyte, value].iloc[0]
-    except:
-        return 0
-    try:
-        return convert_to_numeric(result, strip=True)
-    except:
-        return result
     
 
 # # Identify all unique cannabinoids and terpenes.
@@ -88,21 +54,21 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
+            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
         ],
     },
     'Glass House Farms': {
@@ -110,9 +76,33 @@ CA_LAB_RESULTS = {
     },
     'SC Labs':{
         'datafiles': [
-            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx',
-            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx',
-            # 'D:/data/california/lab_results/datasets/sclabs/ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx',
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
         ],
     },
 }
@@ -122,32 +112,24 @@ CA_LAB_RESULTS = {
 all_results = []
 for source in CA_LAB_RESULTS:
     for datafile in CA_LAB_RESULTS[source]['datafiles']:
-        data = pd.read_excel(datafile)
+        try:
+            data = pd.read_excel(datafile)
+        except:
+            print('Error reading:', datafile)
+            continue
         all_results.append(data)
 
-# Aggregate results.
+# Aggregate results, removing lab results that are being processed (no results).
 results = pd.concat(all_results)
+results = results[results['results'] != "[]"]
 results.drop_duplicates(subset=['sample_id'], inplace=True)
 print('Number of results:', len(results))
+
+# Save the data.
+results.to_excel(r"D:\data\california\lab_results\datasets\sclabs\aggregated-ca-results-sclabs-2024-01-23.xlsx", index=False)
 # results.to_excel(r"D:\data\california\lab_results\datasets\flower-company\aggregated-ca-results-flower-company-2024-01-07.xlsx", index=False)
 
 
-# === Look at the Emerald Cup results ===
-emerald_2023 = results.loc[results['producer'] == 'Emerald Cup 2023']
-emerald_2022 = results.loc[results['producer'] == 'Emerald Cup 2022']
-emerald_2020 = results.loc[results['producer'] == 'Emerald Cup 2020']
-emerald_2023['year'] = 2023
-emerald_2022['year'] = 2022
-emerald_2020['year'] = 2020
-emerald = pd.concat([emerald_2023, emerald_2022, emerald_2020])
-
-# TODO: Merge with ranking data.
-winners_2022 = pd.read_excel('data/emerald-cup-winners-2022.xlsx')
-winners_2023 = pd.read_excel('data/emerald-cup-winners-2023.xlsx')
-
-winners_2022['product_name'] = winners_2022['entry_name'].apply(
-    lambda x: x.split(' – ')[-1]
-)
 
 
 cannabinoids = [
@@ -212,10 +194,29 @@ terpenes = [
 # Get the results for each cannabinoid and terpene.
 for a in cannabinoids + terpenes:
     print('Augmenting:', a)
-    emerald[a] = emerald['results'].apply(
+    results[a] = results['results'].apply(
         lambda x: get_result_value(x, a, key='key')
     )
 
+
+
+
+# # === Look at the Emerald Cup results ===
+# emerald_2023 = results.loc[results['producer'] == 'Emerald Cup 2023']
+# emerald_2022 = results.loc[results['producer'] == 'Emerald Cup 2022']
+# emerald_2020 = results.loc[results['producer'] == 'Emerald Cup 2020']
+# emerald_2023['year'] = 2023
+# emerald_2022['year'] = 2022
+# emerald_2020['year'] = 2020
+# emerald = pd.concat([emerald_2023, emerald_2022, emerald_2020])
+
+# # TODO: Merge with ranking data.
+# winners_2022 = pd.read_excel('data/emerald-cup-winners-2022.xlsx')
+# winners_2023 = pd.read_excel('data/emerald-cup-winners-2023.xlsx')
+
+# winners_2022['product_name'] = winners_2022['entry_name'].apply(
+#     lambda x: x.split(' – ')[-1]
+# )
 
 
 # TODO: See which strain has the highest terpenes.

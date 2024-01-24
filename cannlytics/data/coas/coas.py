@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/16/2023
+Updated: 1/23/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -39,10 +39,6 @@ from typing import Any, List, Optional
 # External imports.
 import cv2
 import numpy as np
-# try:
-#     import openai
-# except ImportError:
-#     print('Unable to find `openai` package. This tool is used for parsing with AI.')
 import openpyxl
 import pandas as pd
 import requests
@@ -51,7 +47,6 @@ from PIL import Image
 from pypdf import PdfMerger
 try:
     from pyzbar import pyzbar
-    # from pyzbar.pyzbar import decode
 except:
     print('Unable to import `zbar` library. This tool is used for decoding QR codes.')
 try:
@@ -179,6 +174,38 @@ def convert_pdf_to_images(
         if os.path.isfile(magick_path) and i.startswith('magick-'):
             os.remove(magick_path)
     return image_files
+
+
+def get_result_value(
+        results,
+        analyte: str,
+        key: Optional[str] = 'key',
+        value: Optional[str] = 'value',
+    ):
+    """Get the value for an analyte from a list of standardized results."""
+    # Ensure that the results are a list.
+    try:
+        result_list = json.loads(results)
+    except:
+        try:
+            result_list = ast.literal_eval(results)
+        except:
+            result_list = []
+    if not isinstance(result_list, list):
+        return None
+
+    # Get the value of interest from the list of results.
+    result_data = pd.DataFrame(result_list)
+    if result_data.empty:
+        return None
+    try:
+        result = result_data.loc[result_data[key] == analyte, value].iloc[0]
+    except:
+        return 0
+    try:
+        return convert_to_numeric(result, strip=True)
+    except:
+        return result
 
 
 class CoADoc:
@@ -1789,6 +1816,21 @@ class CoADoc:
         if codes:
             code = codes[0].data.decode('utf-8')
         return code
+
+    def get_result_value(
+            self,
+            results,
+            analyte: str,
+            key: Optional[str] = 'key',
+            value: Optional[str] = 'value',
+        ) -> Any:
+        """Get a value from a list of standardized results."""
+        return get_result_value(
+            results,
+            analyte=analyte,
+            key=key,
+            value=value,
+        )
 
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
