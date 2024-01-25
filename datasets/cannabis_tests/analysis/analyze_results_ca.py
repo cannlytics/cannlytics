@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 1/2/2024
+Updated: 1/24/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
@@ -54,25 +54,37 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
-            # r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-23.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-21.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-20.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-17.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-14.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-13.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-12.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-10.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-09.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-08.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
         ],
     },
     'Glass House Farms': {
-        'datafiles': [],
+        'datafiles': [
+            r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
+        ],
     },
     'SC Labs':{
         'datafiles': [
@@ -107,6 +119,9 @@ CA_LAB_RESULTS = {
     },
 }
 
+# TODO: Aggregate Flower Company lab results.
+
+# TODO: Aggregate Glass House Farms lab results.
 
 # Read all datafiles.
 all_results = []
@@ -121,12 +136,18 @@ for source in CA_LAB_RESULTS:
 
 # Aggregate results, removing lab results that are being processed (no results).
 results = pd.concat(all_results)
+print('Number of results before dropping in-progress:', len(results))
 results = results[results['results'] != "[]"]
+print('Number of results before dropping duplicates:', len(results))
 results.drop_duplicates(subset=['sample_id'], inplace=True)
 print('Number of results:', len(results))
 
 # Save the data.
-results.to_excel(r"D:\data\california\lab_results\datasets\sclabs\aggregated-ca-results-sclabs-2024-01-23.xlsx", index=False)
+date = pd.to_datetime('today').strftime('%Y-%m-%d')
+outfile = f"D://data/california/lab_results/datasets/ca-results-{date}.csv"
+results.to_csv(outfile, index=False)
+print('Saved:', outfile)
+# results.to_excel(r"D:\data\california\lab_results\datasets\sclabs\aggregated-ca-results-sclabs-2024-01-23.xlsx", index=False)
 # results.to_excel(r"D:\data\california\lab_results\datasets\flower-company\aggregated-ca-results-flower-company-2024-01-07.xlsx", index=False)
 
 
