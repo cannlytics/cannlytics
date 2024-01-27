@@ -169,7 +169,7 @@ ANALYTES = {
     'n_butane': 'butane',
     'Δ3-Carene': 'delta_3_carene',
     'Chlorantranil-iprole': 'chlorantraniliprole',
-    'cis-Nerolidol': 'cis_nerolidol',
+    'cis-Nerolidol': 'nerolidol',
     'cy_uthrin': 'cyfluthrin',
     'delta_limonene': 'd_limonene',
     'limonene': 'd_limonene',
@@ -406,7 +406,29 @@ ANALYTES = {
     'b_maaliene': 'beta_maaliene',
     'bisabolol': 'alpha_bisabolol',
     'foreign_matter_i_h_e': 'foreign_matter',
+    'camphors': 'camphor',
+    'sabinene_hydrate': 'sabinene',
+    'alpha_phella': 'alpha_phellandrene',
+    'beta_caryophyllene_oxide': 'caryophyllene_oxide',
+    'ocimene': 'alpha_ocimene',
+    'cis_beta_ocimene': 'beta_ocimene',
+    'cis_nerolidol': 'nerolidol',
+    'endo_fenchyl': 'fenchol',
+    'endo_fenchyl_alcohol': 'fenchol',
+    'fenchyl_alcohol': 'fenchol',
+    'loq_endo_fenchyl_alcohol': 'fenchol',
+    'total_terpineol': 'terpineol',
+    'trans_caryophyllene': 'beta_caryophyllene',
+    'below_quantification_limit_alpha_ocimene': 'alpha_ocimene',
+    'below_quantification_limit_beta_ocimene': 'beta_ocimene',
+    'below_quantification_limit_alpha_humulene': 'alpha_humulene',
+    'below_quantification_limit_linalool': 'linalool',
+    'below_quantification_limit_terpinolene': 'terpinolene',
+    'below_quantification_limit_delta_3_carene': 'delta_3_carene',
+    'below_quantification_limit_beta_myrcene': 'beta_myrcene',
+    'thc': 'delta_9_thc',
 }
+
 # TODO: Find out how to map:
 # cis_nerolidol vs. nerolidol vs. nerolidol_1 vs. nerolidol_2 vs. trans_nerolidol?
 

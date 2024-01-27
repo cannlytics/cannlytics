@@ -181,6 +181,8 @@ def get_result_value(
         analyte: str,
         key: Optional[str] = 'key',
         value: Optional[str] = 'value',
+        standardize: Optional[bool] = True,
+        analytes: Optional[dict] = None,
     ):
     """Get the value for an analyte from a list of standardized results."""
     # Ensure that the results are a list.
@@ -193,9 +195,15 @@ def get_result_value(
             result_list = []
     if not isinstance(result_list, list):
         return None
+    
+    # Standardize the keys.
+    result_data = pd.DataFrame(result_list)
+    if standardize:
+        if analytes is None:
+            analytes = ANALYTES
+        result_data[key] = result_data[key].map(analytes).fillna(result_data[key])
 
     # Get the value of interest from the list of results.
-    result_data = pd.DataFrame(result_list)
     if result_data.empty:
         return None
     try:

@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 1/24/2024
+Updated: 1/26/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
@@ -54,6 +54,7 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
+            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-25.xlsx",
             r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-23.xlsx",
             r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-21.xlsx",
             r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-20.xlsx",
@@ -83,45 +84,41 @@ CA_LAB_RESULTS = {
     },
     'Glass House Farms': {
         'datafiles': [
-            r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
+            # r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
         ],
     },
     'SC Labs':{
         'datafiles': [
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
+            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
         ],
     },
 }
-
-# TODO: Aggregate Flower Company lab results.
-
-# TODO: Aggregate Glass House Farms lab results.
 
 # Read all datafiles.
 all_results = []
@@ -137,22 +134,21 @@ for source in CA_LAB_RESULTS:
 # Aggregate results, removing lab results that are being processed (no results).
 results = pd.concat(all_results)
 print('Number of results before dropping in-progress:', len(results))
-results = results[results['results'] != "[]"]
+results = results.loc[results['results'] != "[]"]
 print('Number of results before dropping duplicates:', len(results))
 results.drop_duplicates(subset=['sample_id'], inplace=True)
 print('Number of results:', len(results))
 
 # Save the data.
 date = pd.to_datetime('today').strftime('%Y-%m-%d')
-outfile = f"D://data/california/lab_results/datasets/ca-results-{date}.csv"
+outfile = f"D://data/california/lab_results/datasets/ca-results-flower-company-{date}.csv"
 results.to_csv(outfile, index=False)
 print('Saved:', outfile)
-# results.to_excel(r"D:\data\california\lab_results\datasets\sclabs\aggregated-ca-results-sclabs-2024-01-23.xlsx", index=False)
-# results.to_excel(r"D:\data\california\lab_results\datasets\flower-company\aggregated-ca-results-flower-company-2024-01-07.xlsx", index=False)
 
 
+# === Chemical Analysis ===
 
-
+# Define commonly observed cannabinoids and terpenes.
 cannabinoids = [
     'thca',
     'cbga',

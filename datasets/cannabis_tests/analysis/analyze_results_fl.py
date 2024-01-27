@@ -291,3 +291,99 @@ for folder in folders:
 
     # TODO: Merge with unparsed COA URLs.
     
+
+
+#-----------------------------------------------------------------------
+# Aggregate all lab results.
+#-----------------------------------------------------------------------
+
+import pandas as pd
+
+
+FL_LAB_RESULTS = {
+    'acs': {
+        'datafiles': [
+            r"D:\data\florida\lab_results\.datasets\acs-lab-results-2023-12-27-08-30-49.xlsx",
+        ]
+    },
+    'kaycha': {
+        'datafiles': [
+            r"D:\data\florida\lab_results\.datasets\fl-lab-results-2023-06-07T06-20-43.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0020-lab-results-2023-09-21-20-26-18.xlsx",
+            r"D:\data\florida\lab_results\.datasets\green-scientific-labs-lab-results-2023-06-06T11-38-34.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0001-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0001-lab-results-2023-06-04T06-49-10.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0001-lab-results-2023-06-04T23-17-02.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0001-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0001-lab-results-2023-09-11-19-09-20.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-04T23-17-49.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-07-19-14-34.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-07-19-14-50.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-07-19-14-58.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-07-19-15-08.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-07-19-15-13.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-06-08-06-21-23.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0002-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0003-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0003-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0004-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2015-0004-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2016-0007-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2016-0007-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2016-0007-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0008-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0008-lab-results-2023-06-04T06-48-27.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0008-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0009-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0009-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0009-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0010-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0010-lab-results-2023-06-04T23-16-29.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0010-lab-results-2023-09-11-19-09-20.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0010-lab-results-2023-09-21-20-26-18.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0011-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2017-0011-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0015-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0015-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0017-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0017-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0019-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0019-lab-results-2023-08-29-21-04-30.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0019-lab-results-2023-09-11-16-14-09.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0020-lab-results-2023-06-03.xlsx",
+            r"D:\data\florida\lab_results\.datasets\MMTC-2019-0020-lab-results-2023-09-11-19-09-20.xlsx",
+        ]
+    },
+    'terplife': {
+        'datafiles': [
+            r"D:\data\florida\lab_results\.datasets\fl-lab-results-2024-01-24.xlsx",
+        ]
+    },
+}
+
+
+# Read all datafiles.
+all_results = []
+for source in FL_LAB_RESULTS:
+    for datafile in FL_LAB_RESULTS[source]['datafiles']:
+        try:
+            data = pd.read_excel(datafile)
+        except:
+            print('Error reading:', datafile)
+            continue
+        all_results.append(data)
+
+# Aggregate results, removing lab results that are being processed (no results).
+results = pd.concat(all_results)
+print('Number of results before dropping in-progress:', len(results))
+results = results.loc[results['results'] != "[]"]
+print('Number of results before dropping duplicates:', len(results))
+results.drop_duplicates(subset=['sample_id'], inplace=True)
+print('Number of results:', len(results))
+
+# Save the data.
+date = pd.to_datetime('today').strftime('%Y-%m-%d')
+outfile = f"D://data/florida/lab_results/datasets/fl-results-{date}.csv"
+results.to_csv(outfile, index=False)
+print('Saved:', outfile)

@@ -856,7 +856,12 @@
     "zipcode",
     "zipcodes",
     "zoneinfo",
-    "zorder"
+    "zorder",
+    "suptitle",
+    "ncol",
+    "distplot",
+    "swarmplot",
+    "geopandas"
   ],
   "todo-tree.tree.showBadges": false,
 }
