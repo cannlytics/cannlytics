@@ -473,8 +473,8 @@ if __name__ == '__main__':
         # 'CCRS PRR (3-6-23)',
         # 'CCRS PRR (4-4-23)',
         # 'CCRS PRR (5-7-23)',
-        # 'CCRS PRR (6-6-23)',
-        'CCRS PRR (8-4-23)',
+        'CCRS PRR (6-6-23)',
+        # 'CCRS PRR (8-4-23)',
         # 'CCRS PRR (9-5-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
@@ -488,6 +488,7 @@ if __name__ == '__main__':
         sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
 
         # Curate CCRS sales.
+        # FIXME: ValueError: Excel file format cannot be determined, you must specify an engine manually.
         curate_ccrs_sales(
             data_dir,
             stats_dir,

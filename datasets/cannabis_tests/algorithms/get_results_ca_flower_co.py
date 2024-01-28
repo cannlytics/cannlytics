@@ -156,7 +156,7 @@ def download_coa_pdfs(
         url_key='lab_results_url',
         id_key='product_id',
         verbose=True,
-        pause=0.33,
+        pause=10.0,
     ):
     """Download all of the COA PDFs."""
     for obs in items:
@@ -229,9 +229,10 @@ if __name__ == '__main__':
     # Parameters.
     verbose = True
     headless = False
+    pause_between_page = 10.0
 
     # Initialize the driver.
-    driver = initialize_driver(headless=True)
+    driver = initialize_driver(headless=False)
 
     # Get all of the brand pages.
     driver.get(base_url + 'menu')
@@ -248,7 +249,7 @@ if __name__ == '__main__':
 
     # Open each brand/category page.
     products, recorded = [], []
-    for page in brand_pages + category_pages:
+    for page in category_pages + brand_pages:
 
         # Get the brand/category page.
         driver.get(base_url + page)
@@ -260,7 +261,7 @@ if __name__ == '__main__':
         click_show_more_button(driver)
 
         # Get all of the cards.
-        sleep(3)
+        sleep(pause_between_page)
         cards = driver.find_elements(by=By.CLASS_NAME, value='product-card-wrapper')
         if verbose:
             print(f'Found {len(cards)} products for page: {page}')
@@ -330,14 +331,33 @@ if __name__ == '__main__':
                 'sativa_percentage': sativa_percentage,
                 'product_url': product_url,
             })
+    
+    # Open file of all saved product URLs.
+    products_datafile = os.path.join(DATA_DIR, f'ca-all-products-flower-company.csv')
+    if os.path.exists(products_datafile):
+        existing_products = pd.read_csv(products_datafile)
+        if verbose:
+            print('Number of existing products:', len(existing_products))
+        new_products = pd.DataFrame(products)
+        new_products['total_thc'] = pd.to_numeric(new_products['total_thc'], errors='coerce')
+        new_products['total_thc'].fillna(0, inplace=True)
+        existing_products['total_thc'] = pd.to_numeric(existing_products['total_thc'], errors='coerce')
+        existing_combo = existing_products[['product_url', 'total_thc']]
+        merged_df = pd.merge(new_products, existing_combo, on=['product_url', 'total_thc'], how='left', indicator=True)
+        unrecorded_products = merged_df[merged_df['_merge'] == 'left_only']
+        unrecorded_products.drop(columns=['_merge'], inplace=True)
+    else:
+        unrecorded_products = pd.DataFrame(products)
 
     # Get each product URL page to get each product's data and results.
     data = []
-    for product in products:
+    if verbose:
+        print('Number of unrecorded products:', len(unrecorded_products))
+    for index, product in unrecorded_products.iterrows():
         if verbose:
             print(f'Getting data for: {product["product_url"]}')
         driver.get(product['product_url'])
-        sleep(3)
+        sleep(pause_between_page)
 
         # Click "Yes" button.
         click_yes_button(driver)
@@ -358,11 +378,13 @@ if __name__ == '__main__':
 
         # Get the effects, aromas, lineage, and lab results URL.
         info_rows = driver.find_elements(By.CSS_SELECTOR, '.row.product-view-row')
-        effects, aromas, lineage, lab_results_url = '', '', '', ''
+        contents, effects, aromas, lineage, lab_results_url = '', '', '', '', ''
         for row in info_rows:
             parts = row.text.split('\n')
             field = parts[0].lower()
-            if 'effects' in field:
+            if 'contents' in field:
+                contents = parts[-1]
+            elif 'effects' in field:
                 effects = parts[-1]
             elif 'aromas' in field:
                 aromas = parts[-1]
@@ -374,7 +396,7 @@ if __name__ == '__main__':
                     lab_results_url = el.get_attribute('href')
                 except:
                     pass
-
+        
         # Get the distributor.
         els = driver.find_elements(By.CSS_SELECTOR, '.row.d-block .detail-sub-text')
         distributor = els[-2].text.strip() if len(els) > 1 else None
@@ -392,7 +414,7 @@ if __name__ == '__main__':
         if not product['price']:
             price_element = driver.find_element(By.ID, 'variant-price-retail')
             driver.execute_script("arguments[0].scrollIntoView(true);", price_element)
-            sleep(0.2)
+            sleep(0.33)
             price = price_element.text
             discount_price = driver.find_element(By.ID, 'variant-price').text
             amount = driver.find_element(By.CSS_SELECTOR, '.variant-toggle').text
@@ -439,6 +461,7 @@ if __name__ == '__main__':
             'product_type': product_type,
             'product_subtype': product_subtype,
             'product_description': product_description,
+            'product_contents': contents,
             'predicted_effects': effects,
             'predicted_aromas': aromas.split(', '),
             'lineage': lineage,
@@ -478,3 +501,30 @@ if __name__ == '__main__':
     results_datafile = os.path.join(DATA_DIR, f'ca-results-flower-company-{timestamp}.xlsx')
     parser.save(results, results_datafile)
     print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
+
+
+    # === Aggregate COAs ===
+
+    # Aggregate product URLs that have been recorded.
+    existing_products = []
+    url_files = [x for x in os.listdir(DATA_DIR) if 'products' in x and 'all' not in x]
+    for url_file in url_files:
+        product_df = pd.read_csv(os.path.join(DATA_DIR, url_file))
+        existing_products.append(product_df)
+    existing_products = pd.concat(existing_products)
+    existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
+    print('Final number of products:', len(existing_products))
+    products_datafile = os.path.join(DATA_DIR, f'ca-all-products-flower-company.csv')
+    existing_products.to_csv(products_datafile, index=False)
+
+    # Aggregate COA data that has been saved.
+    all_results = []
+    results_files = [x for x in os.listdir(DATA_DIR) if 'results' in x and 'all' not in x]
+    for results_file in results_files:
+        results_df = pd.read_excel(os.path.join(DATA_DIR, results_file))
+        all_results.append(results_df)
+    all_results = pd.concat(all_results)
+    all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+    print('Final number of results:', len(all_results))
+    all_results_datafile = os.path.join(DATA_DIR, f'ca-all-results-flower-company.xlsx')
+    all_results.to_excel(all_results_datafile, index=False)

@@ -594,8 +594,14 @@ if __name__ == '__main__':
     DATA_DIR = 'D://data/florida/lab_results'
     
     # [✓] TEST: Get The Flowery COAs.
-    the_flowery_products = get_product_results_the_flowery(DATA_DIR)
-    the_flowery_coas = get_results_the_flowery(DATA_DIR)
+    try:
+        the_flowery_products = get_product_results_the_flowery(DATA_DIR)
+    except Exception as e:
+        print('ERROR:', e)
+    try:
+        the_flowery_coas = get_results_the_flowery(DATA_DIR)
+    except Exception as e:
+        print('ERROR:', e)
 
 
 #-----------------------------------------------------------------------
