@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/8/2023
-Updated: 1/20/2024
+Updated: 1/28/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -525,6 +525,7 @@ if __name__ == '__main__':
         all_results.append(results_df)
     all_results = pd.concat(all_results)
     all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+    # all_results = all_results.loc[all_results['results'] != '[]']
     print('Final number of results:', len(all_results))
     all_results_datafile = os.path.join(DATA_DIR, f'ca-all-results-flower-company.xlsx')
     all_results.to_excel(all_results_datafile, index=False)
