@@ -113,17 +113,17 @@ prefixes = [
     # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 start_day = 1
-days = 21
-start_year = 2024
-end_year = 2024
-start_month = 1
-end_month = 2
+days = 30
+start_year = 2023
+end_year = 2023
+start_month = 12
+end_month = 12
 pause = 3.33
 
 # Get all valid URLS, iterating over prefixes, years, and months.
 docs = []
 for y in reversed(range(start_year, end_year + 1)):
-    for m in reversed(range(start_month, end_month)):
+    for m in reversed(range(start_month, end_month + 1)):
         for prefix in prefixes:
             print(f'=== Querying {y}-{m:02d} ({prefix}) ===')
             results = get_sc_labs_results_by_month(

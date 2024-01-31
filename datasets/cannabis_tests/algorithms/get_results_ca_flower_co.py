@@ -229,7 +229,7 @@ if __name__ == '__main__':
     # Parameters.
     verbose = True
     headless = False
-    pause_between_page = 10.0
+    pause_between_page = 60.0
 
     # Initialize the driver.
     driver = initialize_driver(headless=False)
@@ -331,7 +331,7 @@ if __name__ == '__main__':
                 'sativa_percentage': sativa_percentage,
                 'product_url': product_url,
             })
-    
+
     # Open file of all saved product URLs.
     products_datafile = os.path.join(DATA_DIR, f'ca-all-products-flower-company.csv')
     if os.path.exists(products_datafile):

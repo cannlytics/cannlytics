@@ -89,33 +89,35 @@ CA_LAB_RESULTS = {
     },
     'SC Labs':{
         'datafiles': [
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
-            # r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-29-02-37-48.xlsx",
+            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-29-07-16-54.xlsx",
         ],
     },
 }
@@ -141,9 +143,186 @@ print('Number of results:', len(results))
 
 # Save the data.
 date = pd.to_datetime('today').strftime('%Y-%m-%d')
-outfile = f"D://data/california/lab_results/datasets/ca-results-flower-company-{date}.csv"
+outfile = f"D://data/california/lab_results/datasets/ca-results-{date}.csv"
 results.to_csv(outfile, index=False)
 print('Saved:', outfile)
+
+
+# === Timeseries Analysis ===
+
+# Flower company results.
+flower_co = pd.read_excel(r"D:\data\california\lab_results\datasets\flower-company\ca-all-results-flower-company.xlsx")
+
+# SC Labs results.
+all_results = []
+for datafile in reversed(CA_LAB_RESULTS['SC Labs']['datafiles']):
+    try:
+        data = pd.read_excel(datafile)
+    except:
+        print('Error reading:', datafile)
+        continue
+    all_results.append(data)
+results = pd.concat(all_results)
+print('Number of results before dropping in-progress:', len(results))
+results = results.loc[results['results'] != "[]"]
+print('Number of results before dropping duplicates:', len(results))
+results.drop_duplicates(subset=['sample_id'], inplace=True)
+print('Number of results:', len(results))
+date = pd.to_datetime('today').strftime('%Y-%m-%d')
+outfile = f"D://data/california/lab_results/datasets/ca-results-sclabs-{date}.csv"
+results.to_csv(outfile, index=False)
+print('Saved:', outfile)
+sclabs = results.copy()
+sclabs = sclabs.loc[sclabs['lab_state'] == 'CA']
+
+# Glass House Farms results.
+glass_house = pd.read_excel(r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx")
+
+
+# Define when standard method was effective.
+# Source: https://cannabis.ca.gov/cannabis-laws/rulemaking/standard-cannabinoids-test-method-and-standardized-operating-procedures/
+effective_date = pd.to_datetime('2023-10-01')
+compliance_date = pd.to_datetime('2024-01-01')
+
+# TODO: Create a timeseries of average total_cannabinoids, total_thc by week
+# for the datasets: `flower_co`, `sclabs`, `glass_house`.
+# Annotate the effective date and compliance date with a vertical line.
+
+def preprocess_and_aggregate(df):
+    """
+    Preprocess the data and aggregate it to calculate weekly averages.
+    """
+    # Ensure the date column is in datetime format
+    df['date'] = pd.to_datetime(df['date_tested'], errors='coerce')
+
+    # Keep only flower samples.
+    flower_types = [
+        'Flower',
+        'Flower, Inhalable',
+        'Flower, Product Inhalable',
+        'Flower, Medical Inhalable',
+        'Plant (Flower - Cured)',
+        'Plant (Bulk Flower)',
+    ]
+    preroll_types = [
+        'Pre-roll',
+        'Plant (Preroll)',
+        'Pre-Roll Cannabis, Product Inhalable',
+        'Pre-roll Cannabis, Product Inhalable',
+        'Pre-roll Product, Product Inhalable',
+        'Pre-roll Product, Inhalable',
+        'Pre-Roll Cannabis, Inhalable',
+        'Pre-roll Cannabis, Inhalable',
+    ]
+    sample = df.loc[df['product_type'].isin(flower_types)]
+
+    # Filter relevant columns and remove rows with missing values in these columns
+    sample = sample[['date', 'total_cannabinoids', 'total_thc']].dropna()
+
+    # Resample to weekly frequency, calculating the mean of total_cannabinoids and total_thc
+    return sample.resample('M', on='date').mean().reset_index()
+
+
+# Preprocess and aggregate data for each dataset.
+flower_co_weekly = preprocess_and_aggregate(flower_co)
+sclabs_weekly = preprocess_and_aggregate(sclabs)
+glass_house_weekly = preprocess_and_aggregate(glass_house)
+
+
+def plot_timeseries(df, title):
+    """
+    Plot the timeseries data with annotations for effective and compliance dates.
+    """
+    plt.figure(figsize=(15, 8))
+    sns.lineplot(x='date', y='total_cannabinoids', data=df, label='Total Cannabinoids')
+    sns.lineplot(x='date', y='total_thc', data=df, label='Total THC')
+    plt.axvline(x=effective_date, color='#1a1a1a', linestyle='--', lw=2)
+    plt.axvline(x=compliance_date, color='#1a1a1a', linestyle='--', lw=2)
+    plt.text(
+        effective_date,
+        plt.gca().get_ylim()[1] - 1,
+        'Effective Date',
+        color='#1a1a1a',
+        ha='right'
+    )
+    plt.text(
+        compliance_date,
+        plt.gca().get_ylim()[1] - 2,
+        'Compliance Date',
+        color='#1a1a1a',
+        ha='right',
+    )
+    plt.title(title)
+    plt.xlabel('Date')
+    plt.ylabel('Average Value')
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+
+# Plotting each dataset.
+plot_timeseries(flower_co_weekly, 'Flower Company - Average Total Cannabinoids and THC by Month')
+plot_timeseries(sclabs_weekly, 'SC Labs - Average Total Cannabinoids and THC by Month')
+plot_timeseries(glass_house_weekly, 'Glass House Farms - Average Cannabinoids and THC by Month')
+plt.show()
+
+
+def preprocess_and_aggregate_by_lab(df):
+    """
+    Preprocess the data and aggregate it to calculate monthly averages of total THC by lab.
+    """
+    # Ensure the date column is in datetime format
+    df['date'] = pd.to_datetime(df['date_tested'], errors='coerce')
+
+    # Filtering for flower types
+    flower_types = [
+        'Flower', 'Flower, Inhalable', 'Flower, Product Inhalable', 
+        'Flower, Medical Inhalable', 'Plant (Flower - Cured)', 'Plant (Bulk Flower)'
+    ]
+    df = df.loc[df['product_type'].isin(flower_types)]
+
+    # Keep relevant columns
+    df = df[['date', 'lab', 'total_cannabinoids']].dropna()
+
+    # Resampling to monthly frequency and grouping by lab
+    monthly_avg = df.groupby(['lab']).resample('M', on='date').mean().reset_index()
+
+    return monthly_avg
+
+# Preprocess and aggregate data for flower_co by lab.
+flower_co_monthly_by_lab = preprocess_and_aggregate_by_lab(flower_co)
+
+def plot_timeseries_by_lab(df, title):
+    """
+    Plot the timeseries data of monthly average total THC by lab.
+    """
+    plt.figure(figsize=(15, 8))
+    labs = df['lab'].unique()
+    colors = sns.color_palette('tab10', n_colors=len(labs))
+    for i, lab in enumerate(labs):
+        lab_data = df[df['lab'] == lab]
+        sns.lineplot(
+            x='date',
+            y='total_cannabinoids',
+            data=lab_data,
+            label=lab,
+            color=colors[i],
+        )
+    plt.axvline(x=effective_date, color='#1a1a1a', linestyle='--', lw=2)
+    plt.axvline(x=compliance_date, color='#1a1a1a', linestyle='--', lw=2)
+    plt.text(effective_date, plt.gca().get_ylim()[1] - 1, 'Effective Date', color='#1a1a1a', ha='right')
+    plt.text(compliance_date, plt.gca().get_ylim()[1] - 2, 'Compliance Date', color='#1a1a1a', ha='right')
+    plt.xlim(pd.to_datetime('2023-01-01'), pd.to_datetime('2024-02-01'))
+    plt.title(title)
+    plt.xlabel('Date')
+    plt.ylabel('Average Total Cannabinoids')
+    plt.legend(title='Lab', loc='upper left')
+    plt.tight_layout()
+
+# Plotting the timeseries for flower_co by lab
+plot_timeseries_by_lab(
+    flower_co_monthly_by_lab,
+    'Flower Company - Average Total Cannabinoids by Lab by Month'
+)
+plt.show()
 
 
 # === Chemical Analysis ===

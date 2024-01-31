@@ -861,7 +861,8 @@
     "ncol",
     "distplot",
     "swarmplot",
-    "geopandas"
+    "geopandas",
+    "lazyload"
   ],
   "todo-tree.tree.showBadges": false,
 }

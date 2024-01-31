@@ -135,6 +135,8 @@ def save_licensee_items_by_month(
                 month_items.drop_duplicates(subset=subset, keep='last', inplace=True)
             except FileNotFoundError:
                 pass
+            except ValueError as e:
+                manager.create_log(f'Error reading Excel file: {e}')
             month_items.sort_index(axis=1).to_excel(outfile, index=False)
             if verbose:
                 manager.create_log('Saved', licensee_id, month, 'items:', len(month_items))
@@ -254,14 +256,18 @@ def curate_ccrs_sales(
         midpoint_start = datetime.now()
 
         # Read in the sales items.
-        items = pd.read_csv(
-            datafile,
-            sep='\t',
-            encoding='utf-16',
-            parse_dates=date_fields,
-            usecols=item_cols,
-            dtype=item_types,
-        )
+        try:
+            items = pd.read_csv(
+                datafile,
+                sep='\t',
+                encoding='utf-16',
+                parse_dates=date_fields,
+                usecols=item_cols,
+                dtype=item_types,
+            )
+        except Exception as e:
+            manager.create_log('Failed to read sales items: ' + str(e))
+            continue
 
         # Remove any sales items that were deleted.
         items = items.loc[
@@ -473,8 +479,8 @@ if __name__ == '__main__':
         # 'CCRS PRR (3-6-23)',
         # 'CCRS PRR (4-4-23)',
         # 'CCRS PRR (5-7-23)',
-        'CCRS PRR (6-6-23)',
-        # 'CCRS PRR (8-4-23)',
+        # 'CCRS PRR (6-6-23)',
+        'CCRS PRR (8-4-23)',
         # 'CCRS PRR (9-5-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
