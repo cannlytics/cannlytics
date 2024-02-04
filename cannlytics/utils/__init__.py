@@ -48,6 +48,8 @@ from .utils import (
     get_number_of_lines,
     unzip_files,
     reorder_columns,
+    nonzero_columns,
+    nonzero_rows,
 )
 
 __all__ = [
@@ -94,4 +96,6 @@ __all__ = [
     'decode_pdf',
     'encode_pdf',
     'reorder_columns',
+    'nonzero_columns',
+    'nonzero_rows',
 ]
