@@ -169,7 +169,7 @@ def save_all_licenses(data_dir, version='latest'):
 
 
 # === Test ===
-# [✓] Tested: 2023-09-20 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-02-05 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Support command line usage.
