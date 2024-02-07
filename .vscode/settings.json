@@ -862,7 +862,10 @@
     "distplot",
     "swarmplot",
     "geopandas",
-    "lazyload"
+    "lazyload",
+    "countplot",
+    "axvline",
+    "mlines"
   ],
   "todo-tree.tree.showBadges": false,
 }
