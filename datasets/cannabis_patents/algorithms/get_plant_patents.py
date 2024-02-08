@@ -386,8 +386,6 @@ if __name__ == '__main__':
     # Future work: Download PDFs for the patents found.
     #-------------------------------------------------------------------
 
-    # 
-
     # Search for cannabis patents.
     queries = [
         # 'cannabis',

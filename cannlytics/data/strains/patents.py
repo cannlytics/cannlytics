@@ -349,9 +349,9 @@ def get_patent_details(
 
 # DEV:
 # get_patent_details(patent)
-get_patent_details(pd.Series({
-    'patent_number': '*'
-}),)
+# get_patent_details(pd.Series({
+#     'patent_number': '*'
+# }),)
 
 
 def get_strain_name(x):
@@ -363,7 +363,7 @@ def get_strain_name(x):
 
 
 # === Tests ===
-# Tested: 2024-01-21 by Keegan Skeate <keegan@cannlytics.com>
+# Tested: 2024-02-07 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     # === Setup ===
@@ -379,7 +379,7 @@ if __name__ == '__main__':
     # Find cannabis plant patents.
     #-------------------------------------------------------------------
 
-    # TODO: Iterate over search terms.
+    # Define cannabis plant patent queries.
     queries = [
         ('cannabis', ''),
         ('cannabis', 'plant'),
@@ -402,70 +402,69 @@ if __name__ == '__main__':
     driver.get(PATENT_SEARCH_URL)
 
     # Search for patents.
-    # TODO: Iterate over all search terms.
-    search_terms = {
-        'searchText1': 'cannabis',
-        'searchText2': 'cultivar'
-    }
-    for element_id, term in search_terms.items():
-        input_element = driver.find_element(By.ID, element_id)
-        input_element.clear()
-        input_element.send_keys(term)
-
-    # Click the search button.
-    search_button = driver.find_element(by=By.ID, value='searchText2')
-    search_button.send_keys(Keys.ENTER)
-    sleep(3)
-
-    # Iterate over search result pages.
-    iterate = True
     patents = []
-    while iterate:
+    for query in queries:
+        search_terms = {'searchText1': query[0], 'searchText2': query[1]}
+        for element_id, term in search_terms.items():
+            input_element = driver.find_element(By.ID, element_id)
+            input_element.clear()
+            input_element.send_keys(term)
 
-        # Wait until the overlay is no longer visible.
-        WebDriverWait(driver, 3).until(EC.invisibility_of_element((By.CSS_SELECTOR, '.overlay.full-page')))
+        # Click the search button.
+        sleep(5)
+        search_button = driver.find_element(by=By.ID, value='searchText2')
+        search_button.send_keys(Keys.ENTER)
+        sleep(5)
 
-        # Extract the page number and total number of pages.
-        page_info_span = driver.find_element(By.ID, 'pageInfo')
-        page_info_text = page_info_span.text
-        current_page, total_pages = page_info_text.split(" of ")
-        current_page = current_page.replace('Page ', '')
-        
-        # Get the metadata for each patent.
-        metadata = []
-        table = driver.find_element(by=By.ID, value='searchResults')
-        rows = table.find_elements(by=By.TAG_NAME, value='tr')[1:]
-        print('Getting %i patents on page' % len(rows), current_page, 'of', total_pages)
-        for row in rows:
-            metadata.append({
-                'query_number': row.find_element(By.XPATH, './td[1]').text,
-                'patent_number': row.find_element(By.XPATH, './td[2]').text,
-                'patent_title': row.find_element(By.XPATH, './td[4]').text,
-                'inventor_name': row.find_element(By.XPATH, './td[5]').text,
-                'date_published': row.find_element(By.XPATH, './td[6]').text,
-                'page_count': int(row.find_element(By.XPATH, './td[7]').text)
-            })
+        # Iterate over search result pages.
+        iterate = True
+        while iterate:
 
-        # Add URLs to the list of dictionaries.
-        count = 0
-        links = driver.find_elements(by=By.TAG_NAME, value='a')
-        for i, link in enumerate(links):
-            href = link.get_attribute('href')
-            if href and 'image-ppubs.uspto.gov' in href:
-                metadata[count]['patent_url'] = href
-                count += 1
-        
-        # Record the patent data.
-        patents.extend(metadata)
-        
-        # Click the next button if it's not the last page.
-        if current_page != total_pages:
-            next_button = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.ID, 'paginationNextItem'))
-            )
-            next_button.click()
-        else:
-            iterate = False
+            # Wait until the overlay is no longer visible.
+            WebDriverWait(driver, 3).until(EC.invisibility_of_element((By.CSS_SELECTOR, '.overlay.full-page')))
+
+            # Extract the page number and total number of pages.
+            sleep(3)
+            page_info_span = driver.find_element(By.ID, 'pageInfo')
+            page_info_text = page_info_span.text
+            current_page, total_pages = page_info_text.split(" of ")
+            current_page = current_page.replace('Page ', '')
+            
+            # Get the metadata for each patent.
+            metadata = []
+            table = driver.find_element(by=By.ID, value='searchResults')
+            rows = table.find_elements(by=By.TAG_NAME, value='tr')[1:]
+            print('Getting %i patents on page' % len(rows), current_page, 'of', total_pages)
+            for row in rows:
+                metadata.append({
+                    'query_number': row.find_element(By.XPATH, './td[1]').text,
+                    'patent_number': row.find_element(By.XPATH, './td[2]').text,
+                    'patent_title': row.find_element(By.XPATH, './td[4]').text,
+                    'inventor_name': row.find_element(By.XPATH, './td[5]').text,
+                    'date_published': row.find_element(By.XPATH, './td[6]').text,
+                    'page_count': int(row.find_element(By.XPATH, './td[7]').text)
+                })
+
+            # Add URLs to the list of dictionaries.
+            count = 0
+            links = driver.find_elements(by=By.TAG_NAME, value='a')
+            for i, link in enumerate(links):
+                href = link.get_attribute('href')
+                if href and 'image-ppubs.uspto.gov' in href:
+                    metadata[count]['patent_url'] = href
+                    count += 1
+            
+            # Record the patent data.
+            patents.extend(metadata)
+            
+            # Click the next button if it's not the last page.
+            if current_page != total_pages:
+                next_button = WebDriverWait(driver, 3).until(
+                    EC.element_to_be_clickable((By.ID, 'paginationNextItem'))
+                )
+                next_button.click()
+            else:
+                iterate = False
 
     # Close the driver.
     print('Found %i patents, closing driver.' % len(patents))
