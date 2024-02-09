@@ -211,6 +211,7 @@ def curate_ccrs_sales(
         last_file: Optional[int] = None,
         manager: Optional[CCRS] = None,
         release: Optional[str] = '',
+        skip_existing: Optional[bool] = True,
     ):
     """Curate CCRS sales by merging additional datasets."""
 
@@ -252,10 +253,18 @@ def curate_ccrs_sales(
     if reverse:
         sales_items_files.reverse()
     for datafile in sales_items_files[first_file:]:
-        manager.create_log(f'Augmenting: {datafile}')
-        midpoint_start = datetime.now()
+
+        # Skip already curated files.
+        basename = datafile.split('/')[-1]
+        index = int(basename.split('_')[-1].split('.')[0])
+        outfile = os.path.join(sales_dir, f'sales_{index}.csv')
+        if os.path.exists(outfile) and skip_existing:
+            manager.create_log('Skipping already curated file: ' + datafile)
+            continue
 
         # Read in the sales items.
+        manager.create_log(f'Augmenting: {datafile}')
+        midpoint_start = datetime.now()
         try:
             items = pd.read_csv(
                 datafile,
@@ -277,8 +286,6 @@ def curate_ccrs_sales(
 
         # Efficiently order sales headers.
         manager.create_log('Merging sale header data...')
-        basename = datafile.split('/')[-1]
-        index = int(basename.split('_')[-1].split('.')[0])
         sale_headers_files = get_datafiles(data_dir, 'SaleHeader_', desc=False)
         try:
             sale_headers_files = ripple_list(sale_headers_files, index)
@@ -374,7 +381,6 @@ def curate_ccrs_sales(
 
         # Save the augmented sales items.
         manager.create_log('Saving augmented sales data...')
-        outfile = os.path.join(sales_dir, f'sales_{index}.csv')
         items.to_csv(outfile, index=False)
         manager.create_log('Saved augmented sales datafile: ' + str(index))
 
@@ -494,7 +500,6 @@ if __name__ == '__main__':
         sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
 
         # Curate CCRS sales.
-        # FIXME: ValueError: Excel file format cannot be determined, you must specify an engine manually.
         curate_ccrs_sales(
             data_dir,
             stats_dir,
