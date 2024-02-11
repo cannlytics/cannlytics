@@ -776,5 +776,13 @@ if __name__ == '__main__':
     downloader.get_results_terplife(queries)
     downloader.quit()
 
+    # TODO: Aggregate results.
+
+
+    # TODO: Calculate statistics.
+
+
+    # TODO: Upload results to Firestore.
+
 
 # Optional: Search TerpLife for known strains.

@@ -2,31 +2,60 @@
 <html>
 <!--
   Home Page | Cannlytics
-  Copyright (c) 2021-2022 Cannlytics
+  Copyright (c) 2021-2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
-  Created: 1/5/2020
-  Updated: 1/31/2023
+  Created: 1/5/2021
+  Updated: 2/10/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static %}
-{% block title %}Welcome | Cannlytics{% endblock %}
+{% block title %}Cannlytics{% endblock %}
 {% block material %}
   <div class="homepage pb-5 overflow-hidden">
 
     <!-- Hero -->
-    {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %}
+    {% comment %} {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %} {% endcomment %}
 
     <!-- Demo -->
-    {% include "website/pages/homepage/components/demo.html" %}
+    {% comment %} {% include "website/pages/homepage/components/demo.html" %} {% endcomment %}
 
     <!-- Wave -->
-    <div class="wave small" >
+    {% comment %} <div class="wave small" >
       <svg viewBox="0 0 500 150" preserveAspectRatio="none">
         <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
       </svg>
-    </div>
+    </div> {% endcomment %}
+
+    <!-- TODO: Results, Strains, Licenses datasets -->
+
+
+    <!-- TODO: Live analytics -->
+
+
+
+    <!-- TODO: Newest Strains -->
+
+
+    <!-- TODO: Newest Results -->
+
+
+    <!-- TODO: Newest Licenses -->
+
+
+
+    <!-- TODO: Contributors -->
+
+
+    
+    <!-- TODO: Articles -->
+
+
+
+    <!-- TODO: Service Promos -->
+
+
 
     <!-- Video Banner -->
     <div class="ground">
@@ -74,7 +103,7 @@
   </div>
 
   <!-- Vines -->
-  {% include "website/components/art/vines.html" %}
+  {% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
 
 {% endblock %}
 

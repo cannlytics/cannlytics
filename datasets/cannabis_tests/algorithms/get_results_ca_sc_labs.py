@@ -216,3 +216,13 @@ timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
 outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-{timestamp}.xlsx')
 pd.DataFrame(all_data).to_excel(outfile, index=False)
 print(f'Saved {len(all_data)} results: {outfile}')
+
+
+# TODO: Aggregate the results.
+
+
+# TODO: Calculate statistics.
+
+
+# TODO: Upload results to Firestore.
+

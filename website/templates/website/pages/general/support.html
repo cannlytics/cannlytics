@@ -163,7 +163,7 @@
 <script>
   //cannlytics.payments.initializeSupport();
 
-  // Get the slider and price elements.
+  {% comment %} // Get the slider and price elements.
   const tokenSlider = document.getElementById('tokenSlider');
   const tokenCount = document.getElementById('tokenCount');
   const tokenPrice = document.getElementById('tokenPrice');
@@ -182,7 +182,7 @@
 
     // Position the token count above the slider thumb.
     tokenCount.style.left = `${left}px`;
-  }
+  } {% endcomment %}
 
   // TODO: Get the user's subscription.
 

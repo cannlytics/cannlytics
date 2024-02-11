@@ -264,6 +264,12 @@ if __name__ == '__main__':
     # Get CA lab results.
     ca_results = get_glass_house_farms_lab_results(data_dir)
 
+    # TODO: Calculate statistics.
+
+
+    # TODO: Upload results to Firestore.
+
+
 
 # === DEV ===
 

@@ -264,3 +264,10 @@ if __name__ == '__main__':
     print('Connecticut lab results archived:', stats_dir)
 
     # TODO: Integrate with `analyte_results_ct.py`.
+
+
+    # TODO: Calculate statistics.
+
+
+    # TODO: Upload results to Firestore.
+    

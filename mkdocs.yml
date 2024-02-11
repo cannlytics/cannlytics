@@ -23,7 +23,7 @@ site_name: Cannlytics Documentation
 site_url: https://docs.cannlytics.com/
 site_author: Keegan Skeate
 site_description: Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data.
-copyright: Copyright &copy; 2023 Cannlytics
+copyright: Copyright &copy; 2020-2024 Cannlytics
 
 # Repository
 repo_name: Cannlytics
