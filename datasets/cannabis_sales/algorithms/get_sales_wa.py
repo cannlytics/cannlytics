@@ -33,7 +33,7 @@ from cannlytics.data.ccrs import (
     standardize_dataset,
     unzip_datafiles,
 )
-from cannlytics.utils import rmerge, sorted_nicely
+from cannlytics.utils import camel_to_snake, rmerge, sorted_nicely
 import pandas as pd
 
 
@@ -301,10 +301,28 @@ def curate_ccrs_sales(
             target='LicenseeId',
             how='left',
             validate='m:1',
+            rename={
+                'CreatedDate': 'sale_created_date',
+                'CreatedBy': 'sale_created_by',
+                'UpdatedDate': 'sale_updated_date',
+                'UpdatedBy': 'sale_updated_by',
+                # 'LicenseeId': 'sale_licensee_id',
+                'ExternalIdentifier': 'sale_external_id',
+            },
+            break_once_matched=False,
         )
 
         # Standardize inventory items.
-        items = standardize_dataset(items)
+        # items = standardize_dataset(items)
+        items.rename(columns={col: camel_to_snake(col) for col in items.columns}, inplace=True)
+        items.rename(columns={
+            'external_identifier': 'sale_item_external_id',
+            'created_by': 'sale_item_created_by',
+            'created_date': 'sale_item_created_date',
+            'updated_by': 'sale_item_updated_by',
+            'updated_date': 'sale_item_updated_date',
+            'licensee_id': 'sale_licensee_id',
+        }, inplace=True)
 
         # Augment with curated inventory.
         manager.create_log('Merging inventory data...')
@@ -320,15 +338,24 @@ def curate_ccrs_sales(
             # FIXME: Why are there duplicates?
             inventory_data['inventory_id'] = inventory_data['inventory_id'].astype(str)
             inventory_data.drop_duplicates(subset='inventory_id', keep='first', inplace=True)
+
+            # Clean the data.
+            inventory_data['licensee_id'] = inventory_data['licensee_id'].astype(str)
             
+            # FIXME: Account for product_id?
+
             # Merge inventory data with sales data.
-            items = rmerge(
+            match = rmerge(
                 items,
                 inventory_data,
                 on='inventory_id',
                 how='left',
                 validate='m:1',
             )
+            # matched = match.loc[~match[target].isna()]
+            print(len(items.loc[~items['strain_name'].isna()]))
+
+            
 
         # # Augment with curated lab results.
         # # FIXME: This may be overwriting data points.
@@ -423,7 +450,7 @@ def curate_ccrs_sales(
 
     # Finish curating sales.
     end = datetime.now()
-    manager.create_log('✓ Finished curating sales in' + str(end - start))
+    manager.create_log('✓ Finished curating sales in ' + str(end - start))
 
 
 def calculate_and_save_stats(
@@ -465,6 +492,7 @@ def calculate_and_save_stats(
 
     # Save the statistics by month.
     save_stats_by_month(stats, sales_stats_dir, 'sales-by-licensee')
+    manager.create_log('Saved sales statistics to:', stats_file)
     return daily_licensee_sales
 
 
@@ -490,7 +518,7 @@ if __name__ == '__main__':
         # 'CCRS PRR (9-5-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
-        # 'CCRS PRR (1-2-24)',
+        'CCRS PRR (1-2-24)',
     ]
     for release in reversed(releases):
 
@@ -500,6 +528,7 @@ if __name__ == '__main__':
         sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
 
         # Curate CCRS sales.
+        # FIXME: The output data is not correct.
         curate_ccrs_sales(
             data_dir,
             stats_dir,

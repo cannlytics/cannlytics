@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<!--
+  Live Analytics | Cannlytics Website
+  Created: 2/10/2024
+  Updated: 2/10/2024
+-->
+{% load static %}
+<div class="container">
+
+  <h2 class="serif text-dark mt-0 mb-2">Live Analytics</h2>
+  <h4 class="serif text-secondary" id="updated-time">Last Updated: </h4>
+  <select id="series-select">
+    <option value="total_cannabinoids">Total Cannabinoids</option>
+    <option value="total_thc">Total THC</option>
+    <option value="total_cbd">Total CBD</option>
+  </select>
+  <div id="chart" style="width:300px;hieght:300px;"></div>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+
+  // Initalize live results.
+  cannlytics.analytics.initializeLiveResults();
+
+</script>

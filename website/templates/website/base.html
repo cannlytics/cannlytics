@@ -35,16 +35,17 @@
   <!-- Optional: Ween off of jQuery -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
+  <!-- D3 Charting Library -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
   <!-- Cannlytics JavaScript and CSS Module -->
   {% comment %} FIXME: Smoothly switch between dev and production. {% endcomment %}
 
   <!-- PRODUCTION: -->
-  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script>
+  {% comment %} <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script> {% endcomment %}
   
-  {% comment %}
   <!-- DEV: -->
   <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js' %}?v={{ now|date:"YmdHis" }}"></script>
-  {% endcomment %}
 
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}
