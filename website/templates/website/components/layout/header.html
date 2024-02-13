@@ -68,18 +68,10 @@
       <ul class="navbar-nav me-2">
         <li class="nav-item mb-0">
           <a
-            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'ai' in request.path %}active{% endif %}"
-            href="https://github.com/cannlytics/cannlytics"
-          >
-            Code
-          </a>
-        </li>
-        <li class="nav-item mb-0">
-          <a
             class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'data' in request.path %}active{% endif %}"
-            href="https://data.cannlytics.com"
+            href="{% url 'page' page='data' %}"
           >
-            Datasets
+            Data
           </a>
         </li>
         <li class="nav-item mb-0">
@@ -88,6 +80,14 @@
             href="https://docs.cannlytics.com"
           >
             Docs
+          </a>
+        </li>
+        <li class="nav-item mb-0">
+          <a
+            class="nav-link btn-sm background-hover fw-bold serif text-dark {% if 'ai' in request.path %}active{% endif %}"
+            href="https://github.com/cannlytics/cannlytics"
+          >
+            Code
           </a>
         </li>
         <li class="nav-item mb-0">
@@ -122,7 +122,7 @@
                       <div class="card-body bg-transparent px-0">
                         <p class="card-text fs-6 text-dark markdown">
                           <small>
-                            Find, wrangle, and crunch cannabis data like a pro every Wednesday at 8:30am PST / 11:30am EST at the
+                            Find, wrangle, and crunch cannabis data like a pro every Thursday at 3:30pm PST / 6:30pm EST at the
                             <a
                               href="https://www.meetup.com/cannabis-data-science/"
                               class="serif background-hover"
@@ -202,8 +202,7 @@
 
       <!-- No user menu -->
       <ul class="navbar-nav align-items-end align-items-lg-center ms-auto me-3 indicates-auth visually-hidden">
-        {% if section != 'sign-in' %}
-        <li class="nav-item h6 mb-0">
+        {% comment %} <li class="nav-item h6 mb-0">
           <a
             class="nav-link btn-sm app-action background-hover text-nowrap me-2 fw-bold serif text-dark"
             data-bs-target="#sign-in-dialog"
@@ -211,9 +210,18 @@
           >
             Sign in
           </a>
-        </li>
-        {% endif %}
+        </li> {% endcomment %}
         <li class="nav-item">
+          <a
+            type="button"
+            class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
+            data-bs-target="#sign-in-dialog"
+            data-bs-toggle="modal"
+          >
+          Sign in
+          </a>
+        </li>
+        {% comment %} <li class="nav-item">
           <a
             type="button"
             class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
@@ -221,7 +229,7 @@
           >
             Launch App
           </a>
-        </li>
+        </li> {% endcomment %}
       </ul>
 
       <!-- Right navigation shown if user is signed in. -->

@@ -1,45 +1,37 @@
 <!doctype html>
 <html>
 <!--
-  Cannabis Lab Test Results Page | Cannlytics Website
-  Copyright (c) 2022 Cannlytics
+  Results Page | Cannlytics Website
+  Copyright (c) 2022-2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 9/29/2022
-  Updated: 9/29/2022
+  Updated: 2/13/2024
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static icon %}
-{% block title %}Cannabis Lab Test Results | Cannlytics{% endblock %}
+{% block title %}Results | Cannlytics{% endblock %}
 {% block page_css %}
 
-<!-- TODO: Loading JS from the Cannlytics server preferred. -->
-{% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
-<link href="{% static 'website/plugins/ag-grid/ag-grid.min.css' %}" rel="stylesheet" type="text/css"/>
-<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine.min.css' %}" rel="stylesheet" type="text/css"/>
-<link href="{% static 'website/plugins/ag-grid/ag-theme-alpine-dark.min.css' %}" rel="stylesheet" type="text/css"/> {% endcomment %}
- <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
- <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
- <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+  <!-- AG Grid -->
+  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
- <!-- TODO: Load alpine-dark without the entire community bundle. -->
- <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
- {% comment %} <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine-dark.min.css"/> {% endcomment %}
 {% endblock page_css %}
 {% block material %}
 
-<!-- Banner
- - [ ] Add a background picture!
--->
+
 <!-- Optional:  -->
-{% include "website/components/heros/hero_banner.html" with
+{% comment %} {% include "website/components/heros/hero_banner.html" with
   title=''
   description="Get cannabis lab test results while they're hot!"
   image_url=''
   image_size="200px"
   only
-%}
+%} {% endcomment %}
 
 <!-- Breadcrumbs -->
 <section class="container mb-3">
@@ -72,7 +64,7 @@
   </div>
 </section>
 
-<!-- Cannabis Lab Test Results -->
+<!-- Results -->
 <section class="container markdown">
 
 
@@ -85,7 +77,10 @@
 
     // Initialize tooltips.
     // cannlytics.ui.enableTooltips();
-  
+
+    // Initialize results. 
+    cannlytics.resultsJS.initializeResults();
+
   </script>
 {% endblock %}
 </html>

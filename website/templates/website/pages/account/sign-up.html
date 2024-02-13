@@ -28,7 +28,7 @@
   <!-- Email -->
   <div class="mb-3 row">
     <label
-      for="sign-up-email"
+      for="login-email"
       class="col-sm-2 col-form-label col-form-label-sm"
     >
       Email
@@ -37,7 +37,7 @@
       <input
         type="email"
         class="form-control form-control-sm"
-        id="sign-up-email"
+        id="login-email"
         required
         autofocus
         spellcheck="false"
@@ -141,7 +141,7 @@
 </section>
 
 <!-- Vines -->
-{% include "website/components/art/vines.html" %}
+{% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
 
 {% endblock material %}
 </html>

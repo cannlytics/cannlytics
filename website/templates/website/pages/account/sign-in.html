@@ -120,7 +120,7 @@
     </button>
   </div>
 
-  <!-- Google Sign In -->
+  {% comment %} <!-- Google Sign In -->
   <div class="serif text-dark text-center my-3">
     &mdash;&nbsp;or&nbsp;&mdash;
   </div>
@@ -128,7 +128,7 @@
     <a id="google-signin" class="app-action" onclick="cannlytics.auth.signInWithGoogle()"></a>
   </div>
   <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_focus_web@2x.png' %}">
-  <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}">
+  <img style="display:none;" src="{% static 'website/images/logos/signin-assets/btn_google_signin_dark_pressed_web@2x.png' %}"> {% endcomment %}
 
   <!-- Sign up -->
   <div class="d-flex align-items-center justify-content-center">
@@ -151,7 +151,7 @@
 </section>
 
 <!-- Vines -->
-{% include "website/components/art/vines.html" %}
+{% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
 
 {% endblock material %}
 

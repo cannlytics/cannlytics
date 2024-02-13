@@ -169,7 +169,7 @@ export const liveResults = {
     results.forEach(result => {
       const card = `
         <div class="card mb-3" style="width: 100%;">
-          <div class="card-body">
+          <div class="card-body markdown text-dark">
             <h5 class="card-title">${result.product_name}</h5>
             <p class="card-text">Analyses: ${result.analyses.join(", ")}</p>
             <p class="card-text">Method: ${result[`${result.analyses[0]}_method`]}</p>

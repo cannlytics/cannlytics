@@ -186,7 +186,7 @@ export async function signUp() {
   } else {
     terms.classList.remove('is-invalid');
   }
-  const email = document.getElementById('sign-up-email').value;
+  const email = document.getElementById('login-email').value;
   const password = document.getElementById('sign-up-password').value;
   document.getElementById('sign-up-button').classList.add('d-none');
   document.getElementById('sign-up-loading-button').classList.remove('d-none');

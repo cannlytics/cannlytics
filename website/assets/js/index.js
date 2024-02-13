@@ -18,6 +18,9 @@ import { website } from './website/website.js';
 import { showNotification } from './utils.js';
 import { ui } from './ui/ui.js';
 import { utils } from './utils.js';
+import { resultsJS } from './results/results.js';
+import { strainsJS } from './strains/strains.js';
+import { licensesJS } from './licenses/licenses.js';
 
 import '../css/cannlytics.scss';
 
@@ -32,5 +35,8 @@ export {
   utils,
   videos,
   website,
+  resultsJS,
+  strainsJS,
+  licensesJS,
   showNotification,
 };

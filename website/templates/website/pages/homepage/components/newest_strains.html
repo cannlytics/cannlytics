@@ -3,12 +3,20 @@
 <!--
   Newest Strains | Cannlytics Website
   Created: 2/11/2024
-  Updated: 2/11/2024
+  Updated: 2/13/2024
 -->
 {% load static %}
 
 <div class="container mt-5">
-  <h2 class="serif text-dark mt-0 mb-2">Newest Strains</h2>
+  <h2 class="mt-0 mb-2">
+    <a
+      href="{% url 'page' page='strains' %}"
+      class="text-dark serif"
+      style="text-decoration: none;"
+    >
+      Newest Strains
+    </a>
+  </h2>
   <div id="strains-container" class="scrolling-wrapper"></div>
 </div>
 
