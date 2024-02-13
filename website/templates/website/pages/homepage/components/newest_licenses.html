@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<!--
+  Newest Licenses | Cannlytics Website
+  Created: 2/11/2024
+  Updated: 2/11/2024
+-->
+{% load static %}
+
+<div class="container mt-5">
+  <h2 class="serif text-dark mt-0 mb-2">Newest Licenses</h2>
+  <div id="licenses-container" class="scrolling-wrapper"></div>
+</div>
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+
+  // Initialize the newest strains.
+  cannlytics.analytics.initializeNewestLicenses();
+
+</script>
+{% endblock %}

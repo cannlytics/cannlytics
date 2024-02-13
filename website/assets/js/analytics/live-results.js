@@ -85,31 +85,103 @@ export const liveResults = {
           dominant_terpenes: ['Pinene', 'Myrcene', 'Limonene', 'Caryophyllene', 'Humulene']
       },
       // Add more mock strains as needed
-  ];
+    ];
+    console.log('Strains:');
+    console.log(strains);
 
-  // Function to render strains
-  function renderStrains(strains) {
-      const container = document.getElementById('strainsContainer');
-      strains.forEach(strain => {
-          const card = `
-              <div class="card" style="width: 18rem;">
-                  <img src="${strain.image_url}" class="card-img-top" alt="${strain.name}">
-                  <div class="card-body">
-                      <h5 class="card-title">${strain.name}</h5>
-                      <p class="card-text">Discovered by: ${strain.discovered_by}</p>
-                      <p class="card-text">Avg. Terpenes: ${strain.avg_terpenes}</p>
-                      <p class="card-text">Dominant Terpenes: ${strain.dominant_terpenes.join(", ")}</p>
-                  </div>
-              </div>
-          `;
-          container.innerHTML += card;
-      });
-  }
-
-  // Call renderStrains on page load
-  document.addEventListener('DOMContentLoaded', () => {
-      renderStrains(strains);
-  });
+    // Render strains
+    const container = document.getElementById('strains-container');
+    strains.forEach(strain => {
+        const card = `
+            <div class="card" style="width: 18rem;">
+                <img src="${strain.image_url}" class="card-img-top" alt="${strain.name}">
+                <div class="card-body text-dark text-small">
+                    <h5 class="card-title">${strain.name}</h5>
+                    <p class="card-text">Discovered by: ${strain.discovered_by}</p>
+                    <p class="card-text">Avg. Terpenes: ${strain.avg_terpenes}</p>
+                    <p class="card-text">Dominant Terpenes: ${strain.dominant_terpenes.join(", ")}</p>
+                </div>
+            </div>
+        `;
+        container.innerHTML += card;
+    });
   },
+
+  initializeNewestLicenses() {
+    // Mock data for demonstration purposes
+    const licenses = [
+      {
+        license_number: "C10-0000423-LIC",
+        license_status: "Active",
+        license_type: "Commercial - Retailer",
+        license_designation: "Adult-Use and Medicinal",
+        issue_date: "2019-07-15T00:00:00",
+        expiration_date: "2023-07-14T00:00:00",
+        business_legal_name: "Movocan",
+        premise_city: "Calexico",
+        premise_state: "CA",
+      },
+      // Add more mock licenses as needed
+    ];
+    console.log('Licenses:');
+    console.log(licenses);
+  
+    // Render licenses
+    const container = document.getElementById('licenses-container'); // Ensure you have this container in your HTML
+    licenses.forEach(license => {
+        const card = `
+            <div class="card" style="width: 18rem;">
+                <div class="card-body text-dark">
+                    <h5 class="card-title">${license.license_number}</h5>
+                    <p class="card-text">Status: ${license.license_status}</p>
+                    <p class="card-text">Type: ${license.license_type}</p>
+                    <p class="card-text">Designation: ${license.license_designation}</p>
+                    <p class="card-text">Issue Date: ${license.issue_date.split('T')[0]}</p>
+                    <p class="card-text">Expiration Date: ${license.expiration_date.split('T')[0]}</p>
+                    <p class="card-text">Legal Name: ${license.business_legal_name}</p>
+                    <p class="card-text">Location: ${license.premise_city}, ${license.premise_state}</p>
+                </div>
+            </div>
+        `;
+        container.innerHTML += card;
+    });
+  },
+
+  initializeNewestResults() {
+    // Mock data for demonstration purposes
+    const results = [
+      {
+        product_name: "Blue Rhino Pre-Roll",
+        analyses: ["cannabinoids"],
+        cannabinoids_method: "HPLC",
+        cannabinoids_status: "pass",
+        date_tested: "2022-04-20T16:20",
+        producer: "Grow Tent",
+        producer_city: "SF",
+        producer_state: "CA",
+        lab_results_url: "https://cannlytics.com/results/blue_rhino_pre_roll",
+      },
+      // Add more mock results as needed
+    ];
+  
+    // Render results
+    const container = document.getElementById('results-container'); // Ensure you have this container in your HTML
+    results.forEach(result => {
+      const card = `
+        <div class="card mb-3" style="width: 100%;">
+          <div class="card-body">
+            <h5 class="card-title">${result.product_name}</h5>
+            <p class="card-text">Analyses: ${result.analyses.join(", ")}</p>
+            <p class="card-text">Method: ${result[`${result.analyses[0]}_method`]}</p>
+            <p class="card-text">Status: ${result[`${result.analyses[0]}_status`]}</p>
+            <p class="card-text">Date Tested: ${new Date(result.date_tested).toLocaleDateString()}</p>
+            <p class="card-text">Producer: ${result.producer}, ${result.producer_city}, ${result.producer_state}</p>
+            <a href="${result.lab_results_url}" class="card-link">View Results</a>
+          </div>
+        </div>
+      `;
+      container.innerHTML += card;
+    });
+  },  
 
 };

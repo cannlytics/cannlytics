@@ -139,7 +139,7 @@ def save_licensee_items_by_month(
                 manager.create_log(f'Error reading Excel file: {e}')
             month_items.sort_index(axis=1).to_excel(outfile, index=False)
             if verbose:
-                manager.create_log('Saved', licensee_id, month, 'items:', len(month_items))
+                manager.create_log(f'Saved: {licensee_id} {month} {len(month_items)}')
 
 
 def save_stats_by_month(
@@ -345,7 +345,7 @@ def curate_ccrs_sales(
             # FIXME: Account for product_id?
 
             # Merge inventory data with sales data.
-            match = rmerge(
+            items = rmerge(
                 items,
                 inventory_data,
                 on='inventory_id',
@@ -353,9 +353,8 @@ def curate_ccrs_sales(
                 validate='m:1',
             )
             # matched = match.loc[~match[target].isna()]
-            print(len(items.loc[~items['strain_name'].isna()]))
+            print('Strains matched:', len(items.loc[~items['strain_name'].isna()]))
 
-            
 
         # # Augment with curated lab results.
         # # FIXME: This may be overwriting data points.
@@ -492,7 +491,7 @@ def calculate_and_save_stats(
 
     # Save the statistics by month.
     save_stats_by_month(stats, sales_stats_dir, 'sales-by-licensee')
-    manager.create_log('Saved sales statistics to:', stats_file)
+    manager.create_log('Saved sales statistics to: ' + stats_file)
     return daily_licensee_sales
 
 
@@ -515,9 +514,9 @@ if __name__ == '__main__':
         # 'CCRS PRR (5-7-23)',
         # 'CCRS PRR (6-6-23)',
         'CCRS PRR (8-4-23)',
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
         'CCRS PRR (1-2-24)',
     ]
     for release in reversed(releases):
@@ -537,6 +536,7 @@ if __name__ == '__main__':
             last_file=last_file,
             manager=manager,
             release=release,
+            skip_existing=False,
         )
 
         # Aggregate monthly sales items.

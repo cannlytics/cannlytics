@@ -110,7 +110,6 @@ TODO:
 
   // Fetch financial contributors from Open Collective.
   function fetchBackers() {
-    console.log('Fethicng financial contributors...');
     var slug = 'cannlytics-company';
     var limit = 25;
     var offset = 0;
@@ -119,10 +118,7 @@ TODO:
         return response.json();
       })
       .then(function(data) {
-        console.log('CONTRIBUTORS FOUND:');
-        console.log(data);
         const contributorsDiv = document.getElementById("financial-contributors");
-
         data
           .filter(function(member) {
             return member.role === 'BACKER';
@@ -165,7 +161,6 @@ TODO:
             const smallTextElement = document.createElement('p');
             smallTextElement.className = 'text-secondary fs-6 mt-0';
             smallTextElement.textContent = "total contributions!";
-
             amountRow.className = 'row'
             amountRow.appendChild(amountElement);
             amountRow.appendChild(smallTextElement);

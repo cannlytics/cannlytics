@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<!--
+  Newest Results | Cannlytics Website
+  Created: 2/11/2024
+  Updated: 2/11/2024
+-->
+{% load static %}
+
+<div class="container mt-5">
+  <h2 class="serif text-dark mt-0 mb-2">Newest Results</h2>
+  <div id="results-container" class="scrolling-wrapper"></div>
+</div>
+
+<!-- JavaScript -->
+{% block page_js %}
+<script>
+
+  // Initialize the newest results.
+  cannlytics.analytics.initializeNewestResults();
+
+</script>
+{% endblock %}

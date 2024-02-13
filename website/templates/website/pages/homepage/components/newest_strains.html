@@ -6,26 +6,18 @@
   Updated: 2/11/2024
 -->
 {% load static %}
-<style>
-  .scrolling-wrapper {
-      overflow-x: scroll;
-      overflow-y: hidden;
-      white-space: nowrap;
-  }
-  .card {
-      display: inline-block;
-      margin-right: 15px; /* Add some space between cards */
-  }
-</style>
 
 <div class="container mt-5">
-  <h2>Newest Strains</h2>
-  <div class="container mt-5">
-    <h2>Newest Strains</h2>
-    <div class="scrolling-wrapper" id="strainsContainer"></div>
-</div>
+  <h2 class="serif text-dark mt-0 mb-2">Newest Strains</h2>
+  <div id="strains-container" class="scrolling-wrapper"></div>
 </div>
 
+<!-- JavaScript -->
+{% block page_js %}
 <script>
-  
+
+  // Initialize the newest strains.
+  cannlytics.analytics.initializeNewestStrains();
+
 </script>
+{% endblock %}

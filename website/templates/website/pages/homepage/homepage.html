@@ -6,12 +6,31 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/5/2021
-  Updated: 2/10/2024
+  Updated: 2/12/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static %}
 {% block title %}Cannlytics{% endblock %}
+{% block page_css %}
+
+  <!-- D3 Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+  <!-- Page-specific style -->
+  <style>
+    .scrolling-wrapper {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+    .card {
+        display: inline-block;
+        margin-right: 15px;
+    }
+  </style>
+
+{% endblock page_css %}
 {% block material %}
   <div class="homepage pb-5 overflow-hidden">
 
@@ -28,39 +47,33 @@
       </svg>
     </div> {% endcomment %}
 
-    <!-- TODO: Results, Strains, Licenses datasets -->
+    <!-- TODO: Datasets: Results, Strains, Licenses -->
 
 
-    <!-- TODO: Live analytics -->
+    <!-- Live analytics -->
     {% include "website/pages/homepage/components/live_analytics.html" %}
 
-    <!-- TODO: Newest Strains -->
+    <!-- Newest Strains -->
     {% include "website/pages/homepage/components/newest_strains.html" %}
 
+    <!-- Newest Results -->
+    {% include "website/pages/homepage/components/newest_results.html" %}
 
-    <!-- TODO: Newest Results -->
-
-
-    <!-- TODO: Newest Licenses -->
-
-
-
-    <!-- TODO: Contributors -->
-
-
+    <!-- Newest Licenses -->
+    {% include "website/pages/homepage/components/newest_licenses.html" %}
     
+
+
     <!-- TODO: Articles -->
-
-
 
     <!-- TODO: Service Promos -->
 
 
 
     <!-- Video Banner -->
-    <div class="ground">
+    {% comment %} <div class="ground">
     {% include "website/components/banners/video_banner.html" %}
-    </div>
+    </div> {% endcomment %}
 
     {% comment %} <!-- Wave -->
     <div class="wave small upside-down" >
@@ -81,24 +94,23 @@
   
     {% endcomment %}
 
-    <!-- TODO: Problem / Solution section -->
-
     <!-- List of Metrc Validations -->
-    <div class="ground py-5">
+    {% comment %} <div class="ground py-5">
       {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
-    </div>
+    </div> {% endcomment %}
 
     <!-- Wave -->
-    <div class="wave small upside-down" >
+    {% comment %} <div class="wave small upside-down" >
       <svg viewBox="0 0 500 150" preserveAspectRatio="none">
         <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
       </svg>
-    </div>
+    </div> {% endcomment %}
 
-    <!-- TODO: List of contributors -->
+    <!-- List of contributors -->
+    {% include "website/pages/homepage/components/contributors_promo.html" %}
 
     <!-- Call to Action -->
-    {% include "website/pages/homepage/components/call_to_action.html" with app=app only %}
+    {% comment %} {% include "website/pages/homepage/components/call_to_action.html" with app=app only %} {% endcomment %}
 
   </div>
 
@@ -109,6 +121,7 @@
 
 <!-- Homepage JavaScript -->
 {% block page_js %}
+{{ block.super }}
   <script>
 
     function CopyToClipboard(id) {
