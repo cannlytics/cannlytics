@@ -35,6 +35,7 @@ Resources:
 """
 # Standard imports:
 from datetime import datetime
+import json
 import os
 import random
 import string
@@ -776,6 +777,72 @@ if __name__ == '__main__':
     downloader.get_results_terplife(queries)
     downloader.quit()
 
+    # Optional: Search TerpLife for known strains.
+
+
+#-----------------------------------------------------------------------
+# Download Jungle Boys COAs.
+#-----------------------------------------------------------------------
+
+
+coas_url = 'https://jungleboysflorida.com/coa/'
+
+# TODO: With selenium, get all of the products.
+products = []
+products_url = 'https://jungleboysflorida.com/products/'
+
+def get_product_details(driver):
+    products = []
+    driver.get("https://jungleboysflorida.com/products/")
+    sleep(3.33)
+    product_elements = driver.find_elements(By.CSS_SELECTOR, ".wp-block-greenshift-blocks-row-column")
+    for product_element in product_elements:
+        try:
+            name = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-advanced-text a").text
+            image_url = product_element.find_element(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-image img").get_attribute("src")
+            price = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-price__value").text
+            category = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-category").text
+            products.append({
+                "name": name,
+                "image_url": image_url,
+                "price": price,
+                "category": category
+            })
+        except Exception as e:
+            print(f"Error extracting product details: {e}")
+            continue
+
+    return products
+
+
+driver = initialize_selenium(headless=False)
+try:
+    products = get_product_details(driver)
+    products_json = json.dumps(products, indent=2)
+    print(products_json)
+finally:
+    driver.quit()
+
+
+# TODO: Download each COA (if it doesn't already exist).
+pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+
+
+# === Test ===
+if __name__ == '__main__':
+    pass
+
+
+
+
+#-----------------------------------------------------------------------
+# Aggregation.
+#-----------------------------------------------------------------------
+
+# === Test ===
+if __name__ == '__main__':
+    pass
+
     # TODO: Aggregate results.
 
 
@@ -785,4 +852,3 @@ if __name__ == '__main__':
     # TODO: Upload results to Firestore.
 
 
-# Optional: Search TerpLife for known strains.

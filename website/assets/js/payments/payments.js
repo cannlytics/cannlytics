@@ -177,7 +177,8 @@ export const payments = {
      */
   
     // Get the user's level of support.
-    const userSubscription = await this.getUserSubscriptions();
+    let userSubscription = await this.getUserSubscriptions();
+    if (!userSubscription) userSubscription = { support: 'free' };
   
     // If no subscription, then show Upgrade on all and stop.
     const subscribeButtons = document.getElementsByClassName('subscribe-button');

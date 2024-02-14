@@ -194,6 +194,60 @@
       </div>
     </div>
 
+    <!-- Historic Lab Result Migration -->
+    <div class="container mb-5 mt-5">
+      <div class="markdown py-5" style="max-width:560px;">
+        <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/sparkler.svg" %}#sparkler-emoji"></use>
+        </svg>
+        <h1 class="pt-4 text-dark">Standardize your lab results archive</h1>
+        <p class="mt-2">
+          Your laboratory data are valuable to you and your clients,
+          therefore, you can have us standardize your
+          archive of lab results, in whatever format they may be in, into a clean,
+          well-formatted, accessible workbook for you. Our rate is
+          <strong>$500 per 2,500 lab results</strong>.
+        </p>
+        <p class="text-start mt-3">
+          <a
+            class="btn btn-sm bg-gradient-green text-white"
+            href="{% url 'page' page='contact' %}?topic=data-migration"
+          >
+            <small>Request a quote</small> &rarr;
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Consulting -->
+    <div class="container mb-5 mt-3 pt-5">
+      <div class="markdown" style="max-width:560px;">
+        <svg class="pt-3 pe-3" style="float:left;width:125px;height:125px;">
+          <use href="{% static "website/images/emojies/toolbox.svg" %}#toolbox-emoji"></use>
+        </svg>
+        <h1 class="pt-4 text-dark">Consulting and Custom Development</h1>
+        <p class="mt-2">
+          You can employ the Cannlytics team to help you solve any problems at hand.
+          In general, the Cannlytics team is available for <strong>$500 per significant
+          feature</strong> or for <strong>$60 per hour</strong>.
+          We are always happy to talk and help you find your best-possible solution.
+        </p>
+        <p class="text-start mt-3">
+          <a
+            class="btn btn-sm bg-gradient-orange text-white"
+            href="{% url 'page' page='contact' %}?topic=custom"
+          >
+            <small>Request a job</small> &rarr;
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Metrc support -->
+    <div class="my-5 pt-5">
+      {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
+    </div>
+
   </section>
 
   <!-- Cancel subscription dialog -->

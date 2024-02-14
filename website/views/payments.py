@@ -10,6 +10,7 @@ License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main
 # Standard imports:
 from datetime import datetime
 from json import loads, dumps
+import math
 import os
 from typing import Optional
 
@@ -49,6 +50,9 @@ def get_user_subscriptions(request):
     try:
         uid = claims['uid']
         user_subscription = get_document(f'subscribers/{uid}')
+        for key, value in user_subscription.items():
+            if isinstance(value, float) and math.isnan(value):
+                user_subscription[key] = None
         response = {'success': True, 'data': user_subscription}
         return Response(response, content_type='application/json', status=200)
     except KeyError:

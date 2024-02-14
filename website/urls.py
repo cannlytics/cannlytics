@@ -38,6 +38,7 @@ urlpatterns = [
     path('donate', main.donate, name='donate'),
     path('meetup', main.meetup, name='meetup'),
     path('subscriptions', RedirectView.as_view(url='/account/subscriptions', permanent=False)),
+    path('support', RedirectView.as_view(url='/account/subscriptions', permanent=False)),
     path('videos', videos.VideosView.as_view(), name='videos'),
     path('videos/<video_id>', videos.VideosView.as_view(), name='video'),
     path('.well-known/ai-plugin.json', RedirectView.as_view(url='/static/ai-plugin.json', permanent=False)),

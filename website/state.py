@@ -242,7 +242,7 @@ page_data = {
                 "ref": "public/subscriptions/subscription_plans",
                 "order_by": "price_per_token",
                 "desc": False
-            }
+            },
         ],
         "documents": [
             {
@@ -278,14 +278,14 @@ page_data = {
             }
         ]
     },
-    "effects": {
-        "documents": [
-            {
-                "name": "variables",
-                "ref": "public/data/variables/effects_and_aromas"
-            }
-        ]
-    },
+    # "effects": {
+    #     "documents": [
+    #         {
+    #             "name": "variables",
+    #             "ref": "public/data/variables/effects_and_aromas"
+    #         }
+    #     ]
+    # },
     "events": {
         "collections": [
             {
@@ -324,33 +324,33 @@ page_data = {
             }
         ],
     },
-    "map": {
-        "documents": [
-            {
-                "name": "google",
-                "ref": "credentials/google"
-            }
-        ]
-    },
-    "market": {
-        "collections": [
-            {
-                "name": "datasets",
-                "ref": "public/data/datasets",
-                "limit": 10,
-                "order_by": "price_usd",
-                "desc": True
-            }
-        ],
-    },
-    "partners": {
-        "collections": [
-            {
-                "name": "partners_list",
-                "ref": "public/partners/partner_data"
-            }
-        ]
-    },
+    # "map": {
+    #     "documents": [
+    #         {
+    #             "name": "google",
+    #             "ref": "credentials/google"
+    #         }
+    #     ]
+    # },
+    # "market": {
+    #     "collections": [
+    #         {
+    #             "name": "datasets",
+    #             "ref": "public/data/datasets",
+    #             "limit": 10,
+    #             "order_by": "price_usd",
+    #             "desc": True
+    #         }
+    #     ],
+    # },
+    # "partners": {
+    #     "collections": [
+    #         {
+    #             "name": "partners_list",
+    #             "ref": "public/partners/partner_data"
+    #         }
+    #     ]
+    # },
     "personality": {
         "documents": [
             {
@@ -359,16 +359,16 @@ page_data = {
             }
         ]
     },
-    "sponsors": {
-        "collections": [
-            {
-                "name": "sponsorships",
-                "ref": "public/subscriptions/sponsorships",
-                "order_by": "cost",
-                "desc": True,
-            }
-        ]
-    },
+    # "sponsors": {
+    #     "collections": [
+    #         {
+    #             "name": "sponsorships",
+    #             "ref": "public/subscriptions/sponsorships",
+    #             "order_by": "cost",
+    #             "desc": True,
+    #         }
+    #     ]
+    # },
     "subscriptions": {
         "documents": [
             {
@@ -382,25 +382,31 @@ page_data = {
                 "ref": "public/subscriptions/sponsorships",
                 "order_by": "cost",
                 "desc": True
-            }
-        ]
-    },
-    "support": {
-        "collections": [
+            },
             {
                 "name": "verifications",
                 "ref": "public/verifications/verification_data",
                 "limit": None,
                 "order_by": "state"
             }
-        ],
-        "documents": [
-            {
-                "name": "paypal",
-                "ref": "credentials/paypal"
-            }
         ]
     },
+    # "support": {
+    #     "collections": [
+    #         {
+    #             "name": "verifications",
+    #             "ref": "public/verifications/verification_data",
+    #             "limit": None,
+    #             "order_by": "state"
+    #         }
+    #     ],
+    #     "documents": [
+    #         {
+    #             "name": "paypal",
+    #             "ref": "credentials/paypal"
+    #         }
+    #     ]
+    # },
     "team": {
         "collections": [
             {
