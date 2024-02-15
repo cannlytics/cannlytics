@@ -229,7 +229,7 @@ if __name__ == '__main__':
     # Parameters.
     verbose = True
     headless = False
-    pause_between_page = 60.0
+    pause_between_page = 10.0
 
     # Initialize the driver.
     driver = initialize_driver(headless=False)

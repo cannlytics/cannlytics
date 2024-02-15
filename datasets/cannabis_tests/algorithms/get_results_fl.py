@@ -791,31 +791,107 @@ coas_url = 'https://jungleboysflorida.com/coa/'
 products = []
 products_url = 'https://jungleboysflorida.com/products/'
 
+
+def verify_age_jungleboys(driver):
+    # checkbox = WebDriverWait(driver, 10).until(
+    #     EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='checkbox'].chakra-checkbox__input"))
+    # )
+    # checkbox = driver.find_element(By.CSS_SELECTOR, "input[type='checkbox'].chakra-checkbox__input")
+    # checkbox.click()
+    checkbox_js = "document.querySelector('input[type=checkbox].chakra-checkbox__input').click();"
+    driver.execute_script(checkbox_js)
+    continue_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "button.chakra-button:not([disabled])"))
+    )
+    continue_button.click()
+
+
 def get_product_details(driver):
     products = []
-    driver.get("https://jungleboysflorida.com/products/")
-    sleep(3.33)
-    product_elements = driver.find_elements(By.CSS_SELECTOR, ".wp-block-greenshift-blocks-row-column")
-    for product_element in product_elements:
+    # driver.get("https://jungleboysflorida.com/products/")
+    # sleep(3.33)
+    product_elements = driver.find_elements(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-list-list-view")
+    for el in product_elements:
+        driver.execute_script("arguments[0].scrollIntoView(true);", el)
+        sleep(1)
+        # try:
+        # name = el.find_element(By.CSS_SELECTOR, ".chakra-link.chakra-text").text
+        # FIXME:
+        image_url = el.find_element(By.TAG_NAME, "img").get_attribute("src")
+        # category = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-category").text
+
+        # # FIXME:
+        # quantity_element = el.find_element(By.CSS_SELECTOR, "button.chakra-button span.dt-css-xl71ch")
+        # quantity = quantity_element.text
+        # print('Quantity:', quantity)
+
+        # # FIXME:
+        # price_element = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-price__value")
+        # price = price_element.text
+        # print(price)
+
+        # # Get the strain type.
+        # strain_type_element = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-strain--hybrid p.chakra-text")
+        # strain_type = strain_type_element.text
+        # print(strain_type)
+
+        # thc_content_element = el.find_element(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-potency--thc .dovetail-ecommerce-product-potency__value")
+        # total_thc = thc_content_element.text
+        # print(total_thc)
+
+        # FIXME: Need to get elements directly!
+        lines = el.text.split('\n')
+        name = lines[1]
+        price = lines[-1]
+        quantity = lines[-2]
+        category = lines[2]
+        strain_type = lines[-4]
+        total_thc = lines[-3].replace('THC ', '').replace('%', '')
         try:
-            name = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-advanced-text a").text
-            image_url = product_element.find_element(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-image img").get_attribute("src")
-            price = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-price__value").text
-            category = product_element.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-category").text
-            products.append({
-                "name": name,
-                "image_url": image_url,
-                "price": price,
-                "category": category
-            })
-        except Exception as e:
-            print(f"Error extracting product details: {e}")
-            continue
+            total_thc = float(total_thc)
+        except:
+            pass
+        products.append({
+            "name": name,
+            "image_url": image_url,
+            "price": price,
+            "category": category,
+            'strain_type': strain_type,
+            'quantity': quantity,
+        })
+        # except Exception as e:
+        #     print(f"Error extracting product details: {e}")
+        #     continue
 
     return products
 
 
 driver = initialize_selenium(headless=False)
+
+# TODO: Get products from each store.
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer"))
+)
+select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
+for button in select_buttons:
+    try:
+        # Scroll into view and click the button
+        driver.execute_script("arguments[0].scrollIntoView(true);", button)
+        sleep(1) # Small delay to ensure visibility
+        button.click()
+        sleep(5)
+        # Assuming clicking navigates away or requires you to go back
+        driver.back()
+        # Re-find the buttons to avoid StaleElementReferenceException
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button"))
+        )
+        select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
+    except:
+        pass
+        # select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
+
+
 try:
     products = get_product_details(driver)
     products_json = json.dumps(products, indent=2)
