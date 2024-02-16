@@ -86,7 +86,8 @@ def initialize_selenium(
                     'download.default_directory': default_directory,
                     'download.prompt_for_download': False,
                     'download.directory_upgrade': True,
-                    'plugins.always_open_pdf_externally': True
+                    'plugins.always_open_pdf_externally': True,
+                    # "safebrowsing.enabled": True
                 }
                 options.add_experimental_option('prefs', prefs)
 

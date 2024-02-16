@@ -463,10 +463,10 @@ if __name__ == '__main__':
 
     # Curate the inventory for each release.
     releases = [
-        # 'CCRS PRR (3-6-23)',
-        # 'CCRS PRR (4-4-23)',
-        # 'CCRS PRR (5-7-23)',
-        'CCRS PRR (6-6-23)',
+        'CCRS PRR (3-6-23)',
+        'CCRS PRR (4-4-23)',
+        'CCRS PRR (5-7-23)',
+        # 'CCRS PRR (6-6-23)',
         # 'CCRS PRR (8-4-23)',
         # 'CCRS PRR (9-5-23)',
         # 'CCRS PRR (11-2-23)',

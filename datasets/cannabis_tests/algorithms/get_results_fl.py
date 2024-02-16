@@ -53,6 +53,7 @@ import requests
 
 # Selenium imports.
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -214,7 +215,7 @@ def download_coas_kaycha(
         url = f'{base}/company/company?t={slug}&page={page}'
         response = requests.get(url, headers=DEFAULT_HEADERS)
         if response.status_code != 200:
-            print(f"Request failed with status {response.status_code}")
+            print(f'Request failed with status {response.status_code}')
 
         # Get the download URLs.
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -792,123 +793,201 @@ products = []
 products_url = 'https://jungleboysflorida.com/products/'
 
 
-def verify_age_jungleboys(driver):
-    # checkbox = WebDriverWait(driver, 10).until(
-    #     EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='checkbox'].chakra-checkbox__input"))
-    # )
-    # checkbox = driver.find_element(By.CSS_SELECTOR, "input[type='checkbox'].chakra-checkbox__input")
-    # checkbox.click()
+def verify_age_jungleboys(driver, pause=1):
+    """Verify age for Jungle Boys' website."""
     checkbox_js = "document.querySelector('input[type=checkbox].chakra-checkbox__input').click();"
     driver.execute_script(checkbox_js)
+    sleep(pause)
     continue_button = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, "button.chakra-button:not([disabled])"))
+        EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.chakra-button:not([disabled])'))
     )
     continue_button.click()
 
 
 def get_product_details(driver):
     products = []
-    # driver.get("https://jungleboysflorida.com/products/")
-    # sleep(3.33)
-    product_elements = driver.find_elements(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-list-list-view")
+    product_elements = driver.find_elements(By.CSS_SELECTOR, '.wp-block-dovetail-ecommerce-product-list-list-view')
+    accessories = ['Accessories', 'Grinders', 'Lighters']
     for el in product_elements:
-        driver.execute_script("arguments[0].scrollIntoView(true);", el)
-        sleep(1)
-        # try:
-        # name = el.find_element(By.CSS_SELECTOR, ".chakra-link.chakra-text").text
-        # FIXME:
-        image_url = el.find_element(By.TAG_NAME, "img").get_attribute("src")
-        # category = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-category").text
+        driver.execute_script('arguments[0].scrollIntoView(true);', el)
+        sleep(0.1)
 
-        # # FIXME:
-        # quantity_element = el.find_element(By.CSS_SELECTOR, "button.chakra-button span.dt-css-xl71ch")
-        # quantity = quantity_element.text
-        # print('Quantity:', quantity)
+        # Skip accessories.
+        name = el.find_element(By.CSS_SELECTOR, 'div.dovetail-ecommerce-advanced-text').text
+        text = el.text
+        if any(x in text for x in accessories) and text not in name:
+            print('Skipping:', name)
+            continue
 
-        # # FIXME:
-        # price_element = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-price__value")
-        # price = price_element.text
-        # print(price)
+        # Get the image URL.
+        image_url = el.find_element(By.TAG_NAME, 'img').get_attribute('src')
 
-        # # Get the strain type.
-        # strain_type_element = el.find_element(By.CSS_SELECTOR, ".dovetail-ecommerce-product-strain--hybrid p.chakra-text")
-        # strain_type = strain_type_element.text
-        # print(strain_type)
-
-        # thc_content_element = el.find_element(By.CSS_SELECTOR, ".wp-block-dovetail-ecommerce-product-potency--thc .dovetail-ecommerce-product-potency__value")
-        # total_thc = thc_content_element.text
-        # print(total_thc)
-
-        # FIXME: Need to get elements directly!
-        lines = el.text.split('\n')
-        name = lines[1]
-        price = lines[-1]
-        quantity = lines[-2]
-        category = lines[2]
-        strain_type = lines[-4]
-        total_thc = lines[-3].replace('THC ', '').replace('%', '')
+        # Get the category.
         try:
-            total_thc = float(total_thc)
+            category = el.find_element(By.CSS_SELECTOR, 'div.dovetail-ecommerce-product-category').text
+        except:
+            try:
+                category = el.find_element(By.CSS_SELECTOR, 'div.dovetail-ecommerce-product-sub-category').text
+            except:
+                category = None
+
+        # Get the quantity.
+        quantity = None
+        buttons = el.find_elements(By.TAG_NAME, 'button')
+        for button in buttons:
+            button_text = button.text
+            if button_text and button_text != 'Add to Bag':
+                quantity = button_text
+                break
+
+        # Get the strain type.
+        strain_type = None
+        try:
+            strain_type = el.find_element(By.CSS_SELECTOR, 'div.dovetail-ecommerce-product-strain').text
         except:
             pass
+
+        # Get the price and total THC.
+        price, total_thc = None, None
+        lines = el.text.split('\n')
+        for line in lines:
+            if 'THC' in line:
+                total_thc = line.replace('THC ', '').replace('%', '')
+                try:
+                    total_thc = float(total_thc)
+                except:
+                    pass
+            elif '$' in line:
+                price = line.replace('$ ', '')
+                try:
+                    price = float(price)
+                except:
+                    pass
+
+        # Record the product details.
         products.append({
-            "name": name,
-            "image_url": image_url,
-            "price": price,
-            "category": category,
+            'name': name,
+            'image_url': image_url,
+            'price': price,
+            'category': category,
             'strain_type': strain_type,
             'quantity': quantity,
         })
-        # except Exception as e:
-        #     print(f"Error extracting product details: {e}")
-        #     continue
 
+    # Return the products.
     return products
 
 
-driver = initialize_selenium(headless=False)
+def search_and_download_coas(driver, product_names, pdf_dir):
+    """Search for and download COAs from Jungle"""
+    driver.get("https://jungleboysflorida.com/coa/")
+    sleep(3.33)
+    for product_name in product_names:
+        # JavaScript to set the value of the search input.
+        js_query_selector = "document.querySelector('div.wp-block-create-block-coa__search input[placeholder=\"Search\"]')"
+        search_query = product_name.replace('-', '').replace('  ', ' ')
+        js_set_value = f"{js_query_selector}.value = '{search_query}';"
+        driver.execute_script(js_set_value)
 
-# TODO: Get products from each store.
-WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer"))
-)
-select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
-for button in select_buttons:
-    try:
-        # Scroll into view and click the button
-        driver.execute_script("arguments[0].scrollIntoView(true);", button)
-        sleep(1) # Small delay to ensure visibility
-        button.click()
-        sleep(5)
-        # Assuming clicking navigates away or requires you to go back
-        driver.back()
-        # Re-find the buttons to avoid StaleElementReferenceException
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button"))
-        )
-        select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
-    except:
-        pass
-        # select_buttons = driver.find_elements(By.CSS_SELECTOR, ".dovetail-ecommerce-age-gate-retailer .chakra-button")
+        # Perform the search.
+        search_div = driver.find_element(By.CSS_SELECTOR, '.wp-block-create-block-coa__search')
+        search_box = search_div.find_element(By.TAG_NAME, 'input')
+        search_box.send_keys(Keys.RETURN)
+        sleep(0.33)
+
+        # Download the PDFs.
+        download_pdf_links(driver, pdf_dir)
 
 
-try:
-    products = get_product_details(driver)
-    products_json = json.dumps(products, indent=2)
-    print(products_json)
-finally:
-    driver.quit()
-
-
-# TODO: Download each COA (if it doesn't already exist).
-pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+def download_pdf_links(driver, pdf_dir, pause=3.33, overwrite=False):
+    """Download all PDF links in search results."""
+    pdf_links = driver.find_elements(By.CSS_SELECTOR, ".wp-block-create-block-coa__result a[target='_blank']")
+    pdf_urls = [x.get_attribute('href') for x in pdf_links]
+    for pdf_url in pdf_urls:
+        pdf_name = pdf_url.split('/')[-1]
+        pdf_path = os.path.join(pdf_dir, pdf_name)
+        if not os.path.exists(pdf_path) and not overwrite:
+            driver.get(pdf_url)
+            print('Downloaded:', pdf_path)
+            sleep(pause)
 
 
 # === Test ===
 if __name__ == '__main__':
-    pass
 
+    # Initialize a driver to query Jungle Boys COAs.
+    driver = initialize_selenium(
+        headless=False,
+        download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs',
+    )
 
+    # Get products from each store.
+    all_products = []
+    driver.get(products_url)
+    sleep(3.33)
+    verify_age_jungleboys(driver)
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer'))
+    )
+    select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+    for button in select_buttons:
+        try:
+            # Scroll into view and click the button
+            driver.execute_script('arguments[0].scrollIntoView(true);', button)
+            sleep(1) # Small delay to ensure visibility
+            button.click()
+            sleep(5)
+
+            # Get all of the products for the store.
+            products = get_product_details(driver)
+            all_products.extend(products)
+
+            # FIXME: May need to query COAs at this stage.
+
+            # Assuming clicking navigates away or requires you to go back
+            # driver.back()
+            driver.get(products_url)
+            # Re-find the buttons to avoid StaleElementReferenceException
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button'))
+            )
+            select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+        except:
+            pass
+            # select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+
+    # Download each COA (if it doesn't already exist).
+    pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+    product_names = [x['name'] + ' ' + str(x['category']) for x in all_products]
+    search_and_download_coas(driver, product_names, pdf_dir)
+
+    # Close the driver.
+    driver.quit()
+
+    # Parse the COAs!
+    parser = CoADoc()
+    pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+    all_pdfs = [x for x in os.listdir(pdf_dir) if x.endswith('.pdf')]
+    coa_data = []
+    print('Parsing %i COAs...' % len(all_pdfs))
+    for i, pdf in enumerate(all_pdfs):
+        try:
+            doc = os.path.join(pdf_dir, pdf)
+            data = parser.parse(doc)
+            if isinstance(data, dict):
+                coa_data.append(data)
+            elif isinstance(data, list):
+                coa_data.extend(data)
+            print('Parsed:', doc)
+        except:
+            print('Error parsing:', doc)
+
+    # Save the COA data.
+    data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
+    all_data = pd.DataFrame(coa_data)
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    outfile = os.path.join(data_dir,  f'fl-lab-results-jungleboys-{timestamp}.xlsx')
+    parser.save(coa_data, outfile)
 
 
 #-----------------------------------------------------------------------

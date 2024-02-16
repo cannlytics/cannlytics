@@ -298,14 +298,17 @@ def parse_kaycha_coa(
                 if k in line:
                     name = name.replace(k, '').strip()
                     obs['status'] = v
-            street = lines[i + 1]
-            city, state, zipcode, _ = [x.strip() for x in lines[i + 2].split(',')]
             obs['distributor'] = name
-            obs['distributor_address'] = f'{street}, {city}, {state} {zipcode}'
-            obs['distributor_street'] = street
-            obs['distributor_city'] = city
-            obs['distributor_state'] = state
-            obs['distributor_zipcode'] = zipcode
+            try:
+                street = lines[i + 1]
+                city, state, zipcode, _ = [x.strip() for x in lines[i + 2].split(',')]
+                obs['distributor_address'] = f'{street}, {city}, {state} {zipcode}'
+                obs['distributor_street'] = street
+                obs['distributor_city'] = city
+                obs['distributor_state'] = state
+                obs['distributor_zipcode'] = zipcode
+            except:
+                pass
         
         # Get totals.
         if 'Total THC' in line and obs.get('total_thc') is None:
@@ -324,15 +327,19 @@ def parse_kaycha_coa(
             if lines[i + 2].startswith('Analysis'):
                 lod = [convert_to_numeric(x) for x in lines[i + 3].lstrip('LOD ').split(' ') if x != '']
             else:
-                lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ') if x != '']
+                lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ')]
             for k, key in enumerate(keys):
+                try:
+                    lod_value = lod[k]
+                except:
+                    lod_value = None
                 results.append({
                     'analysis': 'cannabinoids',
                     'key': key,
                     'name': analytes[k],
                     'value': values[k],
                     'unit': 'percent',
-                    'lod': lod[k],
+                    'lod': lod_value,
                 })
             break
 
