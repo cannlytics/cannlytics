@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 12/31/2023
+Updated: 2/15/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -20,6 +20,7 @@ Data Sources:
     - [Kaycha Labs](https://yourcoa.com)
     - [The Flowery](https://support.theflowery.co)
     - [TerpLife Labs](https://www.terplifelabs.com)
+    - [Jungle Boys Florida](https://jungleboysflorida.com)
 
 Resources:
 
@@ -786,13 +787,6 @@ if __name__ == '__main__':
 #-----------------------------------------------------------------------
 
 
-coas_url = 'https://jungleboysflorida.com/coa/'
-
-# TODO: With selenium, get all of the products.
-products = []
-products_url = 'https://jungleboysflorida.com/products/'
-
-
 def verify_age_jungleboys(driver, pause=1):
     """Verify age for Jungle Boys' website."""
     checkbox_js = "document.querySelector('input[type=checkbox].chakra-checkbox__input').click();"
@@ -912,82 +906,87 @@ def download_pdf_links(driver, pdf_dir, pause=3.33, overwrite=False):
             sleep(pause)
 
 
-# === Test ===
-if __name__ == '__main__':
+# # === Test ===
+# if __name__ == '__main__':
 
-    # Initialize a driver to query Jungle Boys COAs.
-    driver = initialize_selenium(
-        headless=False,
-        download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs',
-    )
+#     # Initialize a driver to query Jungle Boys COAs.
+#     driver = initialize_selenium(
+#         headless=False,
+#         download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs',
+#     )
 
-    # Get products from each store.
-    all_products = []
-    driver.get(products_url)
-    sleep(3.33)
-    verify_age_jungleboys(driver)
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer'))
-    )
-    select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
-    for button in select_buttons:
-        try:
-            # Scroll into view and click the button
-            driver.execute_script('arguments[0].scrollIntoView(true);', button)
-            sleep(1) # Small delay to ensure visibility
-            button.click()
-            sleep(5)
+#     # Define the Jungle Boys URLs.
+#     coas_url = 'https://jungleboysflorida.com/coa/'
+#     products_url = 'https://jungleboysflorida.com/products/'
 
-            # Get all of the products for the store.
-            products = get_product_details(driver)
-            all_products.extend(products)
 
-            # FIXME: May need to query COAs at this stage.
+#     # Get products from each store.
+#     all_products = []
+#     driver.get(products_url)
+#     sleep(3.33)
+#     verify_age_jungleboys(driver)
+#     WebDriverWait(driver, 10).until(
+#         EC.presence_of_element_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer'))
+#     )
+#     select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+#     for button in select_buttons:
+#         try:
+#             # Scroll into view and click the button
+#             driver.execute_script('arguments[0].scrollIntoView(true);', button)
+#             sleep(1) # Small delay to ensure visibility
+#             button.click()
+#             sleep(5)
 
-            # Assuming clicking navigates away or requires you to go back
-            # driver.back()
-            driver.get(products_url)
-            # Re-find the buttons to avoid StaleElementReferenceException
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button'))
-            )
-            select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
-        except:
-            pass
-            # select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+#             # Get all of the products for the store.
+#             products = get_product_details(driver)
+#             all_products.extend(products)
 
-    # Download each COA (if it doesn't already exist).
-    pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
-    product_names = [x['name'] + ' ' + str(x['category']) for x in all_products]
-    search_and_download_coas(driver, product_names, pdf_dir)
+#             # FIXME: May need to query COAs at this stage.
 
-    # Close the driver.
-    driver.quit()
+#             # Assuming clicking navigates away or requires you to go back
+#             # driver.back()
+#             driver.get(products_url)
+#             # Re-find the buttons to avoid StaleElementReferenceException
+#             WebDriverWait(driver, 10).until(
+#                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button'))
+#             )
+#             select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
+#         except:
+#             pass
+#             # select_buttons = driver.find_elements(By.CSS_SELECTOR, '.dovetail-ecommerce-age-gate-retailer .chakra-button')
 
-    # Parse the COAs!
-    parser = CoADoc()
-    pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
-    all_pdfs = [x for x in os.listdir(pdf_dir) if x.endswith('.pdf')]
-    coa_data = []
-    print('Parsing %i COAs...' % len(all_pdfs))
-    for i, pdf in enumerate(all_pdfs):
-        try:
-            doc = os.path.join(pdf_dir, pdf)
-            data = parser.parse(doc)
-            if isinstance(data, dict):
-                coa_data.append(data)
-            elif isinstance(data, list):
-                coa_data.extend(data)
-            print('Parsed:', doc)
-        except:
-            print('Error parsing:', doc)
+#     # Download each COA (if it doesn't already exist).
+#     pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+#     product_names = [x['name'] + ' ' + str(x['category']) for x in all_products]
+#     search_and_download_coas(driver, product_names, pdf_dir)
 
-    # Save the COA data.
-    data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
-    all_data = pd.DataFrame(coa_data)
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    outfile = os.path.join(data_dir,  f'fl-lab-results-jungleboys-{timestamp}.xlsx')
-    parser.save(coa_data, outfile)
+#     # Close the driver.
+#     driver.quit()
+
+#     # Parse the COAs!
+#     parser = CoADoc()
+#     pdf_dir = r'D:\data\florida\lab_results\jungleboys\pdfs'
+#     all_pdfs = [x for x in os.listdir(pdf_dir) if x.endswith('.pdf')]
+#     coa_data = []
+#     print('Parsing %i COAs...' % len(all_pdfs))
+#     for i, pdf in enumerate(all_pdfs):
+#         try:
+#             doc = os.path.join(pdf_dir, pdf)
+#             data = parser.parse(doc)
+#             if isinstance(data, dict):
+#                 coa_data.append(data)
+#             elif isinstance(data, list):
+#                 coa_data.extend(data)
+#             print('Parsed:', doc)
+#         except:
+#             print('Error parsing:', doc)
+
+#     # Save the COA data.
+#     data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
+#     all_data = pd.DataFrame(coa_data)
+#     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+#     outfile = os.path.join(data_dir,  f'fl-lab-results-jungleboys-{timestamp}.xlsx')
+#     parser.save(coa_data, outfile)
 
 
 #-----------------------------------------------------------------------

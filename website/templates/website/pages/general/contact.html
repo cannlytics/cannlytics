@@ -9,10 +9,6 @@
   Updated: 2/13/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 
-  TODO: Replace contact form in entirety with contact cards.
-  Slack: https://cannlytics.slack.com/
-  LinkedIn: 
-
 -->
 {% extends "website/index.html" %}
 {% block title %}Contact | Cannlytics{% endblock %}
@@ -35,13 +31,21 @@
     <div class="row featurette mt-5">
       <div class="col-md-7 order-2 order-lg-1">
         <h2 class="h1 serif text-gradient-reverse pb-3 mt-3 mb-0">
-          {{ contact.title }}
+          Contact Us
         </h2>
         <p class="fs-6 double-line text-dark text-start text-muted mb-4">
-          {{ contact.message }}
+          You're welcome to contact us anytime about anything. Please enter your contact information and message and the team will get back to you as soon as possible.
         </p>
 
-        <!-- Form -->
+        {% comment %} 
+        TODO: Contact cards.
+        Slack: https://cannlytics.slack.com/
+        LinkedIn: 
+        Meetup:
+        Email: contact@cannlytics.com
+        Phone: (828) 395-3954 {% endcomment %}
+
+        {% comment %} <!-- Form -->
         <form
           id="contact-form"
           class="mt-4 pe-sm-5"
@@ -163,7 +167,7 @@
             >
           </div>
 
-        </form>
+        </form> {% endcomment %}
       </div>
 
       <!-- Image -->
@@ -175,14 +179,55 @@
       </div>
 
     </div>
+
+    <!-- Contact Cards -->
+    <div class="row" id="contact-cards"></div>
+
   </div>
 {% endblock %}
 
 <!-- JavaScript -->
 {% block page_js %}
-  <script>
-    cannlytics.website.initializeContactForm();
-  </script>
+<script>
+   // cannlytics.website.initializeContactForm();
+   function renderContactCard(title, link, description, emojiName) {
+    const contactCard = document.createElement('div');
+    contactCard.className = 'card col-5 m-3';
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body bg-transparent text-dark markdown';
+
+    const titleElement = document.createElement('h5');
+    titleElement.className = 'card-title fs-4 fw-bold fancy-serif';
+    const titleLink = document.createElement('a');
+    titleLink.href = link;
+    titleLink.textContent = title;
+    titleElement.appendChild(titleLink);
+
+    const descriptionElement = document.createElement('p');
+    descriptionElement.className = 'card-text fs-6 lh-lg';
+    descriptionElement.textContent = description;
+
+    const imgDiv = document.createElement('img');
+    imgDiv.src = `/images/emojies/${emojiName}.svg`;
+    imgDiv.alt = title;
+    imgDiv.style.width = '100px';
+    imgDiv.style.height = '100px';
+    imgDiv.className = 'float-start me-3';
+
+    cardBody.appendChild(imgDiv);
+    cardBody.appendChild(titleElement);
+    cardBody.appendChild(descriptionElement);
+    contactCard.appendChild(cardBody);
+    document.getElementById("contact-cards").appendChild(contactCard);
+  }
+
+  // Initialize contact cards
+  renderContactCard('Slack', 'https://cannlytics.slack.com/', 'Join our Slack community.', 'slack');
+  renderContactCard('LinkedIn', 'https://linkedin.com/company/cannlytics', 'Connect with us on LinkedIn.', 'linkedin');
+  renderContactCard('Meetup', 'https://meetup.com/cannabis-data-science', 'Meet us at upcoming events.', 'calendar');
+  renderContactCard('Email', 'mailto:contact@cannlytics.com', 'Email us directly.', 'envelope');
+  renderContactCard('Phone', 'tel:+18283953954', 'Give us a call.', 'telephone');
+</script>
 {% endblock %}
 
 </html>

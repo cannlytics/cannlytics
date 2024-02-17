@@ -536,7 +536,7 @@ if __name__ == '__main__':
             last_file=last_file,
             manager=manager,
             release=release,
-            skip_existing=False,
+            # skip_existing=False,
         )
 
         # Aggregate monthly sales items.

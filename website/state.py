@@ -97,10 +97,10 @@ material = {
             },
         ],
     },
-    "contact": {
-        "title": "Contact Us",
-        "message": "You're welcome to contact us anytime about anything. Please enter your contact information and message and the team will get back to you as soon as possible.",
-    },
+    # "contact": {
+    #     "title": "Contact Us",
+    #     "message": "You're welcome to contact us anytime about anything. Please enter your contact information and message and the team will get back to you as soon as possible.",
+    # },
     "homepage": {
         "hero": {
             # Colors: ffa600 f8e496
