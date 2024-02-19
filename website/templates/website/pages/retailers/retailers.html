@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<!--
+  Retailers Page | Cannlytics Website
+  Copyright (c) 2022-2024 Cannlytics
+
+  Authors: Keegan Skeate <https://github.com/keeganskeate>
+  Created: 2/17/2024
+  Updated: 2/18/2024
+  License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+-->
+{% extends "website/index.html" %}
+{% load static icon %}
+{% block title %}Retailers | Cannlytics{% endblock %}
+{% block page_css %}
+
+  <!-- AG Grid -->
+  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
+  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+
+{% endblock page_css %}
+{% block material %}
+
+<!-- Breadcrumbs -->
+<section class="container mb-3">
+  <div class="d-flex mt-4">
+    <nav
+      style="--bs-breadcrumb-divider: '>';"
+      aria-label="breadcrumb"
+    >
+      <ol class="breadcrumb bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item fs-6 lh-sm">
+          <a
+            class="text-dark serif action"
+            href="{% url 'page' page='data' %}"
+          >
+            Data
+          </a>
+        </li>
+        <li class="breadcrumb-item fs-6 lh-sm">
+          Labs
+        </li>
+      </ol>
+      <div>
+    </div>
+    </nav>
+  </div>
+</section>
+
+<!-- Labs -->
+<section class="container markdown">
+
+
+</section>
+
+<!-- Lab Sign Up -->
+<section class="container markdown my-4 my-lg-5 px-5">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card mx-auto" style="max-width: 800px;">
+        <div class="row g-0">
+          <div class="col-md-4 d-flex align-items-center justify-content-center">
+            <img src="/images/emojies/microscope.svg" class="img-fluid rounded-start" alt="Sign Up" style="width: 100px; height: 100px;"> <!-- Adjust image path -->
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title fs-4 fw-bold fancy-serif">Exclusive Offer for Labs</h5>
+              <p class="card-text fs-6 lh-lg">Sign up today to share your COAs with your customers.</p>
+              <a href="/signup" class="btn btn-primary">Sign Up Now</a> <!-- Adjust link as needed -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% include "website/components/art/vines.html" %}
+{% endblock material %}
+{% block page_js %}
+  <script>
+
+    // Initialize tooltips.
+    // cannlytics.ui.enableTooltips();
+
+    // Initialize labs. 
+    // cannlytics.labsJS.initializeLabs();
+
+  </script>
+{% endblock %}
+</html>

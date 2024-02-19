@@ -24,6 +24,8 @@ import gc
 import os
 from typing import  List, Optional
 
+import numpy as np
+
 # External imports:
 from cannlytics.data.ccrs import (
     CCRS,
@@ -99,6 +101,7 @@ def save_licensee_items_by_month(
         manager: CCRS,
         df: pd.DataFrame,
         data_dir: str,
+        key: str = 'licensee_id',
         item_type: Optional[str] = 'sales',
         subset: Optional[str] = '',
         parse_dates: Optional[list] =None,
@@ -119,7 +122,7 @@ def save_licensee_items_by_month(
             licensee_id = index
         licensee_dir = os.path.join(data_dir, licensee_id)
         if not os.path.exists(licensee_dir): os.makedirs(licensee_dir)
-        licensee_items = df.loc[df['licensee_id'] == index]
+        licensee_items = df.loc[df[key] == index]
         months = list(licensee_items['month'].unique())
         for month in months:
             outfile = f'{licensee_dir}/{item_type}-{licensee_id}-{month}.xlsx'
@@ -326,6 +329,7 @@ def curate_ccrs_sales(
 
         # Augment with curated inventory.
         manager.create_log('Merging inventory data...')
+        items['strain_name'] = np.nan
         for datafile in inventory_files:
 
             # Read inventory data file.
@@ -345,13 +349,16 @@ def curate_ccrs_sales(
             # FIXME: Account for product_id?
 
             # Merge inventory data with sales data.
-            items = rmerge(
-                items,
+            already_matched = items.loc[~items['strain_name'].isna()]
+            unmatched = items.loc[items['strain_name'].isna()]
+            matched = rmerge(
+                unmatched,
                 inventory_data,
                 on='inventory_id',
                 how='left',
                 validate='m:1',
             )
+            items = pd.concat([already_matched, matched])
             # matched = match.loc[~match[target].isna()]
             print('Strains matched:', len(items.loc[~items['strain_name'].isna()]))
 
@@ -424,8 +431,17 @@ def curate_ccrs_sales(
             manager,
             items,
             licensees_dir,
-            subset='sale_detail_id',
             verbose=False,
+            subset='sale_detail_id',
+            key='sale_licensee_id',
+        )
+        save_licensee_items_by_month(
+            manager,
+            items,
+            licensees_dir,
+            verbose=False,
+            subset='sale_detail_id',
+            key='licensee_id',
         )
         midpoint_end = datetime.now()
         manager.create_log('Curated sales file in: ' + str(midpoint_end - midpoint_start))
@@ -507,17 +523,16 @@ if __name__ == '__main__':
 
     # Specify where your data lives.
     base = 'D://data/washington/'
-    # release = 'CCRS PRR (1-2-24)'
     releases = [
         # 'CCRS PRR (3-6-23)',
         # 'CCRS PRR (4-4-23)',
         # 'CCRS PRR (5-7-23)',
-        'CCRS PRR (6-6-23)',
+        # 'CCRS PRR (6-6-23)',
         # 'CCRS PRR (8-4-23)',
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
-        # 'CCRS PRR (1-2-24)',
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
     ]
     for release in reversed(releases):
 
@@ -536,7 +551,7 @@ if __name__ == '__main__':
             last_file=last_file,
             manager=manager,
             release=release,
-            # skip_existing=False,
+            skip_existing=False,
         )
 
         # Aggregate monthly sales items.
