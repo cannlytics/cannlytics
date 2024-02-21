@@ -11,10 +11,12 @@ import { checkGoogleLogIn, onAuthChange } from '../firebase.js';
 import { authRequest, hasClass } from '../utils.js';
 import { contact } from './contact.js';
 import { theme } from '../ui/theme.js';
+import { dashboard } from './dashboard.js';
 
 export const website = {
 
   ...contact,
+  ...dashboard,
 
   initialize() {
     /**
@@ -30,16 +32,19 @@ export const website = {
     // Check if a user is signed in.
     onAuthChange(async user => {
       if (user) {
-        document.getElementById('user-email').textContent = user.email;
-        document.getElementById('user-name').textContent = user.displayName;
-        if (user.photoURL) {
-          document.getElementById('user-photo').src = user.photoURL;
-        } else {
-          const robohash = `${window.location.origin}/robohash/${user.email}/?width=60&height=60`;
-          document.getElementById('user-photo').src = robohash;
+        try {
+          document.getElementById('user-email').textContent = user.email;
+          document.getElementById('user-name').textContent = user.displayName;
+          if (user.photoURL) {
+            document.getElementById('user-photo').src = user.photoURL;
+          } else {
+            const robohash = `${window.location.origin}/robohash/${user.email}/?width=60&height=60`;
+            document.getElementById('user-photo').src = robohash;
+          }
+        } catch(error) {
+          // Pass
         }
         this.toggleAuthenticatedMaterial(true);
-        console.log('Request to /src/auth/login');
         await authRequest('/src/auth/login');
         if (user.metadata.createdAt == user.metadata.lastLoginAt) {
           const { email } = user;

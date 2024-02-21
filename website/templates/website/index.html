@@ -13,13 +13,13 @@
 {% block page %}
 
   <!-- Header -->
-  {% include "website/components/layout/header.html" %}
+  {% comment %} {% include "website/components/layout/header.html" %} {% endcomment %}
 
   <!-- Material -->
   <div id="material">{% block material %}{% endblock %}</div>
 
   <!-- Footer -->
-  {% include "website/components/layout/footer.html" %}
+  {% comment %} {% include "website/components/layout/footer.html" %} {% endcomment %}
 
 {% endblock %}
 </html>

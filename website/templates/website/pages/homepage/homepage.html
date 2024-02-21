@@ -20,19 +20,278 @@
   <!-- Page-specific style -->
   <style>
     .scrolling-wrapper {
-        overflow-x: scroll;
-        overflow-y: hidden;
-        white-space: nowrap;
+      /* overflow-x: scroll; */
+      /* overflow-y: hidden; */
+      white-space: nowrap;
     }
     .card {
-        display: inline-block;
-        margin-right: 15px;
+      display: inline-block;
+      margin-right: 15px;
+    }
+    body {
+      min-height: 100vh;
+      padding-left: 250px; /* Adjust based on sidebar width */
+    }
+    .main-content {
+      margin-left: 200px; /* Adjusted to sidebar width */
+    }
+    .grid-view .card {
+        width: calc(33.333% - 20px);
+        margin: 10px;
+    }
+    .list-view .card {
+        margin: 10px 0;
+    }
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 250px;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto; /* Ensures scrollability for small screens */
+    }
+    @media (max-width: 992px) {
+      #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      body {
+        padding-left: 0;
+      }
+    }
+    #sidebar.collapsed {
+      width: 80px;
+    }
+    #sidebar.collapsed .link-text,
+    #sidebar.collapsed h2 {
+      display: none;
+    }
+    #sidebar.collapsed .btn {
+      width: 48px;
+      height: 48px;
+    }
+    #sidebar.collapsed .sidebar-icon-collapsed {
+      display: block !important; /* Show the icon when sidebar is collapsed */
+    }
+    #sidebar .sidebar-icon-collapsed {
+      display: none; /* Hide the icon by default */
+    }
+    #toggleSidebar {
+      background-color: transparent;
+      color: #333; /* or any color you prefer */
+      border-color: transparent;
+      /*position: absolute;
+      right: 0;
+      top: 10px;
+      transform: translateX(100%);*/
+      border-radius: 0.25rem; /* Adjust for rounded corners if desired */
+      text-align: right;
+    }
+    #toggleSidebar:hover {
+      border-color: #ccc; /* color when hovered */
+    }
+    #toggleSidebar .bi {
+      font-weight: bold; /* Bootstrap Icons don't directly support font-weight changes */
+      font-size: 1.25rem; /* Larger icon size */
+    }
+    .sidebar .nav {
+      list-style-type: none; /* Remove bullet points */
+      padding-left: 0; /* Remove padding */
     }
   </style>
 
 {% endblock page_css %}
 {% block material %}
-  <div class="homepage pb-5 overflow-hidden">
+
+<!-- Mobile Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light d-lg-none">
+  <div class="container-fluid">
+    <a
+      class="navbar-brand"
+      href="{% url 'index' %}"
+      aria-label="Cannlytics"
+    >
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
+        class="light-only"
+        height="24px"
+        alt="Cannlytics"
+      >
+      <img
+        src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
+        class="dark-only"
+        height="24px"
+        alt="Cannlytics"
+      >
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#">COAs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Strains</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Producers</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Retailers</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Reports</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Dashboard -->
+<div class="d-flex">
+  <div id="sidebar" class="bg-light p-3 d-flex flex-column">
+    
+    <!-- Logo -->
+    <div class="sidebar-icon-collapsed d-none text-center mb-2">
+      <a href="{% url 'index' %}" aria-label="Cannlytics">
+        <img src="{% static 'website/images/logos/cannlytics_calyx_detailed.svg' %}" alt="Cannlytics" height="24px">
+      </a>
+    </div>
+
+    <!-- Brand name -->
+    <h2 class="fs-5">
+      <a
+        class="navbar-brand"
+        href="{% url 'index' %}"
+        aria-label="Cannlytics"
+      >
+        <img
+          src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
+          class="light-only"
+          height="24px"
+          alt="Cannlytics"
+        >
+        <img
+          src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
+          class="dark-only"
+          height="24px"
+          alt="Cannlytics"
+        >
+      </a>
+    </h2>
+
+    <!-- Navigation -->
+    <ul class="nav flex-column mb-auto">
+      <li class="nav-item">
+        <a class="nav-link fs-6" href="#">
+          <i class="bi bi-file-earmark-text"></i> <span class="link-text">COAs</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-6" href="#">
+          <i class="bi bi-diagram-3"></i> <span class="link-text">Strains</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-6" href="#">
+          <i class="bi bi-people"></i> <span class="link-text">Producers</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-6" href="#">
+          <i class="bi bi-shop"></i> <span class="link-text">Retailers</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-6" href="#">
+          <i class="bi bi-graph-up"></i> <span class="link-text">Reports</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Bottom sidebar -->
+    <div class="mt-auto pt-4">
+      
+      <!-- Theme button -->
+      {% include "website/components/buttons/theme_toggle.html" %}
+
+      <!-- Sign in button -->
+      <div class="">
+        <a
+          type="button"
+          class="btn btn-sm bg-gradient-orange text-white text-nowrap serif"
+          data-bs-target="#sign-in-dialog"
+          data-bs-toggle="modal"
+        >
+        Sign in
+        </a>
+      </div>
+
+      <!-- User menu -->
+      <div class="">
+        {% include "website/components/menus/user_menu.html" %}
+      </div>
+      {% comment %} <div class="dropdown">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle"></i> <span class="link-text">{username}</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="#">Logout</a></li>
+        </ul>
+      </div> {% endcomment %}
+  
+    </div>
+
+    <!-- Collapse button -->
+    <button
+      id="toggleSidebar"
+      class="btn btn-outline-secondary text-secondary mb-3"
+    >
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+  </div>
+
+  <div class="main-content p-4">
+      <!-- Search Bar (from previous example) -->
+      <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="Find your COA..." aria-label="Search">
+          <button class="btn btn-outline-secondary" type="button"><i class="bi bi-funnel"></i> Filters</button>
+      </div>
+
+      <!-- COAs List/Grid View -->
+      <div class="btn-group" role="group" aria-label="View toggle">
+          <button type="button" class="btn btn-secondary">List</button>
+          <button type="button" class="btn btn-secondary">Grid</button>
+      </div>
+
+      <div class="coa-container mt-3 grid-view d-flex flex-wrap">
+          <!-- Placeholder for COAs -->
+          <div class="card" style="width: 18rem;">
+              <img src="..." class="card-img-top" alt="...">
+              <div class="card-body">
+                  <h5 class="card-title">COA Name</h5>
+                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                  <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+          </div>
+          <!-- Repeat for other COAs -->
+      </div>
+  </div>
+</div>
+
+
+<!-- Old Homepage -->
+  {% comment %} <div class="homepage pb-5 overflow-hidden"> {% endcomment %}
 
     <!-- Hero -->
     {% comment %} {% include "website/pages/homepage/components/hero.html" with hero=homepage.hero only %} {% endcomment %}
@@ -50,7 +309,7 @@
     <!-- TODO: Datasets: Results, Strains, Licenses -->
 
 
-    <!-- Live analytics -->
+    {% comment %} <!-- Live analytics -->
     {% include "website/pages/homepage/components/live_analytics.html" %}
 
     <!-- Newest Strains -->
@@ -61,7 +320,7 @@
 
     <!-- Newest Licenses -->
     {% include "website/pages/homepage/components/newest_licenses.html" %}
-    
+     {% endcomment %}
 
 
     <!-- TODO: Articles -->
@@ -107,12 +366,12 @@
     </div> {% endcomment %}
 
     <!-- List of contributors -->
-    {% include "website/pages/homepage/components/contributors_promo.html" %}
+    {% comment %} {% include "website/pages/homepage/components/contributors_promo.html" %} {% endcomment %}
 
     <!-- Call to Action -->
     {% comment %} {% include "website/pages/homepage/components/call_to_action.html" with app=app only %} {% endcomment %}
 
-  </div>
+  {% comment %} </div> {% endcomment %}
 
   <!-- Vines -->
   {% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
@@ -122,7 +381,14 @@
 <!-- Homepage JavaScript -->
 {% block page_js %}
 {{ block.super }}
-  <script>
+<script>
+
+  // Initialize the dashboard.
+  cannlytics.website.initializeDashboard();
+
+</script>
+
+  {% comment %} <script>
 
     function CopyToClipboard(id) {
       /**
@@ -160,7 +426,7 @@
       CopyToClipboard(code.id);
     });
 
-  </script>
+  </script> {% endcomment %}
 {% endblock %}
 
 </html>
