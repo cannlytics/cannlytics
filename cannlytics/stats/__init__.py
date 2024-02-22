@@ -8,6 +8,7 @@ Updated: 5/31/2022
 """
 
 from .stats import (
+    calculate_shannon_diversity,
     calculate_model_statistics,
     estimate_discrete_model,
     get_stats_model,
@@ -16,6 +17,7 @@ from .stats import (
 )
 
 __all__ = [
+    'calculate_shannon_diversity',
     'calculate_model_statistics',
     'estimate_discrete_model',
     'get_stats_model',

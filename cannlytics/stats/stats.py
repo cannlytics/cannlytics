@@ -12,6 +12,7 @@ from datetime import datetime
 import os
 import shutil
 from typing import Any, Optional
+import numpy as np
 
 # External imports.
 import pandas as pd
@@ -28,6 +29,17 @@ from cannlytics.firebase import (
     update_documents,
     upload_file,
 )
+
+
+def calculate_shannon_diversity(df, compounds):
+    """Calculate Shannon Diversity Index."""
+    diversities = []
+    for _, row in df.iterrows():
+        proportions = [pd.to_numeric(row[compound], errors='coerce') for compound in compounds if pd.to_numeric(row[compound], errors='coerce') > 0]
+        proportions = np.array(proportions) / sum(proportions)
+        shannon_index = -np.sum(proportions * np.log2(proportions))
+        diversities.append(shannon_index)
+    return diversities
 
 
 def calculate_model_statistics(models, Y, X):
