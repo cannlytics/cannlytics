@@ -901,7 +901,9 @@
     "midrule",
     "endo",
     "fenchyl",
-    "hexahydrothymol"
+    "hexahydrothymol",
+    "ttest",
+    "linregress"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

@@ -517,7 +517,7 @@ if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = None
+    first_file = 100
     last_file = None
     reverse = False
 
@@ -528,11 +528,11 @@ if __name__ == '__main__':
         # 'CCRS PRR (4-4-23)',
         # 'CCRS PRR (5-7-23)',
         # 'CCRS PRR (6-6-23)',
-        # 'CCRS PRR (8-4-23)',
-        'CCRS PRR (9-5-23)',
-        'CCRS PRR (11-2-23)',
-        'CCRS PRR (12-2-23)',
-        'CCRS PRR (1-2-24)',
+        'CCRS PRR (8-4-23)',
+        # 'CCRS PRR (9-5-23)',
+        # 'CCRS PRR (11-2-23)',
+        # 'CCRS PRR (12-2-23)',
+        # 'CCRS PRR (1-2-24)',
     ]
     for release in reversed(releases):
 

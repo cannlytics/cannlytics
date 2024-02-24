@@ -30,10 +30,10 @@
     }
     body {
       min-height: 100vh;
-      padding-left: 250px; /* Adjust based on sidebar width */
+      /* padding-left: 250px; */
     }
     .main-content {
-      margin-left: 200px; /* Adjusted to sidebar width */
+      /* margin-left: 200px; */
     }
     .grid-view .card {
         width: calc(33.333% - 20px);
@@ -101,6 +101,9 @@
     .sidebar .nav {
       list-style-type: none; /* Remove bullet points */
       padding-left: 0; /* Remove padding */
+    }
+    .navbar-nav .nav-item {
+      border-radius: 0.33rem;
     }
   </style>
 
@@ -187,35 +190,36 @@
     </h2>
 
     <!-- Navigation -->
-    <ul class="nav flex-column mb-auto">
+    <ul class="nav flex-column mb-auto markdown">
       <li class="nav-item">
         <a class="nav-link fs-6" href="#">
-          <i class="bi bi-file-earmark-text"></i> <span class="link-text">COAs</span>
+          <i class="bi bi-file-earmark-text me-1"></i> <span class="link-text serif">COAs</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link fs-6" href="#">
-          <i class="bi bi-diagram-3"></i> <span class="link-text">Strains</span>
+          <i class="bi bi-diagram-3 me-1"></i> <span class="link-text serif">Strains</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link fs-6" href="#">
-          <i class="bi bi-people"></i> <span class="link-text">Producers</span>
+          <i class="bi bi-people me-1"></i> <span class="link-text serif">Producers</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link fs-6" href="#">
-          <i class="bi bi-shop"></i> <span class="link-text">Retailers</span>
+          <i class="bi bi-shop me-1"></i> <span class="link-text serif">Retailers</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link fs-6" href="#">
-          <i class="bi bi-graph-up"></i> <span class="link-text">Reports</span>
+          <i class="bi bi-graph-up me-1"></i> <span class="link-text serif">Reports</span>
         </a>
       </li>
     </ul>
 
-    <!-- Bottom sidebar -->
+    
+    {% comment %} <!-- Bottom sidebar -->
     <div class="mt-auto pt-4">
       
       <!-- Theme button -->
@@ -237,18 +241,8 @@
       <div class="">
         {% include "website/components/menus/user_menu.html" %}
       </div>
-      {% comment %} <div class="dropdown">
-        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-person-circle"></i> <span class="link-text">{username}</span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <li><a class="dropdown-item" href="#">Profile</a></li>
-          <li><a class="dropdown-item" href="#">Settings</a></li>
-          <li><a class="dropdown-item" href="#">Logout</a></li>
-        </ul>
-      </div> {% endcomment %}
   
-    </div>
+    </div> {% endcomment %}
 
     <!-- Collapse button -->
     <button
@@ -260,7 +254,12 @@
 
   </div>
 
-  <div class="main-content p-4">
+  <!-- Main Dashboard -->
+  <div class="main-content">
+
+    <!-- Header -->
+    {% include "website/components/layout/header.html" %}
+
       <!-- Search Bar (from previous example) -->
       <div class="input-group mb-3">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
