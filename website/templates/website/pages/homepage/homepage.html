@@ -33,7 +33,11 @@
       /* padding-left: 250px; */
     }
     .main-content {
-      /* margin-left: 200px; */
+      transition: margin-left 0.3s;
+      margin-left: 250px;
+    }
+    .main-content.expanded-margin {
+      margin-left: 200px;
     }
     .grid-view .card {
         width: calc(33.333% - 20px);
@@ -255,7 +259,7 @@
   </div>
 
   <!-- Main Dashboard -->
-  <div class="main-content">
+  <div class="main-content w-100">
 
     <!-- Header -->
     {% include "website/components/layout/header.html" %}

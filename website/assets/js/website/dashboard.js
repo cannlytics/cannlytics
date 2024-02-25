@@ -18,6 +18,16 @@ export const dashboard = {
     document.getElementById('toggleSidebar').addEventListener('click', function() {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('collapsed');
+
+      // Adjust main content margin based on sidebar state
+      const mainContent = document.querySelector('.main-content');
+      if (sidebar.classList.contains('collapsed')) {
+        mainContent.style.marginLeft = '80px';
+        // mainContent.classList.remove('expanded-margin');
+      } else {
+        mainContent.style.marginLeft = '250px';
+        // mainContent.classList.add('expanded-margin');
+      }
     
       // Adjust aria-labels based on collapse state
       const isCollapsed = sidebar.classList.contains('collapsed');
