@@ -10,7 +10,10 @@
     phone_number
 -->
 {% load static %}
-<div class="info-bar text-dark d-flex justify-content-between py-2 px-2 px-lg-3">
+<div
+  id="main-banner"
+  class="text-dark d-flex justify-content-between py-2 px-2 px-lg-3"
+>
   <div class="d-flex"></div>
   <div class="d-flex align-items-center justify-content-center flex-wrap fw-bold">
 
@@ -81,7 +84,7 @@
 
     <!-- Github star button -->
     <span class="px-2">|</span>
-    <div class="d-flex">
+    <div class="d-flex me-2">
       <iframe
         src="https://ghbtns.com/github-btn.html?user=cannlytics&repo=cannlytics&type=star&count=true"
         frameborder="0"
@@ -91,6 +94,22 @@
         title="Check out Cannlytics code and data on GitHub!"
       ></iframe>
     </div>
+
+    <!-- Sign-in button -->
+    <a
+      type="button"
+      class="btn btn-sm bg-gradient-orange text-white text-nowrap serif indicates-auth visually-hidden"
+      data-bs-target="#sign-in-dialog"
+      data-bs-toggle="modal"
+    >
+    Sign in
+    </a>
+
+    <!-- User Menu -->
+    {% include "website/components/menus/user_menu.html" %}
+
+    <!-- Theme Toggle -->
+    {% comment %} {% include "website/components/buttons/theme_toggle.html" %} {% endcomment %}
 
   </div>
   <div class="d-flex d-lg-none"></div>

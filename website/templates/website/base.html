@@ -50,6 +50,9 @@
   <!-- Page-specific stylesheets -->
   {% block page_css %}{% endblock page_css %}
 
+  <!-- Dashboard stylesheets -->
+  {% block dashboard_css %}{% endblock dashboard_css %}
+
 </head>
 
 <!-- Body -->
@@ -76,7 +79,10 @@
   <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 
   <!-- Page-specific JavaScript -->
-  {% block page_js %}{% endblock page_js %}
+  {% block page_js %}{% endblock %}
+
+  <!-- Dashboard JavaScript -->
+  {% block dashboard_js %}{% endblock %}
 
 </body>
 

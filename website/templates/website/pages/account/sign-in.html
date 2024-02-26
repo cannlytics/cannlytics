@@ -9,10 +9,10 @@
   Updated: 1/7/2022
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Sign In | Cannlytics{% endblock title %}
-{% block page_css %}
+{% block dashboard_css %}
 <style>
   #google-signin {
     background: url({% static 'website/images/logos/signin-assets/btn_google_signin_dark_normal_web@2x.png' %});
@@ -33,8 +33,8 @@
     background-size: contain;
   }
 </style>
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 <section class="container pt-5" style="max-width:475px;">
 
   <!-- Message -->
@@ -150,13 +150,10 @@
 
 </section>
 
-<!-- Vines -->
-{% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
-
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
   <script>
 
     // Initialize the sign in form.
@@ -173,6 +170,6 @@
     });
 
   </script>
-{% endblock page_js %}
+{% endblock %}
 
 </html>

@@ -1,17 +1,17 @@
 <!doctype html>
 <html>
 <!--
-  Report Page | Cannlytics Website
+  Strain Page | Cannlytics Website
   Copyright (c) 2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
-  Created: 2/25/2024
+  Created: 2/17/2024
   Updated: 2/25/2024
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
 {% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
-{% block title %}Report | Cannlytics{% endblock %}
+{% block title %}Strain | Cannlytics{% endblock %}
 {% block dashboard_css %}{% endblock %}
 {% block dashboard %}
 
@@ -26,13 +26,13 @@
         <li class="breadcrumb-item fs-6 lh-sm">
           <a
             class="text-dark serif action"
-            href="{% url 'page' page='reports' %}"
+            href="{% url 'page' page='strains' %}"
           >
-            Reports
+            Strains
           </a>
         </li>
         <li class="breadcrumb-item fs-6 lh-sm">
-          Report
+          Strain
         </li>
       </ol>
       <div>
@@ -41,7 +41,7 @@
   </div>
 </section>
 
-<!-- Report -->
+<!-- Strain -->
 <section class="container markdown">
 
 </section>

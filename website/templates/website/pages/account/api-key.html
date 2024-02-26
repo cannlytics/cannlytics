@@ -6,10 +6,10 @@
   Created: 6/18/2021
   Updated: 6/22/2023
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load icon %}
 {% block title %}Manage API Key | Cannlytics {% endblock title %}
-{% block material %}
+{% block dashboard %}
 
 <!-- Header -->
 {% include "website/components/heros/hero_banner.html" with
@@ -164,13 +164,13 @@
   </div><!-- End of body -->
 
 </main>
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
   <script>
     cannlytics.settings.viewAPIKey();
   </script>
-{% endblock page_js %}
+{% endblock %}
 
 </html>

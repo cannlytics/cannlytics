@@ -9,10 +9,10 @@
   Updated: 7/5/2023
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Subscription | Cannlytics{% endblock %}
-{% block page_css %}
+{% block dashboard_css %}
 
   <!-- Minor Style Adjustments -->
   <style>
@@ -48,17 +48,17 @@
   <!-- PayPal Subscriptions JavaScript -->
   <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 
-  <!-- Header -->
+  {% comment %} <!-- Header -->
   {% include "website/components/heros/hero_banner.html" with
     title="Manage your Cannlytics Subscription"
     description="Explore subscription plans and find the right plan for you."
     background_image="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Fai%2Fcannbot-ai.png?alt=media&token=3f2b4dcd-d661-404e-b417-c38768f1cb44"
     background_position="top left"
     only
-  %}
+  %} {% endcomment %}
 
   <!-- Sign In Prompt -->
   {% include "website/components/placeholders/sign_in_placeholder.html" %}
@@ -291,10 +291,10 @@
     </div>
   </div>
 
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
 
 <script>
 
@@ -315,4 +315,4 @@
 
 </script>
 
-{% endblock page_js %}
+{% endblock %}

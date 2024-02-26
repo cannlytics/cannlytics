@@ -11,10 +11,10 @@
 
   Optional: Add reCaptcha.
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Sign Up | Cannlytics{% endblock %}
-{% block material %}
+{% block dashboard %}
 <section class="container pt-5" style="max-width:475px;">
 
   <!-- Message -->
@@ -143,5 +143,5 @@
 <!-- Vines -->
 {% comment %} {% include "website/components/art/vines.html" %} {% endcomment %}
 
-{% endblock material %}
+{% endblock %}
 </html>

@@ -12,7 +12,7 @@
 {% extends "website/index.html" %}
 {% load static icon %}
 {% block title %}Scheduling | Cannlytics{% endblock %}
-{% block page_css %}
+{% block dashboard_css %}
 
   <!-- AG Grid -->
   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
@@ -20,8 +20,8 @@
   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 
 <!-- Breadcrumbs -->
 <section class="container mb-3">
@@ -59,8 +59,8 @@
 
 
 {% include "website/components/art/vines.html" %}
-{% endblock material %}
-{% block page_js %}
+{% endblock %}
+{% block dashboard_js %}
   <script>
 
     // Initialize tooltips.

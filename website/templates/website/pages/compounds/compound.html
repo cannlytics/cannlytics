@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <!--
-  Report Page | Cannlytics Website
+  Compound Page | Cannlytics Website
   Copyright (c) 2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
@@ -11,7 +11,7 @@
 -->
 {% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
-{% block title %}Report | Cannlytics{% endblock %}
+{% block title %}Compound | Cannlytics{% endblock %}
 {% block dashboard_css %}{% endblock %}
 {% block dashboard %}
 
@@ -26,13 +26,13 @@
         <li class="breadcrumb-item fs-6 lh-sm">
           <a
             class="text-dark serif action"
-            href="{% url 'page' page='reports' %}"
+            href="{% url 'page' page='compounds' %}"
           >
-            Reports
+            Compounds
           </a>
         </li>
         <li class="breadcrumb-item fs-6 lh-sm">
-          Report
+          Compound
         </li>
       </ol>
       <div>
@@ -41,8 +41,26 @@
   </div>
 </section>
 
-<!-- Report -->
+<!-- Compound -->
 <section class="container markdown">
+
+  <!-- TODO: Observed distribution of the given compound. -->
+
+  <!-- TODO: Description about the compound. -->
+
+  <!-- TODO: Chemical data about the compound:
+    - Molecular formula
+    - Molecular weight
+    - CAS number
+    - Boiling point
+    - Melting point
+    - Solubility
+      
+  -->
+
+  <!-- TODO: Strains with the highest concentrations of the compound. -->
+
+  <!-- TODO: Results with the highest concentration of the compound. -->
 
 </section>
 

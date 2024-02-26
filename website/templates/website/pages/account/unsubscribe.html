@@ -9,10 +9,10 @@
   Updated: 11/25/2021
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static %}
 {% block title %}Unsubscribe | Cannlytics{% endblock %}
-{% block material %}
+{% block dashboard %}
 
   <!-- Hero Banner -->
   {% comment %} {% include "website/components/heros/hero_banner.html" with
@@ -43,13 +43,13 @@
     </div>
   </main><!-- End of body -->
 
-{% endblock material %}
+{% endblock %}
 
 <!-- Unsubscribe JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
   <script>
     // TODO: Update email as unsubscribed, manually or with id in URL.
   </script>
-{% endblock page_js %}
+{% endblock %}
 
 </html>

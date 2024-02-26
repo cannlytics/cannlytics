@@ -5,10 +5,10 @@
   Created: 6/21/2023
   Updated: 6/21/2023
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Buy Tokens | Cannlytics{% endblock %}
-{% block page_css %}
+{% block dashboard_css %}
 
   <!-- Minor Style Adjustments -->
   <style>
@@ -19,8 +19,8 @@
   <script data-sdk-integration-source="integrationbuilder_sc"></script>
   <script src="https://www.paypal.com/sdk/js?client-id={{ paypal.client_id }}&components=buttons"></script>
 
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 
   <!-- Header -->
   {% include "website/components/heros/hero_banner.html" with
@@ -152,10 +152,10 @@
     %}
   </div>
 
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
 <script>
 
   // Initialize subscriptions.
@@ -166,6 +166,6 @@
 
 </script>
 
-{% endblock page_js %}
+{% endblock %}
 
 </html>

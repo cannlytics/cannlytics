@@ -9,10 +9,10 @@
   Updated: 11/28/2021
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Suggestions | Cannlytics{% endblock %}
-{% block material %}
+{% block dashboard %}
 <section class="container pt-5" style="max-width:475px;">
 
   <!-- Message -->
@@ -81,13 +81,10 @@
 
 </section>
 
-<!-- Vines -->
-{% include "website/components/art/vines.html" %}
-
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
   <script>
     function onSubmit(form) {
       /**

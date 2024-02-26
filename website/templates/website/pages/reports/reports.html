@@ -2,24 +2,24 @@
 <html>
 <!--
   Whitepapers Page | Cannlytics Website
-  Copyright (c) 2021-2022 Cannlytics
+  Copyright (c) 2021-2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/9/2021
-  Updated: 1/23/2022
+  Updated: 1/25/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}Whitepapers | Cannlytics{% endblock %}
-{% block page_css %}
+{% block dashboard_css %}
 <style>
   .popover-body {
     width: 250px;
   }
 </style>
-{% endblock page_css %}
-{% block material %}
+{% endblock dashboard_css %}
+{% block dashboard %}
 
 <!-- Hero Banner -->
 <!-- TODO: Insert link to first issue -->
@@ -174,26 +174,23 @@
   link="/contact?topic=paper"
 %}
 
-<!-- Vines -->
-{% include "website/components/art/vines.html" %}
 
-{% endblock material %}
+{% endblock %}
 
 <!-- JavaScript -->
-{% block page_js %}
+{% block dashboard_js %}
 <script>
 
   // Initialize popover.
-  cannlytics.ui.enablePopover('#share-button', '#share-popover');
-
-  // Select link.
-  var popoverTrigger = document.getElementById('share-button')
-  popoverTrigger.addEventListener('shown.bs.popover', function () {
-    var input = document.getElementById('share-link-copy');
-    input.focus();
-    input.select();
-  })
+  // FIXME:
+  // cannlytics.ui.enablePopover('#share-button', '#share-popover');
+  // var popoverTrigger = document.getElementById('share-button')
+  // popoverTrigger.addEventListener('shown.bs.popover', function () {
+  //  var input = document.getElementById('share-link-copy');
+  //  input.focus();
+  //  input.select();
+  //})
 
 </script>
-{% endblock page_js %}
+{% endblock dashboard_js %}
 </html>

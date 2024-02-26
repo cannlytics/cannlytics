@@ -146,14 +146,14 @@ export const CoADoc = {
     const qrCodeOptions = { fps: 10, qrbox: {width: 250, height: 250} };
     let html5QrcodeScanner = new Html5QrcodeScanner('reader', qrCodeOptions, false);
     html5QrcodeScanner.render(this.onScanSuccess, this.onScanFailure);
-    document.getElementById('reader__camera_permission_button').classList.add(
+    document.getElementById('html5-qrcode-button-camera-permission').classList.add(
       'btn',
       'btn-sm-light',
       'btn-md-light',
       'mb-1',
       'serif',
     );
-    document.getElementById('reader__dashboard_section_swaplink').classList.add(
+    document.getElementById('html5-qrcode-anchor-scan-type-change').classList.add(
       'app-action',
       'serif',
     );

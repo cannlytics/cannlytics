@@ -15,10 +15,10 @@ TODO:
   - [ ] Toggle between percent and mg/g.
 
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
 {% block title %}CoADoc | Cannlytics{% endblock %}
-{% block page_css %}
+{% block dashboard_css %}
 
 <!-- TODO: Loading JS from the Cannlytics server preferred. -->
 {% comment %} <script src="{% static 'website/plugins/ag-grid/ag-grid-community.min.noStyle.js' %}"></script>
@@ -88,20 +88,17 @@ TODO:
 </style>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 
-<!-- Banner
- - [ ] Add a background picture!
--->
-<!-- Optional:  -->
+{% comment %} <!-- Optional:  -->
 {% include "website/components/heros/hero_banner.html" with
   title=''
   description='Do you need <span class="serif fw-bold fst-italic text-decoration-underline">your</span> CoA data? Of course!<br>Have no fear, CoADoc is here to get you your data.'
   image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3'
   image_size="200px"
   only
-%}
+%} {% endcomment %}
 
 <!-- Breadcrumbs -->
 <section class="container mb-3">
@@ -736,16 +733,15 @@ title="Copy snippet"
 
 </section>
 
-{% include "website/components/art/vines.html" %}
-{% endblock material %}
-{% block page_js %}
+{% endblock %}
+{% block dashboard_js %}
   <script>
 
     // Initalize CoADoc!
     cannlytics.data.coas.initializeCoADoc();
 
     // Initialize tooltips.
-    cannlytics.ui.enableTooltips();
+    // cannlytics.ui.enableTooltips();
   
   </script>
 {% endblock %}

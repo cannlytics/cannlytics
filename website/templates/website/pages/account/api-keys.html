@@ -5,10 +5,10 @@
   Created: 5/9/2021
   Updated: 6/22/2023
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load icon %}
 {% block title %}API Keys | Cannlytics {% endblock title %}
-{% block page_css %}
+{% block dashboard_css %}
 
   <!-- AG-Grid CSS and JavaScript -->
   {% include "website/components/tables/ag_grid_scripts.html" %}
@@ -17,17 +17,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
-{% endblock page_css %}
-{% block material %}
+{% endblock %}
+{% block dashboard %}
 
-<!-- Header -->
+{% comment %} <!-- Header -->
 {% include "website/components/heros/hero_banner.html" with
   description="Get your API credentials for programmatic access."
   image_url='https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-api-logo.png?alt=media&token=5c0ec64e-f755-45cf-991f-61573a2fcd5b'
   image_size='200px'
   alt_title='Cannlytics API'
   only
-%}
+%} {% endcomment %}
 
 <!-- Sign In Prompt -->
 {% include "website/components/placeholders/sign_in_placeholder.html" %}
@@ -255,8 +255,8 @@
 
 </section>
 
-{% endblock material %}
-{% block page_js %}
+{% endblock %}
+{% block dashboard_js %}
   <script type="text/javascript" charset="utf-8">
 
     // Render the date picker.
@@ -373,5 +373,5 @@
     expirationInput.value = formattedDate;
 
   </script>
-{% endblock page_js %}
+{% endblock %}
 </html>

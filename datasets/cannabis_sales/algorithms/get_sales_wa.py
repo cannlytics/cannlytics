@@ -517,9 +517,10 @@ if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = 100
+    first_file = 40
     last_file = None
     reverse = False
+    skip_existing = False
 
     # Specify where your data lives.
     base = 'D://data/washington/'
@@ -551,7 +552,7 @@ if __name__ == '__main__':
             last_file=last_file,
             manager=manager,
             release=release,
-            skip_existing=False,
+            skip_existing=skip_existing,
         )
 
         # Aggregate monthly sales items.
