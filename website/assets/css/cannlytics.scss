@@ -1498,6 +1498,11 @@ body.dark .paypal-button-text {
   color: #ccc !important;
 }
 
+/* Dark dividers */
+body.dark .dropdown-divider {
+  border-top-color: #404040;
+}
+
 /*--------------------------------------------------------------------------
   Footer
 ---------------------------------------------------------------------------*/

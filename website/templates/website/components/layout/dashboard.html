@@ -14,9 +14,6 @@
 {% block title %}Cannlytics{% endblock %}
 {% block page_css %}
 
-  {% comment %} <!-- D3 Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script> {% endcomment %}
-
   <!-- Dashboard style -->
   <style>
     .scrolling-wrapper {
@@ -95,7 +92,7 @@
       right: 0;
       top: 10px;
       transform: translateX(100%);*/
-      border-radius: 0.25rem;
+      border-radius: 2rem;
       text-align: right;
     }
     #toggleSidebar:hover {
@@ -109,11 +106,11 @@
       list-style-type: none;
       padding-left: 0;
     }
-    .navbar-nav .nav-item {
-      border-radius: 0.33rem;
+    .nav .nav-link {
+      border-radius: 2rem;
     }
     #sidebar.collapsed {
-      align-items: center !important;
+      align-items: center;
     }
     body:not(.dark) #sidebar,
     body:not(.dark) #mobile-navigation,
@@ -233,15 +230,20 @@
     </h2>
 
     <!-- Navigation -->
-    <ul class="nav flex-column mb-auto markdown">
+    <ul class="nav flex-column mb-auto markdown pt-2">
       <li class="nav-item">
         <a class="nav-link fs-6" href="{% url 'page' page='coas' %}">
           <i class="bi bi-file-earmark-text me-1"></i> <span class="link-text serif">COAs</span>
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link fs-6" href="{% url 'page' page='compounds' %}">
+          <i class="bi bi-diagram-2-fill me-1"></i> <span class="link-text serif">Compounds</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link fs-6" href="{% url 'page' page='strains' %}">
-          <i class="bi bi-diagram-3 me-1"></i> <span class="link-text serif">Strains</span>
+          <i class="bi bi-flower3 me-1"></i> <span class="link-text serif">Strains</span>
         </a>
       </li>
       <li class="nav-item">

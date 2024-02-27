@@ -14,7 +14,49 @@
 {% block title %}Strains{% endblock %}
 {% block dashboard %}
 
-Strains here!
+
+  <!-- Search Bar -->
+  {% include "website/components/dashboard/search.html" %}
+
+  <!-- List/Grid View -->
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="viewToggleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+      View
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="viewToggleDropdown">
+      <li>
+        <a class="dropdown-item" href="#">
+          <i class="bi bi-list"></i> List
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="#">
+          <i class="bi bi-grid"></i> Grid
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Strains List -->
+  <div class="coa-container mt-3 grid-view d-flex flex-wrap">
+    <div class="card" style="width: 18rem;">
+      <img
+        src="{% static 'website/images/logos/cannlytics_calyx_detailed.svg' %}"
+        class="card-img-top"
+        alt="Strain"
+        style="height:75px;;"
+      >
+      <div class="card-body markdown">
+        <h5 class="card-title text-dark fs-5 serif">Strain Name</h5>
+        <p class="card-text fs-6 lh-sm">
+          <small class="text-dark serif">
+            Some quick example text to build on the card title and make up the bulk of the card's content.
+          </small>
+        </p>
+      </div>
+    </div>
+    <!-- TODO: Infinitely scrolling list of strains -->
+  </div>
 
 <!-- 
   # Ridge plots for cultivars with terpene data.

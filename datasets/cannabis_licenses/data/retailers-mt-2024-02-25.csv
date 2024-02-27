@@ -1,0 +1,423 @@
+premise_city,license_designation,business_legal_name,business_phone,id,license_number,licensing_authority_id,licensing_authority,premise_state,license_status,license_status_date,license_type,license_term,issue_date,expiration_date,business_owner_name,business_structure,activity,parcel_number,business_email,business_image_url,business_dba_name,premise_street_address,premise_county,premise_zip_code,premise_latitude,premise_longitude,business_website,data_refreshed_date
+Anaconda,Adult Use,Remedy Medicinals LLC,(406) 490-9298,0,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Remedy Medicinals LLC,,,,,,,2024-02-25T22:43:22.641549
+Arlee,Adult Use,The Hi-Line Company-Arlee,(406) 239-7292,1,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Hi-Line Company-Arlee,,,,,,,2024-02-25T22:43:22.641549
+Arlee,Adult Use,Tsb Montana Arlee,(406) 223-6916,2,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tsb Montana Arlee,,,,,,,2024-02-25T22:43:22.641549
+Ashland,Adult Use,Ashland,(406) 459-2618,3,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ashland,,,,,,,2024-02-25T22:43:22.641549
+Ashland,Adult Use,High Mountain - Ashland,(406) 670-6325,4,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Mountain - Ashland,,,,,,,2024-02-25T22:43:22.641549
+Ashland,Adult Use,Ninepipe Organics,(406) 690-1467,5,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ninepipe Organics,,,,,,,2024-02-25T22:43:22.641549
+Baker,Medical Only,Better Daze LLC,(406) 941-1191,6,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Better Daze LLC,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Juniper Naturals LLC,(406) 600-2553,7,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Juniper Naturals LLC,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Natural Wellness LLC,(406) 539-5354,8,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Natural Wellness LLC,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Nomad Canna Belgrade Store,(406) 788-6173,9,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nomad Canna Belgrade Store,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Paradise Organics,(406) 220-0661,10,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Paradise Organics,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Pure Remedies,(406) 660-0944,11,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Pure Remedies,,,,,,,2024-02-25T22:43:22.641549
+Belgrade,Adult Use,Wildfire Organics,(406) 580-1098,12,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Wildfire Organics,,,,,,,2024-02-25T22:43:22.641549
+Belt,Adult Use,Green Mountain Caregivers LLC,(406) 581-3754,13,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Mountain Caregivers LLC,,,,,,,2024-02-25T22:43:22.641549
+Big Sky,Adult Use,Greener Pastures,(831) 239-9028,14,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Greener Pastures,,,,,,,2024-02-25T22:43:22.641549
+Big Sky,Adult Use,Honey Sour,(480) 842-0078,15,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Honey Sour,,,,,,,2024-02-25T22:43:22.641549
+Big Sky,Adult Use,Jas Ventures Inc.,(406) 995-4444,16,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Herbaceous Inc,,,,,,,2024-02-25T22:43:22.641549
+Big Sky,Adult Use,Lone Peak Caregivers,(386) 931-9334,17,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lone Peak Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Big Timber,Medical Only,Michael Shirley,(206) 851-5295,18,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Michael Shirley,,,,,,,2024-02-25T22:43:22.641549
+Bigfork,Adult Use,Beargrass Naturals,(805) 434-8764,19,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Beargrass Naturals,,,,,,,2024-02-25T22:43:22.641549
+Bigfork,Adult Use,David V. Sandry,(406) 880-1234,20,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Rocky Mountain,,,,,,,2024-02-25T22:43:22.641549
+Bigfork,Adult Use,Freedom Farms,(406) 314-8234,22,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Freedom Farms,,,,,,,2024-02-25T22:43:22.641549
+Bigfork,Adult Use,Sugar Tree Organics,(406) 261-7337,23,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sugar Tree Organics,,,,,,,2024-02-25T22:43:22.641549
+Bigfork,Adult Use,The Local Dispensary,(406) 314-3716,24,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Local Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,312 Dispensary,(406) 690-5862,25,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,312 Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,406 Essence Of Safe Access,(406) 696-0849,26,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,406 Essence Of Safe Access,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Bloom,(406) 459-2618,27,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,B-Town Buds,(406) 670-6815,28,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,B-Town Buds,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,C4,(406) 371-5252,29,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,C4,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Chronic Caregivers,(406) 672-8860,30,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Chronic Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Collective Elevation,(406) 794-9756,31,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Collective Elevation,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Elevated LLC,(406) 855-0291,32,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Medical Only,Enlighten LLC,(406) 661-5300,33,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Enlighten LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Frosteez,(406) 850-5570,34,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Frosteez,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Granite Peak Distributing LLC,(406) 670-1333,35,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Granite Peak Distributing LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Gvh Inc,(406) 652-5819,36,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Gvh Inc,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Herb Doc,(406) 855-8906,37,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Herb Doc,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,High Mountain - Billings West End,(406) 670-6325,38,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Mountain - Billings West End,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Holistic Relief By Design,(406) 860-1220,39,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Holistic Relief By Design,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Hometree,(406) 544-9135,40,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Hometree,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Ideal Naturals,(406) 861-9920,41,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ideal Naturals,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Ideal Naturals LLC,(406) 601-1191,42,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ideal Naturals LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Kanopli,(406) 530-5041,43,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Kanopli,,,,,,,2024-02-25T22:43:22.641549
+Billings,Medical Only,Laughing Forest,(406) 697-8680,44,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Laughing Forest,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Lighthouse Organics LLC,(406) 208-7927,45,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lighthouse Organics LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Lionheart Cannabis Billings Dispensary,(844) 586-2837,46,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Billings Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Mac,(406) 698-7242,47,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mac,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Magic City Releaf,(406) 598-1400,48,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic City Releaf,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Marimint LLC,(406) 396-1454,49,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Marimint LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Medicine Creek Caregivers,(406) 551-5120,50,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Medicine Creek Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Montana Advanced Caregivers,(406) 698-7242,51,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Advanced Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Montana Advanced Caregivers,(406) 656-0026,52,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Advanced Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Billings,Medical Only,Montana Flower Shoppe,(406) 794-5600,53,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Flower Shoppe,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Montana Medicine Man,(406) 696-1812,54,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Medicine Man,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Mountain Organics,(406) 894-2010,55,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mountain Organics,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Mountain Organics,(406) 839-3872,56,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mountain Organics,,,,,,,2024-02-25T22:43:22.641549
+Billings,Medical Only,My Buddies,(406) 794-4479,57,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,My Buddies,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Seed Of Life Labs,(406) 855-8204,58,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Seed Of Life Labs,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Sensicare,(406) 794-8425,59,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sensicare,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Stink Blossom,(406) 591-9233,60,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Stink Blossom,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Stink Blossom West,(406) 894-2033,61,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Stink Blossom West,,,,,,,2024-02-25T22:43:22.641549
+Billings,Medical Only,That One Place,(406) 876-4930,62,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,That One Place,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,The Green Bee,(406) 850-0461,63,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Green Bee,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,The Patch LLC,(406) 490-4273,64,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Patch LLC,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Uncle Bucks,(406) 670-2332,65,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Uncle Bucks,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Yellowstone Buds,(406) 600-7060,66,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Yellowstone Buds,,,,,,,2024-02-25T22:43:22.641549
+Billings,Adult Use,Yellowstone Cannabis,(406) 794-7289,67,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Yellowstone Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Black Eagle,Adult Use,Elevated Great Falls,(406) 855-0291,68,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Great Falls,,,,,,,2024-02-25T22:43:22.641549
+Boulder,Adult Use,Bloom,(406) 459-2618,69,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Box Elder,Adult Use,Green Achres LLC,(406) 879-6773,70,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Achres LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,710 Montana,(406) 209-2470,71,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,710 Montana LLC,(406) 209-2470,72,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,719 S 9Th Ave Dispensary,(406) 580-8502,73,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,719 S 9Th Ave Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,7Th Street Dispensary,(406) 551-0904,74,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,7Th Street Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Apogee Gardens Bozeman Dispensary,(406) 219-2344,75,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Apogee Gardens Bozeman Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Big Sky,Adult Use,Bozeman  Buds,(406) 763-1420,76,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bozeman  Buds,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Bighorn Buds,(406) 548-7312,77,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bighorn Buds,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Bloom,(406) 459-2618,78,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Bozeman,(801) 350-1639,79,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bozeman,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Bozeman 1,(406) 224-0238,80,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bozeman 1,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Collective Elevation,(440) 488-0184,81,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Collective Elevation,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Connoisseur Pharms,(406) 599-2552,82,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Connoisseur Pharms,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Double Dogs,(406) 224-0238,83,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Double Dogs,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Elevated Bozeman,(406) 855-0291,84,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Bozeman,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Elevated Four Corners,(406) 855-0291,85,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Four Corners,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Euphoria Wellness,(406) 579-7227,86,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Euphoria Wellness,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Euphoria Wellness,(406) 577-2774,87,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Euphoria Wellness,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Gallatin Valley Organics,(406) 451-1616,88,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Gallatin Valley Organics,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Ganja Goddess,(406) 451-4291,89,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ganja Goddess,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Greener Pastures,(831) 239-9028,90,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Greener Pastures,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Grizzly Pine,(406) 595-0577,91,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Grizzly Pine,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Herbaceous Inc,(406) 220-1802,92,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Herbaceous Inc,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Honey Sour,(480) 842-0078,93,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Honey Sour,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Jack Hudson,(406) 599-9584,94,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Jack Hudson,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Jones Holdings LLC,(406) 579-6956,95,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Jones Holdings LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Juniper Cannabis,(406) 600-2553,96,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Juniper Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Last Best Cannabis,(406) 570-3241,97,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Last Best Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Lazy Daze Cannabis,(406) 219-7420,98,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lazy Daze Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Lionheart Cannabis Bozeman Dispensary,(844) 586-2837,99,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Bozeman Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Lionheart Cannabis Four Corners,(844) 586-2837,100,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Four Corners,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Lone Peak Caregivers,(386) 931-9334,102,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lone Peak Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Loud Smoke,(406) 570-8693,103,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Loud Smoke,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Lucky Dog Cannabis,(406) 219-3018,104,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lucky Dog Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Medcine Creek Caregivers - Bozeman,(612) 990-1072,105,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Medcine Creek Caregivers - Bozeman,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Montana Jane's Medicinals,(406) 599-5977,106,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Jane's Medicinals,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Montana Wildflower,(406) 539-9722,107,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Wildflower,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Mountain High,(406) 580-4150,108,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mountain High,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Mtk Inc.,(406) 465-2281,109,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mtk Inc.,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Natrapeutics,(406) 459-0391,110,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Natrapeutics,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Nature's Roots,(406) 551-5241,111,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nature's Roots,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Ninepipe Organics,(406) 690-1467,112,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ninepipe Organics,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Nomad Canna Bozeman Store,(406) 788-6173,113,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nomad Canna Bozeman Store,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Northstar Evolution LLC,(406) 539-1184,114,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Northstar Evolution LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Operation Green,(406) 224-2458,115,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Operation Green,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Sacred Sun Farms Inc.,(406) 580-4098,116,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sacred Sun Farms Inc.,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Shapan Enterprises LLC,(970) 946-7161,117,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Shapan Enterprises LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Supherb Wellness,(406) 595-3611,118,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Supherb Wellness,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Think Higher Caregiving LLC,(603) 801-4456,119,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Think Higher Caregiving LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Think Higher Caregiving LLC,(603) 801-4456,120,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Think Higher Caregiving LLC,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Top Shelf Botanicals,(406) 219-3288,121,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Treasure Tree,(406) 624-6337,122,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Treasure Tree,,,,,,,2024-02-25T22:43:22.641549
+Bozeman,Adult Use,Yellowstone Buds,(406) 600-7060,123,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Yellowstone Buds,,,,,,,2024-02-25T22:43:22.641549
+Bridger,Adult Use,Bridger- Sweetgrass,(406) 459-2618,124,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bridger- Sweetgrass,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,710 Montana,(406) 209-2470,125,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Advancedalternativesllc,(406) 529-8863,126,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Advancedalternativesllc,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Apogee Gardens LLC,(406) 299-3027,127,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Apogee Gardens LLC,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Bloom,(406) 459-2618,128,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Burn,(406) 565-6010,129,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Burn,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Butte Dispensary,(406) 565-5272,130,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Butte Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Collective Elevation Butte,(406) 498-3549,131,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Collective Elevation Butte,,,,,,,2024-02-25T22:43:22.641549
+Butte,Medical Only,Corner House,(406) 221-7421,132,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Corner House,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Elevated Butte,(406) 855-0291,133,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Butte,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Greenhouse LLC,(406) 565-7537,134,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Greenhouse LLC,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Harrison,(970) 708-7015,135,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Harrison,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,High Altitude Gardens,(406) 533-5664,136,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Altitude Gardens,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Honey Sour,(480) 842-0078,137,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Honey Sour,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Jas Ventures Inc.,(406) 461-2300,138,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Herbaceous Inc,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Kannatonic,(406) 491-1353,139,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Kannatonic,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Lionheart Cannabis Butte Dispensary,(844) 586-2837,140,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Butte Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,"Lycon, LLC",(406) 498-1778,141,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,"Lycon, LLC",,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Marimint Butte,(406) 970-9430,142,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Marimint Butte,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Medicine Creek Caregivers,(406) 404-5625,143,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Medicine Creek Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Mt Kush Butte,(406) 465-2281,144,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mt Kush Butte,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Natural Welleness LLC,(406) 539-5354,145,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Natural Welleness LLC,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Silverbow Cannabis,(406) 580-1839,146,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Silverbow Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Silverleaf,(970) 708-7015,147,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Silverleaf,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Soultonix,(406) 565-5185,148,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Soultonix,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,The Higher Standard Butte,(406) 459-2571,149,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Higher Standard Butte,,,,,,,2024-02-25T22:43:22.641549
+Butte,Adult Use,Top Shelf Botanicals,(406) 565-5970,150,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Cardwell,Adult Use,Top Shelf Botanicals,(406) 219-3288,151,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Chinook,Adult Use,Elevated Chinook,(406) 601-1166,152,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Chinook,,,,,,,2024-02-25T22:43:22.641549
+Clinton,Medical Only,Funk Farm,(701) 202-8652,153,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Funk Farm,,,,,,,2024-02-25T22:43:22.641549
+Clinton,Adult Use,Holistic Harvest Cannabis Farms LLC,(406) 370-7923,154,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Holistic Harvest Cannabis Farms LLC,,,,,,,2024-02-25T22:43:22.641549
+Clinton,Adult Use,Mc Courier,(406) 207-1799,155,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mc Courier,,,,,,,2024-02-25T22:43:22.641549
+Columbia Falls,Adult Use,Big Mountain Botanicals LLC,(406) 250-2241,156,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Big Mountain Botanicals LLC,,,,,,,2024-02-25T22:43:22.641549
+Columbia Falls,Adult Use,Bloominati,(406) 871-5776,157,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloominati,,,,,,,2024-02-25T22:43:22.641549
+Columbia Falls,Adult Use,Columbia Falls,(406) 314-4156,158,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Columbia Falls,,,,,,,2024-02-25T22:43:22.641549
+Columbia Falls,Adult Use,Fruit Factory Inc,(435) 668-4387,159,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fruit Factory Inc,,,,,,,2024-02-25T22:43:22.641549
+Columbia Falls,Adult Use,Terpene Time Extracts,(406) 885-3770,160,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Terpene Time Extracts,,,,,,,2024-02-25T22:43:22.641549
+Columbia Fls,Adult Use,Bud Factory,(406) 885-0188,161,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bud Factory,,,,,,,2024-02-25T22:43:22.641549
+Columbia Fls,Adult Use,Ember,(406) 404-6470,162,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ember,,,,,,,2024-02-25T22:43:22.641549
+Columbia Fls,Adult Use,Kgi,(406) 253-2863,163,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Kgi,,,,,,,2024-02-25T22:43:22.641549
+Columbus,Medical Only,Bloom,(406) 459-2618,164,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Columbus,Medical Only,Triggers Relief LLC,(406) 426-4446,165,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Triggers Relief LLC,,,,,,,2024-02-25T22:43:22.641549
+Culbertson,Adult Use,Magic Cityreleaf,(406) 598-1400,166,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic Cityreleaf,,,,,,,2024-02-25T22:43:22.641549
+Cut Bank,Adult Use,Green Acres,(406) 879-6773,167,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Acres,,,,,,,2024-02-25T22:43:22.641549
+Cut Bank,Adult Use,Mommaz Enterprises,(406) 249-7270,168,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mommaz Enterprises,,,,,,,2024-02-25T22:43:22.641549
+Dillon,Adult Use,D&L's Sweetwater Goods,(406) 925-0613,169,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,D&L's Sweetwater Goods,,,,,,,2024-02-25T22:43:22.641549
+Dillon,Medical Only,The Higher Standard,(406) 865-0341,170,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Higher Standard,,,,,,,2024-02-25T22:43:22.641549
+East Helena,Adult Use,Bloom,(406) 459-2618,171,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+East Helena,Adult Use,Emerald Apothecary By Onelife,(406) 640-4958,172,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Emerald Apothecary By Onelife,,,,,,,2024-02-25T22:43:22.641549
+Ennis,Adult Use,Lpc - Ennis,(386) 931-9334,173,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lpc - Ennis,,,,,,,2024-02-25T22:43:22.641549
+Ennis,Adult Use,Medicine Creek Caregivers,(406) 551-5120,174,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Medicine Creek Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Ennis,Adult Use,Top Shelf Botanicals,(406) 682-5558,175,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Eureka,Adult Use,Area93 Dispensary,(406) 212-8856,176,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Area93 Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Eureka,Adult Use,Awesome Blossoms Mt,(406) 945-7511,177,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Awesome Blossoms Mt,,,,,,,2024-02-25T22:43:22.641549
+Eureka,Adult Use,N8's Nuggz N Such,(406) 297-2349,178,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,N8's Nuggz N Such,,,,,,,2024-02-25T22:43:22.641549
+Eureka,Adult Use,Powerplant Arena,(714) 235-1605,179,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Powerplant Arena,,,,,,,2024-02-25T22:43:22.641549
+Fairview,Adult Use,Armadillo Buds LLC,(406) 941-0791,180,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Armadillo Buds LLC,,,,,,,2024-02-25T22:43:22.641549
+Fairview,Adult Use,High Mountain - Fairview,(406) 670-6325,181,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Mountain - Fairview,,,,,,,2024-02-25T22:43:22.641549
+Fairview,Adult Use,Seed Of Life Labs,(406) 855-8204,182,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Seed Of Life Labs,,,,,,,2024-02-25T22:43:22.641549
+Florence,Adult Use,710 Montana,(406) 209-2470,183,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana,,,,,,,2024-02-25T22:43:22.641549
+Florence,Adult Use,Bloom,(406) 540-4163,184,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Florence,Adult Use,Elevated Florence,(406) 855-0291,185,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Florence,,,,,,,2024-02-25T22:43:22.641549
+Florence,Adult Use,Family Farms,(406) 465-4555,186,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Family Farms,,,,,,,2024-02-25T22:43:22.641549
+Fort Benton,Medical Only,Fat Hippie,(406) 459-2618,187,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fat Hippie,,,,,,,2024-02-25T22:43:22.641549
+Frenchtown,Medical Only,Tr2 LLC,(425) 999-7441,188,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tr2 LLC,,,,,,,2024-02-25T22:43:22.641549
+Gallatin Gtwy,Adult Use,Double Dogs,(406) 224-0238,189,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Double Dogs,,,,,,,2024-02-25T22:43:22.641549
+Gallatin Gtwy,Adult Use,Mountain Medicine,(406) 589-7200,190,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mountain Medicine,,,,,,,2024-02-25T22:43:22.641549
+Gallatin Gtwy,Adult Use,Mtk Inc.,(406) 465-2281,191,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mtk Inc.,,,,,,,2024-02-25T22:43:22.641549
+Gardiner,Adult Use,The Smoking Bear By Lazy Daze,(646) 522-6729,192,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Smoking Bear By Lazy Daze,,,,,,,2024-02-25T22:43:22.641549
+Glasgow,Adult Use,Cannaorganics LLC,(406) 228-4202,193,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Cannaorganics LLC,,,,,,,2024-02-25T22:43:22.641549
+Glasgow,Adult Use,Wild Sky Farms,(406) 783-7270,194,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Wild Sky Farms,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,Armadillo Buds,(406) 941-0791,195,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Armadillo Buds,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,Bloom,(406) 459-2618,196,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,High Mountain - Glendive,(406) 670-6325,197,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Mountain - Glendive,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,Magic City Releaf Glendive Location,(406) 598-1400,198,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic City Releaf Glendive Location,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,Sacred Sun Farms Inc.,(406) 580-4098,199,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sacred Sun Farms Inc.,,,,,,,2024-02-25T22:43:22.641549
+Glendive,Adult Use,Seed Of Life Labs LLC,(406) 855-8204,200,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Seed Of Life Labs LLC,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Great Falls,(406) 403-8109,201,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Great Falls,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Great Northern Dispensary,(406) 333-3000,202,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Great Northern Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Great Northern Farmisee,(406) 590-1918,203,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Great Northern Farmisee,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Great Northern West,(406) 590-1918,204,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Great Northern West,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Green Creek,(406) 750-7152,205,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Creek,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Holistic Releaf By Design,(406) 860-1220,206,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Holistic Releaf By Design,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Infinity Wellness Dispensary,(406) 600-1266,207,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Infinity Wellness Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Lionheart Cannabis Great Falls,(844) 586-2837,208,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Great Falls,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Marimart Great Falls,(406) 396-1454,210,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Marimart Great Falls,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Montana Dispensary,(406) 219-7220,211,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Rocky Mountain Remedies,(406) 231-4739,212,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Rocky Mountain Remedies,,,,,,,2024-02-25T22:43:22.641549
+Great Falls,Adult Use,Wheat Building,,213,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Wheat Building,,,,,,,2024-02-25T22:43:22.641549
+Hamilton,Adult Use,Euphoria Wellness,(406) 375-5591,214,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Euphoria Wellness,,,,,,,2024-02-25T22:43:22.641549
+Hamilton,Adult Use,Starrbuds,(406) 240-8979,215,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Starrbuds,,,,,,,2024-02-25T22:43:22.641549
+Hamilton,Adult Use,The Flower Shop,(406) 360-3057,216,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Flower Shop,,,,,,,2024-02-25T22:43:22.641549
+Hamilton,Adult Use,Treasured State Farm LLC,(406) 361-5870,217,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Treasured State Farm LLC,,,,,,,2024-02-25T22:43:22.641549
+Hardin,Adult Use,312 Cannabis Hardin,(406) 690-5862,218,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,312 Cannabis Hardin,,,,,,,2024-02-25T22:43:22.641549
+Hardin,Adult Use,Bloom,(406) 459-2618,219,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Harlem,Adult Use,Harlem Location,(406) 879-6773,220,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Harlem Location,,,,,,,2024-02-25T22:43:22.641549
+Hathaway,Adult Use,High Mountain - Hathaway,(406) 670-6325,221,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,High Mountain - Hathaway,,,,,,,2024-02-25T22:43:22.641549
+Havre,Adult Use,Bloom,(406) 459-2618,222,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Havre,Adult Use,Dancing Goat Gardens,(406) 399-0356,223,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Dancing Goat Gardens,,,,,,,2024-02-25T22:43:22.641549
+Havre,Adult Use,Elevated Havre,,224,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Havre,,,,,,,2024-02-25T22:43:22.641549
+Havre,Adult Use,Montana Green Realeaf,(406) 399-6573,225,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Green Realeaf,,,,,,,2024-02-25T22:43:22.641549
+Havre,Adult Use,Seed Of Life Labs LLC,(406) 855-8204,226,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Seed Of Life Labs LLC,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,710 Montana,(406) 209-2470,227,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,A Perfect Cure Mt,(406) 459-0507,228,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,A Perfect Cure Mt,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Ancient Alchemy,(406) 422-8039,229,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ancient Alchemy,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Bloom,(406) 459-2618,230,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Bloom,(406) 458-9333,231,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Cannabis Corner,(406) 422-4113,232,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Cannabis Corner,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Elevated,(406) 855-0291,233,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Emerald Apothecary,(406) 594-2127,234,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Emerald Apothecary,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Ganja Goddess LLC,(406) 451-4291,235,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ganja Goddess LLC,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Helena Buds,(406) 558-2572,236,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Helena Buds,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Keeper Of The Green,(406) 465-5413,237,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Keeper Of The Green,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Lionheart Cannabis Helena Dispensary,(844) 586-2837,238,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Helena Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Mtk Inc.,(406) 465-2281,239,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mtk Inc.,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Natural Wellness LLC,(406) 539-5354,240,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Natural Wellness LLC,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Nomad Canna Helena Store,(406) 788-6173,241,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nomad Canna Helena Store,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Sean's Way,(406) 202-6217,242,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sean's Way,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Silverleaf,(406) 594-2448,243,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Silverleaf,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Sleeping Giant Gardens,(406) 459-0753,244,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sleeping Giant Gardens,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,The Broadwater Market,(406) 603-0528,245,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Broadwater Market,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,The Higher Standard Corp Helena,(406) 459-2571,246,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Higher Standard Corp Helena,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,The Higher Standard Corp.,(406) 459-2571,247,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Higher Standard Corp.,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Top Shelf Botanicals,(406) 475-5381,248,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,Treasure Tree,(406) 502-1177,249,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Treasure Tree,,,,,,,2024-02-25T22:43:22.641549
+Helena,Adult Use,White Pine Montana,(406) 951-2335,250,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,White Pine Montana,,,,,,,2024-02-25T22:43:22.641549
+Heron,Adult Use,Tastebuds,(406) 847-2741,251,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tastebuds,,,,,,,2024-02-25T22:43:22.641549
+Hinsdale,Adult Use,The Loaded Toad Medicinal Garden,(406) 263-7302,252,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Loaded Toad Medicinal Garden,,,,,,,2024-02-25T22:43:22.641549
+Hungry Horse,Adult Use,Mommaz Enterprises,(406) 249-7270,253,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mommaz Enterprises,,,,,,,2024-02-25T22:43:22.641549
+Joliet,Adult Use,Magic City Releaf Rockvale Location,(406) 598-1400,254,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic City Releaf Rockvale Location,,,,,,,2024-02-25T22:43:22.641549
+Joliet,Adult Use,Nature's Fix,(406) 661-7867,255,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nature's Fix,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Abilene Apothecary,(406) 210-5370,256,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Abilene Apothecary,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Awesome Blossoms Mt,(406) 945-7511,257,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Awesome Blossoms Mt,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Bloom,(406) 459-2618,258,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Delta 9 Collective,(406) 257-1545,259,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Delta 9 Collective,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Elevated Kalispell,(406) 855-0291,260,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Kalispell,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Fcgf,(406) 250-0040,261,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fcgf,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Flower,(406) 207-1898,262,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Flower,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Fruit Factory Inc,(435) 668-4387,263,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fruit Factory Inc,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Garden Mother,(406) 407-7206,264,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Garden Mother,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Glacier Green Cross,(406) 890-2237,265,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Glacier Green Cross,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Green Imports,(406) 260-4413,266,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Imports,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,H&H Industries,(406) 314-4299,267,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,H&H Industries,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Honey Sour,(480) 842-0078,268,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Honey Sour,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Kalispell South,(406) 890-8829,269,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Kalispell South,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Last Best Place Cannabis LLC,(406) 300-1022,270,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Last Best Place Cannabis LLC,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Lil Amsterdam Usa,(406) 885-3770,271,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lil Amsterdam Usa,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Lionheart Cannabis Kalispell Dispensary,,272,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Kalispell Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Lucid Leaf LLC,(406) 309-2209,273,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lucid Leaf LLC,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Mommaz,(406) 309-2380,274,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mommaz,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Montana Canna,(406) 261-3798,275,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Canna,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Nectar 406,(406) 261-4473,276,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Nectar 406,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Puffin Canna,(509) 710-6192,277,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Puffin Canna,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Simply Sublime,(406) 314-4353,278,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Simply Sublime,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Medical Only,Sticky Budz,(540) 798-2975,279,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sticky Budz,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Sugar Leaves,(406) 471-3129,280,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sugar Leaves,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Tamarack Cannabis,(406) 755-7227,281,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tamarack Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,The Green Haus,(406) 261-8386,282,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Green Haus,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,The Hi-Line Company,(406) 239-7292,283,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Hi-Line Company,,,,,,,2024-02-25T22:43:22.641549
+Kalispell,Adult Use,Top Shelf Botanicals,(406) 249-8915,284,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Lakeside,Adult Use,Altitude Lakeside,(406) 709-2090,285,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Altitude Lakeside,,,,,,,2024-02-25T22:43:22.641549
+Lakeside,Adult Use,Green Bee Lakeside,(406) 850-0461,286,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Bee Lakeside,,,,,,,2024-02-25T22:43:22.641549
+Laurel,Adult Use,Bigsky Dispensary,(406) 270-1078,287,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bigsky Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Laurel,Adult Use,Golden Valley Honey,(406) 670-1771,288,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Golden Valley Honey,,,,,,,2024-02-25T22:43:22.641549
+Laurel,Adult Use,Montana Advanced Caregivers,(406) 656-0026,289,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Advanced Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Lewistown,Medical Only,Bloom,(406) 459-2618,290,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Lewistown,Medical Only,Natural Wellness LLC,(406) 539-5354,291,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Natural Wellness LLC,,,,,,,2024-02-25T22:43:22.641549
+Libby,Adult Use,Alternative Releaf LLC,(406) 293-6555,292,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Alternative Releaf LLC,,,,,,,2024-02-25T22:43:22.641549
+Libby,Adult Use,Bloom,(406) 459-2618,293,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Libby,Adult Use,Fruit Factory,(435) 668-4387,294,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fruit Factory,,,,,,,2024-02-25T22:43:22.641549
+Libby,Adult Use,Granite Peak Products,(406) 291-7629,295,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Granite Peak Products,,,,,,,2024-02-25T22:43:22.641549
+Lincoln,Adult Use,Fat Hippie,(406) 459-2618,296,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fat Hippie,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Apogee Gardens LLC,(406) 333-2477,297,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Apogee Gardens LLC,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Bloom,(406) 459-2618,298,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Ganja Goddess,(406) 451-4291,299,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ganja Goddess,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Lionheart Cannabis Livingston,(406) 586-2837,300,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Livingston,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Paradise Organics,(406) 220-0661,302,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Paradise Organics,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Sweet Grass,(406) 459-2618,303,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sweet Grass,,,,,,,2024-02-25T22:43:22.641549
+Livingston,Adult Use,Top Shelf Botanicals,(270) 996-7502,304,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Lockwood,Adult Use,North Coast Cure,(406) 647-6943,305,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,North Coast Cure,,,,,,,2024-02-25T22:43:22.641549
+Lolo,Adult Use,Bliss,(406) 396-6271,306,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bliss,,,,,,,2024-02-25T22:43:22.641549
+Lolo,Medical Only,Bloom,(406) 459-2618,307,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Mc Allister,Adult Use,Agfertilizers Division LLC.,(406) 581-2740,308,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Agfertilizers Division LLC.,,,,,,,2024-02-25T22:43:22.641549
+Miles City,Medical Only,Seed Of Life Labs,(406) 855-8204,309,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Seed Of Life Labs,,,,,,,2024-02-25T22:43:22.641549
+Miles City,Medical Only,Sweet Grass,(406) 459-2618,310,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sweet Grass,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,710 Montana,(406) 209-2470,311,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,710 Montana,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,A Lucker LLC,(406) 830-0460,312,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,A Lucker LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Big Sky Buds Missoula,(406) 763-1420,313,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Big Sky Buds Missoula,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Big Sky Herbals & Edibles LLC,(406) 529-1919,314,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Big Sky Herbals & Edibles LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Buzz Genetics,(406) 949-0931,315,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Buzz Genetics,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Ccc Farms LLC,(406) 218-1073,316,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ccc Farms LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Collective Elevation,(406) 396-3997,317,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Collective Elevation,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Dancing Goat Gardens,(406) 420-6979,318,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Dancing Goat Gardens,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Davis Family Farms Inc,(406) 370-7945,319,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Davis Family Farms Inc,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Doubledogs,(406) 224-0238,320,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Doubledogs,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Elevated,(406) 855-0291,321,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Euphoria Wellness,(406) 317-1419,322,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Euphoria Wellness,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Farm406,(406) 544-4404,323,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Farm406,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Firefly,(406) 880-4066,324,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Firefly,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Flower,(406) 207-1898,325,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Flower,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Forbidden Gardens,(406) 396-6271,326,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Forbidden Gardens,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Frosteez,(406) 850-5570,327,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Frosteez,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Garden Mother LLC.,(406) 529-3834,328,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Garden Mother LLC.,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Great Northern Pharmacy,(406) 207-7912,329,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Great Northern Pharmacy,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Greener Pastures,(831) 239-9028,330,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Greener Pastures,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Greenhouse Farmacy,(406) 203-2263,331,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Greenhouse Farmacy,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Groove LLC.,(406) 544-7440,332,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Groove LLC.,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,H&H Industries,(406) 926-3420,333,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,H&H Industries,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Hometree Co,(630) 460-2900,334,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Hometree Co,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Hydrocarellc,(509) 710-6192,335,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Hydrocarellc,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Lionheart Cannabis Missoula Dispensary,(844) 586-2837,336,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lionheart Cannabis Missoula Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Medical Only,Mary Jane's 406 Big Sky Boutique,(406) 304-8055,337,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mary Jane's 406 Big Sky Boutique,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Mcmad Enterprises,(406) 205-3700,338,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mcmad Enterprises,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Mile High Cannabis LLC,(509) 389-2945,339,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mile High Cannabis LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Moncanna LLC,(406) 493-0395,340,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Moncanna LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Montana Medicinals LLC,(406) 686-1199,341,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Medicinals LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Montana Preferred Provider,(406) 540-4147,342,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Montana Preferred Provider,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Mtk Inc.,(406) 465-2281,343,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mtk Inc.,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Olympus Incendias,(406) 531-1812,344,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Olympus Incendias,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Prescribed Burn,(406) 493-0599,345,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Prescribed Burn,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Red Dawg LLC,(406) 240-3395,346,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Red Dawg LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Remedy Medicinals LLC,(406) 490-9298,347,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Remedy Medicinals LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Shane Lowman,(406) 498-8723,348,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Shane Lowman,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Spark1,(970) 232-5124,349,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Spark1,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Starrbuds,(406) 240-8979,350,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Starrbuds,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Steves Montana Sweetgrass Company,(406) 370-7130,351,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Steves Montana Sweetgrass Company,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Stokes,(406) 303-0725,352,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Stokes,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Tastebuds LLC,(406) 546-7211,353,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tastebuds LLC,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,The Higher Standard Corp Missoula,(406) 459-2571,354,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Higher Standard Corp Missoula,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,The Hi-Line Company Agnes,(406) 239-7292,355,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Hi-Line Company Agnes,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,The Hi-Line Company-Missoula,(406) 239-7292,356,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Hi-Line Company-Missoula,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,The Local East Missoula,(140) 620-7179,357,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Local East Missoula,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Top Shelf Botanicals,(406) 493-0375,358,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Urban Farmer,(406) 830-7373,359,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Urban Farmer,,,,,,,2024-02-25T22:43:22.641549
+Missoula,Adult Use,Zen Medicine,(406) 396-3554,360,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Zen Medicine,,,,,,,2024-02-25T22:43:22.641549
+Nashua,Medical Only,Highline Apothecary,(213) 445-7462,361,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Highline Apothecary,,,,,,,2024-02-25T22:43:22.641549
+Norris,Adult Use,Papaya,(406) 581-2205,362,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Papaya,,,,,,,2024-02-25T22:43:22.641549
+Olney,Adult Use,Good Deeds Organics LLC,(406) 249-8869,363,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Good Deeds Organics LLC,,,,,,,2024-02-25T22:43:22.641549
+Philipsburg,Adult Use,Tsb Montana LLC,(406) 859-3964,364,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tsb Montana LLC,,,,,,,2024-02-25T22:43:22.641549
+Plains,Adult Use,Mommaz Enterprises,(406) 249-7270,365,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mommaz Enterprises,,,,,,,2024-02-25T22:43:22.641549
+Plains,Adult Use,Tsb Montana LLC,(214) 310-6361,366,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tsb Montana LLC,,,,,,,2024-02-25T22:43:22.641549
+Plentywood,Adult Use,Goat Weed Farms,(801) 850-7720,367,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Goat Weed Farms,,,,,,,2024-02-25T22:43:22.641549
+Plentywood,Adult Use,Khm Plentywood,(406) 765-1283,368,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Khm Plentywood,,,,,,,2024-02-25T22:43:22.641549
+Polson,Adult Use,Alternative Releaf LLC,(406) 883-1880,369,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Alternative Releaf LLC,,,,,,,2024-02-25T22:43:22.641549
+Polson,Adult Use,Flathead Lake Herb,(406) 883-4372,370,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Flathead Lake Herb,,,,,,,2024-02-25T22:43:22.641549
+Polson,Adult Use,Tomcat LLC _ Polson Cannabis,(406) 407-0331,371,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tomcat LLC _ Polson Cannabis,,,,,,,2024-02-25T22:43:22.641549
+Polson,Adult Use,Top Shelf Botanicals,(406) 883-1580,372,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Red Lodge,Adult Use,Beartooth Medicinal Red Lodge,(406) 661-0112,373,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Beartooth Medicinal Red Lodge,,,,,,,2024-02-25T22:43:22.641549
+Red Lodge,Adult Use,Sweetgrass,(406) 445-3039,374,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sweetgrass,,,,,,,2024-02-25T22:43:22.641549
+Roberts,Adult Use,Elevated Roberts,(406) 855-0291,375,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Elevated Roberts,,,,,,,2024-02-25T22:43:22.641549
+Ronan,Adult Use,Olympus Incendias,(406) 210-6471,376,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Olympus Incendias,,,,,,,2024-02-25T22:43:22.641549
+Ronan,Adult Use,The Hi-Line Co.,(406) 676-0079,377,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Hi-Line Co.,,,,,,,2024-02-25T22:43:22.641549
+Roundup,Medical Only,Tumbleweed Dispancery,(406) 699-3366,378,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tumbleweed Dispancery,,,,,,,2024-02-25T22:43:22.641549
+Saint Ignatius,Adult Use,St Ignatius,(406) 548-8456,379,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,St Ignatius,,,,,,,2024-02-25T22:43:22.641549
+Saint Regis,Adult Use,Starrbuds,(406) 240-8979,380,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Starrbuds,,,,,,,2024-02-25T22:43:22.641549
+Savage,Adult Use,Rlogan Enterprises LLC,(406) 480-0074,381,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Northern,,,,,,,2024-02-25T22:43:22.641549
+Seeley Lake,Adult Use,Dancing Goat Gardens,(406) 499-8414,383,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Dancing Goat Gardens,,,,,,,2024-02-25T22:43:22.641549
+Seeley Lake,Adult Use,Fat Hippie,(406) 459-2618,384,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Fat Hippie,,,,,,,2024-02-25T22:43:22.641549
+Shepherd,Adult Use,406 Organix,(406) 697-2332,385,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,406 Organix,,,,,,,2024-02-25T22:43:22.641549
+Sheridan,Adult Use,Top Shelf Botanicals,(406) 842-5963,386,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Top Shelf Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Sidney,Adult Use,Bloom,(406) 459-2618,387,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Sidney,Adult Use,Khm Sidney,(406) 488-5700,388,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Khm Sidney,,,,,,,2024-02-25T22:43:22.641549
+Sidney,Adult Use,Magic City Releaf Sidney Location,(406) 598-1400,389,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic City Releaf Sidney Location,,,,,,,2024-02-25T22:43:22.641549
+Sidney,Adult Use,Sidney,(406) 224-0238,390,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sidney,,,,,,,2024-02-25T22:43:22.641549
+Somers,Adult Use,Green Thumbelina LLC,(406) 250-7813,391,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Green Thumbelina LLC,,,,,,,2024-02-25T22:43:22.641549
+Stevensville,Adult Use,Bliss,(406) 396-6271,392,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bliss,,,,,,,2024-02-25T22:43:22.641549
+Stevensville,Adult Use,Red Dawg Cannoisseur South,(406) 360-2020,393,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Red Dawg Cannoisseur South,,,,,,,2024-02-25T22:43:22.641549
+Stevensville,Medical Only,Stone Emerald Dispensary LLC,(406) 360-4105,394,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Stone Emerald Dispensary LLC,,,,,,,2024-02-25T22:43:22.641549
+Thompson Falls,Adult Use,Thompson Falls Dispensary,,395,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Thompson Falls Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Three Forks,Medical Only,Three Rivers Cannabis And Haze Bay,(360) 581-2412,396,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Three Rivers Cannabis And Haze Bay,,,,,,,2024-02-25T22:43:22.641549
+Three Forks,Adult Use,Tsb Montana LLC,,397,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tsb Montana LLC,,,,,,,2024-02-25T22:43:22.641549
+Townsend,Medical Only,Bloom,(406) 459-2618,398,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Trout Creek,Adult Use,A+ Medical Dispensary,(406) 334-3454,399,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,A+ Medical Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Victor,Adult Use,Apogee Gardens LLC,(406) 961-6865,400,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Apogee Gardens LLC,,,,,,,2024-02-25T22:43:22.641549
+Victor,Adult Use,Heirloom Remedies,(406) 802-4211,401,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Heirloom Remedies,,,,,,,2024-02-25T22:43:22.641549
+Victor,Adult Use,Peace & Healing Mmmp406,(406) 381-6807,402,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Peace & Healing Mmmp406,,,,,,,2024-02-25T22:43:22.641549
+Victor,Adult Use,The Green Room LLC,(406) 363-8513,403,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,The Green Room LLC,,,,,,,2024-02-25T22:43:22.641549
+Virginia City,Adult Use,Virgina City Farmacy,(706) 669-8233,404,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Virgina City Farmacy,,,,,,,2024-02-25T22:43:22.641549
+West Glacier Pa,Adult Use,Rkeast Glacier,(406) 879-6773,405,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Rkeast Glacier,,,,,,,2024-02-25T22:43:22.641549
+West,Adult Use,Lone Peak Caregivers,(386) 931-9334,406,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Lone Peak Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Yellowstone,Medical Only,,,407,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,406 Farmacy,(406) 270-2224,408,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,406 Farmacy,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Big Mountain Botanicals,(406) 250-2241,409,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Big Mountain Botanicals,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Bloom,,410,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Grizzly Pine,(406) 224-3525,411,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Grizzly Pine,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Groove,,412,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Groove,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Hc Medical,(406) 299-5555,413,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Hc Medical,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Mission Mountain Organics - Dispensary,(530) 555-5555,414,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Mission Mountain Organics - Dispensary,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Power Plant Dispensary LLC,(406) 890-5447,415,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Power Plant Dispensary LLC,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Power Plant Montana,(714) 235-1605,416,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Power Plant Montana,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Puffin Canna,(509) 710-6192,417,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Puffin Canna,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Ramsey's Remedies,(256) 345-1866,418,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Ramsey's Remedies,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Tamarack Cannabis - Whitefish,(406) 730-2599,419,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tamarack Cannabis - Whitefish,,,,,,,2024-02-25T22:43:22.641549
+Whitefish,Adult Use,Tegridy Farms L.L.C.,(406) 471-6110,420,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Tegridy Farms L.L.C.,,,,,,,2024-02-25T22:43:22.641549
+Whitehall,Adult Use,406 Organix - Whitehall,(406) 697-0347,421,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,406 Organix - Whitehall,,,,,,,2024-02-25T22:43:22.641549
+Wolf Creek,Adult Use,Bloom,(406) 459-2618,422,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Bloom,,,,,,,2024-02-25T22:43:22.641549
+Wolf Point,Adult Use,Magic City Releaf Wolf Point Location,(406) 598-1400,423,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Magic City Releaf Wolf Point Location,,,,,,,2024-02-25T22:43:22.641549
+Wolf Point,Adult Use,Medicine Creek Caregivers,(406) 404-5625,424,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Medicine Creek Caregivers,,,,,,,2024-02-25T22:43:22.641549
+Wolf Point,Adult Use,Sacred Sun Farms Inc.,(406) 580-4098,425,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Sacred Sun Farms Inc.,,,,,,,2024-02-25T22:43:22.641549
+Wolf Point,Adult Use,Zen Medicine,(406) 396-3554,426,,MTCCD,Montana Cannabis Control Division,MT,Active,,Commercial - Retailer,,,,,,,,,,Zen Medicine,,,,,,,2024-02-25T22:43:22.641549
