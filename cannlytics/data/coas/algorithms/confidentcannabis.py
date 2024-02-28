@@ -23,7 +23,6 @@ Data Points:
     ✓ analyses
     - {analysis}_method
     ✓ {analysis}_status
-    ✓ classification
     ✓ coa_urls
     ✓ date_tested
     - date_received
@@ -41,6 +40,7 @@ Data Points:
     - total_terpenes (calculated)
     ✓ sample_id (generated)
     ✓ strain_name
+    ✓ strain_type
     ✓ lab_id
     ✓ lab
     ✓ lab_image_url
@@ -91,7 +91,7 @@ CONFIDENT_CANNABIS = {
     'coa_algorithm': 'confidentcannabis.py',
     'coa_algorithm_entry_point': 'parse_cc_coa',
     'lims': 'Con\x00dent Cannabis',
-    'url': 'https://orders.confidentcannabis.com',
+    'url': 'confidentcannabis.com',
     'public': True,
 }
 
@@ -102,6 +102,8 @@ def parse_cc_url(
         headers: Optional[Any] = None,
         max_delay: Optional[float] = 60,
         persist: Optional[bool] = False,
+        headless: Optional[bool] = True,
+        pause: Optional[float] = 10,
         **kwargs
     ) -> dict:
     """Parse a Confident Cannabis CoA URL.
@@ -119,18 +121,30 @@ def parse_cc_url(
     """
     # Initialize a web driver.
     if parser.driver is None:
-        parser.driver = initialize_selenium()
+        parser.driver = initialize_selenium(
+            headless=headless,
+        )
 
     # Get the URL.
     parser.driver.get(url)
 
+    # Handle shared URLs.
+    if 'share.confidentcannabis.com' in url:
+        iframe = WebDriverWait(parser.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe'))
+        )
+        url = iframe.get_attribute('src')
+        parser.driver.switch_to.frame(iframe)
+        sleep(pause)
+
     # Wait for the page to load by waiting to detect the image.
-    try:
-        el = (By.CLASS_NAME, 'product-box-cc')
-        detect = EC.presence_of_element_located(el)
-        WebDriverWait(parser.driver, max_delay).until(detect)
-    except TimeoutException:
-        print('Failed to load page within %i seconds.' % max_delay)
+    else:
+        try:
+            el = (By.CLASS_NAME, 'product-box-cc')
+            detect = EC.presence_of_element_located(el)
+            WebDriverWait(parser.driver, max_delay).until(detect)
+        except TimeoutException:
+            print('Failed to load page within %i seconds.' % max_delay)
 
     # Create a sample observation.
     analyses, results = [], []
@@ -142,7 +156,7 @@ def parse_cc_url(
     try:
         el = parser.driver.find_element(
             by=By.CLASS_NAME,
-            value='product-box-cc'
+            value='col-md-12'
         )
         img = el.find_element(by=By.TAG_NAME, value='img')
         image_url = img.get_attribute('src')
@@ -166,9 +180,9 @@ def parse_cc_url(
     except:
         obs['lab_id'] = None
     try:
-        obs['classification'] = block[2]
+        obs['strain_type'] = block[2]
     except:
-        obs['classification'] = None
+        obs['strain_type'] = None
     try:
         parts = block[3].split(', ')
         obs['strain_name'] = strip_whitespace(', '.join(parts[:-1]))
@@ -184,8 +198,7 @@ def parse_cc_url(
     span = el.find_element(by=By.TAG_NAME, value='span')
     tooltip = span.get_attribute('uib-tooltip')
     tested_at = tooltip.split(': ')[-1]
-    date_tested = pd.to_datetime(tested_at).isoformat()
-    obs['date_tested'] = date_tested
+    obs['date_tested'] = pd.to_datetime(tested_at).isoformat()
 
     # Get the CoA URL.
     button = el.find_element(by=By.TAG_NAME, value='button')
@@ -351,7 +364,11 @@ def parse_cc_url(
                         button.click()
                     except ElementNotInteractableException:
                         continue
-                    sleep(0.2) # Brief pause to give modal time to close.
+
+                    # sleep(0.33) # Brief pause to give modal time to close.
+                    WebDriverWait(parser.driver, 10).until(
+                        EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.uib-modal-window"))
+                    )
 
         # Try to get lab data.
         producer = ''
@@ -443,6 +460,20 @@ def parse_cc_url(
                 'producer': producer
             }
 
+    # Rename moisture as moisture_content.
+    obs['moisture_content'] = obs.pop('moisture')
+
+    # Calculate total terpenes.
+    terp_results = [x for x in results if 'terp' in x['analysis']]
+    if terp_results:
+        total_terpenes = 0
+        for result in terp_results:
+            try:
+                total_terpenes += float(result['value'])
+            except ValueError:
+                pass
+        obs['total_terpenes'] = round(total_terpenes, 5)
+
     # Return the sample with a freshly minted sample ID.
     obs = {**CONFIDENT_CANNABIS, **obs}
     obs['lab_results_url'] = url
@@ -514,10 +545,10 @@ def parse_cc_coa(
 # === Tests ===
 # Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
-    pass
+    # pass
 
     # Test Confident Cannabis CoAs parsing.
-    # from cannlytics.data.coas import CoADoc
+    from cannlytics.data.coas import CoADoc
 
     # # [✓] Test: Ensure that the web driver works.
     # parser = CoADoc()
@@ -528,9 +559,10 @@ if __name__ == '__main__':
 
     # # [✓] TEST: Parse a CoA URL.
     # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
-    # parser = CoADoc()
-    # data = parse_cc_url(parser, cc_coa_url)
-    # assert data is not None
+    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/f86633f2-a49a-4bb0-aece-8aab8e0f3b39'
+    parser = CoADoc()
+    data = parse_cc_url(parser, cc_coa_url, headless=False)
+    assert data is not None
 
     # # [✓] TEST: Parse a CoA PDF.
     # cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'

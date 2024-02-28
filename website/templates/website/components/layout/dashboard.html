@@ -6,7 +6,7 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/5/2021
-  Updated: 2/25/2024
+  Updated: 2/27/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -56,6 +56,9 @@
       flex-direction: column;
       padding: 1rem;
       /*overflow-y: auto;*/
+    }
+    #sidebar {
+      overflow-y: auto;
     }
     @media (max-width: 992px) {
       #sidebar {
@@ -138,6 +141,22 @@
     }
     #addButton.active i, #filterButton.active i {
       color: #00ff00; /* Bright green */
+    }
+    .nav-item .nav-link:hover {
+      color: rgb(33, 37, 41) !important;
+      background-color: hsl(225 10% 70%/0.3) !important;
+    }
+    body.dark .nav-link:hover {
+      color: rgb(201, 209, 217) !important;
+      background-color: hsl(225deg 9% 50%/0.3) !important;
+    }
+    .nav-item.active .nav-link {
+      color: #004B09 !important;
+      background-color: rgba(80, 250, 123, 0.2) !important;
+    }
+    body.dark .nav-item.active .nav-link {
+      color: #fff !important;
+      background-color: rgba(255, 166, 0, 0.2) !important;
     }
   </style>
 
@@ -231,39 +250,67 @@
 
     <!-- Navigation -->
     <ul class="nav flex-column mb-auto markdown pt-2">
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='coas' %}">
-          <i class="bi bi-file-earmark-text me-1"></i> <span class="link-text serif">COAs</span>
+      <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='coas' %}"
+        >
+          <i class="bi bi-file-earmark-text me-1"></i>
+          <span class="link-text serif">COAs</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='compounds' %}">
-          <i class="bi bi-diagram-2-fill me-1"></i> <span class="link-text serif">Compounds</span>
+      <li class="nav-item {% if '/compounds' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='compounds' %}"
+        >
+          <i class="bi bi-diagram-2-fill me-1"></i>
+          <span class="link-text serif">Compounds</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='strains' %}">
-          <i class="bi bi-flower3 me-1"></i> <span class="link-text serif">Strains</span>
+      <li class="nav-item {% if '/strains' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='strains' %}"
+        >
+          <i class="bi bi-flower3 me-1"></i>
+          <span class="link-text serif">Strains</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='producers' %}">
-          <i class="bi bi-people me-1"></i> <span class="link-text serif">Producers</span>
+      <li class="nav-item {% if '/producers' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='producers' %}"
+        >
+          <i class="bi bi-people me-1"></i>
+          <span class="link-text serif">Producers</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='retailers' %}">
-          <i class="bi bi-shop me-1"></i> <span class="link-text serif">Retailers</span>
+      <li class="nav-item {% if '/retailers' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='retailers' %}"
+        >
+          <i class="bi bi-shop me-1"></i>
+          <span class="link-text serif">Retailers</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='labs' %}">
-          <i class="bi bi-moisture me-1"></i> <span class="link-text serif">Labs</span>
+      <li class="nav-item {% if '/labs' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='labs' %}"
+        >
+          <i class="bi bi-moisture me-1"></i>
+          <span class="link-text serif">Labs</span>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link fs-6" href="{% url 'page' page='reports' %}">
-          <i class="bi bi-graph-up me-1"></i> <span class="link-text serif">Reports</span>
+      <li class="nav-item {% if '/reports' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='reports' %}"
+        >
+          <i class="bi bi-graph-up me-1"></i>
+          <span class="link-text serif">Reports</span>
         </a>
       </li>
     </ul>
