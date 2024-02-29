@@ -904,7 +904,10 @@
     "zipcode",
     "zipcodes",
     "zoneinfo",
-    "zorder"
+    "zorder",
+    "linalg",
+    "TSNE",
+    "darkgreen"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

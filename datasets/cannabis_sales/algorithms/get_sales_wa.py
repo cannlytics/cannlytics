@@ -517,7 +517,7 @@ if __name__ == '__main__':
 
     # Parameters.
     manager = CCRS()
-    first_file = 65
+    first_file = 35
     last_file = None
     reverse = False
     skip_existing = False
