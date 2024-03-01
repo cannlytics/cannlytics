@@ -907,7 +907,11 @@
     "zorder",
     "linalg",
     "TSNE",
-    "darkgreen"
+    "darkgreen",
+    "networkx",
+    "kamada",
+    "kawai",
+    "cumsum"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
