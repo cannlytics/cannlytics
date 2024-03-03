@@ -575,7 +575,7 @@ def get_mcr_labs_test_results(
         print('Found %i samples.' % len(samples))
 
     # Get all of the sample details.
-    # Optional: Log errors?
+    # FIXME: Figure out why samples are failing to be collected.
     rows = []
     for i, sample in enumerate(samples):
         try:

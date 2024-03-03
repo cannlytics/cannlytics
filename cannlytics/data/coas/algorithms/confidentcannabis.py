@@ -1,12 +1,12 @@
 """
 Parse Confident Cannabis CoA
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 12/31/2023
+Updated: 3/2/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,6 +17,7 @@ Description:
         - California Ag Labs
         - CB Labs Novato
         - Harrens Lab Inc
+        - Encore Labs (algorithmic)
 
 Data Points:
 
@@ -104,6 +105,7 @@ def parse_cc_url(
         persist: Optional[bool] = False,
         headless: Optional[bool] = True,
         pause: Optional[float] = 10,
+        verbose: Optional[bool] = False,
         **kwargs
     ) -> dict:
     """Parse a Confident Cannabis CoA URL.
@@ -460,8 +462,15 @@ def parse_cc_url(
                 'producer': producer
             }
 
+    # FIXME: Supplement data from the PDF.
+    if not results and obs.get('lab') == 'Encore Labs':
+        print('TODO: Parse Encore Labs PDF...')
+
     # Rename moisture as moisture_content.
-    obs['moisture_content'] = obs.pop('moisture')
+    try:
+        obs['moisture_content'] = obs.pop('moisture')
+    except KeyError:
+        pass
 
     # Calculate total terpenes.
     terp_results = [x for x in results if 'terp' in x['analysis']]
@@ -559,9 +568,20 @@ if __name__ == '__main__':
 
     # # [✓] TEST: Parse a CoA URL.
     # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
-    cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/f86633f2-a49a-4bb0-aece-8aab8e0f3b39'
+    # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/f86633f2-a49a-4bb0-aece-8aab8e0f3b39'
+    # parser = CoADoc()
+    # data = parse_cc_url(parser, cc_coa_url, headless=False)
+    # assert data is not None
+
+    # FIXME: Parse a private URL.
+    url = 'https://orders.confidentcannabis.com/report/public/sample/6ea7ee5b-8443-4c8f-b87c-ab17eba6cad1'
     parser = CoADoc()
-    data = parse_cc_url(parser, cc_coa_url, headless=False)
+    data = parse_cc_url(
+        parser,
+        url,
+        headless=False,
+        verbose=True,
+    )
     assert data is not None
 
     # # [✓] TEST: Parse a CoA PDF.
