@@ -75,7 +75,6 @@ from selenium.common.exceptions import (
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-
 # Internal imports.
 from cannlytics import __version__
 from cannlytics.data.data import create_hash, create_sample_id
@@ -85,7 +84,7 @@ from cannlytics.utils.utils import (
     snake_case,
     strip_whitespace,
 )
-
+from cannlytics.data.coas.algorithms.encore import parse_encore_coa
 
 # It is assumed that the lab has the following details.
 CONFIDENT_CANNABIS = {
@@ -462,9 +461,17 @@ def parse_cc_url(
                 'producer': producer
             }
 
-    # FIXME: Supplement data from the PDF.
+    # Supplement data directly from the PDF.
     if not results and obs.get('lab') == 'Encore Labs':
-        print('TODO: Parse Encore Labs PDF...')
+        if verbose:
+            print('Parsing Encore Labs PDF...')
+        obs = {**CONFIDENT_CANNABIS, **obs}
+        obs['lab_results_url'] = url
+        parsed_coa = parse_encore_coa(parser, url, **kwargs)
+        obs = {**parsed_coa, **obs}
+        if not persist:
+            parser.quit()
+        return obs
 
     # Rename moisture as moisture_content.
     try:
