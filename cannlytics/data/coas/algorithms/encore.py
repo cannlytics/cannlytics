@@ -35,15 +35,15 @@ Data points:
     ✓ distributor
     ✓ distributor_license_number
     ✓ distributor_address
-    ✓ distributor_street
-    ✓ distributor_city
+    x distributor_street
+    x distributor_city
     ✓ distributor_state
     ✓ distributor_zipcode
     ✓ producer
     ✓ producer_license_number
     ✓ producer_address
-    ✓ producer_street
-    ✓ producer_city
+    x producer_street
+    x producer_city
     ✓ producer_state
     ✓ producer_zipcode
     ✓ lab
@@ -132,12 +132,52 @@ def list_between_values(lst, start_value, end_value):
         return []
 
 
+def extract_license_details(text):
+    details = {
+        'name': '',
+        'license_number': '',
+        'street': '',
+        'city': '',
+        'state': '',
+        'zipcode': ''
+    }
+    
+    # Split text into lines for processing
+    lines = text.split('\n')
+    
+    # Process each line
+    for i, line in enumerate(lines):
+        if "Lic. #" in line:
+            # License number is on the same line
+            details['license_number'] = line.split("Lic. #")[-1].strip()
+        elif "Lic." in line:
+            # License number might be on the next line
+            details['license_number'] = lines[i + 1].strip()
+        elif re.match(r'^[A-Za-z]+, [A-Z]{2}, \d{5}$', line):
+            # This regex matches "City, ST, ZipCode" format
+            city, state_zip = line.split(', ')
+            details['city'] = city
+            details['state'], details['zipcode'] = state_zip.split(' ')
+        elif i > 0 and ('Producer' in lines[i - 1] or 'Distributor' in lines[i - 1]):
+            # Assuming the name is right after 'Producer'/'Distributor'
+            details['name'] = line.strip()
+        elif "Rd.," in line or "Rd." in line:
+            # Assuming this might be part of the address
+            details['street'] += line.strip() + " "
+    
+    # Clean up fields
+    details['name'] = details['name'].rstrip()
+    details['street'] = details['street'].rstrip()
+    
+    return details
+
+
 def parse_encore_coa(
         parser,
         doc: Any,
         temp_path: Optional[str] = None,
         verbose: Optional[bool] = False,
-        pause: Optional[float] = 3.33,
+        pause: Optional[float] = 10,
         headless: Optional[bool] = True,
         **kwargs,
     ) -> dict:
@@ -211,45 +251,69 @@ def parse_encore_coa(
         if 'Matrix:' in line:
             obs['product_type'] = line.split('Matrix:')[1].split('Completed:')[0].strip()
         elif 'Type:' in line:
-            obs['product_subtype'] = line.split('Type:')[1].split('Sample Size::')[0].strip()
+            # FIXME: This line can go wrong.
+            obs['product_subtype'] = line.split('Type:')[1].split('Sample Size::')[0].split('S Ba am tchp :')[0].strip()
 
     # Get the product name.
     obs['product_name'] = lines[5].strip()
 
+    # Crop the producer and distributor areas.
+    # Finds the location of the words "Producer" and "Distributor".
+    # The distributor area is the space starting at the word "Distributor" and ending at the word "Producer".
+    # The producer area starts at the word "Producer" and ends at the end of the page.
+    # The areas go down to the 2nd line.
+    top = report.pages[0].within_bbox((0, 0, page.width, page.height * 0.25))
+    words = top.extract_words()
+    producer_coords = None
+    distributor_coords = None
+    for word in words:
+        if word['text'] == "Producer":
+            producer_coords = (word['x0'], word['top'], word['x1'], word['bottom'])
+        elif word['text'] == "Distributor":
+            distributor_coords = (word['x0'], word['top'], word['x1'], word['bottom'])
+        if producer_coords and distributor_coords:
+            break
+    lines = top.lines
+    border_line = lines[-1]
+    bottom_boundary = min(border_line['top'], border_line['bottom'])
+    if producer_coords:
+        producer_bbox = (
+            producer_coords[0] - 5, producer_coords[1], # x0, y0
+            top.width, bottom_boundary # x1, y1
+        )
+        producer_section = top.within_bbox(producer_bbox)
+    if distributor_coords:
+        distributor_bbox = (
+            distributor_coords[0] - 5, distributor_coords[1], # x0, y0
+            producer_coords[0], bottom_boundary # x1, y1
+        )
+        distributor_section = top.within_bbox(distributor_bbox)
+    
     # Get the producer details.
-    front_page = report.pages[0]
-    area = (
-        page.width * 0.8,
-        page.height * 0.1,
-        page.width * 1,
-        page.height * 0.25,
-    )
-    crop = front_page.within_bbox(area)
-    details = crop.extract_text()
-    producer_lines = details.split('\n')
-    obs['producer'] = producer_lines[1]
-    obs['producer_license_number'] = producer_lines[2].split('#')[-1].strip()
-    obs['producer_street'] = producer_lines[3]
-    obs['producer_city'] = producer_lines[4].split(',')[0].strip()
-    obs['producer_state'] = producer_lines[4].split(',')[1].strip().split(' ')[0]
-    obs['producer_zipcode'] = producer_lines[4].split(' ')[-1].strip()
+    if producer_section:
+        producer_text = producer_section.extract_text()
+        obs['producer'] = producer_text.split('Producer')[-1].split('Lic. #')[0].replace('\n', ' ').strip()
+        obs['producer_license_number'] = producer_text.split('Lic. #')[-1].replace('\n', ' ').split(' ')[1]
+        address = producer_text.split(obs['producer_license_number'])[-1].strip()
+        address = address.replace('\n', ' ').replace('  ', ' ')
+        obs['producer_address'] = address
+        obs['producer_state'] = address.split(' ')[-2]
+        obs['producer_zipcode'] = address.split(' ')[-1]
+        # TODO: Find a way to identify the street and city.
+        # obs['producer_street'] = address.split(',')[0].strip()
+        # obs['producer_city'] = address.split(',')[1].strip().split(' ')[0]
 
     # Get the distributor details.
-    area = (
-        page.width * 0.65,
-        page.height * 0.1,
-        page.width * 0.8,
-        page.height * 0.25,
-    )
-    crop = front_page.within_bbox(area)
-    details = crop.extract_text()
-    producer_lines = details.split('\n')
-    obs['distributor'] = producer_lines[1]
-    obs['distributor_license_number'] = producer_lines[2].split('#')[-1].strip()
-    obs['distributor_street'] = producer_lines[3]
-    obs['distributor_city'] = producer_lines[4].split(',')[0].strip()
-    obs['distributor_state'] = producer_lines[4].split(',')[1].strip().split(' ')[0]
-    obs['distributor_zipcode'] = producer_lines[4].split(' ')[-1].strip()
+    if distributor_section:
+        distributor_text = distributor_section.extract_text()
+        obs['distributor'] = distributor_text.split('Distributor')[-1].split('Lic. #')[0].replace('\n', ' ').strip()
+        obs['distributor_license_number'] = distributor_text.split('Lic. #')[-1].replace('\n', ' ').split(' ')[1]
+        address = distributor_text.split(obs['distributor_license_number'])[-1].strip()
+        address = address.replace('\n', ' ').replace('  ', ' ')
+        obs['distributor_address'] = address
+        obs['distributor_state'] = address.split(' ')[-2]
+        obs['distributor_zipcode'] = address.split(' ')[-1]
+        # TODO: Find a way to identify the street and city.
 
     # Get analyses, methods, and results.
     analyses, methods, results = [], [], []
@@ -297,7 +361,7 @@ def parse_encore_coa(
                     pass
 
     # Get heavy metals.
-    sublist = list_between_values(unique_lines[-25:], 'Heavy Metals', 'without')
+    sublist = list_between_values(unique_lines[50:], 'Heavy Metals', 'without')
     if sublist:
         analyses.append('heavy_metals')
         for line in sublist:
@@ -327,7 +391,7 @@ def parse_encore_coa(
                     pass
 
     # Get microbe results.
-    sublist = list_between_values(unique_lines[-100:], 'Microbial Impurities', 'Date Tested')
+    sublist = list_between_values(unique_lines[50:], 'Microbial Impurities', 'Date Tested')
     if sublist:
         analyses.append('microbes')
         for line in sublist:
@@ -355,7 +419,7 @@ def parse_encore_coa(
                     pass
 
     # Get mycotoxin results.
-    sublist = list_between_values(lines[-100:], 'Mycotoxins', 'Date Tested')
+    sublist = list_between_values(lines[50:], 'Mycotoxins', 'Date Tested')
     if sublist:
         analyses.append('mycotoxins')
         for line in sublist:
@@ -461,9 +525,8 @@ def parse_encore_coa(
                 })
 
     # Get terpenes.
-    sublist = list_between_values(unique_lines, 'Terpenes', 'Primary Aromas')
+    sublist = list_between_values(unique_lines[50:], 'Terpenes', 'Primary Aromas')
     if sublist:
-        sublist = list_between_values(sublist, 'Terpenes', 'LOQ =')
         analyses.append('terpenes')
         for line in sublist:
             if 'LOQ =' in line or 'Date Tested' in line:
@@ -529,22 +592,31 @@ def parse_encore_coa(
 
 
 # === Tests ===
+# Tested: 2024-03-04 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
 
-    # FIXME: Test parsing a URL.
-    parser = CoADoc()
-    doc = 'https://orders.confidentcannabis.com/report/public/sample/6ea7ee5b-8443-4c8f-b87c-ab17eba6cad1'
-    data = parse_encore_coa(parser, doc)
-    assert data is not None
+    # # [✓] Test parsing a URL.
+    # parser = CoADoc()
+    # doc = 'https://orders.confidentcannabis.com/report/public/sample/6ea7ee5b-8443-4c8f-b87c-ab17eba6cad1'
+    # data = parse_encore_coa(parser, doc, pause=4, headless=False)
+    # assert data is not None
 
-    # Test parsing full-panel flower COA.
-    doc = r'D:/data/california/lab_results/.datasets/flower-company/pdfs/710-labs-badder-cardan.pdf'
-    data = parse_encore_coa(parser, doc)
-    assert data is not None
+    # # [✓] Test parsing full-panel flower COA.
+    # parser = CoADoc()
+    # doc = r'D:/data/california/lab_results/.datasets/flower-company/pdfs/710-labs-badder-cardan.pdf'
+    # data = parse_encore_coa(parser, doc)
+    # assert data is not None
 
-    # Test parsing full-panel concentrate COA.
-    doc = r'D:/data/california/lab_results/pdfs/flower-company/bbd406b8a6f3f0683006bc2d366c75d9f400a4794513db10ca2e2c0b618fe62f.pdf'
-    data = parse_encore_coa(parser, doc)
-    assert data is not None
+    # # [✓] Test parsing full-panel concentrate COA.
+    # parser = CoADoc()
+    # doc = r'D:/data/california/lab_results/pdfs/flower-company/bbd406b8a6f3f0683006bc2d366c75d9f400a4794513db10ca2e2c0b618fe62f.pdf'
+    # data = parse_encore_coa(parser, doc)
+    # assert data is not None
+
+    # # [✓] Test parsing a COA with multi-line producer names.
+    # parser = CoADoc()
+    # doc = r'D:/data/california/lab_results/pdfs/flower-company\deef169934c829c782b2da8eaad34f95e3785c9bfdd66b1692b471c94e9bdf74.pdf'
+    # data = parse_encore_coa(parser, doc)
+    # assert data is not None
