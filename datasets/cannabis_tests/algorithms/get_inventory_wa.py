@@ -191,6 +191,7 @@ def merge_lab_results(
                 filename = os.path.join(directory, datafile)
 
                 # Read the standardized inventory.
+                print('Reading:', filename)
                 data = pd.read_excel(
                     filename,
                     dtype=fields,
@@ -377,22 +378,22 @@ def curate_ccrs_inventory(
     # FIXME:
     # Merge and save inventory data with curated lab result data.
     # TODO: Save a copy as `wa-lab-results-latest.csv` in the `data` directory.
-    try:
-        manager.create_log('Merging lab results...')
-        # inventory_files = sorted_nicely(os.listdir(inventory_dir))
+    # try:
+    manager.create_log('Merging lab results...')
+    # inventory_files = sorted_nicely(os.listdir(inventory_dir))
 
-        # Match with aggregate lab results.
-        lab_results_dir = os.path.join(stats_dir, 'lab_results')
-        results_file = os.path.join(lab_results_dir, 'wa-lab-results-aggregate.xlsx')
-        matched = merge_lab_results(manager, results_file, stats_dir)
-        matched.rename(columns=lambda x: camel_to_snake(x), inplace=True)
+    # Match with aggregate lab results.
+    lab_results_dir = os.path.join(stats_dir, 'lab_results')
+    results_file = os.path.join(lab_results_dir, 'wa-lab-results-aggregate.xlsx')
+    matched = merge_lab_results(manager, results_file, stats_dir)
+    matched.rename(columns=lambda x: camel_to_snake(x), inplace=True)
 
-        # Save the matched inventory lab results.
-        outfile = save_dataset(matched, lab_results_dir, 'wa-inventory-lab-results-' + release)
-        manager.create_log('Saved inventory lab results: ' + str(outfile))
-    except Exception as e:
-        manager.create_log('Failed to merge lab results. Curate lab results first.')
-        manager.create_log(str(e))
+    # Save the matched inventory lab results.
+    outfile = save_dataset(matched, lab_results_dir, 'wa-inventory-lab-results-' + release)
+    manager.create_log('Saved inventory lab results: ' + str(outfile))
+    # except Exception as e:
+    #     manager.create_log('Failed to merge lab results. Curate lab results first.')
+    #     manager.create_log(str(e))
 
     # FIXME: Attach lab results to products.
     # matched = pd.DataFrame()
@@ -472,6 +473,7 @@ if __name__ == '__main__':
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
         # 'CCRS PRR (1-2-24)',
+        'CCRS PRR (2-2-24)',
     ]
     for release in reversed(releases):
         data_dir = os.path.join(base, release, release)

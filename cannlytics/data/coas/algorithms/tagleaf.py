@@ -285,7 +285,10 @@ def parse_tagleaf_url(
             }
             cells = row.find_all('td')
             for i, cell in enumerate(cells):
-                key = columns[i]
+                try:
+                    key = columns[i]
+                except IndexError: # Handles rows such as "* Beyond scope of accreditation"
+                    continue
                 value = strip_whitespace(cell.text)
                 if key == 'name':
                     analyte = parser.analytes.get(value, snake_case(value))
@@ -398,22 +401,44 @@ if __name__ == '__main__':
     tagleaf_coa_url = 'https://lims.tagleaf.com/coas/F6LHqs9rk9vsvuILcNuH6je4VWCiFzdhgWlV7kAEanIP24qlHS'
     tagleaf_coa_short_url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
 
-    # [✓] TEST: Parse a COA URL.
-    parser = CoADoc()
-    data = parse_tagleaf_url(parser, tagleaf_coa_url)
-    assert data is not None
-    print(data)
+    # # [✓] TEST: Parse a COA URL.
+    # parser = CoADoc()
+    # data = parse_tagleaf_url(parser, tagleaf_coa_url)
+    # assert data is not None
+    # print(data)
 
-    # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
-    parser = CoADoc()
-    tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
-    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
-    assert data is not None
-    print(data)
+    # # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
+    # parser = CoADoc()
+    # tagleaf_coa_pdf = f'{DATA_DIR}/Sunbeam.pdf'
+    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    # assert data is not None
+    # print(data)
 
-    # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
+    # # [✓] TEST: Parse a TagLeaf LIMS COA PDF.
+    # parser = CoADoc()
+    # tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
+    # data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    # assert data is not None
+    # print(data)
+
+    # FIXME: This is where the fields are coming from:
+    # - total_cbd_per_packagepackage_5_grams
+    # - total_thc_per_packagepackage_5_grams
+    # - total_cbd_total_cbd_cbd_cbda_x_0_877
+    # - total_thc_total_thc_delta_8_thc_delta_8_thca_x_0_877_delta_9_thc_thca_x_0_877
+
+    # FIXME: Clean fields (and convert to percentages):
+    # total_cannabinoids
+    # total_thc
+
+    # FIXME:
+    # doc = 'https://lims.tagleaf.com/coa_/rtBuMi7LXm'
+    doc = 'https://lims.tagleaf.com/coa_/L0wvRr9mKT'
     parser = CoADoc()
-    tagleaf_coa_pdf = f'{DATA_DIR}/BCL-211214-151.pdf'
-    data = parse_tagleaf_pdf(parser, tagleaf_coa_pdf)
+    data = parse_tagleaf_url(parser, doc)
     assert data is not None
     print(data)
+    # https://lims.tagleaf.com/coa_/A9WW42AX0S
+    # https://lims.tagleaf.com/coa_/Fh2pfoOn8L
+    # https://lims.tagleaf.com/coa_/VynWeem2HV
+    # https://lims.tagleaf.com/coa_/L0wvRr9mKT

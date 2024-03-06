@@ -84,7 +84,7 @@ from cannlytics.utils.utils import (
     snake_case,
     strip_whitespace,
 )
-from cannlytics.data.coas.algorithms.encore import parse_encore_coa
+from cannlytics.data.coas.algorithms.encore import parse_cc_custom_coa
 
 # It is assumed that the lab has the following details.
 CONFIDENT_CANNABIS = {
@@ -462,16 +462,21 @@ def parse_cc_url(
             }
 
     # Supplement data directly from the PDF.
+    # FIXME: Perhaps move this to the top?
     if not results and obs.get('lab') == 'Encore Labs':
         if verbose:
             print('Parsing Encore Labs PDF...')
         obs = {**CONFIDENT_CANNABIS, **obs}
         obs['lab_results_url'] = url
-        parsed_coa = parse_encore_coa(parser, url, **kwargs)
+        parsed_coa = parse_cc_custom_coa(parser, url, **kwargs)
         obs = {**parsed_coa, **obs}
         if not persist:
             parser.quit()
         return obs
+
+    # Close the driver.
+    if not persist:
+        parser.quit()
 
     # Rename moisture as moisture_content.
     try:
@@ -504,8 +509,6 @@ def parse_cc_url(
         salt=producer,
     )
     obs['sample_hash'] = create_hash(obs)
-    if not persist:
-        parser.quit()
     return obs
 
 
@@ -529,6 +532,7 @@ def parse_cc_pdf(
 def parse_cc_coa(
         parser,
         doc: Any,
+        verbose: Optional[bool] = False,
         **kwargs,
     ) -> dict:
     """Parse a Confident Cannabis CoA PDF or URL.
@@ -551,10 +555,14 @@ def parse_cc_coa(
     elif isinstance(doc, PDF):
         data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     
-    # FIXME: Supplement data from the PDF.
-    if data.get('results') == '[]' and data.get('lab') == 'Encore Labs':
-        print('Parsing Encore Labs PDF...')
+    # Try to supplement data from the PDF if results are not online.
+    if data.get('results') == '[]':
+        if verbose:
+            print('Parsing custom Confident Cannabis PDF:', doc)
+        coa_data = parse_cc_custom_coa(parser, doc, **kwargs)
+        data = {**coa_data, **data}
     
+    # Return the data.
     return data
 
 
@@ -581,12 +589,12 @@ if __name__ == '__main__':
     # assert data is not None
 
     # FIXME: Parse a private URL.
-    url = 'https://orders.confidentcannabis.com/report/public/sample/6ea7ee5b-8443-4c8f-b87c-ab17eba6cad1'
+    url = 'https://orders.confidentcannabis.com/report/public/sample/520e1f7e-c9cf-4d86-a069-7f8780935123'
     parser = CoADoc()
     data = parse_cc_url(
         parser,
         url,
-        headless=False,
+        headless=True,
         verbose=True,
     )
     assert data is not None

@@ -258,7 +258,8 @@ if __name__ == '__main__':
         # 'CCRS PRR (9-5-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
-        'CCRS PRR (1-2-24)',
+        # 'CCRS PRR (1-2-24)',
+        'CCRS PRR (2-2-24)',
     ]
     for release in releases:
         data_dir = os.path.join(base, release, release)
