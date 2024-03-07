@@ -370,7 +370,12 @@ if __name__ == '__main__':
             product_subtype = types[1].text.strip()
         else:
             product_subtype = None
-        product_description = driver.find_element(By.CSS_SELECTOR, '.product-view-description').text.strip()
+
+        # Get the product description.
+        try:
+            product_description = driver.find_element(By.CSS_SELECTOR, '.product-view-description').text.strip()
+        except:
+            product_description = None
 
         # Skip accessories.
         if product_type == 'Accessory':

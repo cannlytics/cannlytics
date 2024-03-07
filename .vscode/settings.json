@@ -911,7 +911,15 @@
     "networkx",
     "kamada",
     "kawai",
-    "cumsum"
+    "cumsum",
+    "jointplot",
+    "kdeplot",
+    "gridspec",
+    "sharey",
+    "labelleft",
+    "labelbottom",
+    "wspace",
+    "hspace"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

@@ -159,8 +159,6 @@ def merge_lab_results(
     ) -> pd.DataFrame:
     """Merge lab results with items in a given directory."""
 
-    # FIXME: This does not appear to be matching very many lab results.
-
     # Read the standardized lab results.
     lab_results = pd.read_excel(results_file)
     lab_results.rename(columns={
@@ -178,9 +176,6 @@ def merge_lab_results(
 
     # Iterate over all inventory datafiles in the directory.
     matched = pd.DataFrame()
-    # datafiles = sorted_nicely(os.listdir(directory))
-    # FIXME: Walk this directory.
-    # root_directory = r"D:\data\washington\stats"
     for directory, _, files in os.walk(root_directory):
         for datafile in files:
             if 'inventory' in datafile.lower() and datafile.endswith('.xlsx'):
@@ -191,13 +186,16 @@ def merge_lab_results(
                 filename = os.path.join(directory, datafile)
 
                 # Read the standardized inventory.
-                print('Reading:', filename)
-                data = pd.read_excel(
-                    filename,
-                    dtype=fields,
-                    parse_dates=parse_dates,
-                    usecols=use_cols,
-                )
+                try:
+                    data = pd.read_excel(
+                        filename,
+                        dtype=fields,
+                        parse_dates=parse_dates,
+                        usecols=use_cols,
+                    )
+                except:
+                    manager.create_log('Failed to read: ' + filename)
+                    continue
                 data[on] = data[on].astype(str)
                 data.drop_duplicates(subset=on, inplace=True)
                 
