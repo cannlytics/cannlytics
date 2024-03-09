@@ -771,8 +771,8 @@ if __name__ == '__main__':
     queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
     # Download TerpLife Labs COAs by alphabetic combinations.
-    # specific_letters = [x for x in string.ascii_lowercase]
-    # queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
+    specific_letters = [x for x in string.ascii_lowercase]
+    queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
 
     DATA_DIR = 'D://data/florida/lab_results'
     downloader = TerpLifeLabs(DATA_DIR)
@@ -1010,46 +1010,46 @@ class JungleBoys:
                 print('Cached:', pdf_path)
 
 
-# === Test ===
-if __name__ == '__main__':
+# # === Test ===
+# if __name__ == '__main__':
 
-    # Specify where the data lives.
-    DATA_DIR = 'D://data/florida/lab_results'
-    data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
-    download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs'
+#     # Specify where the data lives.
+#     DATA_DIR = 'D://data/florida/lab_results'
+#     data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
+#     download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs'
 
-    # Initialize a client to query Jungle Boys COAs.
-    downloader = JungleBoys(
-        DATA_DIR,
-        download_dir=download_dir,
-        headless=False,
-    )
+#     # Initialize a client to query Jungle Boys COAs.
+#     downloader = JungleBoys(
+#         DATA_DIR,
+#         download_dir=download_dir,
+#         headless=False,
+#     )
 
-    # Download the COAs.
-    products = downloader.get_results_jungle_boys()
+#     # Download the COAs.
+#     products = downloader.get_results_jungle_boys()
 
-    # Parse the Jungle Boys COAs.
-    parser = CoADoc()
-    all_pdfs = [x for x in os.listdir(download_dir) if x.endswith('.pdf')]
-    coa_data = []
-    print('Parsing %i COAs...' % len(all_pdfs))
-    for i, pdf in enumerate(all_pdfs):
-        try:
-            doc = os.path.join(download_dir, pdf)
-            data = parser.parse(doc)
-            if isinstance(data, dict):
-                coa_data.append(data)
-            elif isinstance(data, list):
-                coa_data.extend(data)
-            print('Parsed:', doc)
-        except:
-            print('Error parsing:', doc)
+#     # Parse the Jungle Boys COAs.
+#     parser = CoADoc()
+#     all_pdfs = [x for x in os.listdir(download_dir) if x.endswith('.pdf')]
+#     coa_data = []
+#     print('Parsing %i COAs...' % len(all_pdfs))
+#     for i, pdf in enumerate(all_pdfs):
+#         try:
+#             doc = os.path.join(download_dir, pdf)
+#             data = parser.parse(doc)
+#             if isinstance(data, dict):
+#                 coa_data.append(data)
+#             elif isinstance(data, list):
+#                 coa_data.extend(data)
+#             print('Parsed:', doc)
+#         except:
+#             print('Error parsing:', doc)
 
-    # Save the Jungle Boys COA data.
-    all_data = pd.DataFrame(coa_data)
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    outfile = os.path.join(data_dir,  f'fl-lab-results-jungle-boys-{timestamp}.xlsx')
-    parser.save(coa_data, outfile)
+#     # Save the Jungle Boys COA data.
+#     all_data = pd.DataFrame(coa_data)
+#     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+#     outfile = os.path.join(data_dir,  f'fl-lab-results-jungle-boys-{timestamp}.xlsx')
+#     parser.save(coa_data, outfile)
 
 
 #-----------------------------------------------------------------------
