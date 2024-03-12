@@ -73,7 +73,7 @@ output_dir = 'D://data/florida/lab_results/datasets'
 parser = CoADoc()
 all_data = []
 print(f'Parsing {len(pdfs)} COAs...')
-for i, doc in enumerate(pdfs):
+for i, doc in enumerate(pdfs[8_000:]):
     gc.collect()
     try:
         coa_data = parser.parse(doc, verbose=True)
@@ -105,6 +105,36 @@ df = pd.DataFrame(all_data)
 df.replace(r'\\u0000', '', regex=True, inplace=True)
 parser.save(df, outfile)
 print('Saved COA data:', outfile)
+
+
+#-----------------------------------------------------------------------
+# Read all lab results.
+#-----------------------------------------------------------------------
+
+import os
+import pandas as pd
+
+
+data_dir = "D://data/florida/lab_results/datasets"
+datafiles = os.listdir(data_dir)
+datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
+all_results = []
+for datafile in datafiles:
+    if '2024-01-26' in datafile and 'all' not in datafile:
+        continue
+    print('Reading:', datafile)
+    data = pd.read_excel(datafile)
+    all_results.append(data)
+all_results = pd.concat(all_results)
+all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+all_results = all_results.loc[all_results['results'] != '[]']
+print('Number of results:', len(all_results))
+
+# Save the results.
+date = pd.Timestamp.now().strftime('%Y-%m-%d')
+outfile = os.path.join(data_dir, f'all-fl-lab-results-{date}.xlsx')
+all_results.to_excel(outfile, index=False)
+
 
 
 #-----------------------------------------------------------------------
