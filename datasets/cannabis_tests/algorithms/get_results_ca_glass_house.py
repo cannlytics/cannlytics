@@ -239,7 +239,7 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 
     # Save the lab results.
     date = datetime.now().strftime('%Y-%m-%d')
-    outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
+    outfile = os.path.join(data_dir, f'ca-results-glass-house-{date}.xlsx')
     try:
         parser.save(coa_data, outfile)
     except:
@@ -259,7 +259,10 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    data_dir = 'D://data/california/lab_results'
+    # FIXME: Change where the data lives.
+    data_dir = r'D:\data\california\lab_results\datasets\glass-house'
+    pdf_dir = r'D:\data\california\lab_results\pdfs\glass-house'
+    # data_dir = 'D://data/california/lab_results'
 
     # Get CA lab results.
     ca_results = get_glass_house_farms_lab_results(data_dir)

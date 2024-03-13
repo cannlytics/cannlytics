@@ -19,6 +19,41 @@ from cannlytics.utils import convert_to_numeric
 import pandas as pd
 import statsmodels.api as sm
 
+
+#-----------------------------------------------------------------------
+# Read all lab results.
+#-----------------------------------------------------------------------
+
+import os
+import pandas as pd
+
+
+# Aggregate SC Labs results.
+data_dir = r"D:\data\california\lab_results\datasets\sclabs"
+datafiles = os.listdir(data_dir)
+datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
+datafiles = [x for x in datafiles if 'all' not in x and 'urls' not in datafile]
+print('Number of datafiles:', len(datafiles))
+all_results = []
+for datafile in datafiles:
+    print('Reading:', datafile)
+    try:
+        data = pd.read_excel(datafile)
+    except:
+        print('Error reading:', datafile)
+        continue
+    all_results.append(data)
+all_results = pd.concat(all_results)
+all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+all_results = all_results.loc[all_results['results'] != '[]']
+print('Number of SC Labs results:', len(all_results))
+
+# Save SC Labs results.
+date = pd.Timestamp.now().strftime('%Y-%m-%d')
+outfile = os.path.join(data_dir, f'all-sc-labs-results-{date}.xlsx')
+all_results.to_excel(outfile, index=False)
+print('Saved aggregate SC Labs results:', outfile)
+
     
 
 # # Identify all unique cannabinoids and terpenes.
@@ -54,32 +89,7 @@ plt.rcParams.update({
 CA_LAB_RESULTS = {
     'Flower Company': {
         'datafiles': [
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-25.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-23.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-21.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-20.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-17.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-14.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-13.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-12.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-10.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-09.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-08.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-06.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-04.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-03.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2024-01-02.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-31.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-29.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-26.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-24.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-23.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-20.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-19.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-14.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-13.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-10.xlsx",
-            r"D:\data\california\lab_results\datasets\flower-company\ca-results-flower-company-2023-12-09.xlsx",
+            r"D:\data\california\lab_results\datasets\flower-company\ca-all-results-flower-company.xlsx"
         ],
     },
     'Glass House Farms': {

@@ -1162,13 +1162,13 @@ if __name__ == '__main__':
         # Skip invalid files.
         try:
             report = pdfplumber.open(pdf_file)
+            front_page_text = report.pages[0].extract_text()
         except:
             print('Invalid file:', pdf_file)
             invalid += 1
             continue
 
         # Identify the lab and extract the COA data.
-        front_page_text = report.pages[0].extract_text()
         report.close()
         if NE_LABS['url'] in front_page_text:
             try:

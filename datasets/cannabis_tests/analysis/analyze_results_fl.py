@@ -9,8 +9,8 @@ from typing import Optional
 # External imports:
 from cannlytics.data.coas import CoADoc
 import pandas as pd
-
-# TODO: Parse TerpLife Labs COA PDFs.
+import os
+from pathlib import Path
 
 
 #-----------------------------------------------------------------------
@@ -49,8 +49,28 @@ data_dirs = [
     r"D:\data\florida\lab_results\jungleboys\pdfs",
 ]
 
-import os
-from pathlib import Path
+
+# Find all of the parsed and failed PDFs.
+parsed_files, failed_files = [], []
+logs_files = [
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-1.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-2.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-3.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-5.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-6.txt",
+]
+for logs_file in logs_files:
+    with open(logs_file, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if 'Parsed:' in line:
+                parsed_files.append(line.split('Parsed:')[1].strip())
+            if 'Failed to parse:' in line:
+                failed_files.append(line.split('Failed to parse:')[1].strip())
+
+print('Parsed:', len(parsed_files))
+print('Failed:', len(failed_files))
 
 
 # Find all COA PDFs.
@@ -60,8 +80,11 @@ min_file_size = 12_000
 for data_dir in data_dirs:
     for root, _, files in os.walk(data_dir):
         for filename in files:
+            # Skip already parsed or failed files.
             if filename.endswith('.pdf'):
                 file_path = os.path.join(root, filename)
+                if file_path in parsed_files or file_path in failed_files:
+                    continue
                 file_size = os.path.getsize(file_path)
                 if file_size >= min_file_size:
                     pdfs.append(file_path)
@@ -73,7 +96,7 @@ output_dir = 'D://data/florida/lab_results/datasets'
 parser = CoADoc()
 all_data = []
 print(f'Parsing {len(pdfs)} COAs...')
-for i, doc in enumerate(pdfs[8_000:]):
+for i, doc in enumerate(pdfs):
     gc.collect()
     try:
         coa_data = parser.parse(doc, verbose=True)
@@ -115,13 +138,14 @@ import os
 import pandas as pd
 
 
+# Aggregate lab results.
 data_dir = "D://data/florida/lab_results/datasets"
 datafiles = os.listdir(data_dir)
 datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
+datafiles = [x for x in datafiles if 'all' not in x and '2024-01-26' not in datafile]
+print('Number of datafiles:', len(datafiles))
 all_results = []
 for datafile in datafiles:
-    if '2024-01-26' in datafile and 'all' not in datafile:
-        continue
     print('Reading:', datafile)
     data = pd.read_excel(datafile)
     all_results.append(data)
@@ -132,8 +156,9 @@ print('Number of results:', len(all_results))
 
 # Save the results.
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'all-fl-lab-results-{date}.xlsx')
+outfile = os.path.join(data_dir, f'all-fl-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
+print('Saved aggregate Florida lab results:', outfile)
 
 
 
@@ -259,6 +284,9 @@ all_results.to_excel(outfile, index=False)
 
 # print('Downloaded %i COA URLs.' % len(urls))
 
+
+
+# TODO: Aggregate (parse if needed) TerpLife Labs COA PDFs.
 
 
 #-----------------------------------------------------------------------

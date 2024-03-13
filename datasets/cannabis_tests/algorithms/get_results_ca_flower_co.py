@@ -464,7 +464,9 @@ if __name__ == '__main__':
             'lab_results_url': lab_results_url,
             'image_url': image_url,
             'product_type': product_type,
+            # FIXME: This may be getting over-ridden.
             'product_subtype': product_subtype,
+            'product_sub_type': product_subtype,
             'product_description': product_description,
             'product_contents': contents,
             'predicted_effects': effects,
