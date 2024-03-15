@@ -262,7 +262,7 @@ if __name__ == '__main__':
     # FIXME: Change where the data lives.
     data_dir = r'D:\data\california\lab_results\datasets\glass-house'
     pdf_dir = r'D:\data\california\lab_results\pdfs\glass-house'
-    # data_dir = 'D://data/california/lab_results'
+    data_dir = 'D://data/california/lab_results'
 
     # Get CA lab results.
     ca_results = get_glass_house_farms_lab_results(data_dir)

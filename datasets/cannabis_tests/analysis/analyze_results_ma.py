@@ -24,7 +24,6 @@ from adjustText import adjust_text
 # Setup plotting style.
 plt.style.use('fivethirtyeight')
 plt.rcParams.update({
-    'figure.figsize': (12, 8),
     'font.family': 'Times New Roman',
     'font.size': 24,
 })
@@ -94,17 +93,21 @@ print(pivot_df.head())
 # Count the number of tests per month.
 monthly_tests = pivot_df.groupby('month_year').size().reset_index(name='n_tests')
 
-# Plot the number of tests per month.
-fig, ax = plt.subplots()
-monthly_tests.plot(x='month_year', y='n_tests', kind='bar', ax=ax, color='k')
-ax.set_title('Number of MA Cannabis Tests per Month')
-ax.set_xlabel('Month')
-ax.set_ylabel('Number of Tests')
-ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
-plt.show()
+# # Plot the number of tests per month.
+# plt.figure(figsize=(15, 8))
+# fig, ax = plt.subplots()
+# monthly_tests.plot(x='month_year', y='n_tests', kind='bar', ax=ax, color='k')
+# ax.set_title('Number of MA Cannabis Tests per Month')
+# ax.set_xlabel('Month')
+# ax.set_ylabel('Number of Tests')
+# ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+# plt.show()
+
+# Isolate the sample.
+sample = pivot_df.loc[pivot_df['yeast_and_mold'].notnull()]
+sample = sample.loc[sample['date'] >= pd.to_datetime('2023-01-01')]
 
 # Calculate the number of detects.
-sample = pivot_df.loc[pivot_df['yeast_and_mold'].notnull()]
 detects = sample.loc[sample['yeast_and_mold'] > 0]
 detects.sort_values('yeast_and_mold', ascending=False, inplace=True)
 
@@ -114,8 +117,9 @@ print('Maximum yeast and mold detection:', detects['yeast_and_mold'].max())
 # Calculate the most frequent value.
 print('Most frequent yeast and mold detection:', detects['yeast_and_mold'].mode())
 
-# Histogram
-filtered_df = pivot_df.dropna(subset=['yeast_and_mold'])
+# Histogram below 10k.
+plt.figure(figsize=(15, 8))
+filtered_df = sample.dropna(subset=['yeast_and_mold'])
 filtered_df.loc[
     (filtered_df['yeast_and_mold'] <= 15_000) &
     (filtered_df['yeast_and_mold'] > 100)
@@ -125,44 +129,47 @@ filtered_df.loc[
     density=True,
 )
 plt.axvline(10_000, color='r', linestyle='dashed', linewidth=1)
-plt.xlabel('Yeast and Mold Counts')
+plt.xlabel('Yeast and Mold (CFU/g)')
 plt.ylabel('Frequency')
 plt.title('Histogram of Yeast and Mold Detections below 10,000')
-plt.legend(['State Limit (10,000)', 'Yeast and Mold Counts'])
+plt.legend(['State Limit (10,000)', 'Yeast and Mold (CFU/g)'])
 plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
 plt.xlim(0, 15_000)
+plt.savefig(f'{assets_dir}/histogram-below-10k.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
-# Histogram
-filtered_df = pivot_df.dropna(subset=['yeast_and_mold'])
+# Histogram above 10k,
+plt.figure(figsize=(15, 8))
+filtered_df = sample.dropna(subset=['yeast_and_mold'])
 filtered_df.loc[filtered_df['yeast_and_mold'] > 10_000]['yeast_and_mold'].hist(
     bins=1000,
     alpha=0.75,
     density=True,
 )
 plt.axvline(10_000, color='r', linestyle='dashed', linewidth=1)
-plt.xlabel('Yeast and Mold Counts')
+plt.xlabel('Yeast and Mold (CFU/g)')
 plt.ylabel('Frequency')
 plt.title('Histogram of Yeast and Mold Detections above 10,000')
-plt.legend(['State Limit (10,000)', 'Yeast and Mold Counts'])
+plt.legend(['State Limit (10,000)', 'Yeast and Mold (CFU/g)'])
 plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
 plt.xlim(0, 500_000)
+plt.savefig(f'{assets_dir}/histogram-above-10k.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
 
 # === Failure Analysis ===
 
 # Identify failures.
-fails = filtered_df.loc[filtered_df['yeast_and_mold'] > 10_000]
+fails = sample.loc[sample['yeast_and_mold'] > 10_000]
 print(fails[['label', 'date_tested', 'lab', 'yeast_and_mold']])
 
-
-# FIXME: Visualize failure rates.
-pivot_df['fail'] = pivot_df['yeast_and_mold'] > 10_000
-fail_counts = pivot_df['fail'].value_counts()
+# Visualize failure rates.
+sample['fail'] = sample['yeast_and_mold'] >= 10_000
+fail_counts = sample['fail'].value_counts()
 fail_percentages = (fail_counts / fail_counts.sum()) * 100
-colors = cm.coolwarm(pivot_df['fail'].value_counts(normalize=True))
-ax = pivot_df['fail'].value_counts().plot(
+colors = cm.coolwarm(sample['fail'].value_counts(normalize=True))
+plt.figure(figsize=(15, 8))
+ax = sample['fail'].value_counts().plot(
     kind='bar',
     color=[colors[-1], colors[0]]
 )
@@ -175,17 +182,20 @@ plt.xticks(
 for i, (count, percentage) in enumerate(zip(fail_counts, fail_percentages)):
     ax.text(i, count, f'{percentage:.1f}%', color='black', ha='center', va='bottom')
 plt.ylabel('Number of Samples')
-plt.title('Total Yeast and Mold Detections in MA in 2021', pad=24)
+plt.title('Total Yeast and Mold Detections in MA in 2023', pad=24)
 plt.xlabel('Pass/Fail')
-plt.savefig(f'presentation/images/figures/ma-yeast-and-mold-failure-rate-2021.png', bbox_inches='tight', dpi=300)
+plt.savefig(f'{assets_dir}/ma-yeast-and-mold-failure-rate-2023.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
-failure_rate = len(fails) / len(pivot_df)
+failure_rate = len(fails) / len(sample)
 print('Failure rate: %0.2f%%' % (failure_rate * 100))
 
+
+# === Lab Failure Analysis ===
+
 # FIXME: Visualize failure rate by lab.
-samples_tested_by_lab = pivot_df['lab'].value_counts()
-failures_by_lab = pivot_df.groupby('lab')['fail'].sum()
-failure_rate_by_lab = pivot_df.groupby('lab')['fail'].mean()
+samples_tested_by_lab = sample['lab'].value_counts()
+failures_by_lab = sample.groupby('lab')['fail'].sum()
+failure_rate_by_lab = sample.groupby('lab')['fail'].mean()
 failure_rate_by_lab = failure_rate_by_lab.sort_values()
 plt.figure(figsize=(18, 16/1.618))
 ax = sns.barplot(
@@ -212,13 +222,13 @@ plt.xticks(rotation=45)
 plt.figtext(
     0,
     -0.075,
-    'Note: Statistics are calculated from 31,613 package lab tests for total yeast and mold performed between 4/1/2021 and 12/31/2021 in Massachusetts. The number of tests above the state limit, 10,000 CFU/g, and the total number of tests are shown for each lab.',
+    'Note: Statistics are calculated from 35,825 package lab tests for total yeast and mold performed between 1/1/2023 and 9/30/2023 in Massachusetts. The number of tests above the state limit, 10,000 CFU/g, and the total number of tests are shown for each lab.',
     ha='left',
     fontsize=24,
     wrap=True
 )
 plt.tight_layout()
-plt.savefig(f'presentation/images/figures/ma-yeast-and-mold-failure-rate-by-lab-2021.png', bbox_inches='tight', dpi=300)
+plt.savefig(f'{assets_dir}/ma-yeast-and-mold-failure-rate-by-lab-2023.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
 
@@ -239,17 +249,18 @@ def determine_method(x):
 
 
 # Determine the method of testing.
-pivot_df['method'] = pivot_df['yeast_and_mold'].apply(determine_method)
-test_count_per_method = pivot_df['method'].value_counts()
+sample['method'] = sample['yeast_and_mold'].apply(determine_method)
+test_count_per_method = sample['method'].value_counts()
 
 # Example analysis: Average yeast_and_mold results per method
-average_results_per_method = pivot_df.groupby('method')['yeast_and_mold'].mean()
+average_results_per_method = sample.groupby('method')['yeast_and_mold'].mean()
 
 print(test_count_per_method)
 print(average_results_per_method)
 
 # Histogram
-filtered_df = pivot_df.dropna(subset=['yeast_and_mold'])
+plt.figure(figsize=(15, 8))
+filtered_df = sample.dropna(subset=['yeast_and_mold'])
 subsample = filtered_df.loc[
     (filtered_df['yeast_and_mold'] <= 15_000) &
     (filtered_df['yeast_and_mold'] > 100)
@@ -269,17 +280,19 @@ qpcr_values.hist(
     label='qPCR',
 )
 plt.axvline(10_000, color='r', linestyle='dashed', linewidth=1, label='State Limit (10,000)')
-plt.xlabel('Yeast and Mold Counts')
+plt.xlabel('Yeast and Mold (CFU/g)')
 plt.ylabel('Frequency')
 plt.title('Histogram of Yeast and Mold Detections below 10,000')
 # plt.legend(['State Limit (10,000)', 'Yeast and Mold Counts'])
 plt.legend()
 plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
 plt.xlim(0, 15_000)
+plt.savefig(f'{assets_dir}/below-10k-methods.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
 # Histogram
-filtered_df = pivot_df.dropna(subset=['yeast_and_mold'])
+plt.figure(figsize=(15, 8))
+filtered_df = sample.dropna(subset=['yeast_and_mold'])
 subsample = filtered_df.loc[filtered_df['yeast_and_mold'] > 10_000]
 plating_values = subsample.loc[subsample['method'] == 'plating']['yeast_and_mold']
 qpcr_values = subsample.loc[subsample['method'] == 'qPCR']['yeast_and_mold']
@@ -304,8 +317,21 @@ plt.title('Histogram of Yeast and Mold Detections above 10,000')
 plt.legend()
 plt.gca().xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
 plt.xlim(0, 500_000)
+plt.savefig(f'{assets_dir}/above-10k-methods.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
+
+# Count the number of tests per method per lab.
+group = sample.groupby('lab')['method'].value_counts()
+group.sort_index(inplace=True)
+group.plot(kind='bar', figsize=(14, 7), width=0.8)
+plt.title('Estimated Number of Tests per Method per Lab')
+plt.xlabel('Lab')
+plt.ylabel('Number of Tests')
+plt.legend(title='Method')
+plt.tight_layout()
+plt.savefig(f'{assets_dir}/methods-by-lab.png', bbox_inches='tight', dpi=300, transparent=True)
+plt.show()
 
 # === Benford's Law Analysis ===
 
@@ -315,7 +341,7 @@ def first_significant_digit(number):
     return int(str(number).split('.')[0][0])
 
 # 1. Extracting first significant digit from yeast_and_mold values
-subsample = pivot_df.dropna(subset=['yeast_and_mold'])
+subsample = sample.dropna(subset=['yeast_and_mold'])
 subsample = subsample.loc[
     (subsample['yeast_and_mold'] <= 200_000) &
     (subsample['yeast_and_mold'] > 0)
@@ -339,10 +365,16 @@ random_first_digit = [first_significant_digit(num) for num in random_sample]
 actual_counts = subsample['first_digit'].value_counts(normalize=True).sort_index() * 100
 random_counts = pd.Series(random_first_digit).value_counts(normalize=True).sort_index() * 100
 
+# Smooth line.
+from scipy.interpolate import make_interp_spline
+xnew = np.linspace(min(digits), max(digits), 100) 
+spl = make_interp_spline(digits, benford, k=2)  # k is the degree of the spline
+benford_smooth = spl(xnew)
+
 # 4. Plot the distributions
-plt.figure(figsize=(10, 6))
-plt.plot(digits, benford, 'o-', label='Benford\'s Law')
-plt.plot(actual_counts.index, actual_counts, 's-', label='Yeast and Mold')
+plt.figure(figsize=(15, 8))
+plt.plot(xnew, benford_smooth, '-', label='Benford\'s Law')
+plt.plot(actual_counts.index, actual_counts, 's-', label='Yeast and Mold Counts')
 plt.plot(random_counts.index, random_counts, 'd-', label='Random Sample')
 plt.xticks(digits)
 plt.xlabel('First Significant Digit')
@@ -350,6 +382,7 @@ plt.ylabel('Percentage')
 plt.title('First Significant Digit Distribution Comparison')
 plt.legend()
 plt.grid(True)
+plt.savefig(f'{assets_dir}/benford-ym.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
 
 # # 4. Plot the distributions
@@ -357,7 +390,7 @@ qpcr = subsample.loc[subsample['method'] == 'qPCR']
 plating = subsample.loc[subsample['method'] == 'plating']
 plating_counts = plating['first_digit'].value_counts(normalize=True).sort_index() * 100
 qpcr_counts = qpcr['first_digit'].value_counts(normalize=True).sort_index() * 100
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(15, 8))
 plt.plot(digits, benford, 'o-', label='Benford\'s Law')
 plt.plot(plating_counts.index, plating_counts, 's-', label='Plating')
 plt.plot(qpcr_counts.index, qpcr_counts, 'd-', label='qPCR')
@@ -367,7 +400,11 @@ plt.ylabel('Percentage')
 plt.title('First Significant Digit Distribution Comparison')
 plt.legend()
 plt.grid(True)
+plt.savefig(f'{assets_dir}/benford-methods.png', bbox_inches='tight', dpi=300, transparent=True)
 plt.show()
+
+print(plating.sample(5, random_state=420)['yeast_and_mold'])
+print(qpcr.sample(5, random_state=420)['yeast_and_mold'])
 
 
 from scipy.stats import chisquare
@@ -410,11 +447,6 @@ print(f"The method with lower deviation from Benford's Law is {lower_deviation}"
 
 
 
-
-
-
-
-
 def plot_metric_over_time(metric, metric_name, y_label, color='skyblue'):
     """
     General function to plot any calculated metric over time.
@@ -427,6 +459,9 @@ def plot_metric_over_time(metric, metric_name, y_label, color='skyblue'):
     plt.ylabel(y_label)
     plt.grid(True)
     plt.tight_layout()
+    title = metric_name.replace(' ', '-').lower()
+    print(title)
+    plt.savefig(f'{assets_dir}/timeseries-{title}.png', bbox_inches='tight', dpi=300, transparent=True)
     plt.show()
 
 # Get a sample.
@@ -446,9 +481,9 @@ plot_metric_over_time(cost_of_tests, 'Cost of Tests', 'Cost ($)', 'green')
 
 # Visualize the cost of failures over time (assuming $35,000 per failure).
 sample['failure'] = sample['yeast_and_mold'] > 10_000
-failures_per_month = sample.resample('M', on='date_tested')['failure'].sum()
-cost_of_failures = failures_per_month * 35_000
-plot_metric_over_time(cost_of_failures, 'Cost of Failures', 'Cost ($)', 'red')
+failures_per_month = sample.loc[sample['date'] >= pd.to_datetime('2023-01-01')].resample('M', on='date_tested')['failure'].sum()
+cost_of_failures = failures_per_month * 21_464
+plot_metric_over_time(cost_of_failures, 'Estimated Cost of Failures', 'Cost ($)', 'red')
 
 # Estimate the cost of testing in 2023.
 total_cost_of_tests = cost_of_tests.sum()
@@ -542,7 +577,7 @@ plot_timeseries(
     x='date_tested',
     y='yeast_and_mold',
     y_label='Yeast and Mold (CFU/g)',
-    outfile=None,
+    outfile=f'{assets_dir}/timeseries-yeast-and-mold.png',
     y_min=100,
     y_max=10_000,
     ma=30,
@@ -558,7 +593,7 @@ plot_timeseries(
     x='date_tested',
     y='yeast_and_mold',
     y_label='Yeast and Mold (CFU/g)',
-    outfile=None,
+    outfile=f'{assets_dir}/timeseries-yeast-and-mold-above-10k.png',
     y_min=10_000,
     y_max=500_000,
     ma=30,
@@ -585,13 +620,14 @@ for i, lab in enumerate(labs):
         x='date_tested',
         y='yeast_and_mold',
         y_label='Yeast and Mold (CFU/g)',
-        outfile=None,
+        outfile=f'{assets_dir}/timeseries-yeast-and-mold-{lab}.png',
         y_min=y_min,
         y_max=y_max,
         ma=30,
         dot_color=lab_colors[i],
         line_color=lab_colors[i],
     )
+    print(f'timeseries-yeast-and-mold-{lab}.png')
 
 
 # === Lab Failure Analysis ===
@@ -690,6 +726,8 @@ def plot_failure_rates(df, color, threshold=10_000, period='W'):
     plt.xlabel('Date')
     plt.ylabel('Failure Rate (%)')
     plt.tight_layout()
+    outfile = f'{assets_dir}/failure-rates-over-time.png'
+    plt.savefig(outfile, dpi=300, bbox_inches='tight', transparent=True)
     plt.show()
 
 # Assuming 'pivot_df' is your DataFrame with 'date_tested' and 'yeast_and_mold' columns

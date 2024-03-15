@@ -96,7 +96,7 @@ output_dir = 'D://data/florida/lab_results/datasets'
 parser = CoADoc()
 all_data = []
 print(f'Parsing {len(pdfs)} COAs...')
-for i, doc in enumerate(pdfs):
+for i, doc in enumerate(reversed(pdfs[2_500:])):
     gc.collect()
     try:
         coa_data = parser.parse(doc, verbose=True)
