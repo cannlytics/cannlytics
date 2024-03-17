@@ -36,6 +36,7 @@ assets_dir = './presentation/images/figures'
 # Read MA lab results.
 datafiles = [
     r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-Apr-Dec2021-FINAL.csv",
+    r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2022-FINAL.csv",
     r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jan-June-FINAL.csv",
     r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jul-Sep-FINAL.csv",
 ]
