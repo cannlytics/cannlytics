@@ -25,7 +25,7 @@ export const dashboard = {
         mainContent.style.marginLeft = '80px';
         // mainContent.classList.remove('expanded-margin');
       } else {
-        mainContent.style.marginLeft = '250px';
+        mainContent.style.marginLeft = '225px';
         // mainContent.classList.add('expanded-margin');
       }
     
