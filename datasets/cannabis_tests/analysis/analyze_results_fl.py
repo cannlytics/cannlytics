@@ -1,4 +1,13 @@
+"""
+Analyze Results | Florida
+Copyright (c) 2024 Cannlytics
 
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+Created: 3/19/2024
+Updated: 3/19/2024
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+"""
 # Standard imports:
 from datetime import datetime
 import gc
@@ -59,6 +68,10 @@ logs_files = [
     r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-3.txt",
     r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-5.txt",
     r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-6.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-7.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-8.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-9.txt",
+    r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-10.txt",
 ]
 for logs_file in logs_files:
     with open(logs_file, 'r') as file:
@@ -83,7 +96,9 @@ for data_dir in data_dirs:
             # Skip already parsed or failed files.
             if filename.endswith('.pdf'):
                 file_path = os.path.join(root, filename)
-                if file_path in parsed_files or file_path in failed_files:
+                # if file_path in parsed_files:
+                #     continue
+                if file_path in failed_files:
                     continue
                 file_size = os.path.getsize(file_path)
                 if file_size >= min_file_size:
@@ -96,7 +111,7 @@ output_dir = 'D://data/florida/lab_results/datasets'
 parser = CoADoc()
 all_data = []
 print(f'Parsing {len(pdfs)} COAs...')
-for i, doc in enumerate(reversed(pdfs[2_500:])):
+for i, doc in enumerate(reversed(pdfs[4000:])):
     gc.collect()
     try:
         coa_data = parser.parse(doc, verbose=True)
@@ -142,7 +157,7 @@ import pandas as pd
 data_dir = "D://data/florida/lab_results/datasets"
 datafiles = os.listdir(data_dir)
 datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
-datafiles = [x for x in datafiles if 'all' not in x and '2024-01-26' not in datafile]
+datafiles = [x for x in datafiles if 'all' not in x and '2024-01-26' not in x]
 print('Number of datafiles:', len(datafiles))
 all_results = []
 for datafile in datafiles:

@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 1/26/2024
+Updated: 3/19/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
@@ -32,7 +32,7 @@ import pandas as pd
 data_dir = r"D:\data\california\lab_results\datasets\sclabs"
 datafiles = os.listdir(data_dir)
 datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
-datafiles = [x for x in datafiles if 'all' not in x and 'urls' not in datafile]
+datafiles = [x for x in datafiles if 'all' not in x and 'urls' not in x]
 print('Number of datafiles:', len(datafiles))
 all_results = []
 for datafile in datafiles:
@@ -52,7 +52,7 @@ print('Number of SC Labs results:', len(all_results))
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
 outfile = os.path.join(data_dir, f'all-sc-labs-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
-print('Saved aggregate SC Labs results:', outfile)
+print(f'Saved {len(all_results)} SC Labs results:', outfile)
 
     
 
@@ -94,7 +94,7 @@ CA_LAB_RESULTS = {
     },
     'Glass House Farms': {
         'datafiles': [
-            # r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
+            r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
         ],
     },
     'SC Labs':{
