@@ -1642,7 +1642,7 @@ class CoADoc:
                     # Keep the values from each result.
                     for result in sample_results:
                         result = {k: v for k, v in result.items() if v == v}
-                        analyte = result.get('key', snake_case(result.get('name')))
+                        analyte = result.get('key', snake_case(result.get('name', '')))
                         analyte = standard_analytes.get(analyte, analyte)
                         value = result.get('value', result.get('percent', result.get('mg_g')))
                         std[analyte] = value

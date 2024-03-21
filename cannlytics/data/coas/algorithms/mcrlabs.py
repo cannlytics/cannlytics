@@ -53,7 +53,6 @@ Data Sources:
 
 Future development:
 
-    - [ ] Implement a function to get all of a given client's lab results.
     - Optional: Create necessary data dirs automatically.
     - Optional: Function to download any pre-existing results.
 
@@ -500,10 +499,9 @@ def get_mcr_labs_samples(
 
         # Get the date tested.
         try:
-            obs['date_tested'] = format_iso_date(details.find('div', \
-                attrs={'class': 'fth_date'}).text)
+            div = details.find('div', attrs={'class': 'fth_date'})
+            obs['date_tested'] = format_iso_date(div.text)
         except ValueError:
-            print('Error parsing date:', obs)
             obs['date_tested'] = ''
 
         # Try to get the producer's URL.
@@ -578,17 +576,19 @@ def get_mcr_labs_test_results(
     # FIXME: Figure out why samples are failing to be collected.
     rows = []
     for i, sample in enumerate(samples):
-        try:
-            lab_id = sample['lab_results_url'].split('/')[-1]
-            details = get_mcr_labs_sample_details(None, lab_id)
-            rows.append({**sample, **details})
-            if i > 1:
-                sleep(pause)
-            if verbose:
-                print('Collected sample:', lab_id)
-        except:
-            print('Failed to collect sample:', lab_id)
-            continue
+        # try:
+        lab_id = sample['lab_results_url'].split('/')[-1]
+        details = get_mcr_labs_sample_details(None, lab_id)
+        if details is None:
+            details = {}
+        rows.append({**sample, **details})
+        if i > 1:
+            sleep(pause)
+        if verbose:
+            print('Collected sample:', lab_id)
+        # except:
+        #     print('Failed to collect sample:', lab_id)
+        #     continue
 
     # Return all of the sample data.
     return rows

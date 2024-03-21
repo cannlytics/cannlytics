@@ -31,6 +31,27 @@ plt.rcParams.update({
 assets_dir = './presentation/images/figures'
 
 
+# === Analyze MCR Labs data ===
+
+from cannlytics.data.coas import CoADoc
+import os
+import pandas as pd
+
+
+# Read MCR Labs data.
+datafile = r"D:\data\massachusetts\lab_results\ma-lab-results-2024-01-24.xlsx"
+mcr_results = pd.read_excel(datafile)
+print('Number of MCR Labs results:', len(mcr_results))
+
+# TODO: Standardize lab results.
+parser = CoADoc()
+date = pd.Timestamp.now().strftime('%Y-%m-%d')
+data_dir = r"D:\data\massachusetts\lab_results"
+outfile = os.path.join(data_dir, f'mcr-lab-results-{date}.xlsx')
+parser.save(mcr_results, outfile)
+print(f'Saved standardized MCR Labs results: {outfile}')
+
+
 # === Get the data ===
 
 # Read MA lab results.
@@ -40,10 +61,7 @@ datafiles = [
     r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jan-June-FINAL.csv",
     r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jul-Sep-FINAL.csv",
 ]
-ma_results = []
-for datafile in datafiles:
-    ma_results.append(pd.read_csv(datafile))
-ma_results = pd.concat(ma_results)
+ma_results = pd.concat([pd.read_csv(datafile) for datafile in datafiles])
 
 # Coalesce similarly named columns.
 ma_results['lab'] = ma_results['TestingLabId'].combine_first(ma_results['TestingLab'])
