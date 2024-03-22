@@ -217,9 +217,11 @@ def get_mcr_labs_sample_details(
     # Get the sample image, if not already collected.
     if not obs.get('images'):
         attrs = {'class': 'report_image'}
-        image_url = soup.find('img', attrs=attrs)['src']
-        filename = image_url.split('/')[-1]
-        obs['images'] = [{'url': image_url, 'filename': filename}]
+        img = soup.find('img', attrs=attrs)
+        if img is not None:
+            image_url = img['src']
+            filename = image_url.split('/')[-1]
+            obs['images'] = [{'url': image_url, 'filename': filename}]
 
     # Get the date tested, if not already collected.
     if not obs.get('date_tested'):
@@ -284,10 +286,14 @@ def get_mcr_labs_sample_details(
     try:
         assert '%' in soup.find('div', attrs={'class': 'rd_can_table'}).text
         units = 'percent'
-    except AttributeError:
+    except (AttributeError, AssertionError):
         table = soup.find('table', attrs={'class': 'safetytable'})
-        thead = table.find('thead')
-        units = snake_case(thead.find_all('th', limit=2)[-1].text)
+        if table is not None:
+            thead = table.find('thead')
+            if thead is not None:
+                th = thead.find_all('th', limit=2)
+                if th:
+                    units = snake_case(th[-1].text)
 
     # Record the cannabinoids.
     for analyte in cannabinoids:
@@ -578,14 +584,14 @@ def get_mcr_labs_test_results(
     for i, sample in enumerate(samples):
         # try:
         lab_id = sample['lab_results_url'].split('/')[-1]
+        if verbose:
+            print('Collecting sample:', lab_id)
         details = get_mcr_labs_sample_details(None, lab_id)
         if details is None:
             details = {}
         rows.append({**sample, **details})
         if i > 1:
             sleep(pause)
-        if verbose:
-            print('Collected sample:', lab_id)
         # except:
         #     print('Failed to collect sample:', lab_id)
         #     continue
@@ -975,6 +981,10 @@ if __name__ == '__main__':
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/lab_results'
+
+    # DEV:
+    # data = get_mcr_labs_sample_details(None, '66466')
+    # print(data)
 
     # [✓] TEST: Get the total number of samples.
     # page_count = get_mcr_labs_sample_count(per_page=30)
