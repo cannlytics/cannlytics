@@ -26,27 +26,30 @@ Markdown==3.4.3
 numexpr==2.8.4
 openai==0.27.8
 openpyxl==3.1.2
-opencv-python==4.7.0.72
+opencv-python==4.8.1.78
 pandas==2.0.1
 pdfplumber==0.10.2
-Pillow==10.0.0
-pyarrow==12.0.1
-pydantic==1.10.8
-pypdf==3.8.1
+Pillow==10.2.0
+pyarrow==14.0.1
+pydantic==1.10.13
+pypdf==3.17.0
 pytesseract==0.3.10
 python-dateutil==2.8.2
 python-dotenv==1.0.0
-pymdown-extensions==9.11
+pymdown-extensions==10.0
 python-markdown-math==0.8
 pyzbar==0.1.9
 requests==2.31.0
 scikit-learn==1.3.0
-selenium==4.9.1
+selenium==4.15.1
 statsmodels==0.14.0
 ulid-py==1.1.0
-urllib3==1.26.15
+urllib3==1.26.18
 waitress==2.1.2
 Wand==0.6.11
 whitenoise==6.4.0
 xxhash==3.2.0
 zipcodes==1.2.0
+aiohttp>=3.9.2 # not directly required, pinned by Snyk to avoid a vulnerability
+numpy>=1.22.2 # not directly required, pinned by Snyk to avoid a vulnerability
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
