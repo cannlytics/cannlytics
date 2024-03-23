@@ -582,19 +582,20 @@ def get_mcr_labs_test_results(
     # FIXME: Figure out why samples are failing to be collected.
     rows = []
     for i, sample in enumerate(samples):
-        # try:
-        lab_id = sample['lab_results_url'].split('/')[-1]
-        if verbose:
-            print('Collecting sample:', lab_id)
-        details = get_mcr_labs_sample_details(None, lab_id)
-        if details is None:
-            details = {}
-        rows.append({**sample, **details})
-        if i > 1:
-            sleep(pause)
-        # except:
-        #     print('Failed to collect sample:', lab_id)
-        #     continue
+        try:
+            lab_id = sample['lab_results_url'].split('/')[-1]
+            if verbose:
+                print('Collecting sample:', lab_id)
+            details = get_mcr_labs_sample_details(None, lab_id)
+            if details is None:
+                details = {}
+            rows.append({**sample, **details})
+            if i > 1:
+                sleep(pause)
+        except Exception as e:
+            print('Failed to collect sample:', lab_id)
+            print(e)
+            continue
 
     # Return all of the sample data.
     return rows
