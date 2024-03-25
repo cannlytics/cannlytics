@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<!--
+  State Selection
+  Created: 3/24/2024
+  Updated: 3/24/2024
+-->
+<div class="btn-group btn-group-sm" role="group" aria-label="State selection">
+  <button type="button" class="btn btn-primary" id="btnALL" onclick="updateStateSelection('ALL')">All</button> <!-- Note the change of class here for "All" -->
+  <button type="button" class="btn btn-outline-primary" id="btnCA" onclick="updateStateSelection('CA')">CA</button>
+  <button type="button" class="btn btn-outline-primary" id="btnFL" onclick="updateStateSelection('FL')">FL</button>
+  <button type="button" class="btn btn-outline-primary" id="btnMA" onclick="updateStateSelection('MA')">MA</button>
+  <button type="button" class="btn btn-outline-primary" id="btnWA" onclick="updateStateSelection('WA')">WA</button>
+</div>
+
+<script>
+// JavaScript function to handle state selection
+function updateStateSelection(selectedState) {
+  // Reset all buttons to outline
+  document.querySelectorAll('.btn-group .btn').forEach(btn => {
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-outline-primary');
+  });
+
+  // Set the selected button to primary
+  document.getElementById(`btn${selectedState}`).classList.remove('btn-outline-primary');
+  document.getElementById(`btn${selectedState}`).classList.add('btn-primary');
+
+  console.log("Selected state:", selectedState);
+  // Implement your logic to update the lab results based on the selected state
+}
+</script>
+</html>

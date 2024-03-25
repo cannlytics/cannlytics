@@ -6,13 +6,19 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 9/29/2022
-  Updated: 2/13/2024
+  Updated: 3/24/2024
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
-{% extends "website/index.html" %}
+{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
-{% block title %}Results | Cannlytics{% endblock %}
-{% block page_css %}
+{% block title %}
+  {% if section and section not in 'logs,files,certificates' %}
+    {{ section }} | Cannlytics
+  {% else %}
+    Results | Cannlytics
+  {% endif %}
+{% endblock %}
+{% block dashboard_css %}
 
   <!-- AG Grid -->
   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
@@ -20,9 +26,34 @@
   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css"/>
   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js"></script>
 
-{% endblock page_css %}
-{% block material %}
+  <!-- Bootstrap Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous"></script>
 
+  <!-- Results Style -->
+  <style>
+    .selections-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: start;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+
+{% endblock %}
+{% block dashboard %}
+{% if section and section not in 'logs,files,certificates' %}
+
+  <!-- Result page -->
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pb-5 mx-auto">
+    {% include "website/pages/results/result.html" with
+      id=section
+    %}
+    {% block unit %}{% endblock unit %}
+  </main>
+
+{% else %}
 
 <!-- Optional:  -->
 {% comment %} {% include "website/components/heros/hero_banner.html" with
@@ -33,7 +64,7 @@
   only
 %} {% endcomment %}
 
-<!-- Breadcrumbs -->
+{% comment %} <!-- Breadcrumbs -->
 <section class="container mb-3">
   <div class="d-flex mt-4">
     <nav
@@ -54,7 +85,7 @@
             class="text-dark serif action"
             href="{% url 'section' page='data' section='results' %}"
           >
-            Test Results
+            Lab Results
           </a>
         </li>
       </ol>
@@ -62,26 +93,48 @@
     </div>
     </nav>
   </div>
-</section>
+</section> {% endcomment %}
 
 <!-- Results -->
 <section class="container markdown">
 
-  <!-- Search Bar -->
-  {% include "website/components/dashboard/search.html" %}
+  <h1>Lab Results</h1>
 
+  <!-- Search Bar -->
+  {% include "website/components/dashboard/search.html" with
+    placeholder_text="Search results..."
+  %}
+
+  <!-- Filters -->
+  <div class="selections-container align-items-center">
+
+    <!-- State selection buttons -->
+    {% include "website/components/dashboard/state_selection.html" %}
+
+    <!-- Filter by product type -->
+    {% include "website/components/dashboard/product_type_selection.html" %}
+
+    <!-- Date selection -->
+    {% include "website/components/dashboard/date_selection.html" %}
+
+  </div>
 
   <!-- TODO: Sort by compound -->
-
 
   <!-- TODO: Filter by producer -->
 
 
-</section>
+  <!-- TODO: Grid of results -->
+  <div class="container">
+    <div id="labResultsGrid" class="row">
+      <!-- Dynamic lab results will be injected here -->
+    </div>
+  </div>
 
-{% include "website/components/art/vines.html" %}
+</section>
+{% endif %}
 {% endblock %}
-{% block page_js %}
+{% block dashboard_js %}
   <script>
 
     // Initialize tooltips.
@@ -89,6 +142,23 @@
 
     // Initialize results. 
     cannlytics.resultsJS.initializeResults();
+
+    // Render the date picker for both start and end date inputs
+    $('.datepicker').datepicker({
+      format: 'mm/dd/yyyy',
+      autoclose: true,
+      todayHighlight: true
+    });
+  
+    // Example usage: Set a default start and end date
+    const startDateInput = $('#dateTestedStart');
+    const endDateInput = $('#dateTestedEnd');
+    
+    // Set default dates or handle date changes.
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    $('#dateTestedStart').datepicker('setDate', firstDayOfMonth);
+    $('#dateTestedEnd').datepicker('setDate', currentDate);
 
   </script>
 {% endblock %}

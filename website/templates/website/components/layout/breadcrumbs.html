@@ -3,7 +3,7 @@
 <!--
   Breadcrumbs
   Created: 7/1/2021
-  Updated: 6/22/2023
+  Updated: 3/24/2024
   Parameters:
     base_page
     base_page_url
@@ -14,40 +14,82 @@
     nested_page_url (optional)
     back (optional)
 -->
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
-  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-    <ol class="breadcrumb bg-transparent p-0 mb-0">
-      <li class="breadcrumb-item fs-6 lh-sm">
-        <a class="action" href="{{ base_page_url }}">
+<style>
+  .breadcrumb-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem; /* Increased padding for better spacing */
+    margin-bottom: 1rem; /* Additional margin for separation from content */
+  }
+  
+  .breadcrumb {
+    background-color: transparent; /* Ensuring the breadcrumb background fits any navbar */
+    margin-bottom: 0; /* Removing default margin for tighter integration */
+    padding: 0; /* Resetting padding for cleaner look */
+    font-size: 0.875rem; /* Adjusted for better readability without dominating the page */
+  }
+
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: ">"; /* Custom separator for a modern look */
+    color: #6c757d; /* Subtle color for the separator for better readability */
+    padding: 0 0.5rem; /* Spacing around the separator for clarity */
+  }
+
+  .breadcrumb-item a {
+    color: #007bff; /* Bootstrap primary color for consistency */
+    text-decoration: none; /* Removing underline for a cleaner appearance */
+  }
+
+  .breadcrumb-item a:hover {
+    text-decoration: underline; /* Adding underline on hover for clear interactivity */
+  }
+
+  .btn-back {
+    background-color: #f8f9fa; /* Light background for the back button for subtlety */
+    color: #007bff; /* Matching the breadcrumb link color for consistency */
+    border: 1px solid #dee2e6; /* Border to distinguish the button subtly */
+    padding: 0.25rem 0.5rem; /* Padding adjusted for a smaller, more fitting button */
+    font-size: 0.875rem; /* Matching breadcrumb text size for consistency */
+    border-radius: 0.2rem; /* Softening the edges for a modern feel */
+  }
+
+  .btn-back:hover {
+    background-color: #e2e6ea; /* Slightly darker on hover for feedback */
+  }
+</style>
+
+<div class="breadcrumb-container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{{ base_page_url }}">
           {{ base_page }}
         </a>
       </li>
       {% if nested_page %}
-        <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-          <a class="action" href="{{ nested_page_url }}">
+        <li class="breadcrumb-item">
+          <a href="{{ nested_page_url }}">
             {{ nested_page }}
           </a>
         </li>
       {% endif %}
       {% if extra_page %}
-        <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
-          <a class="action" href="{{ extra_page_url }}">
+        <li class="breadcrumb-item">
+          <a href="{{ extra_page_url }}">
             {{ extra_page }}
           </a>
         </li>
       {% endif %}
-      <li class="breadcrumb-item active fs-6 lh-sm" aria-current="page">
+      <li class="breadcrumb-item active" aria-current="page">
         {% if current_page == 'new' %}New{% else %}{{ current_page }}{% endif %}
       </li>
     </ol>
   </nav>
   {% if back is False %}
-    <a
-      class="btn btn-sm-light btn-md-light"
-      onclick="window.history.back();"
-    >
+    <button class="btn-back" onclick="window.history.back();">
       Back
-    </a>
+    </button>
   {% endif %}
 </div>
 </html>

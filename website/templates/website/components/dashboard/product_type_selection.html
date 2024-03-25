@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<!--
+  Product Type Selection
+  Created: 3/24/2024
+  Updated: 3/24/2024
+-->
+<style>
+  .product-types {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .product-type {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.875rem;
+  }
+  
+  .product-type .icon {
+    display: inline-block;
+    margin-right: 5px;
+  }
+  
+  .product-type:hover {
+  }
+  
+  .product-type.active {
+  }
+</style>
+
+<!-- Product type selection -->
+<div class="product-types">
+  <button class="product-type active btn btn-outline-primary" data-type="all"><span class="icon">🌐</span> All</button>
+  <button class="product-type btn btn-outline-primary" data-type="flower"><span class="icon">🌸</span> Flower</button>
+  <button class="product-type btn btn-outline-primary" data-type="concentrate"><span class="icon">💧</span> Concentrate</button>
+  <button class="product-type btn btn-outline-primary" data-type="edible"><span class="icon">🍪</span> Edible</button>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    selectProductType('all'); // Automatically select "All" on page load
+  });
+
+  // Adjusted function to handle product type selection
+  function selectProductType(type) {
+    document.querySelectorAll('.product-type').forEach(btn => {
+      if (btn.getAttribute('data-type') === type) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    console.log(`Selected product type: ${type}`);
+    // TODO: Implement the logic to display the selected product type
+  }
+
+  // Adding event listeners to each button for click events
+  document.querySelectorAll('.product-type').forEach(btn => {
+    btn.addEventListener('click', () => selectProductType(btn.getAttribute('data-type')));
+  });
+</script>
+</html>

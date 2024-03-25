@@ -11,7 +11,6 @@
 -->
 {% extends "website/index.html" %}
 {% load static %}
-{% block title %}Cannlytics{% endblock %}
 {% block page_css %}
 
   <!-- Dashboard style -->
@@ -249,7 +248,7 @@
 
     <!-- Navigation -->
     <ul class="nav flex-column mb-auto markdown pt-2">
-      <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
+      {% comment %} <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
           href="{% url 'page' page='coas' %}"
@@ -257,8 +256,8 @@
           <i class="bi bi-file-earmark-text me-1"></i>
           <span class="link-text serif">COAs</span>
         </a>
-      </li>
-      <li class="nav-item {% if '/compounds' in request.path %}active{% endif %}">
+      </li> {% endcomment %}
+      {% comment %} <li class="nav-item {% if '/compounds' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
           href="{% url 'page' page='compounds' %}"
@@ -266,7 +265,7 @@
           <i class="bi bi-diagram-2-fill me-1"></i>
           <span class="link-text serif">Compounds</span>
         </a>
-      </li>
+      </li> {% endcomment %}
       <li class="nav-item {% if '/strains' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
@@ -282,10 +281,19 @@
           href="{% url 'page' page='producers' %}"
         >
           <i class="bi bi-people me-1"></i>
-          <span class="link-text serif">Producers</span>
+          <span class="link-text serif">Companies</span>
         </a>
       </li>
-      <li class="nav-item {% if '/retailers' in request.path %}active{% endif %}">
+      <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='coas' %}"
+        >
+          <i class="bi bi-file-earmark-text me-1"></i>
+          <span class="link-text serif">Lab Results</span>
+        </a>
+      </li>
+      {% comment %} <li class="nav-item {% if '/retailers' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
           href="{% url 'page' page='retailers' %}"
@@ -293,8 +301,8 @@
           <i class="bi bi-shop me-1"></i>
           <span class="link-text serif">Retailers</span>
         </a>
-      </li>
-      <li class="nav-item {% if '/labs' in request.path %}active{% endif %}">
+      </li> {% endcomment %}
+      {% comment %} <li class="nav-item {% if '/labs' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
           href="{% url 'page' page='labs' %}"
@@ -302,7 +310,7 @@
           <i class="bi bi-moisture me-1"></i>
           <span class="link-text serif">Labs</span>
         </a>
-      </li>
+      </li> {% endcomment %}
       <li class="nav-item {% if '/reports' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"

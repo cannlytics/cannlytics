@@ -14,9 +14,24 @@
 {% block title %}Strains{% endblock %}
 {% block dashboard %}
 
+<!-- Strains -->
+<section class="container markdown">
+
+  <h1>Strains</h1>
 
   <!-- Search Bar -->
   {% include "website/components/dashboard/search.html" %}
+
+  <!-- Filters -->
+  <div class="selections-container align-items-center">
+
+    <!-- State selection buttons -->
+    {% include "website/components/dashboard/state_selection.html" %}
+
+    <!-- Date selection -->
+    {% include "website/components/dashboard/date_selection.html" %}
+
+  </div>
 
   <!-- List/Grid View -->
   <div class="dropdown">
@@ -74,6 +89,6 @@ Nose
 
 -->
 
-
+</section>
 {% endblock %}
 </html>

@@ -1366,17 +1366,36 @@ body.dark .text-muted {
 }
 
 /* Dark actions */
+body.dark .btn-primary {
+  background-color: #4e8c7a; /* Muted green for a more professional look */
+  border-color: #4e8c7a;
+  color: #f4f4f4; /* Soft white for text to ensure readability */
+}
+
+body.dark .btn-primary:hover {
+  background-color: #3b6b5a; /* A darker shade for hover state */
+  border-color: #3b6b5a;
+  color: #f4f4f4;
+}
+
 body.dark .btn-outline-primary {
-  border-color: #50fa7b;
-  color: #50fa7b;
+  border-color: #4e8c7a; /* Matching the primary button's base color */
+  color: #4e8c7a; /* Ensures consistency with filled button */
 }
+
 body.dark .btn-outline-primary:hover {
-  background: #50fa7b;
-  // color: #1a1a1a;
-  color: #004B09 !important;
+  background: #4e8c7a; /* Hover state matches the primary button's hover */
+  color: #f4f4f4 !important; /* Maintains legibility */
 }
+
+body.dark .btn.active {
+  background-color: #4e8c7a; /* Consistent with primary button */
+  border-color: #4e8c7a;
+  color: #f4f4f4;
+}
+
 body.dark .feather-search {
-  stroke: #ccc;
+  stroke: #b3b3b3; /* A lighter gray for icons to ensure visibility */
 }
 
 /* Dark Cards */

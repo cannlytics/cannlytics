@@ -117,35 +117,36 @@ data = dataset['data']
 Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect encounter in the parsed COA data.
 
 | Field | Example | Description |
-|-------|-----|-------------|
-| `id` | `"1046"` | A state-unique ID for the license. |
-| `license_number` | `"C10-0000423-LIC"` | A unique license number. |
-| `license_status` | `"Active"` | The status of the license. Only licenses that are active are included. |
-| `license_status_date` | `"2022-04-20T00:00"` | The date the status was assigned, an ISO-formatted date if present. |
-| `license_term` | `"Provisional"` | The term for the license. |
-| `license_type` | `"Commercial - Retailer"` | The type of business license. |
-| `license_designation` | `"Adult-Use and Medicinal"` | A state-specific classification for the license. |
-| `issue_date` | `"2019-07-15T00:00:00"` | An issue date for the license, an ISO-formatted date if present. |
-| `expiration_date` | `"2023-07-14T00:00:00"` | An expiration date for the license, an ISO-formatted date if present. |
-| `licensing_authority_id` | `"BCC"` | A unique ID for the state licensing authority. |
-| `licensing_authority` | `"Bureau of Cannabis Control (BCC)"` | The state licensing authority. |
-| `business_legal_name` | `"Movocan"` | The legal name of the business that owns the license. |
-| `business_dba_name` | `"Movocan"` | The name the license is doing business as. |
-| `business_owner_name` | `"redacted"` | The name of the owner of the license. |
-| `business_structure` | `"Corporation"` | The structure of the business that owns the license. |
-| `activity` | `"Pending Inspection"` | Any relevant license activity. |
-| `premise_street_address` | `"1632 Gateway Rd"` | The street address of the business. |
-| `premise_city` | `"Calexico"` | The city of the business. |
-| `premise_state` | `"CA"` | The state abbreviation of the business. |
-| `premise_county` | `"Imperial"` | The county of the business. |
-| `premise_zip_code` | `"92231"` | The zip code of the business. |
-| `business_email` | `"redacted@gmail.com"` | The business email of the license. |
-| `business_phone` | `"(555) 555-5555"` | The business phone of the license. |
-| `business_website` | `"cannlytics.com"` | The business website of the license. |
-| `parcel_number` | `"A42"` | An ID for the business location. |
-| `premise_latitude` | `32.69035693` | The latitude of the business. |
-| `premise_longitude` | `-115.38987552` | The longitude of the business. |
-| `data_refreshed_date` | `"2022-09-21T12:16:33.3866667"` | An ISO-formatted time when the license data was updated. |
+|-------|---------|-------------|
+| `id` | `"123"` | A unique identifier for the strain. |
+| `name` | `"Blue Dream"` | The name of the strain. |
+| `testingStatus` | `"Tested"` | The status indicating whether the strain has been tested. |
+| `thcLevel` | `20%` | THC level percentage. |
+| `cbdLevel` | `1%` | CBD level percentage. |
+| `indicaPercentage` | `40%` | Percentage of Indica genetics. |
+| `sativaPercentage` | `60%` | Percentage of Sativa genetics. |
+| `imageUrl` | `"http://example.com/image.jpg"` | URL to the main image of the strain. |
+| `images` | `[{"url": "http://example.com/image1.jpg", "caption": "Side view"}]` | A list of images URLs related to the strain. |
+| `comments` | `[{"text": "Great for relaxation.", "user": "User123"}]` | User comments about the strain. |
+| `description` | `"A popular strain for sativa lovers."` | Description of the strain. |
+| `imageCaption` | `"Strain under sunlight."` | Caption for the main image. |
+| `aliases` | `["BD", "Blueberry Haze"]` | Known aliases or other names for the strain. |
+| `origin` | `["California", "USA"]` | The origin of the strain. |
+| `breeder` | `"DJ Short"` | The breeder or creator of the strain. |
+| `chemotype` | `"Type I"` | The chemotype classification of the strain. |
+| `firstCultivation` | `"1990"` | The year when the strain was first cultivated. |
+| `folklore` | `"Created during the 70s hippie movement."` | Folklore or stories associated with the strain. |
+| `etymology` | `"Named after its dreamy effects."` | The etymology or origin of the strain's name. |
+| `seedAvailability` | `"Available"` | Availability status of seeds for the strain. |
+| `firstTestedAt` | `"CannaLab"` | The first laboratory where the strain was tested. |
+| `history` | `"Developed in the 70s in California."` | History of the strain. |
+| `references` | `[{"title": "Strain Encyclopedia", "url": "http://example.com"}]` | References or sources for information about the strain. |
+| `awards` | `[{"name": "Cannabis Cup", "year": 2015}]` | Awards won by the strain. |
+| `avgPricePerGram` | `$10` | Average price per gram. |
+| `avgTotalThc` | `18%` | Average total THC content. |
+| `avgTotalCbd` | `1.5%` | Average total CBD content. |
+| `createdAt` | `"2024-01-01T00:00:00Z"` | The creation date of the strain entry. |
+| `updatedAt` | `"2024-01-02T00:00:00Z"` | The last update date of the strain entry. |
 
 ### Data Splits
 
