@@ -118,35 +118,31 @@ Below is a non-exhaustive list of fields, used to standardize the various data t
 
 | Field | Example | Description |
 |-------|---------|-------------|
-| `id` | `"123"` | A unique identifier for the strain. |
-| `name` | `"Blue Dream"` | The name of the strain. |
-| `testingStatus` | `"Tested"` | The status indicating whether the strain has been tested. |
-| `thcLevel` | `20%` | THC level percentage. |
-| `cbdLevel` | `1%` | CBD level percentage. |
-| `indicaPercentage` | `40%` | Percentage of Indica genetics. |
-| `sativaPercentage` | `60%` | Percentage of Sativa genetics. |
-| `imageUrl` | `"http://example.com/image.jpg"` | URL to the main image of the strain. |
+| `strain_id` | `"blue-dream"` | A unique identifier for the strain. |
+| `strain_name` | `"Blue Dream"` | The name of the strain. |
+| `avg_total_thc` | `18%` | Average total THC concentration observed. |
+| `avg_total_cbd` | `1.5%` | Average total CBD concentration observed |
+| `indica_percentage` | `40%` | Estimated percentage of Indica genetics. |
+| `sativa_percentage` | `60%` | Estimated percentage of Sativa genetics. |
+| `image_url` | `"http://example.com/image.jpg"` | URL to the main image of the strain. |
 | `images` | `[{"url": "http://example.com/image1.jpg", "caption": "Side view"}]` | A list of images URLs related to the strain. |
-| `comments` | `[{"text": "Great for relaxation.", "user": "User123"}]` | User comments about the strain. |
 | `description` | `"A popular strain for sativa lovers."` | Description of the strain. |
-| `imageCaption` | `"Strain under sunlight."` | Caption for the main image. |
 | `aliases` | `["BD", "Blueberry Haze"]` | Known aliases or other names for the strain. |
 | `origin` | `["California", "USA"]` | The origin of the strain. |
 | `breeder` | `"DJ Short"` | The breeder or creator of the strain. |
 | `chemotype` | `"Type I"` | The chemotype classification of the strain. |
-| `firstCultivation` | `"1990"` | The year when the strain was first cultivated. |
+| `first_cultivation` | `"1990"` | The year when the strain was first cultivated. |
 | `folklore` | `"Created during the 70s hippie movement."` | Folklore or stories associated with the strain. |
 | `etymology` | `"Named after its dreamy effects."` | The etymology or origin of the strain's name. |
-| `seedAvailability` | `"Available"` | Availability status of seeds for the strain. |
-| `firstTestedAt` | `"CannaLab"` | The first laboratory where the strain was tested. |
+| `seed_availability` | `"Available"` | Availability status of seeds for the strain. |
+| `first_tested_at` | `"CannaLab"` | The first laboratory where the strain was tested. |
 | `history` | `"Developed in the 70s in California."` | History of the strain. |
 | `references` | `[{"title": "Strain Encyclopedia", "url": "http://example.com"}]` | References or sources for information about the strain. |
 | `awards` | `[{"name": "Cannabis Cup", "year": 2015}]` | Awards won by the strain. |
-| `avgPricePerGram` | `$10` | Average price per gram. |
-| `avgTotalThc` | `18%` | Average total THC content. |
-| `avgTotalCbd` | `1.5%` | Average total CBD content. |
-| `createdAt` | `"2024-01-01T00:00:00Z"` | The creation date of the strain entry. |
-| `updatedAt` | `"2024-01-02T00:00:00Z"` | The last update date of the strain entry. |
+| `avg_price_per_gram` | `$10` | Average price per gram. |
+| `created_at` | `"2024-01-01T00:00:00Z"` | The creation date of the strain entry. |
+| `updated_at` | `"2024-01-02T00:00:00Z"` | The last update date of the strain entry. |
+
 
 ### Data Splits
 

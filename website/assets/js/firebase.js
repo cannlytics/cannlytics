@@ -128,21 +128,25 @@ const createCollectionReference = (path) => {
 
 const createCollectionQuery = (path, params) => {
   /**
-  * Create a Firestore collection query from a path and parameters.
-  * @param {String} path The path to the collection.
-  * @param {Map} params Parameters for querying: `desc`, `filters`, `max`, `order`.
-  * @return {Query}
-  */
+   * Create a Firestore collection query from a path and parameters.
+   * @param {String} path The path to the collection.
+   * @param {Map} params Parameters for querying: `desc`, `filters`, `max`, `order`.
+   * @return {Query}
+   */
   const collectionRef = createCollectionReference(path);
-  const args = [collectionRef];
-  const { desc, filters=[], max, order } = params;
+  const { desc, filters = [], max, order } = params;
+  const queryConstraints = [];
   filters.forEach((filter) => {
-    args.push(where(filter.key, filter.operation, filter.value));
+    queryConstraints.push(where(filter.key, filter.operation, filter.value));
   });
-  if (order && desc) args.push(orderBy(order, 'desc'));
-  else if (order) args.push(orderBy(order));
-  if (max) args.push(limit(max));
-  return query(...args);
+  if (order) {
+    queryConstraints.push(orderBy(order, desc ? 'desc' : 'asc'));
+  }
+  if (max) {
+    console.log('max', max);
+    queryConstraints.push(limit(max));
+  }
+  return query(collectionRef, ...queryConstraints);
 };
 
 async function getCollection(path, params) {

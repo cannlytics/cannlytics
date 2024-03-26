@@ -83,7 +83,6 @@ from cannlytics.utils.constants import (
 )
 from cannlytics.utils.utils import (
     convert_to_numeric,
-    format_iso_date,
     snake_case,
     strip_whitespace,
 )
@@ -227,7 +226,8 @@ def get_mcr_labs_sample_details(
     if not obs.get('date_tested'):
         text = soup.find('div', attrs={'class': 'rd_date'}).text
         date = text.split('Tested ')[-1].split(' for')[0]
-        obs['date_tested'] = format_iso_date(date)
+        date_tested = pd.to_datetime(date)
+        obs['date_tested'] = date_tested.strftime('%Y-%m-%d')
 
     # Get the product name and producer, if not already collected.
     if not obs.get('product_name'):
@@ -506,8 +506,9 @@ def get_mcr_labs_samples(
         # Get the date tested.
         try:
             div = details.find('div', attrs={'class': 'fth_date'})
-            obs['date_tested'] = format_iso_date(div.text)
-        except ValueError:
+            date_tested = pd.to_datetime(div.text)
+            obs['date_tested'] = date_tested.strftime('%Y-%m-%d')
+        except:
             obs['date_tested'] = ''
 
         # Try to get the producer's URL.
@@ -970,9 +971,7 @@ def parse_mcrlabs_coa(
 
 
 # === Tests ===
-# Notes: Uncomment tests to perform them.
-# Checked tests have been successfully performed by Cannlytics.
-# Contact: <admin@cannlytics.com>.
+# [✓] Tested: 2024-03-25 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
@@ -984,7 +983,7 @@ if __name__ == '__main__':
     DATA_DIR = '../../../.datasets/lab_results'
 
     # DEV:
-    # data = get_mcr_labs_sample_details(None, '66466')
+    # data = get_mcr_labs_sample_details(None, '60197')
     # print(data)
 
     # [✓] TEST: Get the total number of samples.
