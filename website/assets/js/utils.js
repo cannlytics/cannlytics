@@ -372,12 +372,46 @@ export const sortArrayOfObjects = (array, field) => {
   return array.sort((a, b) => (a[field] > b[field]) ? 1 : ((b[field] > a[field]) ? -1 : 0));
 }
 
+/*------------------------------------------------------------------------------
+ * Table Helpers
+ *----------------------------------------------------------------------------*/
+
+export const formatDate = (params) => {
+  /**
+   * Format a date to a human-readable format.
+   */
+  if (params.value) {
+    const date = new Date(params.value);
+    return date.toLocaleDateString();
+  }
+  return '';
+};
+
+export const formatDecimal = (params) => {
+  /**
+   * Format a decimal number to two decimal places.
+   */
+  if (params.value !== undefined && params.value !== null) {
+    try {
+      return params.value.toFixed(2);
+    } catch (error) {
+      return params.value;
+    }
+  }
+  return '';
+};
+
+/*------------------------------------------------------------------------------
+ * Export
+ *----------------------------------------------------------------------------*/
 
 export const utils = {
   apiRequest,
   authRequest,
   capitalize,
   deserializeForm,
+  formatDate,
+  formatDecimal,
   getCookie,
   getUrlParameter,
   hasClass,

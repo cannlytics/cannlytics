@@ -37,6 +37,7 @@ export const theme = {
     /**
      * Set th initial UI theme.
      */
+    console.log('Setting initial theme...');
     if (typeof(Storage) !== 'undefined') {
       const theme = localStorage.getItem('theme');
       if (!theme) {
@@ -55,11 +56,11 @@ export const theme = {
      * Set the appropriate theme for tables based on the current theme,
      * toggling the Ag-Grid theme too.
      */
-    let nuisanceTableClass = 'ag-theme-alpine-dark';
-    let finalTableClass = 'ag-theme-alpine';
+    let nuisanceTableClass = 'ag-theme-quartz-dark';
+    let finalTableClass = 'ag-theme-quartz';
     if (hasClass(document.body, 'dark')) {
-      nuisanceTableClass = 'ag-theme-alpine';
-      finalTableClass = 'ag-theme-alpine-dark';
+      nuisanceTableClass = 'ag-theme-quartz';
+      finalTableClass = 'ag-theme-quartz-dark';
     }
     let tables = document.getElementsByClassName(nuisanceTableClass);
     [...tables].forEach( x => x.classList.add(finalTableClass) );
@@ -70,12 +71,12 @@ export const theme = {
     /**
      * Toggle the UI theme, toggling the AG-Grid table class too.
      */
-    let currentTableClass = 'ag-theme-alpine';
-    let newTableClass = 'ag-theme-alpine-dark';
+    let currentTableClass = 'ag-theme-quartz';
+    let newTableClass = 'ag-theme-quartz-dark';
     if (theme === 'light') {
       document.body.className = 'base';
-      currentTableClass = 'ag-theme-alpine-dark';
-      newTableClass = 'ag-theme-alpine';
+      currentTableClass = 'ag-theme-quartz-dark';
+      newTableClass = 'ag-theme-quartz';
     } else {
       document.body.classList.add('dark');
     }

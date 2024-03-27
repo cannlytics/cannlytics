@@ -4,10 +4,11 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 2/13/2024
- * Updated: 3/25/2024
+ * Updated: 3/26/2024
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-import { getCollection, listenToCollection } from '../firebase.js';
+import { getCollection } from '../firebase.js';
+import { formatDecimal } from '../utils.js';
 
 export const strainsJS = {
   
@@ -18,9 +19,11 @@ export const strainsJS = {
     console.log('Initializing strains page...');
   
     const searchTerm = document.getElementById('searchInput').value;
-    const startDate = document.getElementById('dateTestedStart').value;
-    const endDate = document.getElementById('dateTestedEnd').value;
+    // const startDate = document.getElementById('dateTestedStart').value;
+    // const endDate = document.getElementById('dateTestedEnd').value;
     const selectedState = document.querySelector('.btn-group .btn-primary').id.replace('btn', '');
+    const startDate = null;
+    const endDate = null;
   
     // Fetch strains data from Firestore
     this.fetchStrains(searchTerm, startDate, endDate, selectedState)
@@ -47,9 +50,7 @@ export const strainsJS = {
         errorMessage.textContent = 'Failed to fetch strains data. Please try again later.';
         strainsContainer.appendChild(errorMessage);
       });
-  
-    // Listen for real-time updates
-    // this.listenForStrainChanges();
+
   },
 
   fetchStrains(searchTerm, startDate, endDate, selectedState) {
@@ -79,42 +80,10 @@ export const strainsJS = {
     });
   },
 
-  listenForStrainChanges() {
-    /**
-     * Listen for real-time changes to the strains collection.
-     */
-    const addedCallback = (strain) => {
-      const strainsContainer = document.querySelector('.coa-container');
-      const strainCard = createStrainCard(strain);
-      strainsContainer.appendChild(strainCard);
-    };
-    const modifiedCallback = (strain) => {
-      const strainCard = document.querySelector(`.strain-card[data-id="${strain.id}"]`);
-      if (strainCard) {
-        const newStrainCard = createStrainCard(strain);
-        strainCard.replaceWith(newStrainCard);
-      }
-    };
-    const removedCallback = (strain) => {
-      const strainCard = document.querySelector(`.strain-card[data-id="${strain.id}"]`);
-      if (strainCard) {
-        strainCard.remove();
-      }
-    };
-    listenToCollection(
-      'public/data/strains',
-      {
-        order: 'strain_name',
-        max: 10,
-      },
-      null,
-      addedCallback,
-      modifiedCallback,
-      removedCallback
-    );
-  },
-
   renderListView(strains) {
+    /**
+     * Render the strains in a list view.
+     */
     document.getElementById('listViewButton').classList.add('btn-primary');
     document.getElementById('listViewButton').classList.remove('btn-outline-primary');
     document.getElementById('gridViewButton').classList.remove('btn-primary');
@@ -142,6 +111,9 @@ export const strainsJS = {
   },
 
   renderGridView(strains) {
+    /**
+     * Render the strains in a grid view.
+     */
     document.getElementById('gridViewButton').classList.add('btn-primary');
     document.getElementById('gridViewButton').classList.remove('btn-outline-primary');
     document.getElementById('listViewButton').classList.remove('btn-primary');
@@ -181,24 +153,32 @@ export const strainsJS = {
       pagination: true,
       paginationPageSize: 10,
       paginationPageSizeSelector: [5, 10, 20, 50],
+      onRowClicked: (params) => {
+        console.log('Selected:', params.data);
+        const strainId = params.data.id;
+        localStorage.setItem('strain', JSON.stringify(params.data));
+        window.location.href = `/strains/${strainId}`;
+      },
     };
     agGrid.createGrid(strainsContainer, gridOptions);
+    cannlytics.ui.setTableTheme();
   },
 
-  initializeStrain() {
+  async initializeStrain() {
     /**
      * Initialize the strain page.
      */
+    let data = JSON.parse(localStorage.getItem('strain'));
+    const slug = window.location.pathname.split('/').pop();
+    if (data && data.id === slug) {
+      console.log('Initializing strain page from local data:', data);
+    } else {
+      const path = `public/data/strains/${slug}`;
+      data = await getDocument(path);
+      console.log('Initializing strain page from Firestore:', data);
+    }
   },
 
-};
-
-// Reusable valueFormatter function
-const formatDecimal = (params) => {
-  if (params.value !== undefined && params.value !== null) {
-    return params.value.toFixed(2);
-  }
-  return '';
 };
 
 // Helper function to create a strain card element.

@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
 <!--
-  Home Page | Cannlytics
+  Dashboard | Cannlytics
   Copyright (c) 2021-2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/5/2021
-  Updated: 2/27/2024
+  Updated: 3/26/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
@@ -191,22 +191,13 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='coas' %}">COAs</a>
+          <a class="nav-link" href="{% url 'page' page='licenses' %}">Companies</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'page' page='results' %}">Lab Results</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'page' page='strains' %}">Strains</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='producers' %}">Producers</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='retailers' %}">Retailers</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='labs' %}">Labs</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='reports' %}">Reports</a>
         </li>
       </ul>
     </div>
@@ -248,24 +239,31 @@
 
     <!-- Navigation -->
     <ul class="nav flex-column mb-auto markdown pt-2">
-      {% comment %} <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
+      <!-- Optional pages:
+        - coas
+        - compounds
+        - producers
+        - retailers
+        - reports
+      -->
+      <li class="nav-item {% if '/licenses' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
-          href="{% url 'page' page='coas' %}"
+          href="{% url 'page' page='licenses' %}"
+        >
+          <i class="bi bi-people me-1"></i>
+          <span class="link-text serif">Companies</span>
+        </a>
+      </li>
+      <li class="nav-item {% if '/results' in request.path %}active{% endif %}">
+        <a
+          class="nav-link fs-6"
+          href="{% url 'page' page='results' %}"
         >
           <i class="bi bi-file-earmark-text me-1"></i>
-          <span class="link-text serif">COAs</span>
+          <span class="link-text serif">Lab Results</span>
         </a>
-      </li> {% endcomment %}
-      {% comment %} <li class="nav-item {% if '/compounds' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='compounds' %}"
-        >
-          <i class="bi bi-diagram-2-fill me-1"></i>
-          <span class="link-text serif">Compounds</span>
-        </a>
-      </li> {% endcomment %}
+      </li>
       <li class="nav-item {% if '/strains' in request.path %}active{% endif %}">
         <a
           class="nav-link fs-6"
@@ -273,51 +271,6 @@
         >
           <i class="bi bi-flower3 me-1"></i>
           <span class="link-text serif">Strains</span>
-        </a>
-      </li>
-      <li class="nav-item {% if '/producers' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='producers' %}"
-        >
-          <i class="bi bi-people me-1"></i>
-          <span class="link-text serif">Companies</span>
-        </a>
-      </li>
-      <li class="nav-item {% if '/coas' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='coas' %}"
-        >
-          <i class="bi bi-file-earmark-text me-1"></i>
-          <span class="link-text serif">Lab Results</span>
-        </a>
-      </li>
-      {% comment %} <li class="nav-item {% if '/retailers' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='retailers' %}"
-        >
-          <i class="bi bi-shop me-1"></i>
-          <span class="link-text serif">Retailers</span>
-        </a>
-      </li> {% endcomment %}
-      {% comment %} <li class="nav-item {% if '/labs' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='labs' %}"
-        >
-          <i class="bi bi-moisture me-1"></i>
-          <span class="link-text serif">Labs</span>
-        </a>
-      </li> {% endcomment %}
-      <li class="nav-item {% if '/reports' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='reports' %}"
-        >
-          <i class="bi bi-graph-up me-1"></i>
-          <span class="link-text serif">Reports</span>
         </a>
       </li>
     </ul>
@@ -349,21 +302,13 @@
 
 {% endblock %}
 
-<!-- Homepage JavaScript -->
+<!-- JavaScript -->
 {% block page_js %}
 {{ block.super }}
 <script>
 
   // Initialize the dashboard.
   cannlytics.website.initializeDashboard();
-
-  {% comment %} // Example JavaScript to toggle 'active' class on buttons
-  document.getElementById('addButton').addEventListener('click', function() {
-    this.classList.toggle('active');
-  });
-  document.getElementById('filterButton').addEventListener('click', function() {
-    this.classList.toggle('active');
-  }); {% endcomment %}
 
 </script>
 
