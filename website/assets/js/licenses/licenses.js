@@ -4,16 +4,168 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 2/13/2024
- * Updated: 2/19/2024
+ * Updated: 3/29/2024
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
+import { getCollection } from '../firebase.js';
+import { formatDecimal } from '../utils.js';
 
 export const licensesJS = {
   
-  initializeLicenses() {
+  initializeLicensees() {
     /**
-     * Initialize the licenses page.
+     * Initialize the licensees page.
      */
+    console.log('Initializing licensees page...');
+  
+    const searchTerm = document.getElementById('searchInput').value;
+    const selectedState = document.querySelector('.btn-group .btn-primary').id.replace('btn', '');
+    const startDate = null;
+    const endDate = null;
+  
+    // Fetch licensees data from Firestore
+    this.fetchLicensees(searchTerm, startDate, endDate, selectedState)
+      .then((licensees) => {
+        console.log('Licensees:', licensees);
+
+        // Add event listeners for view toggle buttons
+        document.getElementById('listViewButton').addEventListener('click', () => {
+          this.renderListView(licensees);
+        });
+        document.getElementById('gridViewButton').addEventListener('click', () => {
+          this.renderGridView(licensees);
+        });
+
+        // Default to grid view
+        this.renderGridView(licensees);
+
+      })
+      .catch((error) => {
+        console.error('Error initializing licensees:', error);
+        const licenseesContainer = document.getElementById('licenseesContainer');
+        licenseesContainer.innerHTML = '';
+        const errorMessage = document.createElement('p');
+        errorMessage.textContent = 'Failed to fetch licensees data. Please try again later.';
+        licenseesContainer.appendChild(errorMessage);
+      });
+
+  },
+
+  fetchLicensees(searchTerm, startDate, endDate, selectedState) {
+    /**
+     * Fetch licensees data from Firestore based on search term, date range, and selected state.
+     */
+    const filters = [];
+    if (searchTerm) {
+      filters.push({ key: 'business_legal_name', operation: '>=', value: searchTerm });
+      filters.push({ key: 'business_legal_name', operation: '<=', value: searchTerm + '\uf8ff' });
+    }
+    if (selectedState && selectedState !== 'ALL') {
+      filters.push({ key: 'state', operation: '==', value: selectedState });
+    }
+    console.log('FILTERS:');
+    console.log(filters);
+    return getCollection('data/licenses/all', {
+      order: 'business_legal_name',
+      max: 10,
+      filters: filters,
+    });
+  },
+
+  renderListView(licensees) {
+    /**
+     * Render the licensees in a list view.
+     */
+    document.getElementById('listViewButton').classList.add('btn-primary');
+    document.getElementById('listViewButton').classList.remove('btn-outline-primary');
+    document.getElementById('gridViewButton').classList.remove('btn-primary');
+    document.getElementById('gridViewButton').classList.add('btn-outline-primary');
+  
+    const licenseesContainer = document.getElementById('licenseesContainer');
+    licenseesContainer.innerHTML = '';
+  
+    if (licensees && licensees.length > 0) {
+      licensees.forEach((licensee) => {
+        const licenseeCard = createLicenseeCard(licensee);
+        licenseesContainer.appendChild(licenseeCard);
+      });
+  
+      // Initialize Masonry after rendering the licensee cards
+      new Masonry(licenseesContainer, {
+        itemSelector: '.col-sm-6',
+        percentPosition: true,
+      });
+    } else {
+      const noDataMessage = document.createElement('p');
+      noDataMessage.textContent = 'No licensees data available.';
+      licenseesContainer.appendChild(noDataMessage);
+    }
+  },
+
+  renderGridView(licensees) {
+    /**
+     * Render the licensees in a grid view.
+     */
+    document.getElementById('gridViewButton').classList.add('btn-primary');
+    document.getElementById('gridViewButton').classList.remove('btn-outline-primary');
+    document.getElementById('listViewButton').classList.remove('btn-primary');
+    document.getElementById('listViewButton').classList.add('btn-outline-primary');
+    const licenseesContainer = document.getElementById('licenseesContainer');
+    licenseesContainer.innerHTML = '';
+    const gridOptions = {
+      columnDefs: [
+        { field: 'business_legal_name', headerName: 'Legal Name', flex: 1 },
+        { field: 'business_dba_name', headerName: 'DBA Name', flex: 1 },
+        {
+          field: 'license_number',
+          headerName: 'License Number',
+          flex: 1,
+        },
+        {
+          field: 'license_type',
+          headerName: 'License Type',
+          flex: 1,
+        },
+        {
+          field: 'premise_city',
+          headerName: 'City',
+          flex: 1,
+        },
+      ],
+      rowData: licensees,
+      defaultColDef: {
+        resizable: true,
+        sortable: true,
+        filter: true,
+      },
+      domLayout: 'autoHeight',
+      pagination: true,
+      paginationPageSize: 10,
+      paginationPageSizeSelector: [5, 10, 20, 50],
+      onRowClicked: (params) => {
+        console.log('Selected:', params.data);
+        const licenseeId = params.data.id;
+        localStorage.setItem('licensee', JSON.stringify(params.data));
+        window.location.href = `/licenses/${licenseeId}`;
+      },
+    };
+    agGrid.createGrid(licenseesContainer, gridOptions);
+    cannlytics.ui.setTableTheme();
+  },
+
+  async initializeLicensee() {
+    /**
+     * Initialize the licensee page.
+     */
+    let data = JSON.parse(localStorage.getItem('licensee'));
+    const slug = window.location.pathname.split('/').pop();
+    if (data && data.id === slug) {
+      console.log('Initializing licensee page from local data:', data);
+    } else {
+      const path = `public/data/licenses/${slug}`;
+      data = await getDocument(path);
+      console.log('Initializing licensee page from Firestore:', data);
+    }
   },
 
   initializeRetailers() {
@@ -190,4 +342,31 @@ export const licensesJS = {
 
   },
 
+};
+
+// Helper function to create a licensee card element.
+const createLicenseeCard = (licensee) => {
+  const cardElement = document.createElement('div');
+  cardElement.classList.add('col-sm-6', 'col-md-4', 'mb-4');
+
+  const cardInnerElement = document.createElement('div');
+  cardInnerElement.classList.add('card');
+
+  const cardBodyElement = document.createElement('div');
+  cardBodyElement.classList.add('card-body');
+
+  const titleElement = document.createElement('h5');
+  titleElement.classList.add('card-title');
+  titleElement.textContent = licensee.business_legal_name;
+
+  const descriptionElement = document.createElement('p');
+  descriptionElement.classList.add('card-text');
+  descriptionElement.textContent = licensee.business_dba_name;
+
+  cardBodyElement.appendChild(titleElement);
+  cardBodyElement.appendChild(descriptionElement);
+  cardInnerElement.appendChild(cardBodyElement);
+  cardElement.appendChild(cardInnerElement);
+
+  return cardElement;
 };
