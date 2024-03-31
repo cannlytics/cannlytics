@@ -85,6 +85,14 @@
 {% endif %}
 {% endblock %}
 {% block dashboard_js %}
+{% if section and section not in 'logs,files,certificates' %}
+  <script>
+
+    // Initialize result. 
+    cannlytics.strainsJS.initializeStrain();
+
+  </script>
+{% else %}
   <script>
 
     {% comment %} // Render the date picker for both start and end date inputs.
@@ -101,6 +109,7 @@
     $('#dateTestedEnd').datepicker('setDate', currentDate); {% endcomment %}
 
     // Attach functionality.
+    console.log('Attaching functionality...');
     document.getElementById('searchInput').addEventListener('input', function() {
       cannlytics.strainsJS.initializeStrains();
     });
@@ -120,5 +129,6 @@
     cannlytics.strainsJS.initializeStrains();
 
   </script>
+{% endif %}
 {% endblock %}
 </html>

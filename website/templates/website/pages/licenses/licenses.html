@@ -82,6 +82,14 @@
 {% endif %}
 {% endblock %}
 {% block dashboard_js %}
+{% if section and section not in 'logs,files,certificates' %}
+  <script>
+
+    // Initialize licensee. 
+    cannlytics.licensesJS.initializeLicensee();
+
+  </script>
+{% else %}
   <script>
 
     // Attach functionality.
@@ -104,5 +112,6 @@
     cannlytics.licensesJS.initializeLicensees();
 
   </script>
+{% endif %}
 {% endblock %}
 </html>

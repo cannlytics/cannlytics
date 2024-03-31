@@ -177,8 +177,7 @@
 <script>
 
   // Add sign-in on enter on login password field.
-  const input = document.getElementById('sign-in-password');
-  input.addEventListener('keyup', function(event) {
+  document.getElementById('sign-in-password').addEventListener('keyup', function(event) {
     event.preventDefault();
     if (event.keyCode === 13) cannlytics.auth.signIn(event);
   });

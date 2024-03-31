@@ -7,10 +7,32 @@
  * Updated: 3/26/2024
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-import { getCollection } from '../firebase.js';
+import { getCollection, getDocument } from '../firebase.js';
 import { formatDecimal } from '../utils.js';
 
 export const strainsJS = {
+
+  async initializeStrain() {
+    /**
+     * Initialize the strain page.
+     */
+    let data = JSON.parse(localStorage.getItem('strain'));
+    const slug = window.location.pathname.split('/').pop();
+    console.log('Strain slug:', slug);
+    if (data && data.id === slug) {
+      console.log('Initializing strain page from local data:', data);
+    } else {
+      const path = `public/data/strains/${slug}`;
+      try {
+        data = await getDocument(path);
+      } catch (error) {
+        console.error('Error fetching strain data:', error);
+        return;
+      }
+      console.log('Initializing strain page from Firestore:', data);
+    }
+    // TODO: Initialize the strain page with the data.
+  },
   
   initializeStrains() {
     /**
@@ -162,21 +184,6 @@ export const strainsJS = {
     };
     agGrid.createGrid(strainsContainer, gridOptions);
     cannlytics.ui.setTableTheme();
-  },
-
-  async initializeStrain() {
-    /**
-     * Initialize the strain page.
-     */
-    let data = JSON.parse(localStorage.getItem('strain'));
-    const slug = window.location.pathname.split('/').pop();
-    if (data && data.id === slug) {
-      console.log('Initializing strain page from local data:', data);
-    } else {
-      const path = `public/data/strains/${slug}`;
-      data = await getDocument(path);
-      console.log('Initializing strain page from Firestore:', data);
-    }
   },
 
 };
