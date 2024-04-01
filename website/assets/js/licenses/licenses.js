@@ -7,10 +7,54 @@
  * Updated: 3/29/2024
  * License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
  */
-import { getCollection } from '../firebase.js';
+import { getCollection, getDocument } from '../firebase.js';
 import { formatDecimal } from '../utils.js';
 
 export const licensesJS = {
+
+  async initializeLicensee() {
+    /**
+     * Initialize the licensee page.
+     */
+    let data = JSON.parse(localStorage.getItem('licensee'));
+    const slug = window.location.pathname.split('/').pop();
+    if (data && data.id === slug) {
+      console.log('Initializing licensee page from local data:', data);
+    } else {
+      const path = `public/data/licenses/${slug}`;
+      data = await getDocument(path);
+      console.log('Initializing licensee page from Firestore:', data);
+    }
+    // Render licensee data in the UI
+    document.getElementById('licenseeImageUrl').src = data.image_url || '';
+    document.getElementById('licenseeLegalName').textContent = data.business_legal_name || '';
+    document.getElementById('licenseeDbaName').textContent = data.business_dba_name || '';
+    document.getElementById('licenseeNumber').textContent = data.license_number || '';
+    document.getElementById('licenseeType').textContent = data.license_type || '';
+
+    // Business Information
+    document.getElementById('businessLegalName').textContent = data.business_legal_name || '';
+    document.getElementById('businessDbaName').textContent = data.business_dba_name || '';
+
+    // License Details
+    document.getElementById('licenseType').textContent = data.license_type || '';
+    document.getElementById('licenseNumber').textContent = data.license_number || '';
+    document.getElementById('licenseStatus').textContent = data.license_status || '';
+    document.getElementById('licenseStatusDate').textContent = data.license_status_date || '';
+    // Populate other license details
+
+    // Contact Information
+    document.getElementById('businessEmail').textContent = data.business_email || '';
+    document.getElementById('businessPhone').textContent = data.business_phone || '';
+    document.getElementById('businessWebsite').textContent = data.business_website || '';
+
+    // Location
+    document.getElementById('premiseStreetAddress').textContent = data.premise_street_address || '';
+    document.getElementById('premiseCity').textContent = data.premise_city || '';
+    // Populate other location details
+
+    // TODO: Implement licensee history functionality
+  },
   
   initializeLicensees() {
     /**
@@ -151,21 +195,6 @@ export const licensesJS = {
     };
     agGrid.createGrid(licenseesContainer, gridOptions);
     cannlytics.ui.setTableTheme();
-  },
-
-  async initializeLicensee() {
-    /**
-     * Initialize the licensee page.
-     */
-    let data = JSON.parse(localStorage.getItem('licensee'));
-    const slug = window.location.pathname.split('/').pop();
-    if (data && data.id === slug) {
-      console.log('Initializing licensee page from local data:', data);
-    } else {
-      const path = `public/data/licenses/${slug}`;
-      data = await getDocument(path);
-      console.log('Initializing licensee page from Firestore:', data);
-    }
   },
 
   initializeRetailers() {
