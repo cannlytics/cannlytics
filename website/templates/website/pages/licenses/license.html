@@ -9,25 +9,28 @@
   Updated: 3/31/2024
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
-{% extends "website/components/layout/dashboard.html" %}
 {% load static icon %}
-{% block title %}Licensee | Cannlytics{% endblock %}
-{% block dashboard %}
 
 <!-- Licensee -->
 <section class="container markdown">
 
   <!-- Breadcrumbs -->
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
+  {% comment %} <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-4 pb-2 mb-3 mt-2 border-bottom border-secondary">
     {% include "website/components/layout/breadcrumbs.html" with
       base_page="Licenses"
       base_page_url="/licenses"
       current_page=id
     %}
-  </div>
+  </div> {% endcomment %}
+  {% include "website/components/layout/breadcrumbs.html" with
+      base_page="Licenses"
+      base_page_url="/licenses"
+      current_page=id
+    %}
 
   <!-- Licensee data form -->
   <div class="row">
+    <!-- FIXME: Fallback image -->
     <div class="col-md-6">
       <img id="licenseeImageUrl" class="img-fluid" alt="Licensee Image">
     </div>
@@ -40,105 +43,76 @@
   </div>
 
   <div class="mt-4">
-    <ul class="nav nav-tabs" id="licenseeTab" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">Details</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">History</button>
-      </li>
-    </ul>
-    <div class="tab-content" id="licenseeTabContent">
-      <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-        <div class="mt-4">
-          <h3>Business Information</h3>
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Business Legal Name</th>
-                <td id="businessLegalName"></td>
-              </tr>
-              <tr>
-                <th scope="row">Business DBA Name</th>
-                <td id="businessDbaName"></td>
-              </tr>
-            </tbody>
-          </table>
+    <h3>Business Information</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Business Legal Name</th>
+          <td id="businessLegalName"></td>
+        </tr>
+        <tr>
+          <th scope="row">Business DBA Name</th>
+          <td id="businessDbaName"></td>
+        </tr>
+      </tbody>
+    </table>
 
-          <h3>License Details</h3>
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">License Type</th>
-                <td id="licenseType"></td>
-              </tr>
-              <tr>
-                <th scope="row">License Number</th>
-                <td id="licenseNumber"></td>
-              </tr>
-              <tr>
-                <th scope="row">License Status</th>
-                <td id="licenseStatus"></td>
-              </tr>
-              <tr>
-                <th scope="row">License Status Date</th>
-                <td id="licenseStatusDate"></td>
-              </tr>
-              <!-- Add more rows for other license details -->
-            </tbody>
-          </table>
+    <h3>License Details</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">License Type</th>
+          <td id="licenseType"></td>
+        </tr>
+        <tr>
+          <th scope="row">License Number</th>
+          <td id="licenseNumber"></td>
+        </tr>
+        <tr>
+          <th scope="row">License Status</th>
+          <td id="licenseStatus"></td>
+        </tr>
+        <tr>
+          <th scope="row">License Status Date</th>
+          <td id="licenseStatusDate"></td>
+        </tr>
+        <!-- Add more rows for other license details -->
+      </tbody>
+    </table>
 
-          <h3>Contact Information</h3>
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Business Email</th>
-                <td id="businessEmail"></td>
-              </tr>
-              <tr>
-                <th scope="row">Business Phone</th>
-                <td id="businessPhone"></td>
-              </tr>
-              <tr>
-                <th scope="row">Business Website</th>
-                <td id="businessWebsite"></td>
-              </tr>
-            </tbody>
-          </table>
+    <h3>Contact Information</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Business Email</th>
+          <td id="businessEmail"></td>
+        </tr>
+        <tr>
+          <th scope="row">Business Phone</th>
+          <td id="businessPhone"></td>
+        </tr>
+        <tr>
+          <th scope="row">Business Website</th>
+          <td id="businessWebsite"></td>
+        </tr>
+      </tbody>
+    </table>
 
-          <h3>Location</h3>
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Premise Street Address</th>
-                <td id="premiseStreetAddress"></td>
-              </tr>
-              <tr>
-                <th scope="row">Premise City</th>
-                <td id="premiseCity"></td>
-              </tr>
-              <!-- Add more rows for other location details -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-        <div class="mt-4">
-          <!-- TODO: Implement licensee history -->
-        </div>
-      </div>
-    </div>
+    <h3>Location</h3>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Premise Street Address</th>
+          <td id="premiseStreetAddress"></td>
+        </tr>
+        <tr>
+          <th scope="row">Premise City</th>
+          <td id="premiseCity"></td>
+        </tr>
+        <!-- Add more rows for other location details -->
+      </tbody>
+    </table>
   </div>
   
 </section>
-
-{% endblock %}
-{% block dashboard_js %}
-  <script>
-
-    // Initialize Licensee. 
-    cannlytics.licensesJS.initializeLicensee();
-
-  </script>
-{% endblock %}
 </html>

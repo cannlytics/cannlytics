@@ -42,27 +42,28 @@
 
 <!-- Strain -->
 <section class="container markdown">
+  <div class="row">
+    <div class="col-md-6">
+      <img id="strainImageUrl" class="img-fluid" alt="Strain Image">
+    </div>
+    <div class="col-md-6">
+      <h1 id="strainName"></h1>
+      <p id="strainDescription"></p>
+      <p>Total Favorites: <span id="strainTotalFavorites"></span></p>
+      <!-- TODO: Add other strain fields -->
+    </div>
+  </div>
 
-  <!-- TODO: Strain data form -->
+  <!-- TODO: Add sections for strain analytics, lab results, etc. -->
 
-</section>
-
-{% endblock %}
-{% block dashboard_js %}
-  <script>
-
-    // Initialize strain. 
-    cannlytics.strainsJS.initializeStrain();
-
-  </script>
-{% endblock %}
-  <!-- TODO:
+  <!-- TODO: Add additional sections:
     - Ridge plots for cultivars with terpene data.
     - Regression plots of ratios with all strains colored by strain.
     - Review strain.
-      On a scale of 1 - 10:
-      Legs
-      Nose
-
+      * On a scale of 1 - 10:
+      * Legs
+      * Nose
   -->
+</section>
+{% endblock %}
 </html>

@@ -32,6 +32,10 @@ export const strainsJS = {
       console.log('Initializing strain page from Firestore:', data);
     }
     // TODO: Initialize the strain page with the data.
+    document.getElementById('strainName').textContent = data.name;
+    document.getElementById('strainDescription').textContent = data.description;
+    document.getElementById('strainImageUrl').src = data.imageUrl;
+    document.getElementById('strainTotalFavorites').textContent = data.totalFavorites;
   },
   
   initializeStrains() {

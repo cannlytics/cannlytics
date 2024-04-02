@@ -19,43 +19,82 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 1rem; /* Increased padding for better spacing */
-    margin-bottom: 1rem; /* Additional margin for separation from content */
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    background-color: #f8f9fa; /* Light background color */
   }
   
   .breadcrumb {
-    background-color: transparent; /* Ensuring the breadcrumb background fits any navbar */
-    margin-bottom: 0; /* Removing default margin for tighter integration */
-    padding: 0; /* Resetting padding for cleaner look */
-    font-size: 0.875rem; /* Adjusted for better readability without dominating the page */
+    background-color: transparent;
+    margin-bottom: 0;
+    padding: 0;
+    font-size: 0.875rem;
   }
-
+  
   .breadcrumb-item + .breadcrumb-item::before {
-    content: ">"; /* Custom separator for a modern look */
-    color: #6c757d; /* Subtle color for the separator for better readability */
-    padding: 0 0.5rem; /* Spacing around the separator for clarity */
+    content: ">";
+    color: #007bff; /* Primary color */
+    padding: 0 0.5rem;
   }
-
+  
   .breadcrumb-item a {
-    color: #007bff; /* Bootstrap primary color for consistency */
-    text-decoration: none; /* Removing underline for a cleaner appearance */
+    color: #007bff; /* Primary color */
+    text-decoration: none;
   }
-
+  
   .breadcrumb-item a:hover {
-    text-decoration: underline; /* Adding underline on hover for clear interactivity */
+    color: #0056b3; /* Darker primary color on hover */
+    text-decoration: underline;
   }
-
+  
+  .breadcrumb-item.active {
+    color: #6c757d; /* Text color */
+  }
+  
   .btn-back {
-    background-color: #f8f9fa; /* Light background for the back button for subtlety */
-    color: #007bff; /* Matching the breadcrumb link color for consistency */
-    border: 1px solid #dee2e6; /* Border to distinguish the button subtly */
-    padding: 0.25rem 0.5rem; /* Padding adjusted for a smaller, more fitting button */
-    font-size: 0.875rem; /* Matching breadcrumb text size for consistency */
-    border-radius: 0.2rem; /* Softening the edges for a modern feel */
+    background-color: #f8f9fa; /* Light button background */
+    color: #007bff; /* Primary color */
+    border: 1px solid #007bff; /* Primary border color */
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
   }
-
+  
   .btn-back:hover {
-    background-color: #e2e6ea; /* Slightly darker on hover for feedback */
+    background-color: #007bff; /* Primary color on hover */
+    color: #fff; /* Text color on hover */
+  }
+  
+  /* Dark theme styles */
+  body.dark .breadcrumb-container {
+    background-color: #1c2531; /* Dark background color */
+  }
+  
+  body.dark .breadcrumb-item + .breadcrumb-item::before {
+    color: #4e8c7a; /* Accent color */
+  }
+  
+  body.dark .breadcrumb-item a {
+    color: #4e8c7a; /* Accent color */
+  }
+  
+  body.dark .breadcrumb-item a:hover {
+    color: #3b6b5a; /* Darker accent color on hover */
+  }
+  
+  body.dark .breadcrumb-item.active {
+    color: #f4f4f4; /* Text color */
+  }
+  
+  body.dark .btn-back {
+    background-color: #2c3e50; /* Dark button background */
+    color: #4e8c7a; /* Accent color */
+    border: 1px solid #4e8c7a; /* Accent border color */
+  }
+  
+  body.dark .btn-back:hover {
+    background-color: #3b6b5a; /* Darker accent color on hover */
+    color: #f4f4f4; /* Text color on hover */
   }
 </style>
 
@@ -63,23 +102,17 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{{ base_page_url }}">
-          {{ base_page }}
-        </a>
+        <a href="{{ base_page_url }}">{{ base_page }}</a>
       </li>
       {% if nested_page %}
-        <li class="breadcrumb-item">
-          <a href="{{ nested_page_url }}">
-            {{ nested_page }}
-          </a>
-        </li>
+      <li class="breadcrumb-item">
+        <a href="{{ nested_page_url }}">{{ nested_page }}</a>
+      </li>
       {% endif %}
       {% if extra_page %}
-        <li class="breadcrumb-item">
-          <a href="{{ extra_page_url }}">
-            {{ extra_page }}
-          </a>
-        </li>
+      <li class="breadcrumb-item">
+        <a href="{{ extra_page_url }}">{{ extra_page }}</a>
+      </li>
       {% endif %}
       <li class="breadcrumb-item active" aria-current="page">
         {% if current_page == 'new' %}New{% else %}{{ current_page }}{% endif %}
@@ -87,9 +120,7 @@
     </ol>
   </nav>
   {% if back is False %}
-    <button class="btn-back" onclick="window.history.back();">
-      Back
-    </button>
+  <button class="btn-back" onclick="window.history.back();">Back</button>
   {% endif %}
 </div>
 </html>
