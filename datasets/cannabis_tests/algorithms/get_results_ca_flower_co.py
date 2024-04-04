@@ -536,6 +536,7 @@ if __name__ == '__main__':
     print('Final number of results:', len(all_results))
     all_results_datafile = os.path.join(DATA_DIR, f'ca-all-results-flower-company.xlsx')
     all_results.to_excel(all_results_datafile, index=False)
+    print(f'Saved {len(all_results)} results to: {all_results_datafile}')
 
 
     # TODO: Calculate statistics.
