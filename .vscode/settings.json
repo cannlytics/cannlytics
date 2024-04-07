@@ -935,7 +935,13 @@
     "Carree",
     "microbiome",
     "axhline",
-    "framealpha"
+    "framealpha",
+    "xytext",
+    "textcoords",
+    "benford",
+    "chisquare",
+    "interp",
+    "darkred"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
