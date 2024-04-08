@@ -4,11 +4,67 @@
  * 
  * Authors: Keegan Skeate <https://github.com/keeganskeate>
  * Created: 10/4/2020
- * Updated: 6/21/2022
+ * Updated: 4/8/2024
  * License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
  */
+
+/*--------------------------------------------------------------------------
+  Theme colors
+---------------------------------------------------------------------------*/
+
+// Cannlytics theme colors
+$green: #2E8B57;
+$orange: #ff7f00;
+$gray-100: #f8f9fa;
+$gray-600: #6c757d;
+$primary: $green;
+$secondary: $gray-600;
+$success: $green;
+$info: $green;
+$warning: $orange;
+$light: $gray-100;
+$white: #fff;
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "light": $light,
+  "white": $white,
+);
+
+// Button customization
+$btn-color: $white;
+$btn-hover-color: $white;
+$btn-active-color: $white;
+$btn-link-color: $primary;
+$btn-link-hover-color: darken($primary, 15%);
+// $btn-border-width: 0.125rem;
+$btn-hover-bg-shade-amount: 20%;
+$btn-hover-bg-tint-amount: 20%;
+
+// Import bootstrap.
 @import 'bootstrap/scss/bootstrap';
-// @import '@primer/css/box/index.scss';
+
+
+.btn-outline-primary:hover {
+  color: #fff;
+}
+.btn-primary {
+  color: #fff;
+}
+.btn-primary:hover {
+  color: #fff;
+}
+.btn.active {
+  color: #fff;
+}
+
+/*--------------------------------------------------------------------------
+  Fonts
+---------------------------------------------------------------------------*/
+
 @import url('https://fonts.googleapis.com/css?family=Source+Serif+Pro:100,200,300,400,500,600,700');
 @import url('https://fonts.googleapis.com/css?family=Libre+Franklin:100,200,300,400,500,600,700');
 @import url('https://fonts.googleapis.com/css?family=Libre+Baskerville:100,200,300,400,500,600,700');
@@ -1851,4 +1907,12 @@ body.dark .callout {
   justify-content: start;
   gap: 20px;
   margin-bottom: 20px;
+}
+
+/*--------------------------------------------------------------------------
+  Breadcrumbs
+---------------------------------------------------------------------------*/
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">";
 }

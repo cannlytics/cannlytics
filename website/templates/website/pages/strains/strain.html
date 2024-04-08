@@ -9,40 +9,16 @@
   Updated: 2/25/2024
   License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 -->
-{% extends "website/components/layout/dashboard.html" %}
-{% load static icon %}
-{% block title %}Strain | Cannlytics{% endblock %}
-{% block dashboard %}
-
-<!-- Breadcrumbs -->
-<section class="container mb-3">
-  <div class="d-flex mt-4">
-    <nav
-      style="--bs-breadcrumb-divider: '>';"
-      aria-label="breadcrumb"
-    >
-      <ol class="breadcrumb bg-transparent p-0 mb-0">
-        <li class="breadcrumb-item fs-6 lh-sm">
-          <a
-            class="text-dark serif action"
-            href="{% url 'page' page='strains' %}"
-          >
-            Strains
-          </a>
-        </li>
-        <li class="breadcrumb-item fs-6 lh-sm">
-          Strain
-        </li>
-      </ol>
-      <div>
-    </div>
-    </nav>
-  </div>
-</section>
-
-<!-- Strain -->
 <section class="container markdown">
-  <div class="row">
+
+  <!-- Breadcrumbs -->
+  {% include "website/components/layout/breadcrumbs.html" with
+    base_page="Strains"
+    base_page_url="/strains"
+    current_page=id
+  %}
+
+  {% comment %} <div class="row">
     <div class="col-md-6">
       <img id="strainImageUrl" class="img-fluid" alt="Strain Image">
     </div>
@@ -52,7 +28,9 @@
       <p>Total Favorites: <span id="strainTotalFavorites"></span></p>
       <!-- TODO: Add other strain fields -->
     </div>
-  </div>
+  </div> {% endcomment %}
+
+  <!-- FIXME: Form of strain data! -->
 
   <!-- TODO: Add sections for strain analytics, lab results, etc. -->
 
@@ -65,5 +43,4 @@
       * Nose
   -->
 </section>
-{% endblock %}
 </html>
