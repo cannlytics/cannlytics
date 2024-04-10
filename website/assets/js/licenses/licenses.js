@@ -53,7 +53,6 @@ export const licensesJS = {
     document.getElementById('premiseCity').textContent = data.premise_city || '';
     // Populate other location details
 
-    // TODO: Implement licensee history functionality
   },
   
   initializeLicensees() {

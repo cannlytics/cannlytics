@@ -17,7 +17,7 @@ import pandas as pd
 
 # Constants.
 _SCRIPT = 'cannabis_tests.py'
-_VERSION = '2023.09.23'
+_VERSION = '2024.04.09'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_tests'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
@@ -28,8 +28,8 @@ _CITATION = """\
   author    = {Skeate, Keegan and O'Sullivan-Sutherland, Candace},
   title     = {Cannabis Tests: Aggregated Cannabis Lab Test Results},
   booktitle = {Cannabis Data Science},
-  month     = {August},
-  year      = {2023},
+  month     = {April},
+  year      = {2024},
   address   = {United States of America},
   publisher = {Cannlytics}
 }

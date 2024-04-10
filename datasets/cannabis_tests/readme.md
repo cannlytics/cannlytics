@@ -90,7 +90,7 @@ print('Downloaded %i observations.' % len(details))
 Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect encounter in the parsed COA data.
 
 | Field | Example| Description |
-|-------|-----|-------------|
+|-------|--------|-------------|
 | `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
 | `{analysis}_method` | "HPLC" | The method used for each analysis. |
 | `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
@@ -134,7 +134,7 @@ Below is a non-exhaustive list of fields, used to standardize the various data t
 | `results_hash` | "{sha256-hash}" | An HMAC of the sample's `results` JSON signed with Cannlytics' public key, `"cannlytics.eth"`. |
 | `sample_id` | "{sha256-hash}" | A generated ID to uniquely identify the `producer`, `product_name`, and `results`. |
 | `sample_hash` | "{sha256-hash}" | An HMAC of the entire sample JSON signed with Cannlytics' public key, `"cannlytics.eth"`. |
- `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. |
+| `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. |
 
 Each result can contain the following fields.
 
