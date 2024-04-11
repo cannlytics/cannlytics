@@ -27,12 +27,16 @@ from pathlib import Path
 #-----------------------------------------------------------------------
 
 data_dirs = [
-    r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2019-0022",
-    r"D:\data\florida\lab_results\.datasets\pdfs\moderncanna",
-    r"D:\data\florida\lab_results\.datasets\pdfs\mtl",
-    r"D:\data\florida\lab_results\.datasets\pdfs\terplife",
-    r"D:\data\florida\lab_results\.datasets\pdfs\acs",
-    r"D:\data\florida\lab_results\.datasets\pdfs\green-scientific-labs",
+    # Labs without parsing algorithms:
+    # r"D:\data\florida\lab_results\.datasets\pdfs\moderncanna",
+    # r"D:\data\florida\lab_results\.datasets\pdfs\mtl",
+    # r"D:\data\florida\lab_results\.datasets\pdfs\green-scientific-labs",
+    # Labs with parsing algorithms:
+    # r"D:\data\florida\lab_results\.datasets\pdfs\terplife",
+    # r"D:\data\florida\lab_results\.datasets\pdfs\acs",
+    # r"D:\data\florida\lab_results\fl-medical-trees",
+    # r"D:\data\florida\lab_results\jungleboys\pdfs",
+    # Kaycha Labs:
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2015-0001",
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2015-0002",
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2015-0003",
@@ -54,12 +58,11 @@ data_dirs = [
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2019-0019",
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2019-0020",
     r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2019-0021",
-    r"D:\data\florida\lab_results\fl-medical-trees",
-    r"D:\data\florida\lab_results\jungleboys\pdfs",
+    r"D:\data\florida\lab_results\.datasets\pdfs\MMTC-2019-0022",
 ]
 
 
-# Find all of the parsed and failed PDFs.
+# DEV: Find all of the already parsed and failed PDFs.
 parsed_files, failed_files = [], []
 logs_files = [
     r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs.txt",
@@ -93,13 +96,18 @@ min_file_size = 12_000
 for data_dir in data_dirs:
     for root, _, files in os.walk(data_dir):
         for filename in files:
-            # Skip already parsed or failed files.
             if filename.endswith('.pdf'):
                 file_path = os.path.join(root, filename)
+
+                # DEV: Skip already parsed files.
                 # if file_path in parsed_files:
                 #     continue
+
+                # DEV: Skip failed files.
                 if file_path in failed_files:
                     continue
+
+                # DEV: Skip files that are too small.
                 file_size = os.path.getsize(file_path)
                 if file_size >= min_file_size:
                     pdfs.append(file_path)
@@ -129,19 +137,20 @@ for i, doc in enumerate(reversed(pdfs[5000:])):
         print(e)
 
     # Save a segment of the results.
-    if i % 250 == 0 and i > 0:
-        all_results = pd.DataFrame(all_data)
+    if i % 100 == 0 and i > 0:
+        all_results = pd.DataFrame(all_data[-100:])
         timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
         outfile = os.path.join(output_dir, f'fl-results-{timestamp}.xlsx')
+        all_results.replace(r'\\u0000', '', regex=True, inplace=True)
         all_results.to_excel(outfile, index=False)
         print(f'Saved {len(all_results)} parsed COAs: {outfile}')
 
 # Save all of the data.
 date = datetime.now().strftime('%Y-%m-%d')
 outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
-df = pd.DataFrame(all_data)
-df.replace(r'\\u0000', '', regex=True, inplace=True)
-parser.save(df, outfile)
+all_results = pd.DataFrame(all_data)
+all_results.replace(r'\\u0000', '', regex=True, inplace=True)
+parser.save(all_results, outfile)
 print('Saved COA data:', outfile)
 
 

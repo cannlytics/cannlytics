@@ -39,7 +39,7 @@ import pandas as pd
 
 
 # Read MCR Labs data.
-datafile = r"D:\data\massachusetts\lab_results\ma-lab-results-2024-01-24.xlsx"
+datafile = r"D:\data\massachusetts\lab_results\ma-lab-results-2024-04-08.xlsx"
 mcr_results = pd.read_excel(datafile)
 print('Number of MCR Labs results:', len(mcr_results))
 
