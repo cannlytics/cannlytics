@@ -12,6 +12,10 @@ import { formatDecimal } from '../utils.js';
 
 export const strainsJS = {
 
+  async searchStrainNames() {
+
+  },
+
   async initializeStrain() {
     /**
      * Initialize the strain page.

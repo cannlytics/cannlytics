@@ -534,9 +534,9 @@ if __name__ == '__main__':
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
         # 'CCRS PRR (1-2-24)',
-        # 'CCRS PRR (2-2-24)',
+        'CCRS PRR (2-2-24)',
         # 'CCRS PRR (3-27-24)',
-        'CCRS PRR (4-2-24)',
+        # 'CCRS PRR (4-2-24)',
     ]
     for release in reversed(releases):
 
@@ -544,6 +544,10 @@ if __name__ == '__main__':
         stats_dir = f'{base}/stats/'
         sales_dir = os.path.join(stats_dir, f'sales-{release}')
         sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
+
+        # FIXME: Anonymize:
+        # - sale_created_by
+        # - sale_item_created_by
 
         # Curate CCRS sales.
         # FIXME: The output data is not correct.

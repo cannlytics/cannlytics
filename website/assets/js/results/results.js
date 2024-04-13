@@ -11,6 +11,18 @@ import { getCollection, getDocument } from '../firebase.js';
 import { formatDate, formatDecimal } from '../utils.js';
 
 export const resultsJS = {
+
+  async searchProductNames() {
+
+  },
+
+  async searchCannabinoids() {
+
+  },
+
+  async searchTerpenes() {
+
+  },
   
   initializeResults() {
     /**
