@@ -226,6 +226,8 @@ if __name__ == '__main__':
     # TODO: Turn the following into a re-usable function.
     # TODO: Implement logging.
 
+    # TODO: Create directories if they don't exist.
+
     # Parameters.
     verbose = True
     headless = False
