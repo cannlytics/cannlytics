@@ -130,6 +130,9 @@ if __name__ == '__main__':
     data_dir = args.get('d', args.get('data_dir'))
     env_file = args.get('env_file')
 
+    # TODO: Implement logging.
+
+
     # Get results for each state.
     # aggregate = main(data_dir, env_file)
 

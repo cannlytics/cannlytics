@@ -1,12 +1,12 @@
 """
 Get California Cannabis Lab Results | Flower Company
-Copyright (c) 2023 Cannlytics
+Copyright (c) 2023-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/8/2023
-Updated: 1/28/2024
+Updated: 4/14/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -54,20 +54,13 @@ from time import sleep
 # External imports:
 from cannlytics.data import create_sample_id
 from cannlytics.data.coas.coas import CoADoc
+from cannlytics.data.web import initialize_selenium
 import pandas as pd
 import requests
 
 # Selenium imports.
-from selenium import webdriver
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import Select
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
 
 
 # Define the base URL.
@@ -99,24 +92,6 @@ indica_percentages = {
 }
 
 
-def initialize_driver(headless=False):
-    """Initialize Selenium, using Chrome first and Edge if Chrome fails."""
-    try:
-        service = Service()
-        options = Options()
-        if headless:
-            options.add_argument('--window-size=1920,1200')
-            options.add_argument('--headless')
-            options.add_argument('--disable-gpu')
-            options.add_argument('--no-sandbox')
-        return webdriver.Chrome(options=options, service=service)
-    except:
-        options = EdgeOptions()
-        if headless:
-            options.add_argument('--headless')
-        return webdriver.Edge(options=options)
-
-
 def click_yes_button(driver):
     """Click the "Yes" button."""
     try:
@@ -139,7 +114,11 @@ def click_show_more_button(driver):
             break
 
 
-def save_product_data(items, data_dir, namespace='lab-results'):
+def save_product_data(
+        items: list[dict],
+        data_dir: str,
+        namespace: str = 'results'
+    ):
     """Save the product data to a CSV file."""
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
@@ -151,12 +130,12 @@ def save_product_data(items, data_dir, namespace='lab-results'):
 
 
 def download_coa_pdfs(
-        items,
-        pdf_dir,
-        url_key='lab_results_url',
-        id_key='product_id',
-        verbose=True,
-        pause=10.0,
+        items: list[dict],
+        pdf_dir: str,
+        url_key: str = 'lab_results_url',
+        id_key: str = 'product_id',
+        verbose: bool = True,
+        pause: float = 10.0,
     ):
     """Download all of the COA PDFs."""
     for obs in items:
@@ -177,9 +156,9 @@ def download_coa_pdfs(
 def parse_coa_pdfs(
         parser,
         data,
-        pdf_dir,
-        id_key='product_id',
-        verbose=True,
+        pdf_dir: str,
+        id_key: str = 'product_id',
+        verbose: bool = True,
     ):
     """Parse corresponding COAs from a DataFrame in a PDF directory.
     The `id_key` is used to match the PDF filename to the DataFrame.
@@ -201,7 +180,7 @@ def parse_coa_pdfs(
     return pd.DataFrame(all_results)
 
 
-def extract_weight(amount_str):
+def extract_weight(amount_str: str):
     """Extracts the numerical weight in grams from the amount string."""
     if amount_str:
         parts = amount_str.split('(')
@@ -211,30 +190,20 @@ def extract_weight(amount_str):
     return None
 
 
-def price_to_float(price_str):
+def price_to_float(price_str: str):
     """Converts a price string to a float."""
     return float(price_str.replace('$', ''))
 
 
-# === Test ===
-if __name__ == '__main__':
-
-    # Define where the data lives.
-    PDF_DIR = 'D:/data/california/lab_results/pdfs/flower-company'
-    DATA_DIR = 'D:/data/california/lab_results/datasets/flower-company'
-
-    # TODO: Turn the following into a re-usable function.
-    # TODO: Implement logging.
-
-    # TODO: Create directories if they don't exist.
-
-    # Parameters.
-    verbose = True
-    headless = False
-    pause_between_page = 30.0
+def get_products_flower_co(
+        data_dir: str,
+        verbose: bool = True,
+        headless: bool = False,
+        pause_between_page: float = 30.0,
+    ):
 
     # Initialize the driver.
-    driver = initialize_driver(headless=False)
+    driver = initialize_selenium(headless=headless)
 
     # Get all of the brand pages.
     driver.get(base_url + 'menu')
@@ -335,7 +304,7 @@ if __name__ == '__main__':
             })
 
     # Open file of all saved product URLs.
-    products_datafile = os.path.join(DATA_DIR, f'ca-all-products-flower-company.csv')
+    products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
     if os.path.exists(products_datafile):
         existing_products = pd.read_csv(products_datafile)
         if verbose:
@@ -482,14 +451,36 @@ if __name__ == '__main__':
     # Close the browser.
     driver.close()
 
+    # Return the data.
+    return data
+
+
+def get_results_ca_flower_co(
+        pdf_dir,
+        data_dir,
+        verbose=True,
+        namespace = 'ca-products-flower-company',
+    ):
+    """Get California cannabis lab results from the Flower Company."""
+
+    # === Download COAs ===
+
+    # Create directories if they don't exist.
+    if not os.path.exists(pdf_dir):
+        os.makedirs(pdf_dir)
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+    # Find the product data.
+    data = get_products_flower_co(data_dir, verbose=verbose)
+
     # Save the product data.
-    datafile = save_product_data(data, DATA_DIR, namespace='ca-products-flower-company')
+    datafile = save_product_data(data, data_dir, namespace=namespace)
     if verbose:
         print(f'Saved {len(data)} products to: {datafile}')
 
     # Download all of the COAs.
-    download_coa_pdfs(data, pdf_dir=PDF_DIR, verbose=verbose)
-
+    download_coa_pdfs(data, pdf_dir=pdf_dir, verbose=verbose)
 
     # === Parse COAs ===
 
@@ -501,47 +492,66 @@ if __name__ == '__main__':
     results = parse_coa_pdfs(
         parser=parser,
         data=product_data,
-        pdf_dir=PDF_DIR,
+        pdf_dir=pdf_dir,
         verbose=verbose,
     )
 
     # Save the parsed COA data to a file.
+    namespace = 'ca-results-flower-company'
     timestamp = datetime.now().strftime('%Y-%m-%d')
-    results_datafile = os.path.join(DATA_DIR, f'ca-results-flower-company-{timestamp}.xlsx')
+    results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
     parser.save(results, results_datafile)
     print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
-
 
     # === Aggregate COAs ===
 
     # Aggregate product URLs that have been recorded.
     existing_products = []
-    url_files = [x for x in os.listdir(DATA_DIR) if 'products' in x and 'all' not in x]
+    url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
     for url_file in url_files:
-        product_df = pd.read_csv(os.path.join(DATA_DIR, url_file))
+        product_df = pd.read_csv(os.path.join(data_dir, url_file))
         existing_products.append(product_df)
     existing_products = pd.concat(existing_products)
     existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
     print('Final number of products:', len(existing_products))
-    products_datafile = os.path.join(DATA_DIR, f'ca-all-products-flower-company.csv')
+    products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
     existing_products.to_csv(products_datafile, index=False)
 
     # Aggregate COA data that has been saved.
     all_results = []
-    results_files = [x for x in os.listdir(DATA_DIR) if 'results' in x and 'all' not in x]
+    results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
     for results_file in results_files:
-        results_df = pd.read_excel(os.path.join(DATA_DIR, results_file))
+        results_df = pd.read_excel(os.path.join(data_dir, results_file))
         all_results.append(results_df)
     all_results = pd.concat(all_results)
     all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
     # all_results = all_results.loc[all_results['results'] != '[]']
     print('Final number of results:', len(all_results))
-    all_results_datafile = os.path.join(DATA_DIR, f'ca-all-results-flower-company.xlsx')
+    all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
     all_results.to_excel(all_results_datafile, index=False)
     print(f'Saved {len(all_results)} results to: {all_results_datafile}')
 
+    # FIXME: Upload data to Firestore.
 
-    # TODO: Calculate statistics.
+
+    # FIXME: Upload files to Google Cloud Storage.
 
 
-    # TODO: Upload results to Firestore.
+
+    # FIXME: Upload datafiles to Google Cloud Storage.
+
+
+    # Return the data.
+    return all_results
+
+
+# === Test ===
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
+
+    # Get results from the Flower Company.
+    all_results = get_results_ca_flower_co(
+        pdf_dir='D:/data/california/results/pdfs/flower-company',
+        data_dir='D:/data/california/results/datasets/flower-company',
+        verbose=True,
+    )

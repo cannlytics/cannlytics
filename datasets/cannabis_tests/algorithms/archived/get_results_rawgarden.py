@@ -319,7 +319,7 @@ if __name__ == '__main__':
 
     # Create directories if they don't already exist.
     # TODO: Edit `ENV_FILE` and `DATA_DIR` as needed for your desired setup.
-    ENV_FILE = '../../../../.env'
+    # ENV_FILE = '../../../../.env'
     DATA_DIR = 'D:/data/california/lab_results'
     COA_DATA_DIR = f'{DATA_DIR}/rawgarden'
     COA_PDF_DIR = f'{COA_DATA_DIR}/pdfs'
@@ -490,18 +490,22 @@ if __name__ == '__main__':
     # )
     # datafile_hash = create_hash(coa_df)
 
+    # Define where the data lives.
+    data_dir = 'D://data/california/results'
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
     # Save Raw Garden COA data as JSON.
     coa_data = pd.DataFrame(parsed)
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    data_dir = 'D://data/california/lab_results'
-    outfile = os.path.join(data_dir, f'rawgarden-coa-data-{timestamp}.json')
+    outfile = os.path.join(data_dir, f'fl-results-rawgarden-{timestamp}.json')
     coa_data.to_json(outfile, orient='records')
     print('Saved Raw Garden lab results:', outfile)
 
     # Save Raw Garden COA datafile.
     coa_data = pd.DataFrame(parsed)
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    outfile = os.path.join(data_dir, f'rawgarden-coa-data-{timestamp}.xlsx')
+    outfile = os.path.join(data_dir, f'fl-results-rawgarden-{timestamp}.xlsx')
     parser.save(coa_data[:1000], outfile)
     print('Saved Raw Garden lab results:', outfile)
 
@@ -526,6 +530,6 @@ if __name__ == '__main__':
     # Save Raw Garden lab results.
     date = datetime.now().strftime('%Y-%m-%d')
     data_dir = 'D://data/california/lab_results'
-    outfile = os.path.join(data_dir, f'rawgarden-lab-results-{date}.csv')
+    outfile = os.path.join(data_dir, f'fl-results-rawgarden-{date}.csv')
     aggregate.to_csv(outfile, index=False)
     print('Saved Raw Garden lab results:', outfile)

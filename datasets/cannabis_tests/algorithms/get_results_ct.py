@@ -226,7 +226,7 @@ def download_pdfs_ct(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-29 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Command line usage.
@@ -266,8 +266,11 @@ if __name__ == '__main__':
     # TODO: Integrate with `analyte_results_ct.py`.
 
 
-    # TODO: Calculate statistics.
+    # FIXME: Upload results to Firestore.
+
+    
+    # FIXME: Upload PDFs to Google Cloud Storage.
 
 
-    # TODO: Upload results to Firestore.
+    # FIXME: Upload datafiles to Google Cloud Storage.
     

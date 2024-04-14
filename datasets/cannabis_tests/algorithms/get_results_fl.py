@@ -1,12 +1,12 @@
 """
 Florida cannabis lab results
-Copyright (c) 2023 Cannlytics
+Copyright (c) 2023-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 2/15/2024
+Updated: 4/14/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -201,7 +201,7 @@ def download_coas_kaycha(
         columns = ['lab_id', 'batch_number', 'product_name']
 
     # Create an output directory.
-    datasets_dir = os.path.join(data_dir, '.datasets')
+    datasets_dir = os.path.join(data_dir, 'datasets')
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
 
@@ -385,14 +385,13 @@ def parse_results_kaycha(
 
 
 # === Test ===
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # Specify where your data lives.
-    DATA_DIR = 'D://data/florida/lab_results'
-    # DATA_DIR = r'C:\.datasets\data\florida\lab_results'
-
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(DATA_DIR)
+    kaycha_coas = get_results_kaycha(
+        data_dir='D://data/florida/results'
+    )
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
@@ -591,10 +590,11 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 
 
 # === Test ===
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    DATA_DIR = 'D://data/florida/lab_results'
+    DATA_DIR = 'D://data/florida/results'
     
     # [✓] TEST: Get The Flowery COAs.
     try:
@@ -722,6 +722,7 @@ class TerpLifeLabs:
 
 
 # === Test ===
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     import itertools
@@ -771,10 +772,10 @@ if __name__ == '__main__':
     queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
     # Download TerpLife Labs COAs by alphabetic combinations.
-    # specific_letters = [x for x in string.ascii_lowercase]
-    # queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
+    specific_letters = [x for x in string.ascii_lowercase]
+    queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
 
-    DATA_DIR = 'D://data/florida/lab_results'
+    DATA_DIR = 'D://data/florida/results'
     downloader = TerpLifeLabs(DATA_DIR)
     downloader.get_results_terplife(queries)
     downloader.quit()
@@ -809,7 +810,7 @@ class JungleBoys:
             pause=3.33,
             initial_pause=3.33,
         ):
-        """Get lab results published by TerpLife Labs on the public web."""
+        """Get lab results published by Jungle Boys on the public web."""
 
         # Get products from each store.
         all_products = []
@@ -1010,46 +1011,59 @@ class JungleBoys:
                 print('Cached:', pdf_path)
 
 
-# # # === Test ===
-# if __name__ == '__main__':
+def get_results_fl_jungle_boys(
+        data_dir: str,
+        download_dir: str,
+        dataset_dir: str,
+    ):
+    """Get lab results for the Jungle Boys in Florida."""
 
-#     # Specify where the data lives.
-#     DATA_DIR = r'D:\data\florida\lab_results'
-#     data_dir = r"D:\data\florida\lab_results\jungleboys\datasets"
-#     download_dir=r'D:\data\florida\lab_results\jungleboys\pdfs'
+    # Initialize a client to query Jungle Boys COAs.
+    downloader = JungleBoys(
+        data_dir=data_dir,
+        download_dir=download_dir,
+        headless=False,
+    )
 
-#     # Initialize a client to query Jungle Boys COAs.
-#     downloader = JungleBoys(
-#         DATA_DIR,
-#         download_dir=download_dir,
-#         headless=False,
-#     )
+    # Download the COAs.
+    downloader.get_results_jungle_boys()
 
-#     # Download the COAs.
-#     products = downloader.get_results_jungle_boys()
+    # Parse the Jungle Boys COAs.
+    parser = CoADoc()
+    all_pdfs = [x for x in os.listdir(download_dir) if x.endswith('.pdf')]
+    coa_data = []
+    print('Parsing %i COAs...' % len(all_pdfs))
+    for pdf in all_pdfs:
+        try:
+            doc = os.path.join(download_dir, pdf)
+            data = parser.parse(doc)
+            if isinstance(data, dict):
+                coa_data.append(data)
+            elif isinstance(data, list):
+                coa_data.extend(data)
+            print('Parsed:', doc)
+        except:
+            print('Error parsing:', doc)
 
-#     # Parse the Jungle Boys COAs.
-#     parser = CoADoc()
-#     all_pdfs = [x for x in os.listdir(download_dir) if x.endswith('.pdf')]
-#     coa_data = []
-#     print('Parsing %i COAs...' % len(all_pdfs))
-#     for i, pdf in enumerate(all_pdfs):
-#         try:
-#             doc = os.path.join(download_dir, pdf)
-#             data = parser.parse(doc)
-#             if isinstance(data, dict):
-#                 coa_data.append(data)
-#             elif isinstance(data, list):
-#                 coa_data.extend(data)
-#             print('Parsed:', doc)
-#         except:
-#             print('Error parsing:', doc)
+    # Save the Jungle Boys COA data.
+    namespace = 'fl-results-jungle-boys'
+    all_data = pd.DataFrame(coa_data)
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    outfile = os.path.join(dataset_dir,  f'{namespace}-{timestamp}.xlsx')
+    parser.save(coa_data, outfile)
+    return all_data
 
-#     # Save the Jungle Boys COA data.
-#     all_data = pd.DataFrame(coa_data)
-#     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-#     outfile = os.path.join(data_dir,  f'fl-lab-results-jungle-boys-{timestamp}.xlsx')
-#     parser.save(coa_data, outfile)
+
+# === Test ===
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
+
+    # Get Jungle Boys Florida results.
+    get_results_fl_jungle_boys(
+        data_dir='D://data/florida/results',
+        download_dir='D://data/florida/results/pdfs/jungleboys',
+        dataset_dir='D://data/florida/results/datasets/jungleboys',
+    )    
 
 
 #-----------------------------------------------------------------------
@@ -1063,9 +1077,12 @@ if __name__ == '__main__':
     # TODO: Aggregate results.
 
 
-    # TODO: Calculate statistics.
+    # FIXME: Upload data to Firestore.
 
 
-    # TODO: Upload results to Firestore.
+    # FIXME: Upload PDFs to Google Cloud Storage.
+
+
+    # FIXME: Upload datafiles to Google Cloud Storage.
 
 

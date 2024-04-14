@@ -90,7 +90,11 @@ STRAIN_TYPES = {
 #     obs['producer_license_number'] = licensee['license_number']
 
 
-def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
+def get_glass_house_farms_lab_results(
+        data_dir: str,
+        pdf_dir: str,
+        overwrite=False
+    ):
     """Get lab results published by Glass House Farms.
     Data points:
         ✓ image_url
@@ -107,7 +111,7 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 
     # Create output directory.
     license_number = GLASS_HOUSE_FARMS['producer_license_number']
-    license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
+    license_pdf_dir = os.path.join(pdf_dir, license_number)
     if not os.path.exists(license_pdf_dir):
         os.makedirs(license_pdf_dir)
 
@@ -161,7 +165,7 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 
     # Save the strain data.
     date = datetime.now().strftime('%Y-%m-%d')
-    outfile = os.path.join(data_dir, f'ca-strains-{date}.xlsx')
+    outfile = os.path.join(data_dir, f'ca-strains-glass-house-{date}.xlsx')
     strain_data.to_excel(outfile, index=False)
 
     # Get the lab results for each strain.
@@ -212,10 +216,10 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
             pdf.write(response.content)
         print('Downloaded: %s' % outfile)
 
-    # Save all lab results.
+    # Save all lab result URLs.
     results = pd.DataFrame(lab_results)
     date = datetime.now().strftime('%Y-%m-%d')
-    outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
+    outfile = os.path.join(data_dir, f'ca-result-urls-glass-house-{date}.xlsx')
     results.to_excel(outfile, index=False)
 
     # Initialize CoADoc.
@@ -255,66 +259,52 @@ def get_glass_house_farms_lab_results(data_dir: str, overwrite=False):
 
 
 # === Test ===
-# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Specify where your data lives.
-    # FIXME: Change where the data lives.
-    data_dir = r'D:\data\california\lab_results\datasets\glass-house'
-    pdf_dir = r'D:\data\california\lab_results\pdfs\glass-house'
-    data_dir = 'D://data/california/lab_results'
+    data_dir = 'D://data/california/results/datasets'
+    pdf_dir = 'D://data/california/results/pdfs'
 
     # Get CA lab results.
-    ca_results = get_glass_house_farms_lab_results(data_dir)
-
-    # TODO: Calculate statistics.
-
-
-    # TODO: Upload results to Firestore.
-
+    all_results = get_glass_house_farms_lab_results(data_dir, pdf_dir)
 
 
 # === DEV ===
 
 # Parse all COAs in directory.
-# parser = CoADoc()
-# license_number = GLASS_HOUSE_FARMS['producer_license_number']
-# license_pdf_dir = os.path.join(data_dir, f'.datasets/{license_number}/pdfs')
-# # pdf_files = os.listdir(license_pdf_dir)
-# # pdf_files.reverse()
+parser = CoADoc()
+license_number = GLASS_HOUSE_FARMS['producer_license_number']
+license_pdf_dir = os.path.join(pdf_dir, license_number)
 
-# outfile = os.path.join(data_dir, f'ca-lab-results-2023-09-21.xlsx')
-# results = pd.read_excel(outfile)
+# Parse the data from all COAs.
+coa_data = []
+for _, result in all_results.iterrows():
+    lab_result_id = result['lab_result_id']
+    pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+    if not os.path.exists(pdf_file):
+        print('File not found:', pdf_file)
+        continue
+    try:
+        parsed = parser.parse(pdf_file)
+        coa_data.append({**result.to_dict(), **parsed[0]})
+        print('Parsed:', pdf_file)
+    except:
+        print('Error parsing:', pdf_file)
+        continue
 
-# # Parse the data from all COAs.
-# coa_data = []
-# for _, result in results.iterrows():
-#     lab_result_id = result['lab_result_id']
-#     pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
-#     if not os.path.exists(pdf_file):
-#         print('File not found:', pdf_file)
-#         continue
-#     try:
-#         parsed = parser.parse(pdf_file)
-#         coa_data.append({**result.to_dict(), **parsed[0]})
-#         print('Parsed:', pdf_file)
-#     except:
-#         print('Error parsing:', pdf_file)
-#         continue
-
-# # Save the lab results.
-# date = datetime.now().strftime('%Y-%m-%d')
-# outfile = os.path.join(data_dir, f'ca-lab-results-{date}.xlsx')
-# try:
-#     parser.save(coa_data, outfile)
-# except:
-#     try:
-#         coa_df = pd.DataFrame(coa_data)
-#         coa_df.to_excel(outfile, index=False)
-#     except:
-#         print('Error saving:', outfile)
-
-# print('Saved %i results:' % len(coa_data), outfile)
+# Save the lab results.
+date = datetime.now().strftime('%Y-%m-%d')
+outfile = os.path.join(data_dir, f'ca-results-glass-house-{date}.xlsx')
+try:
+    parser.save(coa_data, outfile)
+except:
+    try:
+        coa_df = pd.DataFrame(coa_data)
+        coa_df.to_excel(outfile, index=False)
+    except:
+        print('Error saving:', outfile)
+print('Saved %i results:' % len(coa_data), outfile)
 
 
 # # === Aggregate lab results ===
@@ -337,3 +327,12 @@ if __name__ == '__main__':
 # aggregate = pd.concat(aggregate)
 # aggregate.to_csv(f'../data/ca/ca-lab-results-latest.csv', index=False)
 # print('Saved %i CA lab results' % len(aggregate))
+
+
+    # FIXME: Upload results to Firestore.
+
+    
+    # FIXME: Upload PDFs to Google Cloud Storage.
+
+
+    # FIXME: Upload datafiles to Google Cloud Storage.

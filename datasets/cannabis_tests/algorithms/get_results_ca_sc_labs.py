@@ -110,14 +110,14 @@ prefixes = [
     'W', 'V', 'X', 'Y',
     'H', 'Z',
     # Unknown if used
-    'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
+    # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 start_day = 1
-days = 10
-start_year = 2024
+days = 30
+start_year = 2019
 end_year = 2024
-start_month = 4
-end_month = 4
+start_month = 1
+end_month = 12
 pause = 3.33
 
 # Get all valid URLS, iterating over prefixes, years, and months.
@@ -136,10 +136,14 @@ for y in reversed(range(start_year, end_year + 1)):
             )
             docs.extend(results)
 
+# Define the directory.
+DATA_DIR = 'D:/data/california/results/datasets/sclabs'
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
 # Save the list of URLS.
-DATA_DIR = 'D:/data/california/lab_results/datasets/sclabs'
 timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
-outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-urls-{timestamp}.xlsx')
+outfile = os.path.join(DATA_DIR, f'ca-results-sclabs-urls-{timestamp}.xlsx')
 pd.DataFrame(docs, columns=['url']).to_excel(outfile, index=False)
 print(f'Saved URLS: {outfile}')
 
@@ -211,9 +215,9 @@ for doc in docs:
         print(e)
 
 # Save the results.
-DATA_DIR = 'D:/data/california/lab_results/datasets/sclabs'
+DATA_DIR = 'D:/data/california/results/datasets/sclabs'
 timestamp = pd.Timestamp.now().strftime('%Y-%m-%d-%H-%M-%S')
-outfile = os.path.join(DATA_DIR, f'ca-lab-results-sclabs-{timestamp}.xlsx')
+outfile = os.path.join(DATA_DIR, f'ca-results-sclabs-{timestamp}.xlsx')
 pd.DataFrame(all_data).to_excel(outfile, index=False)
 print(f'Saved {len(all_data)} results: {outfile}')
 
@@ -221,8 +225,11 @@ print(f'Saved {len(all_data)} results: {outfile}')
 # TODO: Aggregate the results.
 
 
-# TODO: Calculate statistics.
+# FIXME: Upload data to Firestore.
 
 
-# TODO: Upload results to Firestore.
+# FIXME: Upload PDFs to Google Cloud Storage.
+
+
+# FIXME: Upload datafiles to Google Cloud Storage.
 
