@@ -169,6 +169,9 @@ def get_results_ct(url: str = CT_RESULTS_URL) -> pd.DataFrame:
     # TODO: Format COA URLs.
     # coa_urls
 
+    # Create the directory if it doesn't exist.
+    if not os.path.exists(data_dir): os.makedirs(data_dir)
+
     # Save the results to Excel.
     date = datetime.now().isoformat()[:10]
     datafile = f'{data_dir}/ct-lab-results-{date}.xlsx'
@@ -240,9 +243,9 @@ if __name__ == '__main__':
         args = {}
 
     # Specify where your data lives.
-    DATA_DIR = 'D:/data/connecticut/lab_results'
-    PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
-    stats_dir = '../data/ct'
+    DATA_DIR = 'D://data/connecticut/results'
+    PDF_DIR = 'D://data/connecticut/results/pdfs'
+    stats_dir = 'D://data/connecticut/results/datasets'
 
     # Set the destination for the PDFs.
     data_dir = args.get('data_dir', DATA_DIR)
@@ -259,6 +262,7 @@ if __name__ == '__main__':
 
     # Save the results to Excel.
     date = datetime.now().isoformat()[:10]
+    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
     results.to_excel(f'{stats_dir}/ct-lab-results-{date}.xlsx', index=False)
     results.to_csv(f'{stats_dir}/ct-lab-results-latest.csv', index=False)
     print('Connecticut lab results archived:', stats_dir)
