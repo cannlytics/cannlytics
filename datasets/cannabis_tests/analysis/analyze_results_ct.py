@@ -1106,16 +1106,16 @@ def extract_url(s):
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
-        
+
     # === Read the data ===
 
     # Specify where your data lives.
-    DATA_DIR = 'D:/data/connecticut/lab_results'
-    PDF_DIR = 'D:/data/connecticut/lab_results/pdfs'
-    stats_dir = '../data/ct'
+    DATA_DIR = 'D://data/connecticut/results'
+    PDF_DIR = 'D://data/connecticut/results/pdfs'
+    stats_dir = 'D://data/connecticut/results/datasets'
 
     # Read in downloaded CT results.
-    datafile = '../data/ct/ct-lab-results-latest.csv'
+    datafile = f'{stats_dir}/ct-lab-results-latest.csv'
     ct_results = pd.read_csv(datafile)
 
     # Clean URLs.
