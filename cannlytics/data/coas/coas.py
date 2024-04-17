@@ -47,6 +47,7 @@ from PIL import Image
 from pypdf import PdfMerger
 try:
     from pyzbar import pyzbar
+    from pyzbar.pyzbar import ZBarSymbol
 except:
     print('Unable to import `zbar` library. This tool is used for decoding QR codes.')
 try:
@@ -667,6 +668,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            use_qr_code: Optional[bool] = True,
             verbose: Optional[bool] = False,
         ) -> list:
         """Parse all CoAs given a directory, a list of files,
@@ -742,6 +744,7 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    use_qr_code=use_qr_code,
                     verbose=verbose,
                 )
                 coas.append(coa_data)
@@ -787,6 +790,7 @@ class CoADoc:
                         resolution=resolution,
                         temp_path=temp_path,
                         use_cached=use_cached,
+                        use_qr_code=use_qr_code,
                         verbose=verbose,
                     )
                     coas.append(coa_data)
@@ -819,6 +823,7 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    use_qr_code=use_qr_code,
                     verbose=verbose,
                 )
 
@@ -847,6 +852,7 @@ class CoADoc:
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
             verbose: Optional[bool] = False,
+            use_qr_code: Optional[bool] = True,
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
@@ -927,21 +933,22 @@ class CoADoc:
 
         # Attempt to use an URL from any QR code on the PDF.
         url = None
-        try:
-            qr_code_index = self.lims[known_lims].get('qr_code_index')
-            url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
-            if url is None and qr_code_index is not None:
+        if use_qr_code:
+            try:
+                qr_code_index = self.lims[known_lims].get('qr_code_index')
+                url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
+                if url is None and qr_code_index is not None:
+                    url = self.find_pdf_qr_code_url(pdf_file)
+            except IndexError:
                 url = self.find_pdf_qr_code_url(pdf_file)
-        except IndexError:
-            url = self.find_pdf_qr_code_url(pdf_file)
-        # Experimental: Try to find QR codes on the second page.
-        try:
-            if not url and deep_search:
-                url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
-        except:
-            pass
-        if verbose:
-            print(f'Found URL on PDF: {url}')
+            # Experimental: Try to find QR codes on the second page.
+            try:
+                if not url and deep_search:
+                    url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
+            except:
+                pass
+            if verbose:
+                print(f'Found URL on PDF: {url}')
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
@@ -950,7 +957,7 @@ class CoADoc:
             print(f'Using algorithm: {algorithm_name}')
 
         # Use the URL if found, then try the PDF if the URL fails or is missing.
-        if url:
+        if url and use_qr_code:
             try:
                 if verbose:
                     print(f'Parsing URL: {url}')
@@ -1746,7 +1753,9 @@ class CoADoc:
             self,
             filename: Any,
             width: Optional[int] = 1024,
-            temp_path: Optional[str] = '/tmp'
+            temp_path: Optional[str] = '/tmp',
+            median_blur: Optional[int] = 25,
+            qr_size: Optional[int] = 512,
         ) -> str:
         """Scan an image for a QR code or barcode and return any data.
         Args:
@@ -1818,12 +1827,21 @@ class CoADoc:
             img.save(outfile)
 
         # Read the resized image again (important) and try to decode QR codes.
-        code = None
         image = Image.open(outfile)
         codes = pyzbar.decode(image)
         if codes:
-            code = codes[0].data.decode('utf-8')
-        return code
+            return codes[0].data.decode('utf-8')
+        
+        # Try to read a cleaner QR code.
+        image = cv2.imread(outfile, cv2.IMREAD_GRAYSCALE)
+        clean_im = cv2.medianBlur(image, median_blur)  # Apply median blur for reducing noise
+        small_clean_im = cv2.resize(clean_im, (qr_size, qr_size), interpolation=cv2.INTER_AREA)  # Downscale the image
+        codes = pyzbar.decode(small_clean_im, symbols=[ZBarSymbol.QRCODE])
+        if codes:
+            return codes[0].data.decode('utf-8')
+
+        # Return None if nothing can be found.
+        return None
 
     def get_result_value(
             self,

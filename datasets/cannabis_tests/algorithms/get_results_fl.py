@@ -185,6 +185,48 @@ FLORIDA_LICENSES = {
 }
 
 
+
+def download_pdf_with_selenium(
+        url,
+        driver=None,
+        persist=False,
+        pause=3.33,
+        wait=10,
+        el_id='download',
+        method='iframe',
+        tag_name='iframe',
+        filename=None,
+        download_dir=None,
+    ):
+    if driver is None:
+        driver = initialize_selenium(
+            headless=False,
+            download_dir=download_dir,
+        )
+    driver.get(url)
+    el = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.TAG_NAME, tag_name))
+    )
+    if method == 'iframe':
+        driver.switch_to.frame(el)
+        download_button = WebDriverWait(driver, wait).until(
+            EC.presence_of_element_located((By.ID, el_id))
+        )
+        download_button.click()
+    else:
+        pdf_url = el.get_attribute('href')
+        response = requests.get(pdf_url)
+        if response.status_code == 200:
+            if filename is None:
+                filename = os.path.basename(pdf_url)
+            filepath = os.path.join(download_dir, filename)
+            with open(filepath, 'wb') as file:
+                file.write(response.content)
+    sleep(pause)
+    if not persist:
+        driver.quit()
+
+
 def download_coas_kaycha(
         data_dir: str,
         slug: str,
@@ -271,20 +313,28 @@ def download_coas_kaycha(
         os.makedirs(license_pdf_dir)
 
     # Download the PDFs.
+    # FIXME:
     for _, row in df.iterrows():
         sleep(0.3)
-        sample_id = row['lab_id']
-        outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
-        if os.path.exists(outfile) and not overwrite:
-            continue
-        # FIXME: Handle URLs without a base URL.
+        # sample_id = row['lab_id']
+        # outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+        # if os.path.exists(outfile) and not overwrite:
+        #     continue
         download_url = row['download_url']
         if not download_url.startswith('http'):
             download_url = base + download_url
-        response = requests.get(download_url, headers=DEFAULT_HEADERS)
-        with open(outfile, 'wb') as pdf:
-            pdf.write(response.content)
-        print('Downloaded: %s' % outfile)
+        # response = requests.get(download_url, headers=DEFAULT_HEADERS)
+        # with open(outfile, 'wb') as pdf:
+        #     pdf.write(response.content)
+        # print('Downloaded: %s' % outfile)
+        response = requests.get(url, allow_redirects=True)
+        if response.status_code == 200:
+            redirected_url = response.url
+            download_pdf_with_selenium(
+                redirected_url,
+                download_dir=license_pdf_dir,
+            )
+        print('Downloaded:', download_url)
 
     # Return the COA URLs.
     return df

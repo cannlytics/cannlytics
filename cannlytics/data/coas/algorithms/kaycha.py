@@ -398,11 +398,15 @@ def parse_kaycha_coa(
                         'status': values[-2],
                         'limit': convert_to_numeric(values[2]),
                     })
+                    if 'Analyzed by' in line:
+                        break
                 continue
 
             # Split the page in half.
-            left = page.within_bbox((0, 0, page.width * 0.49, page.height)).extract_text()
-            right = page.within_bbox((page.width * 0.49, 0, page.width, page.height)).extract_text()
+            # FIXME: This is spliting the text wrong.
+            midpoint = 0.48
+            left = page.within_bbox((0, 0, page.width * midpoint, page.height)).extract_text()
+            right = page.within_bbox((page.width * midpoint, 0, page.width, page.height)).extract_text()
 
             # Get the relevant portions.
             left = re.split(r'Page \d+ of \d+', left)[-1].split('This Kaycha Labs Certification shall not be reproduced')[0]
@@ -480,6 +484,8 @@ def parse_kaycha_coa(
             name = line[:first_value].strip()
             key = parser.analytes.get(snake_case(name), snake_case(name))
             values = line[first_value:].strip().split(' ')
+            if len(values) < 3:
+                continue
             results.append({
                 'analysis': 'pesticides',
                 'key': key,
@@ -591,6 +597,9 @@ if __name__ == '__main__':
     coa_parameters = KAYCHA_LABS_COA
     data = parse_kaycha_coa(parser, doc)
     assert data is not None
+
+    # FIXME:
+    doc = r'D:\\data\\reddit\\FLMedicalTrees\\pdfs\\DA40119012-003 (Original).pdf'
 
 
     # [ ] TEST: Parse a cannabinoid and terpene only COA PDF.
