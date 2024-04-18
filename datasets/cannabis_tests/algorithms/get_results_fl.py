@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 5/18/2023
-Updated: 4/14/2024
+Updated: 4/16/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -36,6 +36,7 @@ Resources:
 """
 # Standard imports:
 from datetime import datetime
+import hashlib
 import json
 import os
 import random
@@ -197,10 +198,11 @@ def download_pdf_with_selenium(
         tag_name='iframe',
         filename=None,
         download_dir=None,
+        headless=True,
     ):
     if driver is None:
         driver = initialize_selenium(
-            headless=False,
+            headless=headless,
             download_dir=download_dir,
         )
     driver.get(url)
@@ -225,6 +227,39 @@ def download_pdf_with_selenium(
     sleep(pause)
     if not persist:
         driver.quit()
+    
+
+def hash_file(filepath, size=65536):
+    """Generate a SHA-1 hash for a file."""
+    hasher = hashlib.sha1()
+    with open(filepath, 'rb') as f:
+        buf = f.read(size)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(65536)
+    return hasher.hexdigest()
+
+
+def remove_duplicate_files(directory):
+    """Remove duplicate PDFs from a directory."""
+    hashes = {}
+    files_removed = 0
+    total_files = 0
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            total_files += 1
+            filepath = os.path.join(directory, filename)
+            file_hash = hash_file(filepath)
+            
+            # Check if hash already exists in the dictionary
+            if file_hash in hashes:
+                os.remove(filepath)
+                files_removed += 1
+                print(f"Removed duplicate file: {filepath}")
+            else:
+                hashes[file_hash] = filepath
+    print(f"Total files scanned: {total_files}, duplicates removed: {files_removed}")
+
 
 
 def download_coas_kaycha(
@@ -313,28 +348,31 @@ def download_coas_kaycha(
         os.makedirs(license_pdf_dir)
 
     # Download the PDFs.
-    # FIXME:
+    print('License directory:', license_pdf_dir)
     for _, row in df.iterrows():
         sleep(0.3)
-        # sample_id = row['lab_id']
-        # outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
-        # if os.path.exists(outfile) and not overwrite:
-        #     continue
         download_url = row['download_url']
         if not download_url.startswith('http'):
             download_url = base + download_url
-        # response = requests.get(download_url, headers=DEFAULT_HEADERS)
-        # with open(outfile, 'wb') as pdf:
-        #     pdf.write(response.content)
-        # print('Downloaded: %s' % outfile)
-        response = requests.get(url, allow_redirects=True)
-        if response.status_code == 200:
-            redirected_url = response.url
-            download_pdf_with_selenium(
-                redirected_url,
-                download_dir=license_pdf_dir,
-            )
-        print('Downloaded:', download_url)
+        sample_id = download_url.split('/')[-1]
+        try:
+            coa_url = f'{base}/coa/download?sample={sample_id}'
+            response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+            if response.status_code == 200:
+                outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+                with open(outfile, 'wb') as pdf:
+                    pdf.write(response.content)
+                print('Downloaded:', coa_url)
+        except:
+            coa_url = f'{base}/coa/coa-view?sample={sample_id}'
+            response = requests.get(coa_url, allow_redirects=True)
+            if response.status_code == 200:
+                redirected_url = response.url
+                download_pdf_with_selenium(
+                    redirected_url,
+                    download_dir=license_pdf_dir,
+                )
+                print('Downloaded:', coa_url)
 
     # Return the COA URLs.
     return df
@@ -350,7 +388,7 @@ def get_results_kaycha(data_dir: str, licenses=None, **kwargs):
 
     # Iterate over each producer.
     coa_urls = []
-    for license_number, licensee in licenses.items():
+    for producer_license_number, licensee in licenses.items():
         # expected_total = licensee['total']
         # if expected_total == 0:
         #     continue
@@ -359,9 +397,15 @@ def get_results_kaycha(data_dir: str, licenses=None, **kwargs):
             data_dir,
             slug=licensee['slug'],
             dba=licensee['business_dba_name'],
-            producer_license_number=license_number,
+            producer_license_number=producer_license_number,
         )
         coa_urls.append(urls)
+
+        # Remove duplicate COAs.
+        datasets_dir = os.path.join(data_dir, 'datasets')
+        pdf_dir = os.path.join(datasets_dir, 'pdfs')
+        license_pdf_dir = os.path.join(pdf_dir, producer_license_number)
+        remove_duplicate_files(license_pdf_dir)
 
     # Save and return all of the COA URLs.
     date = datetime.now().isoformat()[:19].replace(':', '-')
@@ -442,6 +486,8 @@ if __name__ == '__main__':
     kaycha_coas = get_results_kaycha(
         data_dir='D://data/florida/results'
     )
+
+    # Optional: Remove duplicate COAs.
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
