@@ -941,7 +941,8 @@
     "benford",
     "chisquare",
     "interp",
-    "darkred"
+    "darkred",
+    "upvotes"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

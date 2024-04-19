@@ -355,14 +355,19 @@ def download_coas_kaycha(
         if not download_url.startswith('http'):
             download_url = base + download_url
         sample_id = download_url.split('/')[-1]
+        outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
+        if os.path.exists(outfile) and not overwrite:
+            print('Cached:', download_url)
+            continue
         try:
             coa_url = f'{base}/coa/download?sample={sample_id}'
             response = requests.get(coa_url, headers=DEFAULT_HEADERS)
             if response.status_code == 200:
-                outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
                 with open(outfile, 'wb') as pdf:
                     pdf.write(response.content)
                 print('Downloaded:', coa_url)
+                # FIXME: Check if the file size is small,
+                # then retry with Selenium if so.
         except:
             coa_url = f'{base}/coa/coa-view?sample={sample_id}'
             response = requests.get(coa_url, allow_redirects=True)
