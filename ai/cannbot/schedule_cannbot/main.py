@@ -100,7 +100,7 @@ def cannbot(event, context=None):
     """
     # Set the parameters.
     # TODO: Make these parameters configurable.
-    model = 'gpt-4-1106-preview'
+    model = 'gpt-4-turbo'
     temperature = 0.24
     user = 'cannlytics'
     max_tokens = 4_096

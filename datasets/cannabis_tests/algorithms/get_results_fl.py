@@ -485,12 +485,12 @@ def parse_results_kaycha(
 
 # === Test ===
 # [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(
-        data_dir='D://data/florida/results'
-    )
+    # kaycha_coas = get_results_kaycha(
+    #     data_dir='D://data/florida/results'
+    # )
 
     # Optional: Remove duplicate COAs.
 
@@ -725,7 +725,8 @@ class TerpLifeLabs:
         if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
         if not os.path.exists(self.license_pdf_dir): os.makedirs(self.license_pdf_dir)
         self.driver = initialize_selenium(
-            download_dir=r'D:\data\florida\lab_results\.datasets\pdfs\terplife',
+            # FIXME: Pass download dir.
+            download_dir=r'D:\data\florida\results\.datasets\pdfs\terplife',
         )
 
     def get_results_terplife(

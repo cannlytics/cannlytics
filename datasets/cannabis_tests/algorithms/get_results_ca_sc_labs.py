@@ -118,7 +118,7 @@ start_year = 2023
 end_year = 2023
 start_month = 1
 end_month = 12
-pause = 3.33
+pause = 10
 
 # Get all valid URLS, iterating over prefixes, years, and months.
 docs = []
