@@ -114,11 +114,11 @@ prefixes = [
     ]
 start_day = 1
 days = 30
-start_year = 2023
-end_year = 2023
+start_year = 2019
+end_year = 2019
 start_month = 1
 end_month = 12
-pause = 10
+pause = 3.33
 
 # Get all valid URLS, iterating over prefixes, years, and months.
 docs = []

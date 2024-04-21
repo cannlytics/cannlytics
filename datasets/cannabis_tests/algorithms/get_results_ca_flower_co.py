@@ -203,7 +203,7 @@ def get_products_flower_co(
     ):
 
     # Initialize the driver.
-    driver = initialize_selenium(headless=headless)
+    driver = initialize_selenium(headless=headless, browser='edge')
 
     # Get all of the brand pages.
     driver.get(base_url + 'menu')

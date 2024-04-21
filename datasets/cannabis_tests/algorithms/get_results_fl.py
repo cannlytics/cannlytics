@@ -692,20 +692,20 @@ def get_product_results_the_flowery(data_dir: str, overwrite = False, **kwargs):
 
 # === Test ===
 # [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    # Specify where your data lives.
-    DATA_DIR = 'D://data/florida/results'
+#     # Specify where your data lives.
+#     DATA_DIR = 'D://data/florida/results'
     
-    # [✓] TEST: Get The Flowery COAs.
-    try:
-        the_flowery_products = get_product_results_the_flowery(DATA_DIR)
-    except Exception as e:
-        print('ERROR:', e)
-    try:
-        the_flowery_coas = get_results_the_flowery(DATA_DIR)
-    except Exception as e:
-        print('ERROR:', e)
+#     # [✓] TEST: Get The Flowery COAs.
+#     try:
+#         the_flowery_products = get_product_results_the_flowery(DATA_DIR)
+#     except Exception as e:
+#         print('ERROR:', e)
+#     try:
+#         the_flowery_coas = get_results_the_flowery(DATA_DIR)
+#     except Exception as e:
+#         print('ERROR:', e)
 
 
 #-----------------------------------------------------------------------
@@ -718,7 +718,7 @@ class TerpLifeLabs:
     def __init__(self, data_dir):
         """Initialize the driver and directories."""
         self.data_dir = data_dir
-        self.datasets_dir = os.path.join(data_dir, '.datasets')
+        self.datasets_dir = os.path.join(data_dir, 'datasets')
         self.pdf_dir = os.path.join(self.datasets_dir, 'pdfs')
         self.license_pdf_dir = os.path.join(self.pdf_dir, 'terplife')
         if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
@@ -726,7 +726,8 @@ class TerpLifeLabs:
         if not os.path.exists(self.license_pdf_dir): os.makedirs(self.license_pdf_dir)
         self.driver = initialize_selenium(
             # FIXME: Pass download dir.
-            download_dir=r'D:\data\florida\results\.datasets\pdfs\terplife',
+            download_dir=self.license_pdf_dir,
+            browser='edge',
         )
 
     def get_results_terplife(
