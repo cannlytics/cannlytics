@@ -13,10 +13,15 @@ Description: This module contains general Cannlytics utility functions.
 # Standard imports.
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
+import hashlib
 import json
 import os
 from re import split, sub, findall
 import secrets
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from time import sleep
 from typing import Any, Callable, List, Optional, Tuple
 from zipfile import ZipFile
 try:
@@ -32,13 +37,11 @@ from pandas.tseries.offsets import MonthEnd
 import requests
 
 # Internal imports.
-try:
-    from cannlytics.utils.constants import (
-        RANDOM_STRING_CHARS,
-        state_time_zones,
-    )
-except ImportError:
-    print('Failed to load constants.')
+from cannlytics.utils.constants import (
+    RANDOM_STRING_CHARS,
+    state_time_zones,
+)
+from cannlytics.data.web import initialize_selenium
 
 
 #-----------------------------------------------------------------------
@@ -827,6 +830,76 @@ def download_file_from_url(url, destination='', ext='', file_name = None):
             if chunk:
                 f.write(chunk)
     return file_path
+
+
+def download_file_with_selenium(
+        url,
+        driver=None,
+        persist=False,
+        pause=3.33,
+        wait=10,
+        el_id='download',
+        method='iframe',
+        tag_name='iframe',
+        filename=None,
+        download_dir=None,
+        headless=True,
+    ):
+    if driver is None:
+        driver = initialize_selenium(
+            headless=headless,
+            download_dir=download_dir,
+        )
+    driver.get(url)
+    presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
+    el = WebDriverWait(driver, 10).until(presence)
+    if method == 'iframe':
+        driver.switch_to.frame(el)
+        presence = EC.presence_of_element_located((By.ID, el_id))
+        download_button = WebDriverWait(driver, wait).until(presence)
+        download_button.click()
+    else:
+        pdf_url = el.get_attribute('href')
+        response = requests.get(pdf_url)
+        if response.status_code == 200:
+            if filename is None:
+                filename = os.path.basename(pdf_url)
+            filepath = os.path.join(download_dir, filename)
+            with open(filepath, 'wb') as file:
+                file.write(response.content)
+    sleep(pause)
+    if not persist:
+        driver.quit()
+
+
+def hash_file(filepath, size=65536):
+    """Generate a SHA-1 hash for a file."""
+    hasher = hashlib.sha1()
+    with open(filepath, 'rb') as f:
+        buf = f.read(size)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(size)
+    return hasher.hexdigest()
+
+
+def remove_duplicate_files(
+        directory: str,
+        size=65536,
+        verbose: Optional[bool] = False,
+    ):
+    """Remove duplicate PDFs from a directory."""
+    hashes = {}
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            filepath = os.path.join(directory, filename)
+            file_hash = hash_file(filepath, size=size)
+            if file_hash in hashes:
+                os.remove(filepath)
+                if verbose:
+                    print(f"Removed duplicate file: {filepath}")
+            else:
+                hashes[file_hash] = filepath
 
 
 def unzip_files(zip_dir, extension='.zip'):

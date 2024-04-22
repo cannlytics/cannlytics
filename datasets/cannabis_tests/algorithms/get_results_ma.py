@@ -1,12 +1,12 @@
 """
-Get MA Lab Result Data
+Get Results Massachusetts | MCR Labs
 Copyright (c) 2022-2023 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/13/2022
-Updated: 8/17/2023
+Updated: 4/21/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -31,22 +31,28 @@ from cannlytics.firebase import initialize_firebase, update_documents
 from cannlytics.utils.utils import to_excel_with_style
 
 
-def upload_results(data: pd.DataFrame):
+def upload_results(
+        data: pd.DataFrame,
+        collection: str = 'public/data/results',
+        key: str = 'sample_hash',
+        verbose: bool = False,
+    ):
     """Upload test results to Firestore."""
     refs, updates = [], []
     for _, obs in data.iterrows():
-        sample_id = obs['sample_id']
-        refs.append(f'public/data/lab_results/{sample_id}')
+        doc_id = obs[key]
+        refs.append(f'{collection}/{doc_id}')
         updates.append(obs.to_dict())
     database = initialize_firebase()
     update_documents(refs, updates, database=database)
-    print('Uploaded %i lab results to Firestore!' % len(refs))
+    if verbose:
+        print('Uploaded %i lab results to Firestore.' % len(refs))
 
 
 def get_results_mcrlabs(
         data_dir: str = '.',
         starting_page: int = 1,
-        pause: int = 3,
+        pause: float = 3.33,
         upload: bool = False,
     ):
     """Get all of the MCR Labs test results."""
@@ -63,14 +69,14 @@ def get_results_mcrlabs(
     date = datetime.now().isoformat()[:10]
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-    datafile = f'{data_dir}/ma-lab-results-{date}.xlsx'
+    datafile = f'{data_dir}/ma-results-{date}.xlsx'
     try:
         to_excel_with_style(data, datafile)
     except:
         data.to_excel(datafile)
 
     # Save the results to CSV.
-    datafile = f'{data_dir}/ma-lab-results-latest.csv'
+    datafile = f'{data_dir}/ma-results-latest.csv'
     data.to_csv(datafile, index=False)
 
     # Optionally upload the data to Firestore.
@@ -85,9 +91,9 @@ def get_results_mcrlabs(
 # [✓] Tested: 2024-03-21 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # Specify where your data lives.
-    # DATA_DIR = '../data/ma'
-    DATA_DIR = 'D://data/massachusetts/lab_results'
-
     # Get all of the MCR Labs test results.
-    ma_results = get_results_mcrlabs(DATA_DIR)
+    ma_results = get_results_mcrlabs(
+        data_dir='D://data/massachusetts/results',
+        starting_page=1,
+        pause=3.33,
+    )

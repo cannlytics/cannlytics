@@ -6,7 +6,7 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
 Updated: 8/13/2023
 """
-from .cannlytics import Cannlytics
+# from .cannlytics import Cannlytics
 import cannlytics.auth as auth
 import cannlytics.data as data
 import cannlytics.firebase as firebase
@@ -17,7 +17,7 @@ import cannlytics.utils as utils
 
 
 __all__ = [
-    Cannlytics,
+    # Cannlytics,
     auth,
     data,
     firebase,

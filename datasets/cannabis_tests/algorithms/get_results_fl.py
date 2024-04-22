@@ -826,62 +826,62 @@ class TerpLifeLabs:
 
 # === Test ===
 # [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    import itertools
+#     import itertools
 
-    # # Drill down on:
-    # long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
-    #                 'io', 'ie', 'fm', 'bu', 'bf', 'at', 'aq', 'ao']
-    # long_digits = ['81', '61', '51', '41', '40', '30', '20']
+#     # # Drill down on:
+#     # long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
+#     #                 'io', 'ie', 'fm', 'bu', 'bf', 'at', 'aq', 'ao']
+#     # long_digits = ['81', '61', '51', '41', '40', '30', '20']
 
-    # # Function to add digits 0-9 to each string in a list
-    # def add_digits(strings):
-    #     return [s + str(digit) for s in strings for digit in range(10)]
+#     # # Function to add digits 0-9 to each string in a list
+#     # def add_digits(strings):
+#     #     return [s + str(digit) for s in strings for digit in range(10)]
 
-    # # Function to add letters a-z to each string in a list
-    # def add_letters(strings):
-    #     return [s + letter for s in strings for letter in string.ascii_lowercase]
+#     # # Function to add letters a-z to each string in a list
+#     # def add_letters(strings):
+#     #     return [s + letter for s in strings for letter in string.ascii_lowercase]
 
-    # # Create new lists with the combinations
-    # combined_letters = add_letters(long_letters)
-    # combined_digits = add_digits(long_digits)
+#     # # Create new lists with the combinations
+#     # combined_letters = add_letters(long_letters)
+#     # combined_digits = add_digits(long_digits)
 
-    # # Printing the result
-    # print("Combinations with letters:")
-    # print(combined_letters)
-    # print("\nCombinations with digits:")
-    # print(combined_digits)
+#     # # Printing the result
+#     # print("Combinations with letters:")
+#     # print(combined_letters)
+#     # print("\nCombinations with digits:")
+#     # print(combined_digits)
 
-    def get_day_month_combinations():
-        """Get all day-month combinations."""
-        day_month_combinations = []
-        for month in range(1, 13):
-            if month in [4, 6, 9, 11]:
-                days_in_month = 30
-            elif month == 2:
-                days_in_month = 29
-            else:
-                days_in_month = 31
-            for day in range(1, days_in_month + 1):
-                formatted_month = f'{month:02d}'
-                formatted_day = f'{day:02d}'
-                combination = formatted_month + formatted_day
-                day_month_combinations.append(combination)
-        return day_month_combinations
+#     def get_day_month_combinations():
+#         """Get all day-month combinations."""
+#         day_month_combinations = []
+#         for month in range(1, 13):
+#             if month in [4, 6, 9, 11]:
+#                 days_in_month = 30
+#             elif month == 2:
+#                 days_in_month = 29
+#             else:
+#                 days_in_month = 31
+#             for day in range(1, days_in_month + 1):
+#                 formatted_month = f'{month:02d}'
+#                 formatted_day = f'{day:02d}'
+#                 combination = formatted_month + formatted_day
+#                 day_month_combinations.append(combination)
+#         return day_month_combinations
 
-    # Download TerpLife Labs COAs by digit combinations.
-    day_month_combinations = get_day_month_combinations()
-    queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+#     # Download TerpLife Labs COAs by digit combinations.
+#     day_month_combinations = get_day_month_combinations()
+#     queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
-    # Download TerpLife Labs COAs by alphabetic combinations.
-    specific_letters = [x for x in string.ascii_lowercase]
-    queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
+#     # Download TerpLife Labs COAs by alphabetic combinations.
+#     specific_letters = [x for x in string.ascii_lowercase]
+#     queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
 
-    DATA_DIR = 'D://data/florida/results'
-    downloader = TerpLifeLabs(DATA_DIR)
-    downloader.get_results_terplife(queries)
-    downloader.quit()
+#     DATA_DIR = 'D://data/florida/results'
+#     downloader = TerpLifeLabs(DATA_DIR)
+#     downloader.get_results_terplife(queries)
+#     downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 
@@ -1166,7 +1166,7 @@ if __name__ == '__main__':
         data_dir='D://data/florida/results',
         download_dir='D://data/florida/results/pdfs/jungleboys',
         dataset_dir='D://data/florida/results/datasets/jungleboys',
-    )    
+    )
 
 
 #-----------------------------------------------------------------------

@@ -29,15 +29,24 @@ import os
 import sys
 
 # External imports.
-from cannlytics import Cannlytics
+from cannlytics.cannlytics import Cannlytics
 import pandas as pd
 
 
 # Specify state-specific algorithms.
 ALGORITHMS = {
-    'ca': 'get_results_ca',
+    'ca': [
+        'get_results_ca_flower_co',
+        'get_results_ca_glass_house',
+        'get_results_ca_sc_labs',
+    ],
     'ct': 'get_results_ct',
-    'fl': 'get_results_fl',
+    'fl': [
+        'get_results_fl_flowery',
+        'get_results_fl_jungleboys',
+        'get_results_fl_kaycha',
+        'get_results_fl_terplife',
+    ],
     # 'md': 'get_results_md',
     'ma': 'get_results_ma',
     'mi': 'get_results_mi',
@@ -48,35 +57,13 @@ ALGORITHMS = {
 
 def main(data_dir, env_file):
     """Collect all cannabis tests."""
-
-    # Initialize.
-    all_data = pd.DataFrame()
     manager = Cannlytics()
-
-    # Add the state_modules directory to sys.path for dynamic imports
     sys.path.append(os.getcwd())
-
-    # Collect licenses for each state.
     for state, algorithm in ALGORITHMS.items():
-
-        # Import the module and get the entry point.
         module = importlib.import_module(algorithm)
         entry_point = getattr(module, algorithm)
-
-        # Collect results for the state.
         manager.create_log(f'Getting results data for {state.upper()}.')
-        data = entry_point(data_dir, env_file=env_file)
-        all_data = pd.concat([all_data, data])
-
-    # Save all of the licenses.
-    date = datetime.now().strftime('%Y-%m-%d')
-    all_data_dir = os.path.join(data_dir, 'all')
-    if not os.path.exists(all_data_dir):
-        os.makedirs(all_data_dir)
-    all_data.to_csv(os.path.join(all_data_dir, f'all-lab-results-{date}.csv'), index=False)
-    all_data.to_csv(os.path.join(all_data_dir, f'all-lab-results-latest.csv'), index=False)
-    manager.create_log(f'Finished collecting lab result data.')
-    return all_data
+        entry_point(data_dir, env_file=env_file)
 
 
 def save_all_lab_results(data_dir, version='latest'):
@@ -130,11 +117,8 @@ if __name__ == '__main__':
     data_dir = args.get('d', args.get('data_dir'))
     env_file = args.get('env_file')
 
-    # TODO: Implement logging.
-
-
     # Get results for each state.
-    # aggregate = main(data_dir, env_file)
+    main(data_dir, env_file)
 
     # Save all results.
     data_dir = '../data'
