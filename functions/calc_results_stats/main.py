@@ -30,6 +30,22 @@ try:
 except ValueError:
     pass
 
+
+# # FIXME: Re-write with the new framework.
+# import base64
+# from cloudevents.http import CloudEvent
+# import functions_framework
+
+
+# @functions_framework.cloud_event
+# def subscribe(cloud_event: CloudEvent) -> None:
+#     print(
+#         "Hello, " + base64.b64decode(cloud_event.data["message"]["data"]).decode()
+#     )
+
+
+
+
 def calc_results_stats(event, context) -> None:
     """Calculate statistics for all lab results and save them to a
     Firestore collection when a user's lab results changes."""

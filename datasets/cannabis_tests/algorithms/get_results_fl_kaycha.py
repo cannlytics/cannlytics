@@ -89,22 +89,22 @@ FLORIDA_LICENSES = {
     #     'business_dba_name': 'Insa - Cannabis for Real Life',
     #     'slug': 'Insa',
     # },
-    'MMTC-2019-0015': {
-        'business_dba_name': 'Jungle Boys',
-        'slug': 'Jungle+Boys',
-    },
-    'MMTC-2017-0010': {
-        'business_dba_name': 'MüV',
-        'slug': 'Altmed+Florida',
-    },
-    'MMTC-2016-0006': {
-        'business_dba_name': 'Planet 13 Florida, Inc.',
-        'slug': '',
-    },
-    'MMTC-2019-0022': {
-        'business_dba_name': 'Revolution Florida',
-        'slug': 'Revolution',
-    },
+    # 'MMTC-2019-0015': {
+    #     'business_dba_name': 'Jungle Boys',
+    #     'slug': 'Jungle+Boys',
+    # },
+    # 'MMTC-2017-0010': {
+    #     'business_dba_name': 'MüV',
+    #     'slug': 'Altmed+Florida',
+    # },
+    # 'MMTC-2016-0006': {
+    #     'business_dba_name': 'Planet 13 Florida, Inc.',
+    #     'slug': '',
+    # },
+    # 'MMTC-2019-0022': {
+    #     'business_dba_name': 'Revolution Florida',
+    #     'slug': 'Revolution',
+    # },
     'MMTC-2019-0017': {
         'business_dba_name': 'Sanctuary Cannabis',
         'slug': 'Sanctuary',
@@ -113,10 +113,10 @@ FLORIDA_LICENSES = {
         'business_dba_name': 'Sunburn',
         'slug': '',
     },
-    # 'MMTC-2017-0008': {
-    #     'business_dba_name': 'Sunnyside*',
-    #     'slug': 'Sunnyside',
-    # },
+    'MMTC-2017-0008': {
+        'business_dba_name': 'Sunnyside*',
+        'slug': 'Sunnyside',
+    },
     # 'MMTC-2015-0004': {
     #     'business_dba_name': 'Surterra Wellness',
     #     'slug': 'Surterra+Wellness',
