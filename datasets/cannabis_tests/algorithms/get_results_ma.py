@@ -97,3 +97,4 @@ if __name__ == '__main__':
         starting_page=1,
         pause=3.33,
     )
+    print('Finished collecting %i lab results from MCR Labs' % len(ma_results))

@@ -187,8 +187,9 @@ if __name__ == '__main__':
     long_digits = ['81', '61', '51', '41', '40', '30', '20']
 
     # Create new lists with the combinations
-    queries += add_letters(long_letters)
-    queries += add_digits(long_digits)
+    # queries += add_letters(long_letters)
+    # queries += add_digits(long_digits)
+    queries.reverse()
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.

@@ -942,7 +942,8 @@
     "chisquare",
     "interp",
     "darkred",
-    "upvotes"
+    "upvotes",
+    "codebook"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
