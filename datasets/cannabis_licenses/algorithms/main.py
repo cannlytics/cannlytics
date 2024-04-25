@@ -43,7 +43,7 @@ import os
 import sys
 
 # External imports.
-from cannlytics import Cannlytics
+from cannlytics.cannlytics import Cannlytics
 import pandas as pd
 
 

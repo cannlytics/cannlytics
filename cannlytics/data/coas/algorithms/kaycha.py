@@ -130,6 +130,8 @@ KAYCHA_LABS = {
     'lab_longitude': -80.210750,
     # FIXME: Make license number dynamic as Kaycha Labs operate in multiple states.
     'lab_license_number': 'CMTL-0002',
+    # FIXME: See if COA's can be identified with URL.
+    # E.g. yourcoa.com
 }
 KAYCHA_LABS_COA = {
     'fields': {

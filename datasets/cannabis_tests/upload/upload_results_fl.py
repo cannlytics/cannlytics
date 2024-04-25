@@ -28,6 +28,15 @@ def upload_results(
     if verbose:
         print('Uploaded %i lab results to Firestore.' % len(refs))
 
+# TODO: Read the latest results.
+
 
 # TODO: Upload COA PDFs (if they don't already exist?)
+
+
+
+# TODO: Hash the file.
+
+
+# TODO: Use local cache to avoid re-uploading duplicate files.
 
