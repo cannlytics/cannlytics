@@ -518,7 +518,7 @@ def get_results_ca_flower_co(
     # existing_products.to_csv(products_datafile, index=False)
 
     # # Aggregate COA data that has been saved.
-    # all_results = []
+    all_results = []
     # results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
     # for results_file in results_files:
     #     results_df = pd.read_excel(os.path.join(data_dir, results_file))
