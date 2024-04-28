@@ -22,7 +22,20 @@
 
   <!-- TODO: Sign-in / subscribe prompt for new users -->
 
+    <!-- Live analytics -->
+  {% include "website/pages/homepage/components/live_analytics.html" %}
+
+  <!-- Newest Strains -->
+  {% include "website/pages/homepage/components/newest_strains.html" %}
+
+  <!-- Newest Results -->
+  {% include "website/pages/homepage/components/newest_results.html" %}
+
+  <!-- Newest Licenses -->
+  {% include "website/pages/homepage/components/newest_licenses.html" %}
+
   <!-- TODO: News -->
+  {% comment %} <h2>News</h2> {% endcomment %}
 
   <!-- TODO: User statistics -->
 
@@ -82,20 +95,6 @@
     <!-- TODO: Datasets: Results, Strains, Licenses -->
 
 
-    {% comment %} <!-- Live analytics -->
-    {% include "website/pages/homepage/components/live_analytics.html" %}
-
-    <!-- Newest Strains -->
-    {% include "website/pages/homepage/components/newest_strains.html" %}
-
-    <!-- Newest Results -->
-    {% include "website/pages/homepage/components/newest_results.html" %}
-
-    <!-- Newest Licenses -->
-    {% include "website/pages/homepage/components/newest_licenses.html" %}
-     {% endcomment %}
-
-
     <!-- TODO: Articles -->
 
     <!-- TODO: Service Promos -->
@@ -105,13 +104,6 @@
     <!-- Video Banner -->
     {% comment %} <div class="ground">
     {% include "website/components/banners/video_banner.html" %}
-    </div> {% endcomment %}
-
-    {% comment %} <!-- Wave -->
-    <div class="wave small upside-down" >
-      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
-        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
-      </svg>
     </div> {% endcomment %}
 
     {% comment %}
@@ -131,12 +123,6 @@
       {% include "website/pages/homepage/components/metrc_state_list.html" with verifications=verifications only %}
     </div> {% endcomment %}
 
-    <!-- Wave -->
-    {% comment %} <div class="wave small upside-down" >
-      <svg viewBox="0 0 500 150" preserveAspectRatio="none">
-        <path d="M3.58,140.29 C215.76,-58.05 343.30,228.11 573.55,-70.89 L500.00,150.00 L-34.23,201.48 Z"></path>
-      </svg>
-    </div> {% endcomment %}
 
     <!-- List of contributors -->
     {% comment %} {% include "website/pages/homepage/components/contributors_promo.html" %} {% endcomment %}

@@ -6,159 +6,11 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/5/2021
-  Updated: 3/26/2024
+  Updated: 4/27/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static %}
-{% block page_css %}
-
-  <!-- Dashboard style -->
-  <style>
-    .scrolling-wrapper {
-      white-space: nowrap;
-    }
-    .card {
-      display: inline-block;
-      margin-right: 15px;
-    }
-    body {
-      min-height: 100vh;
-    }
-    .main-content {
-      transition: margin-left 0.3s;
-      margin-left: 225px;
-      min-height: 100vh;
-    }
-    @media (max-width: 992px) {
-      .main-content {
-        margin-left: 0;
-      }
-    }
-    .main-content.expanded-margin {
-      margin-left: 225px;
-    }
-    .grid-view .card {
-      width: calc(33.333% - 20px);
-      margin: 10px;
-    }
-    .list-view .card {
-      margin: 10px 0;
-    }
-    #sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 225px;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-    }
-    #sidebar {
-      overflow-y: auto;
-    }
-    @media (max-width: 992px) {
-      #sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-      body {
-        padding-left: 0;
-      }
-    }
-    #sidebar.collapsed {
-      width: 80px;
-    }
-    #sidebar.collapsed .link-text,
-    #sidebar.collapsed h2 {
-      display: none;
-    }
-    #sidebar.collapsed .btn {
-      width: 48px;
-      height: 48px;
-    }
-    #sidebar.collapsed .sidebar-icon-collapsed {
-      display: block !important;
-    }
-    #sidebar .sidebar-icon-collapsed {
-      display: none;
-    }
-    #toggleSidebar {
-      background-color: transparent;
-      color: #333;
-      border-color: transparent;
-      /*position: absolute;
-      right: 0;
-      top: 10px;
-      transform: translateX(100%);*/
-      border-radius: 2rem;
-      text-align: right;
-    }
-    #toggleSidebar:hover {
-      border-color: #ccc;
-    }
-    #toggleSidebar .bi {
-      font-weight: bold;
-      font-size: 1.25rem;
-    }
-    .sidebar .nav {
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .nav .nav-link {
-      border-radius: 2rem;
-    }
-    #sidebar.collapsed {
-      align-items: center;
-    }
-    body:not(.dark) #sidebar,
-    body:not(.dark) #mobile-navigation,
-    body:not(.dark) #main-banner,
-    body:not(.dark) .main-content {
-      background-color: #fbfbfc;
-    }
-    .input-group .form-control {
-      border-left: 0;
-      border-right: 0;
-    }
-    .input-group .btn-outline-secondary {
-      border-color: #ced4da; /* Adjust based on your theme */
-    }
-    .input-group-text, .form-control, .btn-outline-secondary {
-      border-color: #ced4da; /* Uniform border color */
-    }
-    .input-group > .btn-outline-secondary:not(:last-child), .input-group > .input-group-text:not(:last-child) {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-    .input-group > .btn-outline-secondary:not(:first-child), .input-group > .input-group-text:not(:first-child) {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    #addButton.active i, #filterButton.active i {
-      color: #00ff00; /* Bright green */
-    }
-    .nav-item .nav-link:hover {
-      color: rgb(33, 37, 41) !important;
-      background-color: hsl(225 10% 70%/0.3) !important;
-    }
-    body.dark .nav-link:hover {
-      color: rgb(201, 209, 217) !important;
-      background-color: hsl(225deg 9% 50%/0.3) !important;
-    }
-    .nav-item.active .nav-link {
-      color: #004B09 !important;
-      background-color: rgba(80, 250, 123, 0.2) !important;
-    }
-    body.dark .nav-item.active .nav-link {
-      color: #fff !important;
-      background-color: rgba(255, 166, 0, 0.2) !important;
-    }
-  </style>
-
-{% endblock page_css %}
 {% block material %}
 
 <!-- Mobile Navigation -->
@@ -251,8 +103,8 @@
           class="nav-link fs-6"
           href="{% url 'page' page='licenses' %}"
         >
-          <i class="bi bi-people me-1"></i>
-          <span class="link-text serif">Companies</span>
+          <i class="bi bi-people" data-bs-toggle="tooltip" data-bs-title="Companies"></i>
+          <span class="link-text serif ms-1">Companies</span>
         </a>
       </li>
       <li class="nav-item {% if '/results' in request.path %}active{% endif %}">
@@ -260,8 +112,8 @@
           class="nav-link fs-6"
           href="{% url 'page' page='results' %}"
         >
-          <i class="bi bi-file-earmark-text me-1"></i>
-          <span class="link-text serif">Lab Results</span>
+          <i class="bi bi-file-earmark-text" data-bs-toggle="tooltip" data-bs-title="Lab Results"></i>
+          <span class="link-text serif ms-1">Lab Results</span>
         </a>
       </li>
       <li class="nav-item {% if '/strains' in request.path %}active{% endif %}">
@@ -269,8 +121,8 @@
           class="nav-link fs-6"
           href="{% url 'page' page='strains' %}"
         >
-          <i class="bi bi-flower3 me-1"></i>
-          <span class="link-text serif">Strains</span>
+          <i class="bi bi-flower3" data-bs-toggle="tooltip" data-bs-title="Strains"></i>
+          <span class="link-text serif ms-1">Strains</span>
         </a>
       </li>
     </ul>
@@ -309,6 +161,9 @@
 
   // Initialize the dashboard.
   cannlytics.website.initializeDashboard();
+
+  // Initialize tooltips.
+  cannlytics.ui.enableTooltips();
 
 </script>
 

@@ -869,6 +869,7 @@ def download_file_with_selenium(
                 file.write(response.content)
     sleep(pause)
     if not persist:
+        driver.close()
         driver.quit()
 
 

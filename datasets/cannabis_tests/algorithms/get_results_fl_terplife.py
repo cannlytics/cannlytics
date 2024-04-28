@@ -138,6 +138,7 @@ class TerpLifeLabs:
 
     def quit(self):
         """Close the driver."""
+        self.driver.close()
         self.driver.quit()
 
 

@@ -6,11 +6,12 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 2/10/2024
+  Updated: 4/27/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% load static %}
 <head>
+  <!-- Metadata -->
   <meta charset="utf-8">
   <meta name="theme-color" content="#281e52"/>
   <meta name="description" content="Superpower your lab with open-source cannabis analytics made with love.">
@@ -32,7 +33,6 @@
   <title>{% block title %}Cannlytics{% endblock title %}</title>
 
   <!-- jQuery -->
-  <!-- Optional: Ween off of jQuery -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 
   <!-- Cannlytics JavaScript and CSS Module -->
@@ -56,7 +56,7 @@
 </head>
 
 <!-- Body -->
-<body class="base" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body class="base dashboard" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
   <!-- Page -->
   <div id="page">{% block page %}{% endblock page %}</div>

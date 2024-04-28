@@ -6,27 +6,29 @@ export const liveResults = {
     /**
      * Initialize live results.
      */
-    // Mock data to simulate "aapl" data
-    var aapl = [
-      { Date: new Date("2023-01-01"), Close: 150 },
-      { Date: new Date("2023-01-02"), Close: 152 },
-      { Date: new Date("2023-01-03"), Close: 155 },
-      { Date: new Date("2023-01-04"), Close: 157 },
-      { Date: new Date("2023-01-05"), Close: 156 },
-      // Add more data points as needed
+
+    // FIXME: Get the data from Firestore:
+    // stats/trends/{analyte}/{date}
+    var data = [
+      { date: new Date("2023-01-01"), value: 20 },
+      { date: new Date("2023-01-02"), value: 21 },
+      { date: new Date("2023-01-03"), value: 20 },
+      { date: new Date("2023-01-04"), value: 22 },
+      { date: new Date("2023-01-05"), value: 24 },
     ];
     console.log('DATA:');
-    console.log(aapl);
+    console.log(data);
 
-    // Chart code
+    // Render the chart.
     const chart = (() => {
+    
+      // Figure
       const width = 928;
       const height = 500;
       const marginTop = 20;
       const marginRight = 30;
       const marginBottom = 30;
       const marginLeft = 40;
-    
       const svg = d3.create("svg")
           .attr("viewBox", [0, 0, width, height])
           .attr("width", width)
@@ -35,34 +37,40 @@ export const liveResults = {
           .style("-webkit-tap-highlight-color", "transparent")
           .style("overflow", "visible");
     
+      // X values
       const x = d3.scaleUtc()
-          .domain(d3.extent(aapl, d => d.Date))
+          .domain(d3.extent(data, d => d.date))
           .range([marginLeft, width - marginRight]);
     
+      // Y values
       const y = d3.scaleLinear()
-          .domain([0, d3.max(aapl, d => d.Close)])
+          .domain([0, d3.max(data, d => d.value)])
           .range([height - marginBottom, marginTop]);
     
-      const line = d3.line()
-          .x(d => x(d.Date))
-          .y(d => y(d.Close));
-    
+      // Line
+      const line = d3.line().x(d => x(d.date)).y(d => y(d.value));
       svg.append("path")
-          .datum(aapl)
+          .datum(data)
           .attr("fill", "none")
-          .attr("stroke", "steelblue")
-          .attr("stroke-width", 1.5)
+          .attr("stroke", "#00c805")
+          .attr("stroke-width", 5)
           .attr("d", line);
     
-      svg.append("g")
+      // X-axis
+      const xAxis = svg.append("g")
           .attr("transform", `translate(0,${height - marginBottom})`)
           .call(d3.axisBottom(x));
+      xAxis.selectAll("text")
+          .attr("font-size", "16px"); // Set x-axis label size
     
-      svg.append("g")
+      // Y-axis
+      const yAxis = svg.append("g")
           .attr("transform", `translate(${marginLeft},0)`)
           .call(d3.axisLeft(y));
+      yAxis.selectAll("text")
+          .attr("font-size", "16px"); // Set y-axis label size
     
-      // Append the svg object to the div called 'chart'
+      // Return the chart.
       document.getElementById('chart').appendChild(svg.node());
     })();
   },
