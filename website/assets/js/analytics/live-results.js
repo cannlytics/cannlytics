@@ -7,6 +7,13 @@ export const liveResults = {
      * Initialize live results.
      */
 
+    // FIXME: Get parameters.
+    const periodName = '1M';
+
+    // FIXME: Connect to a specific series.
+    const seriesName = 'Total THC';
+    const seriesKey = 'total_thc';
+
     // FIXME: Get the data from Firestore:
     // stats/trends/{analyte}/{date}
     var data = [
@@ -15,7 +22,33 @@ export const liveResults = {
       { date: new Date("2023-01-03"), value: 20 },
       { date: new Date("2023-01-04"), value: 22 },
       { date: new Date("2023-01-05"), value: 24 },
-    ];
+      { date: new Date("2023-01-06"), value: 24 },
+      { date: new Date("2023-01-07"), value: 20 },
+      { date: new Date("2023-01-08"), value: 21 },
+      { date: new Date("2023-01-09"), value: 20 },
+      { date: new Date("2023-01-10"), value: 22 },
+      { date: new Date("2023-01-11"), value: 24 },
+      { date: new Date("2023-01-12"), value: 24 },
+      { date: new Date("2023-01-13"), value: 20 },
+      { date: new Date("2023-01-14"), value: 25 },
+      { date: new Date("2023-01-15"), value: 19 },
+      { date: new Date("2023-01-16"), value: 25 },
+      { date: new Date("2023-01-17"), value: 23 },
+      { date: new Date("2023-01-18"), value: 21 },
+      { date: new Date("2023-01-19"), value: 22 },
+      { date: new Date("2023-01-20"), value: 18 },
+      { date: new Date("2023-01-21"), value: 20 },
+      { date: new Date("2023-01-22"), value: 19 },
+      { date: new Date("2023-01-23"), value: 24 },
+      { date: new Date("2023-01-24"), value: 18 },
+      { date: new Date("2023-01-25"), value: 18 },
+      { date: new Date("2023-01-26"), value: 19 },
+      { date: new Date("2023-01-27"), value: 21 },
+      { date: new Date("2023-01-28"), value: 21 },
+      { date: new Date("2023-01-29"), value: 26 },
+      { date: new Date("2023-01-30"), value: 18 },
+      { date: new Date("2023-01-31"), value: 26 }
+  ];
     console.log('DATA:');
     console.log(data);
 
@@ -29,7 +62,7 @@ export const liveResults = {
       const marginRight = 30;
       const marginBottom = 30;
       const marginLeft = 40;
-      const svg = d3.create("svg")
+      let svg = d3.create("svg")
           .attr("viewBox", [0, 0, width, height])
           .attr("width", width)
           .attr("height", height)
@@ -69,10 +102,84 @@ export const liveResults = {
           .call(d3.axisLeft(y));
       yAxis.selectAll("text")
           .attr("font-size", "16px"); // Set y-axis label size
-    
+
+      // Create the vertical dotted line
+      svg = this.addChartFunctionality(data, x, y, svg, height, marginTop, marginBottom);
+
       // Return the chart.
       document.getElementById('chart').appendChild(svg.node());
     })();
+  },
+
+  addChartFunctionality(data, x, y, svg, height, marginTop, marginBottom) {
+    /**
+     * Add chart functionality.
+     */
+    // Add overlay for mouse interaction
+    const hoverGroup = svg.append("g")
+      .attr("class", "hover-group")
+      .style("display", "none");
+
+    // Add interaction to the line on mouse hover.
+    const hoverLine = hoverGroup.append("line")
+      .attr("class", "hover-line")
+      .attr("stroke", "gray")
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "4,4")
+      .attr("y1", marginTop)
+      .attr("y2", height - marginBottom);
+
+    // Create the bullet point
+    const hoverDot = hoverGroup.append("circle")
+      .attr("class", "hover-dot")
+      .attr("r", 4)
+      .attr("fill", "#00c805");
+
+    // Create the div to display the value
+    const valueDiv = d3.select("body").append("div")
+      .attr("class", "value-div")
+      .style("position", "absolute")
+      .style("background-color", "white")
+      .style("border", "1px solid black")
+      .style("padding", "5px")
+      .style("display", "none");
+
+    // Function to update the hover elements
+    function updateHoverElements(event) {
+      const x0 = x.invert(d3.pointer(event)[0]);
+      try {
+        const bisectDate = d3.bisector(d => d.date).left;
+        const i = bisectDate(data, x0, 1);
+        const d0 = data[i - 1];
+        const d1 = data[i];
+        const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+        hoverLine.attr("transform", `translate(${x(d.date)},0)`);
+        hoverDot.attr("transform", `translate(${x(d.date)},${y(d.value)})`);
+        // TODO: Spruce up tooltip:
+        // - Date: E.g. Apr 20, 2024
+        // - Pass series name
+        // - Number of tests?
+        valueDiv.html(`Value: ${d.value}`)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 28}px`);
+      } catch (error) {
+        return;
+      }
+    }
+
+    // Add event listeners to show/hide hover elements
+    svg.on("mouseover", () => {
+      hoverGroup.style("display", null);
+      valueDiv.style("display", null);
+    })
+      .on("mouseout", () => {
+        hoverGroup.style("display", "none");
+        valueDiv.style("display", "none");
+      })
+      .on("mousemove", updateHoverElements);
+    
+    // Return the chart.
+    return svg;
   },
 
   initializeNewestStrains() {

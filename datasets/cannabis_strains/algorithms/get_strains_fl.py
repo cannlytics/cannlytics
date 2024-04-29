@@ -2,18 +2,7 @@
 
 
 
-# TODO: Read Kaycha Labs results.
-
-
-# TODO: Read TerpLife Labs results.
-
-
-# TODO: Read The Flowery results.
-
-
-# TODO: Read FL Medical Trees Reddit Forum results.
-
-
+# TODO: Read latest aggregated FL lab results.
 
 # TODO: Find all of the unique stains.
 # Note: NLP will be required.

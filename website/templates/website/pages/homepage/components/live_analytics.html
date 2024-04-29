@@ -10,7 +10,12 @@
 
   <!-- TODO: Current Average with percent change underneath -->
 
-  <!-- Chart -->
+  <!-- TODO: Chart options:
+    - Filter by state
+    - Filter by lab
+  -->
+
+  <!-- Filter by compound -->
   <select id="series-select">
     <option value="total_cannabinoids">Total Cannabinoids</option>
     <option value="total_thc">Total THC</option>
@@ -19,9 +24,14 @@
     <!-- TODO: Divider for cannabinoids (13-18) -->
     <!-- TODO: Divider for terpenes (38-42) -->
   </select>
-  <div id="chart" style="width:100%;hieght:300px;"></div>
 
-  <!-- TODO: Change time span: 1W, 1M, 3M, YTD, 1Y, All -->
+  <!-- Chart -->
+  <div id="chart" style="width:100%;hieght:300px;"></div>
+  <div id="chart-tooltip" style="position: absolute; display: none;"></div>
+
+  <!-- TODO: Filter by time: 1W, 1M, 3M, YTD, 1Y, All -->
+
+  <!-- Optional: Show a table of lab results for a given date when selected -->
 
 </div>
 
