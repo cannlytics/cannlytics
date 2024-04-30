@@ -136,7 +136,7 @@ FLORIDA_LICENSES = {
 }
 
 # Define the minimum file size for a PDF.
-MIN_FILE_SIZE = 12 * 1024
+MIN_FILE_SIZE = 21 * 1024
 
 
 def download_coas_kaycha(

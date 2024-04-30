@@ -10,17 +10,23 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 """
 # Standard imports:
 from datetime import datetime
+from dotenv import dotenv_values
+import json
 import gc
 import os
-import tempfile
-from typing import Optional
 
 # External imports:
 from cannlytics.utils.utils import hash_file
 from cannlytics.data.coas import CoADoc
+from cannlytics.firebase import (
+    initialize_firebase,
+    create_short_url,
+    get_file_url,
+    update_documents,
+    upload_file,
+)
 import pandas as pd
 import os
-from pathlib import Path
 
 
 #-----------------------------------------------------------------------
@@ -28,10 +34,10 @@ from pathlib import Path
 #-----------------------------------------------------------------------
 
 data_dirs = [
-    # Labs without parsing algorithms:
-    # r"D:\data\florida\lab_results\pdfs\moderncanna",
-    # r"D:\data\florida\lab_results\pdfs\mtl",
-    # r"D:\data\florida\lab_results\pdfs\green-scientific-labs",
+    # FIXME: Labs without parsing algorithms:
+    # r"D:\data\florida\results\pdfs\moderncanna",
+    # r"D:\data\florida\results\pdfs\mtl",
+    # r"D:\data\florida\results\pdfs\green-scientific-labs",
     # Labs with parsing algorithms:
     r"D:\data\florida\results\pdfs\terplife",
     r"D:\data\florida\results\pdfs\acs",
@@ -65,18 +71,7 @@ data_dirs = [
 
 # DEV: Find all of the already parsed and failed PDFs.
 parsed_files, failed_files = [], []
-logs_files = [
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-1.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-2.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-3.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-5.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-6.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-7.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-8.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-9.txt",
-    # r"C:\Users\keega\OneDrive\Cannlytics\archive\2024-03\parsing-fl-coas-logs-interactive-10.txt",
-]
+logs_files = []
 for logs_file in logs_files:
     with open(logs_file, 'r') as file:
         lines = file.readlines()
@@ -93,7 +88,7 @@ print('Failed:', len(failed_files))
 # Find all COA PDFs.
 # TODO: Handle images as well.
 pdfs = []
-min_file_size = 12_000
+min_file_size = 21_000
 for data_dir in data_dirs:
     for root, _, files in os.walk(data_dir):
         for filename in files:
@@ -190,48 +185,155 @@ outfile = os.path.join(data_dir, f'all-fl-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
 print('Saved aggregate Florida lab results:', outfile)
 
-# TODO: Use a local cache to keep track of lab results in Firestore,
+
+#-----------------------------------------------------------------------
+# Standardize lab results.
+#-----------------------------------------------------------------------
+
+# Fill missing `producer_state` with FL.
+all_results['producer_state'] = all_results['producer_state'].fillna('FL')
+
+
+
+#-----------------------------------------------------------------------
+# TODO: Calculate statistics.
+#-----------------------------------------------------------------------
+
+from cannlytics.data.coas import get_result_value
+from cannlytics.lims.compounds import cannabinoids, terpenes
+
+
+# Get the results for each cannabinoid and terpene.
+for a in cannabinoids + terpenes:
+    print('Augmenting:', a)
+    all_results[a] = all_results['results'].apply(
+        lambda x: get_result_value(x, a, key='key')
+    )
+
+# TODO: Ensure totals are calculated:
+# - total_cannabinoids
+# - total_thc
+# - total_cbd
+# - total_terpenes
+
+# TODO: Calculate averages, medians, standard deviations, and percentiles
+# for cannabinoids and terpenes.
+# Time series:
+# - daily
+# - weekly
+# - monthly
+# - quarterly
+# - yearly
+
+
+#-----------------------------------------------------------------------
+# Upload COA PDFs to Google Cloud Storage.
+#-----------------------------------------------------------------------
+
+# Use a local cache to keep track of lab results in Firestore,
 # PDFs in Google Cloud Storage, and which datafiles are in Cloud Storage.
 cache_dir = 'D://data/florida/cache'
-
-# FIXME: Upload data to Firestore.
-
-
-# === Upload PDFs to Google Cloud Storage. ===
+cache_file = os.path.join(cache_dir, 'cache.json')
+if os.path.exists(cache_file):
+    with open(cache_file, 'r') as f:
+        cache = json.load(f)
+else:
+    cache = {}
+    os.makedirs(cache_dir, exist_ok=True)
 
 # Match COA PDFs with the results.
 pdf_dir = 'D://data/florida/results/pdfs'
 coa_pdfs = {}
 for index, result in all_results.iterrows():
 
-    # Walk directory to try to find the PDF.
-    coa_pdf = result['coa_pdf']
-    if coa_pdf == 'download.pdf':
+    # Get the name of the PDF.
+    identifier = result['coa_pdf']
+    if identifier == 'download.pdf':
         lab_results_url = result['lab_results_url']
-        sample_id = lab_results_url.split('=')[-1].split('?')[0]
-        for root, _, files in os.walk(pdf_dir):
-            for filename in files:
-                if sample_id in filename:
-                    pdf_path = os.path.join(root, filename)
-                    print('Matched %s to %s' % (result['sample_hash'], pdf_path))
-                    coa_pdfs[result['sample_hash']] = pdf_path
-                    break
-        continue
+        identifier = lab_results_url.split('=')[-1].split('?')[0]
+    
+    # Find the matching PDF.
     for root, _, files in os.walk(pdf_dir):
         for filename in files:
-            if filename == coa_pdf:
+            if identifier in filename:
                 pdf_path = os.path.join(root, filename)
-                print('Matched %s to %s' % (result['sample_hash'], pdf_path))
                 coa_pdfs[result['sample_hash']] = pdf_path
                 break
 
-# FIXME: Upload PDFs to Google Cloud Storage.
+# Initialize Firebase.
+config = dotenv_values('.env')
+db = initialize_firebase()
+bucket_name = config['FIREBASE_STORAGE_BUCKET']
+firebase_api_key = config['FIREBASE_API_KEY']
+
+# Upload datafiles to Google Cloud Storage.
+# Checks if the file has been uploaded according to the local cache.
+for datafile in datafiles:
+    filename = os.path.split(datafile)[-1]
+    if filename not in cache.get('datafiles', []):
+        file_ref = f'data/results/florida/datasets/{filename}'
+        # upload_file(
+        #     destination_blob_name=file_ref,
+        #     source_file_name=datafile,
+        #     bucket_name=bucket_name,
+        # )
+        print('Uploaded:', file_ref)
+        cache.setdefault('datafiles', []).append(filename)
+
+# Upload PDFs to Google Cloud Storage.
+# Checks if the file has been uploaded according to the local cache.
+print('Number of unique COA PDFs:', len(coa_pdfs))
 for sample_hash, pdf_path in coa_pdfs.items():
     print('Uploading:', pdf_path)
     pdf_hash = hash_file(pdf_path)
 
+    if pdf_hash not in cache.get('pdfs', []):
 
+        # Upload the file.
+        file_ref = f'data/results/florida/pdfs/{pdf_hash}.pdf'
+        # upload_file(
+        #     destination_blob_name=file_ref,
+        #     source_file_name=pdf_path,
+        #     bucket_name=bucket_name,
+        # )
 
-# FIXME: Upload datafiles to Google Cloud Storage.
+        # # Get download URL and create a short URL.
+        # download_url, short_url = None, None
+        # try:
+        #     download_url = get_file_url(file_ref, bucket_name=bucket_name)
+        #     short_url = create_short_url(
+        #         api_key=firebase_api_key,
+        #         long_url=download_url,
+        #         project_name=db.project
+        #     )
+        # except Exception as e:
+        #     print('Failed to get download URL:', e)
 
+        # # Keep track of the file reference and download URLs.
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'file_ref'] = file_ref
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'download_url'] = download_url
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'short_url'] = short_url
 
+        # Cache the PDF.
+        cache.setdefault('pdfs', []).append(pdf_hash)
+
+# Upload the raw data to Firestore.
+# Checks if the data has been uploaded according to the local cache.
+refs, updates = [], []
+collection = 'results'
+for _, obs in all_results.iterrows():
+    doc_id = obs['sample_hash']
+    if doc_id not in cache.get('results', []):
+        refs.append(f'{collection}/{doc_id}')
+        updates.append(obs.to_dict())
+        cache.setdefault('results', []).append(doc_id)
+# if refs:
+#     update_documents(refs, updates, database=db)
+#     print('Uploaded %i results to Firestore.' % len(refs))
+
+# TODO: Save the statistics to Firestore.
+
+# Save the updated cache
+with open(cache_file, 'w') as f:
+    json.dump(cache, f)
+    print('Saved cache:', cache_file)
