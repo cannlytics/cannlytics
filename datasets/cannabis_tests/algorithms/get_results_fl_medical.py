@@ -57,6 +57,7 @@ queries = [
     'Certificate',
     'Certificate of Analysis',
     'lab results',
+    'test results',
     'results',
 ]
 sort_by = 'new'

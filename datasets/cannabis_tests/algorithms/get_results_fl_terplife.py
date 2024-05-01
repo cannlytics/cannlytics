@@ -55,12 +55,16 @@ class TerpLifeLabs:
         ):
         """Get lab results published by TerpLife Labs on the public web."""
         start = datetime.now()
-        self.driver.get(url)
-        sleep(1)
+        # self.driver.get(url)
+        # sleep(1)
         for query in queries:
             print('Querying: %s' % query)
+            self.driver = initialize_selenium(download_dir=self.license_pdf_dir)
+            self.driver.get(url)
+            sleep(1)
             self.query_search_box(query)
             self.download_search_results(wait=wait)
+            self.quit()
         end = datetime.now()
         print('Finished downloading TerpLife Labs COAs.')
         print('Time elapsed: %s' % str(end - start))
@@ -179,8 +183,8 @@ if __name__ == '__main__':
     queries = [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
 
     # Query by alphabetic combinations.
-    specific_letters = [x for x in string.ascii_lowercase]
-    queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
+    # specific_letters = [x for x in string.ascii_lowercase]
+    # queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
 
     # Drill down on specific queries.
     long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
@@ -189,8 +193,8 @@ if __name__ == '__main__':
 
     # Create new lists with the combinations
     # queries += add_letters(long_letters)
-    # queries += add_digits(long_digits)
-    queries.reverse()
+    queries += add_digits(long_digits)
+    # queries.reverse()
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.

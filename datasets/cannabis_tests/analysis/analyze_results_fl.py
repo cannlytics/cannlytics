@@ -203,6 +203,16 @@ from cannlytics.data.coas import get_result_value
 from cannlytics.lims.compounds import cannabinoids, terpenes
 
 
+# Find al unique terpenes and cannabinoids and see if there are any new compounds.
+unidentified_compounds = set()
+for index, row in all_results.iterrows():
+    results = json.loads(row['results'])
+    for result in results:
+        if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
+            unidentified_compounds.add(result['key'])
+unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
+print('Unidentified compounds:', len(unidentified_compounds))
+
 # Get the results for each cannabinoid and terpene.
 for a in cannabinoids + terpenes:
     print('Augmenting:', a)
