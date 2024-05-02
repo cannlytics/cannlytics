@@ -17,17 +17,19 @@ Data Sources:
     - [TerpLife Labs](https://www.terplifelabs.com)
 
 """
-
 # Standard imports:
 from datetime import datetime
 import itertools
 import os
 import random
 import string
-from time import sleep
+from time import time, sleep
 
 # External imports:
+from cannlytics.data.coas.coas import CoADoc
+from cannlytics.data.coas.algorithms.terplife import parse_terplife_coa
 from cannlytics.data.web import initialize_selenium
+import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -36,16 +38,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 class TerpLifeLabs:
     """Download lab results from TerpLife Labs."""
 
-    def __init__(self, data_dir):
+    def __init__(self, data_dir, namespace='terplife'):
         """Initialize the driver and directories."""
         self.data_dir = data_dir
-        self.datasets_dir = os.path.join(data_dir, 'datasets')
-        self.pdf_dir = os.path.join(self.datasets_dir, 'pdfs')
-        self.license_pdf_dir = os.path.join(self.pdf_dir, 'terplife')
+        self.datasets_dir = os.path.join(data_dir, 'datasets', namespace)
+        self.pdf_dir = os.path.join(data_dir, 'pdfs', namespace)
         if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
         if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
-        if not os.path.exists(self.license_pdf_dir): os.makedirs(self.license_pdf_dir)
-        self.driver = initialize_selenium(download_dir=self.license_pdf_dir)
+        self.driver = initialize_selenium(download_dir=self.pdf_dir)
 
     def get_results_terplife(
             self,
@@ -59,7 +59,7 @@ class TerpLifeLabs:
         # sleep(1)
         for query in queries:
             print('Querying: %s' % query)
-            self.driver = initialize_selenium(download_dir=self.license_pdf_dir)
+            self.driver = initialize_selenium(download_dir=self.pdf_dir)
             self.driver.get(url)
             sleep(1)
             self.query_search_box(query)
@@ -84,7 +84,7 @@ class TerpLifeLabs:
                 file_name = row.find_element(By.CLASS_NAME, 'file-item-name').text
                 if file_name == 'COAS':
                     continue
-                outfile = os.path.join(self.license_pdf_dir, file_name)
+                outfile = os.path.join(self.pdf_dir, file_name)
                 if os.path.exists(outfile):
                     print('Cached: %s' % outfile)
                     continue
@@ -204,3 +204,39 @@ if __name__ == '__main__':
     downloader.quit()
 
     # Optional: Search TerpLife for known strains.
+
+    # Find the recently downloaded PDFs.
+    days_ago = 365
+    pdf_dir = 'D://data/florida/results/pdfs/terplife'
+    current_time = time()
+    recent_threshold = days_ago * 24 * 60 * 60
+    recent_files = []
+    for filename in os.listdir(pdf_dir):
+        file_path = os.path.join(pdf_dir, filename)
+        if os.path.isfile(file_path):
+            modification_time = os.path.getmtime(file_path)
+            time_difference = current_time - modification_time
+            if time_difference <= recent_threshold:
+                recent_files.append(file_path)
+
+    # Parse the downloaded PDFs.
+    print('Parsing %i recently downloaded files...' % len(recent_files))
+    parser = CoADoc()
+    all_data = []
+    for doc in recent_files:
+        try:
+            coa_data = parse_terplife_coa(parser, doc, verbose=True)
+            all_data.append(coa_data)
+            print(f'Parsed: {doc}')
+        except Exception as e:
+            print('Failed to parse:', doc)
+            print(e)
+
+    # Save all of the data.
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    output_dir = 'D://data/florida/results/datasets/terplife'
+    outfile = os.path.join(output_dir, f'fl-results-terplife-{timestamp}.xlsx')
+    all_results = pd.DataFrame(all_data)
+    all_results.replace(r'\\u0000', '', regex=True, inplace=True)
+    parser.save(all_results, outfile)
+    print('Saved %i COA data:' % len(all_results), outfile)

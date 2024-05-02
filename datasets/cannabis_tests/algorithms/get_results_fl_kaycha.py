@@ -5,7 +5,7 @@ Copyright (c) 2023-2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 4/21/2024
+Updated: 5/1/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -29,6 +29,7 @@ from typing import Optional
 # External imports:
 from bs4 import BeautifulSoup
 from cannlytics.data.coas.coas import CoADoc
+from cannlytics.data.coas.algorithms.kaycha import parse_kaycha_coa
 from cannlytics.utils.utils import (
     download_file_with_selenium,
     remove_duplicate_files,
@@ -330,39 +331,74 @@ def get_results_kaycha(
 
 def parse_results_kaycha(
         data_dir: str,
-        outfile: Optional[str] = None,
+        pdf_dir: str,
         temp_path: Optional[str] = None,
         reverse: Optional[bool] = True,
-        completed: Optional[list] = [],
-        license_number: Optional[str] = None,
+        sort: Optional[bool] = False,
     ):
     """Parse lab results from Kaycha Labs COAs."""
     parser = CoADoc()
-    if outfile:
-        output_dir = os.path.dirname(outfile)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
     if temp_path is None:
-        temp_path = tempfile.gettempdir()
-    all_data = []
-    for path, _, files in os.walk(data_dir):
-        if reverse:
-            files = reversed(files)
-        for filename in list(iter(files))[550:1_000]:
-            if not filename.endswith('.pdf'):
-                continue
-            if filename in completed:
+        temp_path = tempfile.mkdtemp()
+    date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    folders = os.listdir(pdf_dir)
+    folders = [x for x in folders if x.startswith('MMTC')]
+    if sort: folders = sorted(folders)
+    if reverse: folders = reversed(folders)
+    for folder in folders:
+
+        # DEV:
+        completed = [
+            "MMTC-2015-0004",
+            "MMTC-2015-0005",
+            "MMTC-2016-0006",
+            "MMTC-2015-0003",
+            "MMTC-2015-0002",
+            'MMTC-2017-0009',
+            'MMTC-2016-0007',
+            'MMTC-2017-0011',
+            'MMTC-2017-0012',
+            'MMTC-2017-0013',
+            'MMTC-2018-0014',
+            'MMTC-2019-0015',
+            # In-progress
+            'MMTC-2015-0001',
+            'MMTC-2017-0008',
+            'MMTC-2017-0010',
+            'MMTC-2019-0016',
+        ]
+        if folder in completed:
+            print('Completed:', folder)
+            continue           
+
+        # Identify all of the PDFs for a licensee.
+        outfile = os.path.join(data_dir, 'datasets', f'fl-results-{folder}-{date}.xlsx')
+        license_pdf_dir = os.path.join(pdf_dir, folder)
+        pdf_files = os.listdir(license_pdf_dir)
+        if reverse: pdf_files = reversed(pdf_files)
+
+        # Parse the COAs for each licensee.
+        print('Parsing %i COAs:' % len(pdf_files), folder)
+        all_data = []
+        for pdf_file in pdf_files:
+            if not pdf_file.endswith('.pdf'):
                 continue
             try:
-                doc = os.path.join(path, filename)
-                data = parser.parse(doc, temp_path=temp_path)
-                if license_number is not None:
-                    data['license_number'] = license_number
-                all_data.extend(data)
+                doc = os.path.join(license_pdf_dir, pdf_file)
+                coa_data = parse_kaycha_coa(
+                    parser,
+                    doc,
+                    verbose=True,
+                    temp_path=temp_path,
+                )
+                if coa_data.get('producer_license_number') is None:
+                    coa_data['producer_license_number'] = folder
+                all_data.append(coa_data)
                 print('Parsed:', doc)
             except:
                 print('Error:', doc)
-    if outfile:
+        
+        # Save the data for each licensee.
         try:
             parser.save(all_data, outfile)
             print('Saved COA data:', outfile)
@@ -375,25 +411,19 @@ def parse_results_kaycha(
 # [✓] Tested: 2024-04-21 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # [✓] TEST: Get Kaycha COAs.
-    data_dir = 'D://data/florida/results'
-    kaycha_coas = get_results_kaycha(
-        data_dir=data_dir,
-        pause=3.33,
-        verbose=True,
-    )
+    # # [✓] TEST: Get Kaycha COAs.
+    # data_dir = 'D://data/florida/results'
+    # kaycha_coas = get_results_kaycha(
+    #     data_dir=data_dir,
+    #     pause=3.33,
+    #     verbose=True,
+    # )
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
-    # data_dir = 'D://data/florida/results'
-    # pdf_dir = 'D://data/florida/results/pdfs'
-    # date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    # for folder in os.listdir(pdf_dir):
-    #     outfile = os.path.join(data_dir, 'datasets', f'{folder}-lab-results-{date}.xlsx')
-    #     print('Parsing:', folder)
-    #     coa_data = parse_results_kaycha(
-    #         data_dir,
-    #         outfile,
-    #         reverse=True,
-    #         completed=[]
-    #     )
+    parse_results_kaycha(
+        data_dir='D://data/florida/results',
+        pdf_dir='D://data/florida/results/pdfs',
+        reverse=False,
+        sort=True,
+    )
