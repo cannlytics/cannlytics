@@ -194,7 +194,7 @@ if __name__ == '__main__':
     # Create new lists with the combinations
     # queries += add_letters(long_letters)
     queries += add_digits(long_digits)
-    # queries.reverse()
+    queries.reverse()
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.

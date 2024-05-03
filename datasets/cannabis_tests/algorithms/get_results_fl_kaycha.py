@@ -356,16 +356,23 @@ def parse_results_kaycha(
             "MMTC-2015-0002",
             'MMTC-2017-0009',
             'MMTC-2016-0007',
+            'MMTC-2017-0008',
+            'MMTC-2017-0009',
             'MMTC-2017-0011',
             'MMTC-2017-0012',
             'MMTC-2017-0013',
             'MMTC-2018-0014',
             'MMTC-2019-0015',
-            # In-progress
-            'MMTC-2015-0001',
-            'MMTC-2017-0008',
-            'MMTC-2017-0010',
             'MMTC-2019-0016',
+            'MMTC-2019-0017',
+            'MMTC-2019-0018',
+            'MMTC-2019-0019',
+            'MMTC-2019-0020',
+            'MMTC-2019-0021',
+            'MMTC-2019-0022',
+            'MMTC-2017-0010',
+            # In-progress
+            # 'MMTC-2015-0001',
         ]
         if folder in completed:
             print('Completed:', folder)

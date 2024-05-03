@@ -179,20 +179,14 @@ all_results.drop_duplicates(subset=['sample_hash', 'results_hash'], keep='first'
 all_results = all_results.loc[all_results['results'] != '[]']
 print('Number of unique COAs:', len(all_results))
 
+# Fill missing `producer_state` with FL.
+all_results['producer_state'] = all_results['producer_state'].fillna('FL')
+
 # Save the results locally.
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
 outfile = os.path.join(data_dir, f'all-fl-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
 print('Saved aggregate Florida lab results:', outfile)
-
-
-#-----------------------------------------------------------------------
-# Standardize lab results.
-#-----------------------------------------------------------------------
-
-# Fill missing `producer_state` with FL.
-all_results['producer_state'] = all_results['producer_state'].fillna('FL')
-
 
 
 #-----------------------------------------------------------------------
