@@ -450,6 +450,7 @@ def get_products_flower_co(
 
     # Close the browser.
     driver.close()
+    driver.quit()
 
     # Return the data.
     return data
@@ -466,10 +467,8 @@ def get_results_ca_flower_co(
     # === Download COAs ===
 
     # Create directories if they don't exist.
-    if not os.path.exists(pdf_dir):
-        os.makedirs(pdf_dir)
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+    if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
+    if not os.path.exists(data_dir): os.makedirs(data_dir)
 
     # Find the product data.
     data = get_products_flower_co(data_dir, verbose=verbose)
