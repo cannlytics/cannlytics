@@ -73,7 +73,6 @@ import pandas as pd
 import pdfplumber
 
 # Internal imports.
-from cannlytics import firebase
 from cannlytics import __version__
 from cannlytics.data.data import (
     create_hash,

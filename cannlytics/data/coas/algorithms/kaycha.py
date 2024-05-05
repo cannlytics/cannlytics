@@ -79,35 +79,26 @@ Data Points:
         ✓ moisture
 """
 # Standard imports.
-from ast import literal_eval
-import base64
 from datetime import datetime
 import json
-import io
 import re
-import os
 import tempfile
 from typing import Any, Optional
 
 # External imports.
 import pandas as pd
 import pdfplumber
-from PIL import Image
 
 # Internal imports.
-from cannlytics import firebase
 from cannlytics import __version__
 from cannlytics.data.data import (
     create_hash,
     create_sample_id,
     find_first_value,
 )
-from cannlytics.utils.constants import ANALYTES
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
-    split_list,
-    strip_whitespace,
 )
 
 # It is assumed that the lab has the following details.

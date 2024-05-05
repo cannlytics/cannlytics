@@ -45,7 +45,7 @@ class TerpLifeLabs:
         self.pdf_dir = os.path.join(data_dir, 'pdfs', namespace)
         if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
         if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
-        self.driver = initialize_selenium(download_dir=self.pdf_dir)
+        # self.driver = initialize_selenium(download_dir=self.pdf_dir)
 
     def get_results_terplife(
             self,
@@ -57,14 +57,16 @@ class TerpLifeLabs:
         start = datetime.now()
         # self.driver.get(url)
         # sleep(1)
-        for query in queries:
-            print('Querying: %s' % query)
-            self.driver = initialize_selenium(download_dir=self.pdf_dir)
+        with initialize_selenium(download_dir=self.pdf_dir) as driver:
+            self.driver = driver
             self.driver.get(url)
-            sleep(1)
-            self.query_search_box(query)
-            self.download_search_results(wait=wait)
-            self.quit()
+            for query in queries:
+                print('Querying: %s' % query)
+                sleep(1)
+                self.query_search_box(query)
+                self.download_search_results(wait=wait)
+            self.driver.close()
+            self.driver.quit()
         end = datetime.now()
         print('Finished downloading TerpLife Labs COAs.')
         print('Time elapsed: %s' % str(end - start))
@@ -193,8 +195,8 @@ if __name__ == '__main__':
 
     # Create new lists with the combinations
     # queries += add_letters(long_letters)
-    queries += add_digits(long_digits)
-    queries.reverse()
+    # queries += add_digits(long_digits)
+    # queries.reverse()
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.

@@ -10,13 +10,14 @@ License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/m
 # Standard imports:
 import ast
 import json
-import matplotlib.pyplot as plt
-import seaborn as sns
+import os
 
 # External imports:
 from cannlytics.data.coas import get_result_value
 from cannlytics.utils import convert_to_numeric
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 import statsmodels.api as sm
 
 
@@ -24,15 +25,18 @@ import statsmodels.api as sm
 # Read all lab results.
 #-----------------------------------------------------------------------
 
-import os
-import pandas as pd
-
-
 # Aggregate SC Labs results.
-data_dir = r"D:\data\california\lab_results\datasets\sclabs"
-datafiles = os.listdir(data_dir)
-datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
-datafiles = [x for x in datafiles if 'all' not in x and 'urls' not in x]
+datafiles = []
+data_dirs = [
+    "D://data/california/results/datasets/sclabs",
+    "D://data//california/results/datasets/flower-company",
+    "D://data/california/results/datasets",
+]
+for data_dir in data_dirs:
+    files = os.listdir(data_dir)
+    files = [os.path.join(data_dir, x) for x in files if x.endswith('.xlsx')]
+    files = [x for x in files if 'all' not in x and 'urls' not in x]
+    datafiles.extend(files)
 print('Number of datafiles:', len(datafiles))
 all_results = []
 for datafile in datafiles:
@@ -43,19 +47,16 @@ for datafile in datafiles:
         print('Error reading:', datafile)
         continue
     all_results.append(data)
-all_results = pd.concat(all_results)
-all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+all_results = pd.concat(all_results, ignore_index=True)
+all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
+all_results.drop_duplicates(subset=['sample_id', 'results_hash'], keep='first', inplace=True)
 all_results = all_results.loc[all_results['results'] != '[]']
-print('Number of SC Labs results:', len(all_results))
-
-# Save SC Labs results.
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'all-sc-labs-results-{date}.xlsx')
+outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
-print(f'Saved {len(all_results)} SC Labs results:', outfile)
+print(f'Saved {len(all_results)} CA results:', outfile)
 
     
-
 # # Identify all unique cannabinoids and terpenes.
 # cannabinoids = []
 # terpenes = []
@@ -71,6 +72,15 @@ print(f'Saved {len(all_results)} SC Labs results:', outfile)
 # print('Cannabinoids:', cannabinoids)
 # print('Terpenes:', terpenes)
 
+#-----------------------------------------------------------------------
+# Standardize results.
+#-----------------------------------------------------------------------
+
+# TODO: Standardize product types.
+
+
+# TODO: Standardize stain names.
+
 
 # === Setup ===
 
@@ -83,111 +93,8 @@ plt.rcParams.update({
 })
 
 
-# === Read the data ===
-
-# Define California datasets.
-CA_LAB_RESULTS = {
-    'Flower Company': {
-        'datafiles': [
-            r"D:\data\california\lab_results\datasets\flower-company\ca-all-results-flower-company.xlsx"
-        ],
-    },
-    'Glass House Farms': {
-        'datafiles': [
-            r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx",
-        ],
-    },
-    'SC Labs':{
-        'datafiles': [
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-23-12-25-04.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-24-01-09-39.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-09-39-02.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-25-12-12-21.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-23-07.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-09-25-31.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2023-12-31-14-45-26.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-00-39-36.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-02-22-27-08.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-03-06-24-11.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-17-48-16.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-04-18-24-00.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-02-17-28.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-18-01-26.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-05-23-23-15.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-15-12-32.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-25-42.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-16-59-56.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-17-04-10.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-06-19-47-41.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-08-18-12-08.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-11-18-31-09.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-15-08-42-54.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-17-11-04-10.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-19-00-00-22.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-20-15-57-24.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-21-16-12-00.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-29-02-37-48.xlsx",
-            r"D:\data\california\lab_results\datasets\sclabs\ca-lab-results-sclabs-2024-01-29-07-16-54.xlsx",
-        ],
-    },
-}
-
-# Read all datafiles.
-all_results = []
-for source in CA_LAB_RESULTS:
-    for datafile in CA_LAB_RESULTS[source]['datafiles']:
-        try:
-            data = pd.read_excel(datafile)
-        except:
-            print('Error reading:', datafile)
-            continue
-        all_results.append(data)
-
-# Aggregate results, removing lab results that are being processed (no results).
-results = pd.concat(all_results)
-print('Number of results before dropping in-progress:', len(results))
-results = results.loc[results['results'] != "[]"]
-print('Number of results before dropping duplicates:', len(results))
-results.drop_duplicates(subset=['sample_id'], inplace=True)
-print('Number of results:', len(results))
-
-# Save the data.
-date = pd.to_datetime('today').strftime('%Y-%m-%d')
-outfile = f"D://data/california/lab_results/datasets/ca-results-{date}.csv"
-results.to_csv(outfile, index=False)
-print('Saved:', outfile)
-
 
 # === Timeseries Analysis ===
-
-# Flower company results.
-flower_co = pd.read_excel(r"D:\data\california\lab_results\datasets\flower-company\ca-all-results-flower-company.xlsx")
-
-# SC Labs results.
-all_results = []
-for datafile in reversed(CA_LAB_RESULTS['SC Labs']['datafiles']):
-    try:
-        data = pd.read_excel(datafile)
-    except:
-        print('Error reading:', datafile)
-        continue
-    all_results.append(data)
-results = pd.concat(all_results)
-print('Number of results before dropping in-progress:', len(results))
-results = results.loc[results['results'] != "[]"]
-print('Number of results before dropping duplicates:', len(results))
-results.drop_duplicates(subset=['sample_id'], inplace=True)
-print('Number of results:', len(results))
-date = pd.to_datetime('today').strftime('%Y-%m-%d')
-outfile = f"D://data/california/lab_results/datasets/ca-results-sclabs-{date}.csv"
-results.to_csv(outfile, index=False)
-print('Saved:', outfile)
-sclabs = results.copy()
-sclabs = sclabs.loc[sclabs['lab_state'] == 'CA']
-
-# Glass House Farms results.
-glass_house = pd.read_excel(r"D:\data\california\lab_results\ca-lab-results-2024-01-24.xlsx")
-
 
 # Define when standard method was effective.
 # Source: https://cannabis.ca.gov/cannabis-laws/rulemaking/standard-cannabinoids-test-method-and-standardized-operating-procedures/

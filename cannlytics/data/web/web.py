@@ -41,11 +41,10 @@ except ImportError:
 def initialize_selenium(
         browser=None,
         headless=True,
-        download_dir=None
+        download_dir=None,
     ) -> Any:
     """
     Initialize a Selenium WebDriver with preference for Chrome, falling back to Edge.
-
     The function attempts to initialize Chrome first; if it fails, it tries Edge.
     Users can specify a browser if desired.
 
@@ -61,7 +60,8 @@ def initialize_selenium(
         RuntimeError: If it fails to initialize both Chrome and Edge drivers.
     """
     browsers = ['chrome', 'edge']
-    if browser: browsers = [browser]
+    if browser:
+        browsers = [browser]
     for browser in browsers:
         try:
             # Default to Chrome, or Edge if specified, then Edge as a fallback.
@@ -91,14 +91,22 @@ def initialize_selenium(
                 }
                 options.add_experimental_option('prefs', prefs)
 
+            # Initialize the driver.
             if browser.lower() == 'chrome':
-                return webdriver.Chrome(options=options, service=service)
+                driver = webdriver.Chrome(options=options, service=service)
             else:
-                return webdriver.Edge(options=options, service=service)
+                driver = webdriver.Edge(options=options, service=service)
+            return driver
 
         except Exception as e:
             print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
+        finally:
+            # Ensure the driver is properly closed and quit after each use
+            if 'driver' in locals():
+                driver.close()
+                driver.quit()
 
+    # If no driver was successfully initialized, raise an error
     raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
 
 
