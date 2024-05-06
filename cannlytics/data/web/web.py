@@ -38,6 +38,7 @@ except ImportError:
 
 # === Dynamic HTML Scraping Tools ===
 
+# FIXME: This may be causing a severe memory leak.
 def initialize_selenium(
         browser=None,
         headless=True,
@@ -64,7 +65,6 @@ def initialize_selenium(
         browsers = [browser]
     for browser in browsers:
         try:
-            # Default to Chrome, or Edge if specified, then Edge as a fallback.
             if browser.lower() == 'chrome':
                 service = Service()
                 options = ChromeOptions()
@@ -78,8 +78,6 @@ def initialize_selenium(
                 options = EdgeOptions()
                 if headless:
                     options.add_argument('--headless')
-
-            # Set download preferences if a download directory is provided.
             if download_dir:
                 default_directory = os.path.normpath(os.path.join(os.getcwd(), download_dir))
                 prefs = {
@@ -90,23 +88,13 @@ def initialize_selenium(
                     # "safebrowsing.enabled": True
                 }
                 options.add_experimental_option('prefs', prefs)
-
-            # Initialize the driver.
             if browser.lower() == 'chrome':
                 driver = webdriver.Chrome(options=options, service=service)
             else:
                 driver = webdriver.Edge(options=options, service=service)
             return driver
-
         except Exception as e:
             print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
-        finally:
-            # Ensure the driver is properly closed and quit after each use
-            if 'driver' in locals():
-                driver.close()
-                driver.quit()
-
-    # If no driver was successfully initialized, raise an error
     raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
 
 

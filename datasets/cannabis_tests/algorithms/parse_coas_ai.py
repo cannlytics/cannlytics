@@ -7,31 +7,12 @@ import re
 from time import sleep
 
 # External imports:
-from adjustText import adjust_text
-from bs4 import BeautifulSoup
-import cv2
-from matplotlib import pyplot as plt
-import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
-from matplotlib.colors import LinearSegmentedColormap
-import matplotlib.lines as mlines
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer as SIA
-import numpy as np
+from cannlytics.lims.compounds import cannabinoids, terpenes
 from dotenv import dotenv_values
 import requests
 import pandas as pd
-from pandas import Timestamp
 from openai import OpenAI
-import seaborn as sns
-from skimage import color
-import statsmodels.api as sm
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-import spacy
-from statistics import mean
-from textacy.extract import ngrams
+
 
 
 # === Parse COAs ===
@@ -327,57 +308,8 @@ def extract_coa_terpenes(
     return extracted_data
 
 
-# Define cannabinoids being sought.
-specific_cannabinoids = [
-    'cbc',
-    'cbca',
-    'cbd',
-    'cbda',
-    'cbg',
-    'cbga',
-    'cbn',
-    'cbna',
-    'delta_8_thc',
-    'delta_9_thc',
-    'thca',
-    'thcv',
-    'thcva',
-    # 'thcp',
-    # 'r_delta_10_thc',
-    # 's_delta_10_thc',
-    # '9r_hhc',
-    # '9s_hhc',
-    # 'thco',
-]
-
-# Define terpenes being sought.
-specific_terpenes = [
-    'alpha_bisabolol',
-    'alpha_humulene',
-    'alpha_pinene',
-    'alpha_terpinene',
-    'cineole',
-    'beta_caryophyllene',
-    'beta_myrcene',
-    'borneol',
-    'camphene',
-    'delta_3_carene',
-    'caryophyllene_oxide',
-    'citral',
-    'dihydrocarveol',
-    'fenchone',
-    'gamma_terpinene',
-    'd_limonene',
-    'linalool',
-    'menthol',
-    'nerolidol',
-    'ocimene',
-    'pulegone',
-    'terpinolene',
-]
-
 # FIXME: Refactor:
-def parse_coa
+
 
 # Initialize OpenAI.
 config = dotenv_values('../../.env')

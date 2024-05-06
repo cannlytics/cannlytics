@@ -74,8 +74,7 @@ def get_results_mcrlabs(
         to_excel_with_style(data, datafile)
     except:
         data.to_excel(datafile)
-
-    # Save the results to CSV.
+    print('Saved %i results to %s' % (len(data), datafile))
     datafile = f'{data_dir}/ma-results-latest.csv'
     data.to_csv(datafile, index=False)
 

@@ -200,6 +200,7 @@ if __name__ == '__main__':
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.
+    # FIXME: This has a severe memory leak. Chrome may not being closed properly.
     DATA_DIR = 'D://data/florida/results'
     downloader = TerpLifeLabs(DATA_DIR)
     downloader.get_results_terplife(queries)

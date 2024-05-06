@@ -19,6 +19,71 @@ from cannlytics.firebase import get_collection, update_documents
 from cannlytics.utils import encode_pdf
 
 
+PRODUCT_TYPES = {
+    'flower': {
+        'key': 'flower',
+        'name': 'Flower',
+        'names': [
+            '14g Flower',
+            '3.5g Flower',
+            '3.5g flower',
+            "CANNABIS (MMTC's) Flower & Plants (Inhalation - Heated)",
+            'Flower',
+            'Flower - SC',
+            'Flower Inhalable',
+            'Flower SC',
+            'Flower, Inhalable',
+            'Flower, Inhaled Product',
+            'Flower, Medical Inhalable',
+            'Flower, Product Inhalable',
+            'Plant (Bulk Flower)',
+            'Plant (Flower - Cured)',
+            'Raw flower',
+            'SC flower',
+            'flower',
+        ]
+    },
+    'concentrate': {
+        'key': 'concentrate',
+        'name': 'Concentrate',
+        'names': [
+            'Concentrate',
+            'Derivative',
+            'Derivative Inhalable',
+        ]
+    },
+    'edible': {
+        'key': 'edible',
+        'name': 'Edible',
+        'names': [
+            'Edible',
+            'Edibles',
+            'Derivative Non-inhalable',
+        ]
+    },
+    'pre-roll': {
+        'key': 'pre-roll',
+        'name': 'Pre-Roll',
+        'names': [
+            'Pre-Roll',
+            'Pre-roll',
+            'pre-roll',
+            'pre-Roll',
+            'Preroll',
+            'preroll',
+            'preRoll',
+            'Pre roll',
+            'Pre Roll',
+            'pre Roll',
+            'Joint',
+            'joint',
+            'Blunt',
+            'blunt',
+        ]
+    },
+}
+
+
 def calculate_results(sample_data, analysis, mass, dilution_factor=10, correction_factor=10000):
     """Calculate percentage results given raw results,
     dilution factor, and analysis type.

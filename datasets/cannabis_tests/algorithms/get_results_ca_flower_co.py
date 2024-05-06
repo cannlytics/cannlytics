@@ -203,7 +203,7 @@ def get_products_flower_co(
     ):
 
     # Initialize the driver.
-    driver = initialize_selenium(headless=headless, browser='edge')
+    driver = initialize_selenium(headless=headless)
 
     # Get all of the brand pages.
     driver.get(base_url + 'menu')
@@ -483,52 +483,52 @@ def get_results_ca_flower_co(
 
     # === Parse COAs ===
 
-    # Read the download product items.
-    product_data = pd.read_csv(datafile)
+    # # Read the download product items.
+    # product_data = pd.read_csv(datafile)
 
-    # Parse the corresponding COAs.
-    parser = CoADoc()
-    results = parse_coa_pdfs(
-        parser=parser,
-        data=product_data,
-        pdf_dir=pdf_dir,
-        verbose=verbose,
-    )
+    # # Parse the corresponding COAs.
+    # parser = CoADoc()
+    # results = parse_coa_pdfs(
+    #     parser=parser,
+    #     data=product_data,
+    #     pdf_dir=pdf_dir,
+    #     verbose=verbose,
+    # )
 
-    # Save the parsed COA data to a file.
-    namespace = 'ca-results-flower-company'
-    timestamp = datetime.now().strftime('%Y-%m-%d')
-    results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
-    parser.save(results, results_datafile)
-    print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
+    # # Save the parsed COA data to a file.
+    # namespace = 'ca-results-flower-company'
+    # timestamp = datetime.now().strftime('%Y-%m-%d')
+    # results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
+    # parser.save(results, results_datafile)
+    # print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
 
     # === Aggregate COAs ===
 
     # Aggregate product URLs that have been recorded.
-    existing_products = []
-    url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
-    for url_file in url_files:
-        product_df = pd.read_csv(os.path.join(data_dir, url_file))
-        existing_products.append(product_df)
-    existing_products = pd.concat(existing_products)
-    existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
-    print('Final number of products:', len(existing_products))
-    products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
-    existing_products.to_csv(products_datafile, index=False)
+    # existing_products = []
+    # url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
+    # for url_file in url_files:
+    #     product_df = pd.read_csv(os.path.join(data_dir, url_file))
+    #     existing_products.append(product_df)
+    # existing_products = pd.concat(existing_products)
+    # existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
+    # print('Final number of products:', len(existing_products))
+    # products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
+    # existing_products.to_csv(products_datafile, index=False)
 
     # Aggregate COA data that has been saved.
     all_results = []
-    results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
-    for results_file in results_files:
-        results_df = pd.read_excel(os.path.join(data_dir, results_file))
-        all_results.append(results_df)
-    all_results = pd.concat(all_results)
-    all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
-    # all_results = all_results.loc[all_results['results'] != '[]']
-    print('Final number of results:', len(all_results))
-    all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
-    all_results.to_excel(all_results_datafile, index=False)
-    print(f'Saved {len(all_results)} results to: {all_results_datafile}')
+    # results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
+    # for results_file in results_files:
+    #     results_df = pd.read_excel(os.path.join(data_dir, results_file))
+    #     all_results.append(results_df)
+    # all_results = pd.concat(all_results)
+    # all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+    # # all_results = all_results.loc[all_results['results'] != '[]']
+    # print('Final number of results:', len(all_results))
+    # all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
+    # all_results.to_excel(all_results_datafile, index=False)
+    # print(f'Saved {len(all_results)} results to: {all_results_datafile}')
 
     # FIXME: Upload data to Firestore.
 

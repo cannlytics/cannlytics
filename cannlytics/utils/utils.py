@@ -13,6 +13,7 @@ Description: This module contains general Cannlytics utility functions.
 # Standard imports.
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
+import glob
 import hashlib
 import json
 import os
@@ -871,6 +872,26 @@ def download_file_with_selenium(
     if not persist:
         driver.close()
         driver.quit()
+
+
+def find_latest_file(data_dir: str, slug='all', ext='.xlsx') -> str:
+    """
+    Find the most recently modified data file in a specified directory
+    that includes a given slug and extension in the title.
+    Args:
+        data_dir (str): The directory to search for the files.
+        slug (str): The slug to search for in the file name, 'all' by default.
+        ext (str): The file extension to search for, '.xlsx' by default.
+    Returns:
+        str: The path to the most recently modified file with 'all' in the title.
+    """
+    search_pattern = os.path.join(data_dir, f'*{slug}*-*-*-*-*{ext}')
+    files = glob.glob(search_pattern)
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    if files:
+        return files[0]
+    else:
+        return ''
 
 
 def hash_file(filepath, size=65536):

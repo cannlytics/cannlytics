@@ -177,7 +177,7 @@ all_results = pd.concat(all_results, ignore_index=True)
 all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
 all_results.drop_duplicates(subset=['sample_hash', 'results_hash'], keep='first', inplace=True)
 all_results = all_results.loc[all_results['results'] != '[]']
-print('Number of unique COAs:', len(all_results))
+print('Number of unique results:', len(all_results))
 
 # Fill missing `producer_state` with FL.
 all_results['producer_state'] = all_results['producer_state'].fillna('FL')

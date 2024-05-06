@@ -173,17 +173,18 @@ def get_kaycha_terpenes(parser, page, obs, results):
         return obs, results
 
     # Split the page in half.
-    left = page.within_bbox((0, 0, page.width * 0.5, page.height)).extract_text()
-    right = page.within_bbox((page.width * 0.5, 0, page.width, page.height)).extract_text()
+    left_page = page.within_bbox((0, 0, page.width * 0.5, page.height)).extract_text()
+    right_page = page.within_bbox((page.width * 0.5, 0, page.width, page.height)).extract_text()
 
     # Get the relevant portions.
-    left = left.split('TOTAL TERPENES')[-1].split('This Kaycha Labs Certification shall not be reproduced')[0]
-    right = right.split('(%)')[-1].split('Analyzed by')[0]
+    # Old: .split('TOTAL TERPENES')[-1]
+    left = left_page.split('(%)')[-2].split('This Kaycha Labs Certification')[0]
+    right = right_page.split('(%)')[-1].split('Analyzed by')[0]
     left_lines = [x for x in left.split('\n') if x]
     right_lines = [x for x in right.split('\n') if x]
 
     # Get total terpenes.
-    total = left_lines[-1].split('(%)')[-1].strip()
+    total = left_page.split('(%)')[-1].split('\n')[0].strip()
     obs['total_terpenes'] = convert_to_numeric(total, strip=True)
 
     # Get individual terpenes.
@@ -192,6 +193,8 @@ def get_kaycha_terpenes(parser, page, obs, results):
         first_value = find_first_value(line)
         name = line[:first_value].strip()
         key = parser.analytes.get(snake_case(name), snake_case(name))
+        if key == 'total_terpenes':
+            continue
         values = line[first_value:].strip().split(' ')
         results.append({
             'analysis': 'terpenes',
@@ -268,6 +271,7 @@ def parse_kaycha_coa(
     obs['strain_name'] = lines[2]
     obs['product_type'] = lines[3].split(':')[-1].strip()
     obs['lab_id'] = lines[6].split(':')[-1].strip()
+    # TODO: Get product_subtype
 
     # Get additional sample details.
     # FIXME: These are dry weight! People want wet weight.
@@ -575,24 +579,28 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
 
-    # [✓] TEST: Identify LIMS.
-    parser = CoADoc()
-    docs = [
-        '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf',
-    ]
-    for doc in docs:
-        lims = parser.identify_lims(doc, lims={'Kaycha Labs': KAYCHA_LABS})
-        assert lims == 'Kaycha Labs'
+    # # [✓] TEST: Identify LIMS.
+    # parser = CoADoc()
+    # docs = [
+    #     '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf',
+    # ]
+    # for doc in docs:
+    #     lims = parser.identify_lims(doc, lims={'Kaycha Labs': KAYCHA_LABS})
+    #     assert lims == 'Kaycha Labs'
 
-    # [✓] TEST: Parse a full panel COA PDF.
-    doc = '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf'
-    temp_path = None
-    coa_parameters = KAYCHA_LABS_COA
-    data = parse_kaycha_coa(parser, doc)
-    assert data is not None
+    # # [✓] TEST: Parse a full panel COA PDF.
+    # doc = '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf'
+    # temp_path = None
+    # coa_parameters = KAYCHA_LABS_COA
+    # data = parse_kaycha_coa(parser, doc)
+    # assert data is not None
 
     # FIXME:
-    doc = r'D:\\data\\reddit\\FLMedicalTrees\\pdfs\\DA40119012-003 (Original).pdf'
+    doc = r'D://data/florida/results/pdfs/MMTC-2015-0001/DA40104010-005.pdf'
+    temp_path = None
+    coa_parameters = KAYCHA_LABS_COA
+    parser = CoADoc()
+    data = parse_kaycha_coa(parser, doc)
 
 
     # [ ] TEST: Parse a cannabinoid and terpene only COA PDF.
