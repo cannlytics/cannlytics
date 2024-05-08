@@ -186,7 +186,7 @@ all_results['producer_state'] = all_results['producer_state'].fillna('FL')
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
 outfile = os.path.join(data_dir, f'all-fl-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
-print('Saved aggregate Florida lab results:', outfile)
+print(f'Saved {len(all_results)} FL results:', outfile)
 
 
 #-----------------------------------------------------------------------
@@ -237,7 +237,7 @@ for a in cannabinoids + terpenes:
 # Use a local cache to keep track of lab results in Firestore,
 # PDFs in Google Cloud Storage, and which datafiles are in Cloud Storage.
 cache_dir = 'D://data/florida/cache'
-cache_file = os.path.join(cache_dir, 'cache.json')
+cache_file = os.path.join(cache_dir, 'results-fl.json')
 if os.path.exists(cache_file):
     with open(cache_file, 'r') as f:
         cache = json.load(f)

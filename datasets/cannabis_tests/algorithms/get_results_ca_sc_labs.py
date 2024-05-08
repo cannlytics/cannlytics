@@ -114,8 +114,8 @@ prefixes = [
     ]
 start_day = 1
 days = 30
-start_year = 2023
-end_year = 2023
+start_year = 2022
+end_year = 2022
 start_month = 1
 end_month = 12
 pause = 3.33

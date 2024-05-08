@@ -1,34 +1,109 @@
 """
-Analyze California Cannabis Lab Results
-Copyright (c) 2023 Cannlytics
+Analyze Results | California
+Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 3/19/2024
+Updated: 5/7/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
-import ast
+from datetime import datetime
 import json
 import os
 
+from dotenv import dotenv_values
+
 # External imports:
 from cannlytics.data.coas import get_result_value
-from cannlytics.utils import convert_to_numeric
-import matplotlib.pyplot as plt
+from cannlytics.data.coas.coas import CoADoc
+from cannlytics.firebase.firebase import initialize_firebase
+from cannlytics.lims.compounds import cannabinoids, terpenes
 import pandas as pd
-import seaborn as sns
-import statsmodels.api as sm
+
+from cannlytics.utils.utils import hash_file
 
 
 #-----------------------------------------------------------------------
 # Read all lab results.
 #-----------------------------------------------------------------------
 
-# Aggregate SC Labs results.
+def parse_coa_pdfs(
+        parser: CoADoc,
+        data,
+        pdf_dir: str,
+        id_key: str = 'product_id',
+        verbose: bool = True,
+    ):
+    """Parse corresponding COAs from a DataFrame in a PDF directory.
+    The `id_key` is used to match the PDF filename to the DataFrame.
+    """
+    all_results = []
+    for _, row in data.iterrows():
+        coa_pdf = row[id_key] + '.pdf'
+        pdf_file_path = os.path.join(pdf_dir, coa_pdf)
+        if not os.path.exists(pdf_file_path):
+            continue
+        try:
+            coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
+            if isinstance(coa_data, list):
+                entry = {**row.to_dict(), **coa_data[0]}
+            else:
+                entry = {**row.to_dict(), **coa_data}
+            entry['coa_pdf'] = coa_pdf
+            all_results.append(entry)
+            if verbose:
+                print(f'Parsed COA: {pdf_file_path}')
+        except Exception as e:
+            if verbose:
+                print(f'Failed to parse COA: {pdf_file_path}')
+                print(e)
+            continue
+    return pd.DataFrame(all_results)
+
+# Find all of the COA PDFs in the nested directory.
+pdf_dir = 'D://data/california/results/pdfs'
+pdf_files = []
+for root, dirs, files in os.walk(pdf_dir):
+    for file in files:
+        if file.endswith('.pdf'):
+            pdf_files.append(os.path.join(root, file))
+   
+# Parse the COAs.
+parser = CoADoc()
+product_data = pd.DataFrame(pdf_files, columns=['coa_pdf'])
+product_data['product_id'] = product_data['coa_pdf'].apply(
+    lambda x: x.split('/pdfs\\')[-1].replace('.pdf', '')
+)
+all_results = parse_coa_pdfs(
+    parser=parser,
+    data=product_data,
+    pdf_dir=pdf_dir,
+    verbose=True,
+)
+
+# Fill missing `producer_state` with FL.
+all_results['producer_state'] = all_results['producer_state'].fillna('CA')
+
+# Save the parsed COA data to a file.
+data_dir = 'D://data/california/results/datasets'
+date = pd.Timestamp.now().strftime('%Y-%m-%d')
+outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
+try:
+    parser.save(all_results, outfile)
+except:
+    all_results.to_excel(outfile, index=False)
+print(f'Saved {len(all_results)} CA results: {outfile}')
+
+
+#-----------------------------------------------------------------------
+# Read all lab results.
+#-----------------------------------------------------------------------
+
+# Aggregate CA results.
 datafiles = []
 data_dirs = [
-    "D://data/california/results/datasets/sclabs",
+    # "D://data/california/results/datasets/sclabs",
     "D://data//california/results/datasets/flower-company",
     "D://data/california/results/datasets",
 ]
@@ -51,525 +126,169 @@ all_results = pd.concat(all_results, ignore_index=True)
 all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
 all_results.drop_duplicates(subset=['sample_id', 'results_hash'], keep='first', inplace=True)
 all_results = all_results.loc[all_results['results'] != '[]']
+print('Number of results:', len(all_results))
+
+# Get the results for known compounds.
+for a in cannabinoids + terpenes:
+    print('Augmenting:', a)
+    all_results[a] = all_results['results'].apply(lambda x: get_result_value(x, a))
+
+# Save the results.
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
 outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
 all_results.to_excel(outfile, index=False)
 print(f'Saved {len(all_results)} CA results:', outfile)
 
-    
-# # Identify all unique cannabinoids and terpenes.
-# cannabinoids = []
-# terpenes = []
-# for item in emerald['results']:
-#     lab_results = ast.literal_eval(item)
-#     for result in lab_results:
-#         if result['analysis'] == 'cannabinoids':
-#             cannabinoids.append(result['name'])
-#         elif result['analysis'] == 'terpenes':
-#             terpenes.append(result['name'])
-# cannabinoids = list(set(cannabinoids))
-# terpenes = list(set(terpenes))
-# print('Cannabinoids:', cannabinoids)
-# print('Terpenes:', terpenes)
 
 #-----------------------------------------------------------------------
-# Standardize results.
+# TODO: Calculate statistics.
 #-----------------------------------------------------------------------
 
-# TODO: Standardize product types.
+from cannlytics.data.coas import get_result_value
+from cannlytics.lims.compounds import cannabinoids, terpenes
 
 
-# TODO: Standardize stain names.
-
-
-# === Setup ===
-
-# Setup plotting style.
-plt.style.use('fivethirtyeight')
-plt.rcParams.update({
-    'figure.figsize': (12, 8),
-    'font.family': 'Times New Roman',
-    'font.size': 24,
-})
-
-
-
-# === Timeseries Analysis ===
-
-# Define when standard method was effective.
-# Source: https://cannabis.ca.gov/cannabis-laws/rulemaking/standard-cannabinoids-test-method-and-standardized-operating-procedures/
-effective_date = pd.to_datetime('2023-10-01')
-compliance_date = pd.to_datetime('2024-01-01')
-
-# TODO: Create a timeseries of average total_cannabinoids, total_thc by week
-# for the datasets: `flower_co`, `sclabs`, `glass_house`.
-# Annotate the effective date and compliance date with a vertical line.
-
-def preprocess_and_aggregate(df):
-    """
-    Preprocess the data and aggregate it to calculate weekly averages.
-    """
-    # Ensure the date column is in datetime format
-    df['date'] = pd.to_datetime(df['date_tested'], errors='coerce')
-
-    # Keep only flower samples.
-    flower_types = [
-        'Flower',
-        'Flower, Inhalable',
-        'Flower, Product Inhalable',
-        'Flower, Medical Inhalable',
-        'Plant (Flower - Cured)',
-        'Plant (Bulk Flower)',
-    ]
-    preroll_types = [
-        'Pre-roll',
-        'Plant (Preroll)',
-        'Pre-Roll Cannabis, Product Inhalable',
-        'Pre-roll Cannabis, Product Inhalable',
-        'Pre-roll Product, Product Inhalable',
-        'Pre-roll Product, Inhalable',
-        'Pre-Roll Cannabis, Inhalable',
-        'Pre-roll Cannabis, Inhalable',
-    ]
-    sample = df.loc[df['product_type'].isin(flower_types)]
-
-    # Filter relevant columns and remove rows with missing values in these columns
-    sample = sample[['date', 'total_cannabinoids', 'total_thc']].dropna()
-
-    # Resample to weekly frequency, calculating the mean of total_cannabinoids and total_thc
-    return sample.resample('M', on='date').mean().reset_index()
-
-
-# Preprocess and aggregate data for each dataset.
-flower_co_weekly = preprocess_and_aggregate(flower_co)
-sclabs_weekly = preprocess_and_aggregate(sclabs)
-glass_house_weekly = preprocess_and_aggregate(glass_house)
-
-
-def plot_timeseries(df, title):
-    """
-    Plot the timeseries data with annotations for effective and compliance dates.
-    """
-    plt.figure(figsize=(15, 8))
-    sns.lineplot(x='date', y='total_cannabinoids', data=df, label='Total Cannabinoids')
-    sns.lineplot(x='date', y='total_thc', data=df, label='Total THC')
-    plt.axvline(x=effective_date, color='#1a1a1a', linestyle='--', lw=2)
-    plt.axvline(x=compliance_date, color='#1a1a1a', linestyle='--', lw=2)
-    plt.text(
-        effective_date,
-        plt.gca().get_ylim()[1] - 1,
-        'Effective Date',
-        color='#1a1a1a',
-        ha='right'
-    )
-    plt.text(
-        compliance_date,
-        plt.gca().get_ylim()[1] - 2,
-        'Compliance Date',
-        color='#1a1a1a',
-        ha='right',
-    )
-    plt.title(title)
-    plt.xlabel('Date')
-    plt.ylabel('Average Value')
-    plt.legend(loc='upper left')
-    plt.tight_layout()
-
-# Plotting each dataset.
-plot_timeseries(flower_co_weekly, 'Flower Company - Average Total Cannabinoids and THC by Month')
-plot_timeseries(sclabs_weekly, 'SC Labs - Average Total Cannabinoids and THC by Month')
-plot_timeseries(glass_house_weekly, 'Glass House Farms - Average Cannabinoids and THC by Month')
-plt.show()
-
-
-def preprocess_and_aggregate_by_lab(df):
-    """
-    Preprocess the data and aggregate it to calculate monthly averages of total THC by lab.
-    """
-    # Ensure the date column is in datetime format
-    df['date'] = pd.to_datetime(df['date_tested'], errors='coerce')
-
-    # Filtering for flower types
-    flower_types = [
-        'Flower', 'Flower, Inhalable', 'Flower, Product Inhalable', 
-        'Flower, Medical Inhalable', 'Plant (Flower - Cured)', 'Plant (Bulk Flower)'
-    ]
-    df = df.loc[df['product_type'].isin(flower_types)]
-
-    # Keep relevant columns
-    df = df[['date', 'lab', 'total_cannabinoids']].dropna()
-
-    # Resampling to monthly frequency and grouping by lab
-    monthly_avg = df.groupby(['lab']).resample('M', on='date').mean().reset_index()
-
-    return monthly_avg
-
-# Preprocess and aggregate data for flower_co by lab.
-flower_co_monthly_by_lab = preprocess_and_aggregate_by_lab(flower_co)
-
-def plot_timeseries_by_lab(df, title):
-    """
-    Plot the timeseries data of monthly average total THC by lab.
-    """
-    plt.figure(figsize=(15, 8))
-    labs = df['lab'].unique()
-    colors = sns.color_palette('tab10', n_colors=len(labs))
-    for i, lab in enumerate(labs):
-        lab_data = df[df['lab'] == lab]
-        sns.lineplot(
-            x='date',
-            y='total_cannabinoids',
-            data=lab_data,
-            label=lab,
-            color=colors[i],
-        )
-    plt.axvline(x=effective_date, color='#1a1a1a', linestyle='--', lw=2)
-    plt.axvline(x=compliance_date, color='#1a1a1a', linestyle='--', lw=2)
-    plt.text(effective_date, plt.gca().get_ylim()[1] - 1, 'Effective Date', color='#1a1a1a', ha='right')
-    plt.text(compliance_date, plt.gca().get_ylim()[1] - 2, 'Compliance Date', color='#1a1a1a', ha='right')
-    plt.xlim(pd.to_datetime('2023-01-01'), pd.to_datetime('2024-02-01'))
-    plt.title(title)
-    plt.xlabel('Date')
-    plt.ylabel('Average Total Cannabinoids')
-    plt.legend(title='Lab', loc='upper left')
-    plt.tight_layout()
-
-# Plotting the timeseries for flower_co by lab
-plot_timeseries_by_lab(
-    flower_co_monthly_by_lab,
-    'Flower Company - Average Total Cannabinoids by Lab by Month'
-)
-plt.show()
-
-
-# === Chemical Analysis ===
-
-# Define commonly observed cannabinoids and terpenes.
-cannabinoids = [
-    'thca',
-    'cbga',
-    'cbca',
-    'delta_9_thc',
-    'cbg',
-    'thcva',
-    'cbda',
-    'delta_8_thc',
-    'thcv',
-    'cbd',
-    'cbdv',
-    'cbdva',
-    'cbl',
-    'cbn',
-    'cbc',
-]
-terpenes = [
-    'beta_caryophyllene',
-    'd_limonene',
-    'alpha_humulene',
-    'beta_myrcene',
-    'beta_pinene',
-    'alpha_pinene',
-    'beta_ocimene',
-    'alpha_bisabolol',
-    'terpineol',
-    'fenchol',
-    'linalool',
-    'borneol',
-    'camphene',
-    'terpinolene',
-    'fenchone',
-    'nerolidol',
-    'trans_beta_farnesene',
-    'citronellol',
-    'sabinene_hydrate',
-    'nerol',
-    'valencene',
-    'sabinene',
-    'alpha_phellandrene',
-    'delta_3_carene',
-    'alpha_terpinene',
-    'p_cymene',
-    'eucalyptol',
-    'gamma_terpinene',
-    'isopulegol',
-    'camphor',
-    'isoborneol',
-    'menthol',
-    'pulegone',
-    'geraniol',
-    'geranyl_acetate',
-    'alpha_cedrene',
-    'caryophyllene_oxide',
-    'guaiol',
-    'cedrol'
-]
+# Find al unique terpenes and cannabinoids and see if there are any new compounds.
+unidentified_compounds = set()
+for index, row in all_results.iterrows():
+    results = json.loads(row['results'])
+    for result in results:
+        if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
+            unidentified_compounds.add(result['key'])
+unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
+print('Unidentified compounds:', len(unidentified_compounds))
 
 # Get the results for each cannabinoid and terpene.
 for a in cannabinoids + terpenes:
     print('Augmenting:', a)
-    results[a] = results['results'].apply(
+    all_results[a] = all_results['results'].apply(
         lambda x: get_result_value(x, a, key='key')
     )
 
+# TODO: Ensure totals are calculated:
+# - total_cannabinoids
+# - total_thc
+# - total_cbd
+# - total_terpenes
+
+# TODO: Calculate averages, medians, standard deviations, and percentiles
+# for cannabinoids and terpenes.
+# Time series:
+# - daily
+# - weekly
+# - monthly
+# - quarterly
+# - yearly
 
 
+#-----------------------------------------------------------------------
+# Upload COA PDFs to Google Cloud Storage.
+#-----------------------------------------------------------------------
 
-# # === Look at the Emerald Cup results ===
-# emerald_2023 = results.loc[results['producer'] == 'Emerald Cup 2023']
-# emerald_2022 = results.loc[results['producer'] == 'Emerald Cup 2022']
-# emerald_2020 = results.loc[results['producer'] == 'Emerald Cup 2020']
-# emerald_2023['year'] = 2023
-# emerald_2022['year'] = 2022
-# emerald_2020['year'] = 2020
-# emerald = pd.concat([emerald_2023, emerald_2022, emerald_2020])
+# Use a local cache to keep track of lab results in Firestore,
+# PDFs in Google Cloud Storage, and which datafiles are in Cloud Storage.
+cache_dir = 'D://data/california/cache'
+cache_file = os.path.join(cache_dir, 'results-ca.json')
+if os.path.exists(cache_file):
+    with open(cache_file, 'r') as f:
+        cache = json.load(f)
+else:
+    cache = {}
+    os.makedirs(cache_dir, exist_ok=True)
 
-# # TODO: Merge with ranking data.
-# winners_2022 = pd.read_excel('data/emerald-cup-winners-2022.xlsx')
-# winners_2023 = pd.read_excel('data/emerald-cup-winners-2023.xlsx')
+# Match COA PDFs with the results.
+pdf_dir = 'D://data/florida/results/pdfs'
+coa_pdfs = {}
+for index, result in all_results.iterrows():
 
-# winners_2022['product_name'] = winners_2022['entry_name'].apply(
-#     lambda x: x.split(' – ')[-1]
-# )
+    # Get the name of the PDF.
+    identifier = result['coa_pdf']
+    if identifier == 'download.pdf':
+        lab_results_url = result['lab_results_url']
+        identifier = lab_results_url.split('=')[-1].split('?')[0]
+    
+    # Find the matching PDF.
+    for root, _, files in os.walk(pdf_dir):
+        for filename in files:
+            if identifier in filename:
+                pdf_path = os.path.join(root, filename)
+                coa_pdfs[result['sample_hash']] = pdf_path
+                break
 
+# Initialize Firebase.
+config = dotenv_values('.env')
+db = initialize_firebase()
+bucket_name = config['FIREBASE_STORAGE_BUCKET']
+firebase_api_key = config['FIREBASE_API_KEY']
 
-# TODO: See which strain has the highest terpenes.
-# 2022:
-# Highest Terpene Content – Flower	Woodwide Farms – Mendo Crumble
-# Highest Terpene Content – Solventless	Have Hash – Rainbow Belts
-# Highest Terpene Content – Solvent (Hydrocarbon)	Errl Hill – Gazberries
+# Upload datafiles to Google Cloud Storage.
+# Checks if the file has been uploaded according to the local cache.
+for datafile in datafiles:
+    filename = os.path.split(datafile)[-1]
+    if filename not in cache.get('datafiles', []):
+        file_ref = f'data/results/florida/datasets/{filename}'
+        # upload_file(
+        #     destination_blob_name=file_ref,
+        #     source_file_name=datafile,
+        #     bucket_name=bucket_name,
+        # )
+        print('Uploaded:', file_ref)
+        cache.setdefault('datafiles', []).append(filename)
 
+# Upload PDFs to Google Cloud Storage.
+# Checks if the file has been uploaded according to the local cache.
+print('Number of unique COA PDFs:', len(coa_pdfs))
+for sample_hash, pdf_path in coa_pdfs.items():
+    print('Uploading:', pdf_path)
+    pdf_hash = hash_file(pdf_path)
 
+    if pdf_hash not in cache.get('pdfs', []):
 
-# TODO: See which strain has the most diverse terpene profile.
-# 2022: Most Unique Terpene Profile	Atrium Cultivation – Juice Z
+        # Upload the file.
+        file_ref = f'data/results/florida/pdfs/{pdf_hash}.pdf'
+        # upload_file(
+        #     destination_blob_name=file_ref,
+        #     source_file_name=pdf_path,
+        #     bucket_name=bucket_name,
+        # )
 
+        # # Get download URL and create a short URL.
+        # download_url, short_url = None, None
+        # try:
+        #     download_url = get_file_url(file_ref, bucket_name=bucket_name)
+        #     short_url = create_short_url(
+        #         api_key=firebase_api_key,
+        #         long_url=download_url,
+        #         project_name=db.project
+        #     )
+        # except Exception as e:
+        #     print('Failed to get download URL:', e)
 
-# TODO: See which strain has the most diverse cannabinoid profile.
-# 2022: Most Unique Cannabinoid Profile	Emerald Spirit Botanicals – Pink Boost Goddess
+        # # Keep track of the file reference and download URLs.
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'file_ref'] = file_ref
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'download_url'] = download_url
+        # all_results.loc[all_results['sample_hash'] == sample_hash, 'short_url'] = short_url
 
+        # Cache the PDF.
+        cache.setdefault('pdfs', []).append(pdf_hash)
 
+# Upload the raw data to Firestore.
+# Checks if the data has been uploaded according to the local cache.
+refs, updates = [], []
+collection = 'results'
+for _, obs in all_results.iterrows():
+    doc_id = obs['sample_hash']
+    if doc_id not in cache.get('results', []):
+        refs.append(f'{collection}/{doc_id}')
+        updates.append(obs.to_dict())
+        cache.setdefault('results', []).append(doc_id)
+# if refs:
+#     update_documents(refs, updates, database=db)
+#     print('Uploaded %i results to Firestore.' % len(refs))
 
-# TODO: Build an ordered probit model to back-cast 2020 winners.
+# TODO: Save the statistics to Firestore.
 
-
-# Most Innovative Product – Consumable	Compound Genetics x Node Labs x The Original Resinator x Industry Processing Solutions – Perzimmon #2 Flower
-
-
-# TODO: Is there any interesting analysis that can be done with the images?
-
-
-
-# === Environment analysis ===
-
-# # Compare indoor vs. outdoor
-# indoor = results[results['product_subtype'] == 'Indoor']
-# outdoor = results[results['product_subtype'] == 'Full Sun']
-# indoor_outdoor_comparison = indoor.describe().join(outdoor.describe(), lsuffix='_indoor', rsuffix='_outdoor')
-
-# # Visualize indoor vs. outdoor cannabis.
-# plt.ylabel('Count')
-# plt.xlabel('Percent')
-# plt.title('Terpene Concentrations in Indoor vs. Full Sun Cannabis in CA')
-# indoor['total_terpenes'].hist(bins=40)
-# outdoor['total_terpenes'].hist(bins=40)
-# plt.legend(['Indoor', 'Outdoor'])
-# plt.xlim(0)
-# plt.tight_layout()
-# # plt.savefig(f'figures/indoor-outdoor-thc.png', bbox_inches='tight', dpi=300)
-# plt.show()
-
-
-# === Chemical Analysis ===
-
-# # Look at total cannabinoids.
-# key = 'total_cannabinoids'
-# results[key] = pd.to_numeric(results[key], errors='ignore')
-# sample = results.dropna(subset=[key])
-# sample[key].hist(bins=1000)
-# plt.xlim(0, 100)
-# plt.show()
-
-# # Look at total terpenes.
-# key = 'total_terpenes'
-# results[key] = pd.to_numeric(results[key], errors='coerce')
-# sample = results.dropna(subset=[key])
-# sample[key].hist(bins=40)
-# plt.show()
-
-# # Look at moisture content.
-# key = 'moisture_content'
-# results[key] = pd.to_numeric(results[key], errors='coerce')
-# sample = results.dropna(subset=[key])
-# sample[key].hist(bins=40)
-# plt.show()
-
-# # Look at water activity.
-# key = 'water_activity'
-# results[key] = pd.to_numeric(results[key], errors='coerce')
-# sample = results.dropna(subset=[key])
-# sample[key].hist(bins=40)
-# plt.show()
-
-# # Look at moisture-adjusted total cannabinoids in flower.
-# types = ['Flower', 'Flower, Inhalable']
-# sample = results.loc[results['product_type'].isin(types)]
-# sample = sample.loc[~sample['total_cannabinoids'].isna()]
-# sample = sample.loc[~sample['moisture_content'].isna()]
-# sample['wet_total_cannabinoids'] = sample['total_cannabinoids'] / (1 + sample['moisture_content'] * 0.01)
-# sample['wet_total_cannabinoids'].hist(bins=1000)
-# plt.xlim(0, 100)
-# plt.show()
-
-# # Calculate the mean wet total cannabinoids in flower in CA.
-# valid = sample['wet_total_cannabinoids'].loc[sample['wet_total_cannabinoids'] < 100]
-# valid.mean()
-
-
-# === Product subtype analysis ===
-
-# # Look at terpene concentrations in concentrate products:
-# concentrate_types = [
-#     'Badder',
-#     'Diamond',
-#     'Diamond Infused',
-#     'Crushed Diamond',
-#     'Liquid Diamonds',
-#     'Distillate',
-#     'Resin',
-#     'Live Resin',
-#     'Live Resin Infused',
-#     'Live Resin Sauce',
-#     'Sauce',
-#     'Live Rosin',
-#     'Unpressed Hash Green',
-#     # 'Fresh Press',
-#     # 'Hash Infused',
-#     # 'Rosin Infused',
-# ]
-
-# # Creating a box plot of total terpenes in concentrates.
-# concentrate_data = results.loc[results['product_subtype'].isin(concentrate_types)]
-# filtered_data = concentrate_data.loc[~concentrate_data['total_terpenes'].isna()]
-# grouped_data = filtered_data.groupby('product_subtype')['total_terpenes'].apply(list)
-# mean_terpenes = {subtype: sum(values) / len(values) for subtype, values in grouped_data.items()}
-# sorted_subtypes = sorted(mean_terpenes, key=mean_terpenes.get)
-# data = [grouped_data[subtype] for subtype in sorted_subtypes]
-# labels = sorted_subtypes
-# plt.figure(figsize=(15, 11))
-# plt.boxplot(data, vert=False, labels=labels)
-# plt.xlabel('Total Terpenes (%)', labelpad=20)
-# plt.title('Terpene Concentrations in Concentrates in CA', pad=20)
-# plt.grid(axis='x', linestyle='--', alpha=0.7)
-# plt.tight_layout()
-# plt.show()
-
-
-# === Price analysis ===
-
-# # Clean the price data.
-# results['discount_price'] = results['discount_price'].str.replace('$', '').astype(float)
-# price_data = results.loc[results['discount_price'] > 0]
-# price_data = price_data.loc[~price_data['amount'].isna()]
-# price_data['price_per_gram'] = price_data['discount_price'] / price_data['amount']
-
-# # See if THC, terpenes, etc. are correlated with price.
-# types = ['Flower', 'Flower, Inhalable']
-# # types = [
-# #     'Infused Flower/Pre-Roll, Product Inhalable',
-# #     'Pre-roll',
-# #     'Plant (Preroll)',
-# #     'Infused Pre-roll',
-# # ]
-# # types = [
-# #     'Concentrates & Extracts (Other)',
-# #     'Concentrates & Extracts (Distillate)',
-# #     'Extract',
-# #     'Concentrates & Extracts (Diamonds)',
-# #     'Concentrates & Extracts (Live Resin)',
-# #     'Concentrates & Extracts (Live Rosin)',
-# #     'Concentrates & Extracts (Vape)',
-# #     'Concentrate, Product Inhalable',
-# #     'Distillate',
-# # ]
-# type_price_data = price_data.loc[price_data['product_type'].isin(types)]
-# type_price_data = type_price_data.loc[type_price_data['total_cannabinoids'] < 100]
-
-# # Visualize the relationship between cannabinoids and price.
-# plt.figure(figsize=(10, 6))
-# sns.regplot(
-#     data=type_price_data,
-#     x='total_cannabinoids',
-#     y='price_per_gram',
-# )
-# plt.xlabel('Total Cannabinoids')
-# plt.ylabel('Price per gram ($)')
-# plt.title('Price per gram of flower to total cannabinoids in CA')
-# plt.grid(True)
-# plt.show()
-
-# # Visualize the relationship between terpenes and price.
-# plt.figure(figsize=(10, 6))
-# sns.regplot(
-#     data=type_price_data,
-#     x='total_terpenes',
-#     y='price_per_gram',
-# )
-# plt.xlabel('Total Terpenes')
-# plt.ylabel('Price per gram ($)')
-# plt.title('Price per gram of flower to total terpenes in CA')
-# plt.grid(True)
-# plt.show()
-
-# # Price vs. Chemical Properties Regression
-# X = type_price_data[['total_cannabinoids', 'total_terpenes']]
-# y = type_price_data['price_per_gram']
-# X_clean = X.dropna()
-# y_clean = y.reindex(X_clean.index)
-# X_clean = sm.add_constant(X_clean)
-# model = sm.OLS(y_clean, X_clean)
-# regression = model.fit()
-# print(regression.summary())
-
-# # Look at the average discount.
-# results['discount'].hist(bins=40)
-# plt.vlines(results['discount'].mean(), 0, 60, color='darkorange')
-# plt.show()
-
-# TODO: Look at the average price per product type.
-
-
-
-# === Lineage analysis ===
-
-# # Look at the most common parents.
-# lineage_data = results['lineage'].dropna()
-# unique_parents = pd.Series([parent for lineage in lineage_data for parent in lineage.split(' x ')]).value_counts()
-# filtered_strains = unique_parents[unique_parents >= 2]
-# plt.figure(figsize=(10, 8))
-# filtered_strains.sort_values()[-20:].plot(kind='barh')
-# plt.xlabel('Number of Descendants')
-# plt.ylabel('')
-# plt.title('Number of Descendants by Strain')
-# plt.show()
-
-
-# === Timeseries analysis ===
-
-# # Format the date.
-# results['date'] = pd.to_datetime(results['date_tested'])
-
-# TODO: Look at total THC levels over time.
-
-
-# TODO: Look at total terpene levels over time.
-
-
-
-# === Geographic analysis ===
-
-# Note: Mostly missing.
-
-# TODO: Geocode `producer_address`.
-
-
-# TODO: Compare different regions of CA.
+# Save the updated cache
+with open(cache_file, 'w') as f:
+    json.dump(cache, f)
+    print('Saved cache:', cache_file)

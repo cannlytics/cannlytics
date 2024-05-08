@@ -165,12 +165,15 @@ def parse_coa_pdfs(
     """
     all_results = []
     for _, row in data.iterrows():
-        pdf_file_path = os.path.join(pdf_dir, row[id_key] + '.pdf')
+        coa_pdf = row[id_key] + '.pdf'
+        pdf_file_path = os.path.join(pdf_dir, coa_pdf)
         if not os.path.exists(pdf_file_path):
             continue
         try:
             coa_data = parser.parse(pdf_file_path)
-            all_results.append({**row.to_dict(), **coa_data[0]})
+            entry = {**row.to_dict(), **coa_data[0]}
+            entry['coa_pdf'] = coa_pdf
+            all_results.append(entry)
             if verbose:
                 print(f'Parsed COA: {pdf_file_path}')
         except Exception as e:
@@ -324,7 +327,7 @@ def get_products_flower_co(
     data = []
     if verbose:
         print('Number of unrecorded products:', len(unrecorded_products))
-    for index, product in unrecorded_products.iterrows():
+    for _, product in unrecorded_products.iterrows():
         if verbose:
             print(f'Getting data for: {product["product_url"]}')
         driver.get(product['product_url'])

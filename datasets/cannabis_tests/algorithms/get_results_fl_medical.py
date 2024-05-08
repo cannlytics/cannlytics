@@ -59,6 +59,10 @@ queries = [
     'lab results',
     'test results',
     'results',
+    'effects',
+    'aroma',
+    'taste',
+    'smell',
 ]
 sort_by = 'new'
 subreddit = 'FLMedicalTrees'
@@ -70,33 +74,44 @@ for _ in range(10):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     sleep(2)
 
-# Get the page source HTML.
-page_source = driver.page_source
-
-# Close the driver.
-# driver.quit()
-
-# Parse the HTML with BeautifulSoup.
-soup = BeautifulSoup(page_source, 'html.parser')
-posts = soup.find_all('faceplate-tracker', {'data-testid': 'search-post'})
-print(f'Number of posts: {len(posts)}')
-
 # Collect post details.
 data = []
+recorded_posts = []
+
+# Manual iteration of queries here.
+page_source = driver.page_source
+soup = BeautifulSoup(page_source, 'html.parser')
+posts = soup.find_all('faceplate-tracker', {'data-testid': 'search-post'})
 for post in posts:
     context = post.get('data-faceplate-tracking-context')
     context = json.loads(context)
     post_context = context['post']
+    post_id = post_context['id']
+    if post_id in recorded_posts:
+        continue
+    recorded_posts.append(post_id)
     data.append({
         'title': post_context['title'],
         'url': 'https://www.reddit.com' + post_context['url'],
         'created_timestamp': post_context['created_timestamp'],
         'author_id': post_context['author_id'],
-        'post_id': post_context['id'],
+        'post_id': post_id,
         'number_comments': post_context['number_comments'],
         'subreddit_id': post_context['subreddit_id'],
         'subreddit_name': post_context['subreddit_name'],
     })
+print(f'Number of posts: {len(data)}')
+
+# Close the driver.
+# driver.quit()
+
+# Save the post data.
+data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
+timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+datafile = os.path.join(data_dir, f'fl-medical-trees-posts-{timestamp}.xlsx')
+df = pd.DataFrame(data)
+df.to_excel(datafile, index=False)
+print('Saved post data:', datafile)
 
 
 # === Get Reddit post data with the Reddit API  ===
@@ -111,6 +126,13 @@ def initialize_reddit(config):
     )
     return reddit
 
+# Read already collected posts.
+data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
+post_datafiles = [os.path.join(data_dir, x) for x in os.listdir(data_dir) if 'posts' in x and 'results' not in x]
+posts = pd.concat([pd.read_excel(x) for x in post_datafiles])
+posts.drop_duplicates(subset=['post_id', 'coa_url', 'redirect_url'], inplace=True)
+collected_posts = list(set(posts['post_id'].values) - set(recorded_posts))
+print('Total number of already collected posts:', len(collected_posts))
 
 # Initialize Reddit.
 config = dotenv_values('.env')
@@ -122,6 +144,9 @@ for n, post_data in enumerate(data[len(all_posts):]):
 
     # Retrieve the post content.
     post_id = post_data['post_id'].split('_')[-1]
+    if post_id in collected_posts:
+        print('Post already collected:', post_id)
+        continue
     print('Getting data for post:', post_id)
     try:
         submission = reddit.submission(id=post_id)

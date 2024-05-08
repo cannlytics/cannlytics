@@ -229,13 +229,16 @@ def get_glass_house_farms_lab_results(
     coa_data = []
     for _, result in results.iterrows():
         lab_result_id = result['lab_result_id']
-        pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+        coa_pdf = f'{lab_result_id}.pdf'
+        pdf_file = os.path.join(license_pdf_dir, coa_pdf)  
         if not os.path.exists(pdf_file):
             print('File not found:', pdf_file)
             continue
         try:
             parsed = parser.parse(pdf_file)
-            coa_data.append({**result.to_dict(), **parsed[0]})
+            entry = {**result.to_dict(), **parsed[0]}
+            entry['coa_pdf'] = coa_pdf
+            coa_data.append(entry)
             print('Parsed:', pdf_file)
         except:
             print('Error parsing:', pdf_file)
@@ -281,13 +284,16 @@ license_pdf_dir = os.path.join(pdf_dir, license_number)
 coa_data = []
 for _, result in all_results.iterrows():
     lab_result_id = result['lab_result_id']
-    pdf_file = os.path.join(license_pdf_dir, f'{lab_result_id}.pdf')  
+    coa_pdf = f'{lab_result_id}.pdf'
+    pdf_file = os.path.join(license_pdf_dir, coa_pdf)  
     if not os.path.exists(pdf_file):
         print('File not found:', pdf_file)
         continue
     try:
         parsed = parser.parse(pdf_file)
-        coa_data.append({**result.to_dict(), **parsed[0]})
+        entry = {**result.to_dict(), **parsed[0]}
+        entry['coa_pdf'] = coa_pdf
+        coa_data.append(entry)
         print('Parsed:', pdf_file)
     except:
         print('Error parsing:', pdf_file)
