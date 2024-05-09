@@ -1,10 +1,10 @@
 """
 Get Reddit Results | Cannlytics
-Copyright (c) 2023 Cannlytics
+Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/1/2023
-Updated: 4/17/2024
+Updated: 5/8/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -19,7 +19,6 @@ Description:
 """
 # Standard imports:
 from datetime import datetime
-import hashlib
 import json
 import os
 import shutil
@@ -29,25 +28,35 @@ from time import sleep
 from bs4 import BeautifulSoup
 from cannlytics.data.coas import CoADoc
 from cannlytics.data.web import initialize_selenium
+from cannlytics.utils.constants import DEFAULT_HEADERS
+from cannlytics.utils.utils import (
+    download_file_with_selenium,
+    remove_duplicate_files,
+)
 from dotenv import dotenv_values
 import pandas as pd
 import praw
 import requests
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import tempfile
 
+
+#-----------------------------------------------------------------------
+# Setup.
+#-----------------------------------------------------------------------
 
 # Create a directory to store the downloaded images.
 images_directory = 'D://data/reddit/FLMedicalTrees/images'
 os.makedirs(images_directory, exist_ok=True)
 
 
-# === Get Reddit posts with Selenium ===
+#-----------------------------------------------------------------------
+# Get Reddit posts with Selenium.
+#-----------------------------------------------------------------------
 
 # Get the Subreddit page.
 # Note: This required being logged-in in the browser.
+# Note: This step is currently done manually with repeated reading
+# of the `page_source` to append posts to the `data`.
 driver = initialize_selenium(headless=False)
 query = 'COA'
 queries = [
@@ -63,6 +72,8 @@ queries = [
     'aroma',
     'taste',
     'smell',
+    # TODO:
+    'flavor',
 ]
 sort_by = 'new'
 subreddit = 'FLMedicalTrees'
@@ -114,7 +125,15 @@ df.to_excel(datafile, index=False)
 print('Saved post data:', datafile)
 
 
-# === Get Reddit post data with the Reddit API  ===
+#-----------------------------------------------------------------------
+# Get Reddit post data with the Reddit API.
+#-----------------------------------------------------------------------
+
+# DEV:
+data = pd.read_excel(r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data\fl-medical-trees-posts-2024-05-07-11-45-14.xlsx")
+data = data.to_dict(orient='records')
+recorded_posts = [x['post_id'] for x in data]
+
 
 def initialize_reddit(config):
     reddit = praw.Reddit(
@@ -126,6 +145,7 @@ def initialize_reddit(config):
     )
     return reddit
 
+
 # Read already collected posts.
 data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
 post_datafiles = [os.path.join(data_dir, x) for x in os.listdir(data_dir) if 'posts' in x and 'results' not in x]
@@ -133,6 +153,7 @@ posts = pd.concat([pd.read_excel(x) for x in post_datafiles])
 posts.drop_duplicates(subset=['post_id', 'coa_url', 'redirect_url'], inplace=True)
 collected_posts = list(set(posts['post_id'].values) - set(recorded_posts))
 print('Total number of already collected posts:', len(collected_posts))
+print('Number of posts to collect:', len(data) - len(collected_posts))
 
 # Initialize Reddit.
 config = dotenv_values('.env')
@@ -185,6 +206,13 @@ for n, post_data in enumerate(data[len(all_posts):]):
 
     # Download images.
     for i, image_url in enumerate(images, start=1):
+        file_extension = os.path.splitext(image_url)[-1].split('?')[0]
+        filename = f"{post_id}_image_{i}{file_extension}"
+        if file_extension not in ['.jpg', '.jpeg', '.png', '.gif']:
+            filename = f"{post_id}_image_{i}.jpg"
+        outfile = os.path.join(images_directory, filename)
+        if os.path.exists(outfile):
+            continue
         try:
             response = requests.get(image_url, headers={'User-agent': 'CannBot'})
         except:
@@ -202,16 +230,9 @@ for n, post_data in enumerate(data[len(all_posts):]):
         if response.status_code != 200:
             print('Unsuccessful request for image:', image_url)
             continue
-        file_extension = os.path.splitext(image_url)[-1].split('?')[0]
-        filename = f"{post_id}_image_{i}{file_extension}"
-        if file_extension not in ['.jpg', '.jpeg', '.png', '.gif']:
-            filename = f"{post_id}_image_{i}.jpg"
-        filepath = os.path.join(images_directory, filename)
-        if os.path.exists(filepath):
-            continue
-        with open(filepath, 'wb') as file:
+        with open(outfile, 'wb') as file:
             file.write(response.content)
-        print(f"Downloaded image: {filepath}")
+        print(f"Downloaded image: {outfile}")
 
     # Retrieve comments.
     comments = []
@@ -236,10 +257,38 @@ for n, post_data in enumerate(data[len(all_posts):]):
 
 # Optional: Try downloading all of the images after the post data is retrieved?
 
+# Save the post data.
+try:
+    df = pd.DataFrame(all_posts)
+    data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
+    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    datafile = os.path.join(data_dir, f'fl-medical-trees-coa-posts-{timestamp}.xlsx')
+    df.to_excel(datafile, index=False)
+    print('Saved post data:', datafile)
+except:
+    print('No posts to curate.')
 
-# === Parse COA URLs from images. ===
 
-# DEV: Define the image directory.
+#-----------------------------------------------------------------------
+# Parse COA URLs from images.
+#-----------------------------------------------------------------------
+
+# DEV: Extract all COA URLs for posts from logs.
+text_file = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\158-reported-effects\data\scanned-images.txt"
+with open(text_file, 'r') as file:
+    lines = file.readlines()
+    coa_urls = {}
+    for line in lines:
+        if 'COA URL found for post' in line:
+            post_id, coa_url = line.split(':', maxsplit=1)
+            post_id = 't3_' + post_id.split(' ')[-1].strip()
+            coa_url = coa_url.strip()
+            post_urls = coa_urls.get(post_id, [])
+            post_urls.append(coa_url)
+            coa_urls[post_id] = list(set(post_urls))
+print('Number of COA URLs:', len(coa_urls))
+
+# Define the image directory.
 images_directory = 'D://data/reddit/FLMedicalTrees/images'
 
 # Initialize CoADoc.
@@ -274,141 +323,101 @@ try:
 except:
     pass
 
+#-----------------------------------------------------------------------
+# Download COA PDFs using the COA URLs.
+#-----------------------------------------------------------------------
 
-# === Download COA PDFs using the COA URLs. ===
-
-def download_pdf_with_selenium(
-        url,
-        driver=None,
-        persist=False,
-        pause=3.33,
-        wait=10,
-        el_id='download',
-        method='iframe',
-        tag_name='iframe',
-        filename=None,
-        download_dir=None,
-        headless=True,
-    ):
-    if driver is None:
-        driver = initialize_selenium(
-            headless=headless,
-            download_dir=download_dir,
-        )
-    driver.get(url)
-    el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.TAG_NAME, tag_name))
-    )
-    if method == 'iframe':
-        driver.switch_to.frame(el)
-        download_button = WebDriverWait(driver, wait).until(
-            EC.presence_of_element_located((By.ID, el_id))
-        )
-        download_button.click()
-    else:
-        pdf_url = el.get_attribute('href')
-        response = requests.get(pdf_url)
-        if response.status_code == 200:
-            if filename is None:
-                filename = os.path.basename(pdf_url)
-            filepath = os.path.join(download_dir, filename)
-            with open(filepath, 'wb') as file:
-                file.write(response.content)
-    sleep(pause)
-    if not persist:
-        driver.close()
-        driver.quit()
-
+# Define the minimum file size for a PDF.
+MIN_FILE_SIZE = 21 * 1024
 
 # Download all PDFs.
-pdf_dir = r'D:\data\reddit\FLMedicalTrees\pdfs'
+pdf_dir = 'D://data/reddit/FLMedicalTrees/pdfs'
 redirect_urls = {}
-for post_id, urls in reversed(coa_urls.items()):
+for post_id, urls in coa_urls.items():
     print(f"Downloading COA for post {post_id}: {urls}")
     for i, url in enumerate(urls, start=1):
+        filename = f"{post_id}-coa-{i}.pdf"
+        outfile = os.path.join(pdf_dir, filename)
+        if os.path.exists(outfile):
+            print('Cached:', outfile)
+            continue
 
         # Download Kaycha Labs COAs.
-        if 'yourcoa.com' in url and 'coa-download' in url:
-            response = requests.get(url, allow_redirects=True)
-            if response.status_code == 200:
-                redirected_url = response.url
-                try:
-                    download_pdf_with_selenium(
-                        redirected_url,
-                        download_dir=pdf_dir,
-                    )
-                except:
-                    print('Failed to access the redirected URL. Retrying in 60 seconds...')
-                    sleep(60)
-                    try:
-                        download_pdf_with_selenium(
+        if 'yourcoa.com' in url:
+            base = 'https://yourcoa.com'
+            sample_id = url.split('/')[-1].split('?')[0].split('&')[0]
+            if sample_id == 'coa-download':
+                sample_id = url.split('sample=')[-1]
+            try:
+                coa_url = f'{base}/coa/download?sample={sample_id}'
+                response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+                if response.status_code == 200:
+                    if len(response.content) < MIN_FILE_SIZE:
+                        print('File size is small, retrying with Selenium:', url)
+                        # coa_url = f'{base}/coa/coa-view?sample={sample_id}'
+                        response = requests.get(url, allow_redirects=True)
+                        if response.status_code == 200:
+                            redirected_url = response.url
+                            download_file_with_selenium(
+                                redirected_url,
+                                download_dir=pdf_dir,
+                            )
+                            print('Downloaded with Selenium:', redirected_url)
+                    else:
+                        with open(outfile, 'wb') as pdf:
+                            pdf.write(response.content)
+                        print('Downloaded:', outfile)
+                else:
+                    print('Failed to download, retrying with Selenium:', url)
+                    response = requests.get(url, allow_redirects=True)
+                    if response.status_code == 200:
+                        redirected_url = response.url
+                        download_file_with_selenium(
                             redirected_url,
                             download_dir=pdf_dir,
                         )
-                    except:
-                        print('Failed to access the redirected URL. Continuing...')
-                        continue
-                post_urls = redirect_urls.get(post_id, [])
-                post_urls.append(redirected_url)
-                redirect_urls[post_id] = post_urls
-            else:
-                print('Failed to access the redirected URL.')
+                        print('Downloaded with Selenium:', redirected_url)
+            except:
+                coa_url = f'{base}/coa/coa-view?sample={sample_id}'
+                response = requests.get(coa_url, allow_redirects=True)
+                if response.status_code == 200:
+                    redirected_url = response.url
+                    download_file_with_selenium(
+                        redirected_url,
+                        download_dir=pdf_dir,
+                    )
+                    print('Downloaded with Selenium:', redirected_url)
 
         # Download Method Testing Labs COAs.
         elif 'mete.labdrive.net' in url:
-            download_pdf_with_selenium(
+            download_file_with_selenium(
                 url,
                 download_dir=pdf_dir,
                 method='a',
                 tag_name='a',
                 filename=f"{post_id}-coa-{i}.pdf",
             )
+            print('Downloaded with Selenium:', url)
 
         # Download regular PDFs.
+        # Note: Ensure ModernCanna, ACS, etc. COAs are being downloaded.
         elif url.startswith('http'):
             response = requests.get(url, allow_redirects=True)
             if response.status_code == 200:
                 filename = f"{post_id}-coa-{i}.pdf"
-                filepath = os.path.join(pdf_dir, filename)
-                with open(filepath, 'wb') as file:
+                outfile = os.path.join(pdf_dir, filename)
+                with open(outfile, 'wb') as file:
                     file.write(response.content)
-                print(f"Downloaded COA: {filepath}")
+                print(f"Downloaded COA: {outfile}")
             sleep(1)
+        
+        # Skip invalid URLs.
+        else:
+            print('Invalid URL:', url)
+            continue
 
-
-def hash_file(filepath, size=65536):
-    """Generate a SHA-1 hash for a file."""
-    hasher = hashlib.sha1()
-    with open(filepath, 'rb') as f:
-        buf = f.read(size)
-        while len(buf) > 0:
-            hasher.update(buf)
-            buf = f.read(65536)
-    return hasher.hexdigest()
-
-
-def remove_duplicate_files(directory):
-    """Remove duplicate PDFs from a directory."""
-    hashes = {}
-    files_removed = 0
-    total_files = 0
-    for filename in os.listdir(directory):
-        if filename.endswith('.pdf'):
-            total_files += 1
-            filepath = os.path.join(directory, filename)
-            file_hash = hash_file(filepath)
-            
-            # Check if hash already exists in the dictionary
-            if file_hash in hashes:
-                os.remove(filepath)
-                files_removed += 1
-                print(f"Removed duplicate file: {filepath}")
-            else:
-                hashes[file_hash] = filepath
-    print(f"Total files scanned: {total_files}, duplicates removed: {files_removed}")
-
-# Optional: Remove duplicate PDFs.
-remove_duplicate_files(pdf_dir)
+# Remove duplicate PDFs.
+remove_duplicate_files(pdf_dir, verbose=True)
 
 try:
 
@@ -428,7 +437,9 @@ except:
     print('No posts to curate.')
 
 
-# === Parse COA data from the PDFs. ===
+#-----------------------------------------------------------------------
+# FIXME: Parse COA data from the PDFs.
+#-----------------------------------------------------------------------
 
 # Parse COA data from the PDFs.
 parser = CoADoc()
@@ -458,7 +469,6 @@ for pdf_file in pdf_files:
             all_coa_data[coa_id] = coa_data
     else:
         print('Found no data:', pdf_file)
-
 try:
     shutil.rmtree(temp_path)
 except:
@@ -477,7 +487,9 @@ coa_df.to_excel(datafile, index=False)
 print('Saved %i COA data:' % len(coa_df), datafile)
 
 
-# === Create a sample of posts that have COA URls. ===
+#-----------------------------------------------------------------------
+# FIXME: Create a sample of posts that have COA URls.
+#-----------------------------------------------------------------------
 
 # Define where the data lives.
 data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
@@ -497,7 +509,7 @@ print('Number of COA results:', len(results))
 # Find the post ID for the lab results.
 post_coa_data = {}
 for index, row in results.iterrows():
-    coa_id = row['coa_id'].split('-coa')[0]
+    coa_id = row['coa_id'].replace('t3_', '').split('-coa')[0]
     matches = posts.loc[posts['post_id'].str.contains(coa_id)]
     try:
         if matches.empty:
@@ -523,53 +535,3 @@ timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 datafile = os.path.join(data_dir, f'fl-medical-trees-posts-with-results-{timestamp}.xlsx')
 merged_df.to_excel(datafile, index=False)
 print('Saved %i posts with COA data:' % len(merged_df), datafile)
-
-
-
-
-# === TODO: Try to extract Batch IDs from images with AI! ===
-
-
-
-# === Analyze the review data ===
-
-# TODO: Number of posts by user.
-
-
-
-# === Analyze the lab result data ===
-
-# TODO: Count the number of strains.
-
-
-# TODO: Count the number of brands.
-
-
-
-# === TODO: Estimate sentiment of posts and comments. ===
-
-
-
-# === TODO: Use NLP to identify effects. ===
-
-# TODO: Try to identify any brands mentioned with NLP.
-
-
-
-# === TODO: Analyze results with posts. ===
-
-
-# Correlate sentiment with cannabinoids and terpenes.
-
-
-# Question: How does consumer sentiment correlate with Farnesene concentrations?
-
-
-# Question: How does consumer sentiment correlate with THC concentrations?
-
-
-# Question: How does consumer sentiment correlate with alpha-humulene to beta-caryophyllene ratios?
-
-
-# Question: How does consumer sentiment correlate with beta-Pinene to D-limonene ratios?
-

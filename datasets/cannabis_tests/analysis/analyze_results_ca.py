@@ -28,38 +28,38 @@ from cannlytics.utils.utils import hash_file
 # Read all lab results.
 #-----------------------------------------------------------------------
 
-def parse_coa_pdfs(
-        parser: CoADoc,
-        data,
-        pdf_dir: str,
-        id_key: str = 'product_id',
-        verbose: bool = True,
-    ):
-    """Parse corresponding COAs from a DataFrame in a PDF directory.
-    The `id_key` is used to match the PDF filename to the DataFrame.
-    """
-    all_results = []
-    for _, row in data.iterrows():
-        coa_pdf = row[id_key] + '.pdf'
-        pdf_file_path = os.path.join(pdf_dir, coa_pdf)
-        if not os.path.exists(pdf_file_path):
-            continue
-        try:
-            coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
-            if isinstance(coa_data, list):
-                entry = {**row.to_dict(), **coa_data[0]}
-            else:
-                entry = {**row.to_dict(), **coa_data}
-            entry['coa_pdf'] = coa_pdf
-            all_results.append(entry)
-            if verbose:
-                print(f'Parsed COA: {pdf_file_path}')
-        except Exception as e:
-            if verbose:
-                print(f'Failed to parse COA: {pdf_file_path}')
-                print(e)
-            continue
-    return pd.DataFrame(all_results)
+# def parse_coa_pdfs(
+#         parser: CoADoc,
+#         data,
+#         pdf_dir: str,
+#         id_key: str = 'product_id',
+#         verbose: bool = True,
+#     ):
+#     """Parse corresponding COAs from a DataFrame in a PDF directory.
+#     The `id_key` is used to match the PDF filename to the DataFrame.
+#     """
+#     all_results = []
+#     for _, row in data.iterrows():
+#         coa_pdf = row[id_key] + '.pdf'
+#         pdf_file_path = os.path.join(pdf_dir, coa_pdf)
+#         if not os.path.exists(pdf_file_path):
+#             continue
+#         try:
+#             coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
+#             if isinstance(coa_data, list):
+#                 entry = {**row.to_dict(), **coa_data[0]}
+#             else:
+#                 entry = {**row.to_dict(), **coa_data}
+#             entry['coa_pdf'] = coa_pdf
+#             all_results.append(entry)
+#             if verbose:
+#                 print(f'Parsed COA: {pdf_file_path}')
+#         except Exception as e:
+#             if verbose:
+#                 print(f'Failed to parse COA: {pdf_file_path}')
+#                 print(e)
+#             continue
+#     return pd.DataFrame(all_results)
 
 # Find all of the COA PDFs in the nested directory.
 pdf_dir = 'D://data/california/results/pdfs'
@@ -75,12 +75,37 @@ product_data = pd.DataFrame(pdf_files, columns=['coa_pdf'])
 product_data['product_id'] = product_data['coa_pdf'].apply(
     lambda x: x.split('/pdfs\\')[-1].replace('.pdf', '')
 )
-all_results = parse_coa_pdfs(
-    parser=parser,
-    data=product_data,
-    pdf_dir=pdf_dir,
-    verbose=True,
-)
+# all_results = parse_coa_pdfs(
+#     parser=parser,
+#     data=product_data,
+#     pdf_dir=pdf_dir,
+#     verbose=True,
+# )
+# FIXME: This process is super long, creating memory leaks with Chrome
+# processes.
+id_key = 'product_id'
+verbose = True
+all_results = []
+for _, row in product_data.iterrows():
+    coa_pdf = row[id_key] + '.pdf'
+    pdf_file_path = os.path.join(pdf_dir, coa_pdf)
+    if not os.path.exists(pdf_file_path):
+        continue
+    try:
+        coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
+        if isinstance(coa_data, list):
+            entry = {**row.to_dict(), **coa_data[0]}
+        else:
+            entry = {**row.to_dict(), **coa_data}
+        entry['coa_pdf'] = coa_pdf
+        all_results.append(entry)
+        if verbose:
+            print(f'Parsed COA: {pdf_file_path}')
+    except Exception as e:
+        if verbose:
+            print(f'Failed to parse COA: {pdf_file_path}')
+            print(e)
+        continue
 
 # Fill missing `producer_state` with FL.
 all_results['producer_state'] = all_results['producer_state'].fillna('CA')

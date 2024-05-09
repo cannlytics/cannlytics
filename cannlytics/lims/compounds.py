@@ -1,3 +1,12 @@
+"""
+Compounds
+Copyright (c) 2024 Cannlytics
+
+Authors: Keegan Skeate <https://github.com/keeganskeate>
+Created: 5/8/2024
+Updated: 5/8/2024
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+"""
 # Define common cannabinoids.
 cannabinoids = [
     'cbc',
@@ -74,10 +83,35 @@ terpenes = [
     'valencene'
 ]
 
-# TODO: Define pesticides.
+# Define common heavy metals.
+heavy_metals = [
+    'arsenic',
+    'Barium',
+    'cadmium',
+    'Chromium',
+    'lead',
+    'mercury',
+    'selenium',
+    'silver',
+]
 
-# TODO: Define heavy metals.
+# TODO: Define pesticides.
+pesticides = [
+
+]
 
 # TODO: Define residual solvents.
+residual_solvents = [
+
+]
 
 # TODO: Define microbes, mycotoxins, etc.
+microbes = [
+
+]
+mycotoxins = [
+
+]
+foreign_matter = [
+
+]

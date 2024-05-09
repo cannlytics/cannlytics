@@ -690,6 +690,7 @@
     "Phellandrene",
     "phosmet",
     "Phosmet",
+    "phytol",
     "piechart",
     "pinene",
     "piperonyl",
@@ -952,7 +953,8 @@
     "zipcode",
     "zipcodes",
     "zoneinfo",
-    "zorder"
+    "zorder",
+    "unextracted"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
