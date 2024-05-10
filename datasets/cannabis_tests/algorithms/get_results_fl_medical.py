@@ -438,7 +438,7 @@ except:
 
 
 #-----------------------------------------------------------------------
-# FIXME: Parse COA data from the PDFs.
+# Parse COA data from the PDFs.
 #-----------------------------------------------------------------------
 
 # Parse COA data from the PDFs.
@@ -488,7 +488,7 @@ print('Saved %i COA data:' % len(coa_df), datafile)
 
 
 #-----------------------------------------------------------------------
-# FIXME: Create a sample of posts that have COA URls.
+# Create a sample of posts that have COA URls.
 #-----------------------------------------------------------------------
 
 # Define where the data lives.
