@@ -138,10 +138,8 @@ for index, row in flower.iterrows():
     flower.at[index, 'strain_type'] = strain_type
 
 
-# TODO: What to do about crosses?
-# - strain_names
-# - lineage
-# E.g. "Chem 91 x GSC"
+# Optional: Keep track of crosses.
+# E.g. "Chem 91 x GSC" as `strain_names` and/or `lineage`.
 
 
 #-----------------------------------------------------------------------

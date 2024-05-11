@@ -486,6 +486,8 @@ datafile = os.path.join(data_dir, f'fl-medical-trees-coa-data-{timestamp}.xlsx')
 coa_df.to_excel(datafile, index=False)
 print('Saved %i COA data:' % len(coa_df), datafile)
 
+# TODO: Identify all of the COAs that failed to be parsed.
+
 
 #-----------------------------------------------------------------------
 # Create a sample of posts that have COA URls.

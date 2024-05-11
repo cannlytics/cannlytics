@@ -40,6 +40,9 @@ export const strainsJS = {
     // document.getElementById('strainDescription').textContent = data.description;
     // document.getElementById('strainImageUrl').src = data.imageUrl;
     // document.getElementById('strainTotalFavorites').textContent = data.totalFavorites;
+    // total_tests
+    // strain_type
+    // first_date_tested
   },
   
   initializeStrains() {

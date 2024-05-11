@@ -335,6 +335,7 @@ def parse_results_kaycha(
         temp_path: Optional[str] = None,
         reverse: Optional[bool] = True,
         sort: Optional[bool] = False,
+        completed: Optional[list] = None,
     ):
     """Parse lab results from Kaycha Labs COAs."""
     parser = CoADoc()
@@ -345,38 +346,10 @@ def parse_results_kaycha(
     folders = [x for x in folders if x.startswith('MMTC')]
     if sort: folders = sorted(folders)
     if reverse: folders = reversed(folders)
+    if completed is None: completed = []
     for folder in folders:
-
-        # DEV:
-        completed = [
-            "MMTC-2015-0004",
-            "MMTC-2015-0005",
-            "MMTC-2016-0006",
-            "MMTC-2015-0003",
-            "MMTC-2015-0002",
-            'MMTC-2017-0009',
-            'MMTC-2016-0007',
-            'MMTC-2017-0008',
-            'MMTC-2017-0009',
-            'MMTC-2017-0011',
-            'MMTC-2017-0012',
-            'MMTC-2017-0013',
-            'MMTC-2018-0014',
-            'MMTC-2019-0015',
-            'MMTC-2019-0016',
-            'MMTC-2019-0017',
-            'MMTC-2019-0018',
-            'MMTC-2019-0019',
-            'MMTC-2019-0020',
-            'MMTC-2019-0021',
-            'MMTC-2019-0022',
-            'MMTC-2017-0010',
-            # In-progress
-            # 'MMTC-2015-0001',
-        ]
         if folder in completed:
-            print('Completed:', folder)
-            continue           
+            continue
 
         # Identify all of the PDFs for a licensee.
         outfile = os.path.join(data_dir, 'datasets', f'fl-results-{folder}-{date}.xlsx')
@@ -419,18 +392,46 @@ def parse_results_kaycha(
 if __name__ == '__main__':
 
     # [✓] TEST: Get Kaycha COAs.
-    data_dir = 'D://data/florida/results'
-    kaycha_coas = get_results_kaycha(
-        data_dir=data_dir,
-        pause=3.33,
-        verbose=True,
-    )
+    # data_dir = 'D://data/florida/results'
+    # kaycha_coas = get_results_kaycha(
+    #     data_dir=data_dir,
+    #     pause=3.33,
+    #     verbose=True,
+    # )
+
+    completed = [
+        'MMTC-2015-0001', # Longest
+        "MMTC-2015-0002",
+        "MMTC-2015-0004",
+        "MMTC-2015-0005",
+        "MMTC-2016-0006",
+        "MMTC-2015-0003",
+        'MMTC-2017-0009',
+        'MMTC-2016-0007',
+        'MMTC-2017-0008',
+        'MMTC-2017-0009',
+        'MMTC-2017-0010',
+        'MMTC-2017-0011',
+        'MMTC-2017-0012',
+        'MMTC-2017-0013',
+        # 'MMTC-2018-0014',
+        # 'MMTC-2019-0015',
+        # 'MMTC-2019-0016',
+        # 'MMTC-2019-0017',
+        # 'MMTC-2019-0018',
+        # 'MMTC-2019-0019',
+        # 'MMTC-2019-0020',
+        # 'MMTC-2019-0021',
+        # 'MMTC-2019-0022',
+    ]
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
+    # TODO: Keep track of already parsed COAs.
     parse_results_kaycha(
         data_dir='D://data/florida/results',
         pdf_dir='D://data/florida/results/pdfs',
         reverse=False,
         sort=True,
+        completed=completed
     )
