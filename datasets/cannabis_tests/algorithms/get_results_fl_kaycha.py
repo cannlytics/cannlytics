@@ -391,7 +391,7 @@ def parse_results_kaycha(
 # [✓] Tested: 2024-04-21 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # [✓] TEST: Get Kaycha COAs.
+    # # [✓] TEST: Get Kaycha COAs.
     # data_dir = 'D://data/florida/results'
     # kaycha_coas = get_results_kaycha(
     #     data_dir=data_dir,
@@ -401,19 +401,19 @@ if __name__ == '__main__':
 
     completed = [
         'MMTC-2015-0001', # Longest
-        "MMTC-2015-0002",
-        "MMTC-2015-0004",
-        "MMTC-2015-0005",
-        "MMTC-2016-0006",
-        "MMTC-2015-0003",
-        'MMTC-2017-0009',
-        'MMTC-2016-0007',
-        'MMTC-2017-0008',
-        'MMTC-2017-0009',
-        'MMTC-2017-0010',
-        'MMTC-2017-0011',
-        'MMTC-2017-0012',
-        'MMTC-2017-0013',
+        # "MMTC-2015-0002",
+        # "MMTC-2015-0004",
+        # "MMTC-2015-0005",
+        # "MMTC-2016-0006",
+        # "MMTC-2015-0003",
+        # 'MMTC-2017-0009',
+        # 'MMTC-2016-0007',
+        # 'MMTC-2017-0008',
+        # 'MMTC-2017-0009',
+        # 'MMTC-2017-0010',
+        # 'MMTC-2017-0011',
+        # 'MMTC-2017-0012',
+        # 'MMTC-2017-0013',
         # 'MMTC-2018-0014',
         # 'MMTC-2019-0015',
         # 'MMTC-2019-0016',
