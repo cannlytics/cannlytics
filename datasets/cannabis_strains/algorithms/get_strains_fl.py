@@ -404,6 +404,14 @@ print(strain_description_prompt)
 
 
 #-----------------------------------------------------------------------
+# Create embeddings for the strain names.
+#-----------------------------------------------------------------------
+
+# Create embeddings for the strain names.
+model = 'text-embedding-3-large'
+
+
+#-----------------------------------------------------------------------
 # Upload strain data to Firestore.
 #-----------------------------------------------------------------------
 

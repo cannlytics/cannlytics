@@ -398,3 +398,15 @@ extraction.rename(columns={
 timestamp = pd.to_datetime('now').strftime('%Y-%m-%d-%H-%M-%S')
 outfile = f'{data_dir}/flowgardens-coa-data-{timestamp}.xlsx'
 extraction.to_excel(outfile, index=False)
+
+
+
+#-----------------------------------------------------------------------
+# Tests
+#-----------------------------------------------------------------------
+
+# TODO: Benchmark the speed and cost of the different models.
+model = 'gpt-4o'
+
+
+# TODO: Try to use GPT-3 for data cleaning and validation.
