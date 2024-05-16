@@ -34,6 +34,7 @@ from cannlytics.utils.utils import (
     remove_duplicate_files,
 )
 from dotenv import dotenv_values
+import logging
 import pandas as pd
 import praw
 import requests
@@ -47,6 +48,9 @@ import tempfile
 # Create a directory to store the downloaded images.
 images_directory = 'D://data/reddit/FLMedicalTrees/images'
 os.makedirs(images_directory, exist_ok=True)
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 #-----------------------------------------------------------------------
@@ -68,7 +72,7 @@ queries = [
     'lab results',
     'test results',
     'results',
-    'effects',
+    'effect',
     'aroma',
     'taste',
     'smell',
@@ -114,7 +118,8 @@ for post in posts:
 print(f'Number of posts: {len(data)}')
 
 # Close the driver.
-# driver.quit()
+driver.close()
+driver.quit()
 
 # Save the post data.
 data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
@@ -296,13 +301,15 @@ parser = CoADoc()
 temp_path = tempfile.mkdtemp()
 
 # Scan all images for COA URLs.
-coa_urls = {}
+# coa_urls = {}
 image_files = os.listdir(images_directory)
 image_files = [os.path.join(images_directory, x) for x in image_files]
 print('Number of images:', len(image_files))
-for image_file in reversed(image_files):
-    print('Scanning:', image_file)
+for image_file in image_files:
     post_id = os.path.basename(image_file).split('_')[0]
+    if post_id in coa_urls:
+        continue
+    print('Scanning:', image_file)
     post_urls = coa_urls.get(post_id, [])
     try:
         coa_url = parser.scan(
@@ -322,6 +329,7 @@ try:
     shutil.rmtree(temp_path)
 except:
     pass
+
 
 #-----------------------------------------------------------------------
 # Download COA PDFs using the COA URLs.
@@ -446,8 +454,9 @@ parser = CoADoc()
 pdf_dir = r'D:\data\reddit\FLMedicalTrees\pdfs'
 pdf_files = os.listdir(pdf_dir)
 pdf_files = [os.path.join(pdf_dir, x) for x in pdf_files]
-print('Number of %i PDFs...' % len(pdf_files))
+logging.info('Parsing %i COA PDFs...' % len(pdf_files))
 all_coa_data = {}
+failed = []
 temp_path = tempfile.mkdtemp()
 for pdf_file in pdf_files:
     try:
@@ -458,17 +467,18 @@ for pdf_file in pdf_files:
             use_qr_code=False,
         )
     except:
-        print('Failed to parse:', pdf_file)
+        logging.info('Failed to parse: %s' % pdf_file)
+        failed.append(pdf_file)
         continue
     if coa_data:
-        print('Parsed:', pdf_file)
+        logging.info('Parsed: %s' % pdf_file)
         coa_id = os.path.basename(pdf_file).split(' ')[0]
         if isinstance(coa_data, list):
             all_coa_data[coa_id] = coa_data[0]
         elif isinstance(coa_data, dict):
             all_coa_data[coa_id] = coa_data
     else:
-        print('Found no data:', pdf_file)
+        logging.info('Found no data: %s' % pdf_file)
 try:
     shutil.rmtree(temp_path)
 except:
@@ -484,9 +494,12 @@ data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\
 timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 datafile = os.path.join(data_dir, f'fl-medical-trees-coa-data-{timestamp}.xlsx')
 coa_df.to_excel(datafile, index=False)
-print('Saved %i COA data:' % len(coa_df), datafile)
+logging.info('Saved %i COA data: %s' % (len(coa_df), datafile))
 
-# TODO: Identify all of the COAs that failed to be parsed.
+# Save all of the COAs that failed to be parsed.
+with open(os.path.join(data_dir, f'unidentified-coas-{timestamp}.json'), 'w') as f:
+    json.dump(failed, f, indent=4)
+logging.info('Saved list of failed PDFs.')
 
 
 #-----------------------------------------------------------------------
