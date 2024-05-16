@@ -14,6 +14,7 @@ from time import sleep
 from typing import List, Optional
 
 # External imports:
+import logging
 import google.auth
 import openai
 
@@ -30,6 +31,7 @@ AI_WARNING = "This data was parsed from text using OpenAI's GPT models. Please v
 
 # OpenAI API model prices (as of 2023-06-06) per 1000 tokens.
 PRICE_PER_1000_TOKENS = {
+    'gpt-4o': {'prompt': 0.005, 'completion': 0.015},
     'gpt-4': {'prompt': 0.03, 'completion': 0.06},
     'gpt-3.5-turbo': {'prompt': 0.002, 'completion': 0.002},
     'ada': {'prompt': 0.0004, 'completion': 0.0004, 'training': 0.0004, 'usage': 0.0016},
@@ -43,7 +45,7 @@ PRICE_PER_1000_TOKENS = {
 }
 
 # Define the maximum number of tokens per prompt.
-MAX_PROMPT_LENGTH = 4_000
+MAX_PROMPT_LENGTH = 4096
 
 # Instructional prompt.
 INSTRUCTIONAL_PROMPT = 'Only return JSON and always return at least an empty object, {}, if no data can be found. Return a value of `null` for any field that cannot be found.'
@@ -109,6 +111,15 @@ def get_tokens_price(num_tokens, model='gpt-4', prices=PRICE_PER_1000_TOKENS):
     return num_tokens / 1_000 * prices[model]['prompt']
 
 
+def get_usage_cost(completion, model='gpt-4o', prices=PRICE_PER_1000_TOKENS):
+    """Returns the cost of a prompt and completion."""
+    content = completion.dict()
+    usage = content['usage']
+    prompt_cost = usage['prompt_tokens'] / 1_000 * prices[model]['prompt']
+    completion_cost = usage['completion_tokens'] / 1_000 * prices[model]['completion']
+    return prompt_cost + completion_cost
+
+
 def split_string(string, max_length):
     """Split a string into chunks of a given length."""
     return [string[i:i+max_length] for i in range(0, len(string), max_length)]
@@ -139,6 +150,7 @@ def split_into_token_chunks(
 # Engineered prompts.
 #-----------------------------------------------------------------------
 
+# DEPRECATED:
 def gpt_to_json(
         text: str,
         system_prompts: List[str],
@@ -218,3 +230,166 @@ def gpt_to_json(
 
     # Return the extracted data.
     return extract, cost
+
+
+def extract_completion(completion):
+    """Extract JSON from a OpenAI completion."""
+    content = completion.choices[0].message.content
+    extracted_json = content.lstrip('```json\n').split('\n```')[0]
+    try:
+        extracted_data = json.loads(extracted_json)
+    except:
+        try:
+            if not content.endswith('"'):
+                content += '"'
+            extracted_data = json.loads(extracted_json + '}')
+        except:
+            extracted_data = json.loads(','.join(extracted_json.split(',')[:-1]) + '}')
+    return extracted_data
+
+
+def extract_data(
+        client,
+        extraction_prompt: str,
+        user_prompt: str,
+        model = 'gpt-4o',
+        max_tokens = 4_096,
+        temperature = 0.0,
+        user = 'cannlytics',  
+        verbose = True,
+        seed = None,
+    ):
+    """Extract strains from text using OpenAI's GPT model."""
+    messages = [
+        {'role': 'system', 'content': extraction_prompt},
+        {'role': 'user', 'content': user_prompt}
+    ]
+    completion = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        user=user,
+        response_format={"type": "json_object"},
+        seed=seed,
+    )
+    if verbose: logging.info(f'RESPONSE: {json.dumps(completion.dict())}')
+    cost = get_usage_cost(completion, model=model)
+    extract = extract_completion(completion)
+    return extract, cost
+
+
+#-----------------------------------------------------------------------
+# OpenAI Batches
+#-----------------------------------------------------------------------
+
+
+def create_prompt_batch_file(
+        prompts,
+        batch_file: str,
+        system_prompt: str,
+        user_prompt: str,
+        text_key='text',
+        id_field='custom_id',
+        max_tokens=4096,
+        model='gpt-4o',
+        temperature=0.0,
+        user='cannlytics',
+        seed=4200,
+    ):
+    """Create a batch file."""
+    with open(batch_file, "w") as f:
+        for _, obs in prompts.iterrows():
+            prompt = user_prompt.format(obs[text_key])
+            custom_id = obs[id_field]
+            request = {
+                "custom_id": custom_id,
+                "method": "POST",
+                "url": "/v1/chat/completions",
+                "body": {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "user": user,
+                    "response_format": {"type": "json_object"},
+                    "seed": seed
+                }
+            }
+            f.write(json.dumps(request) + "\n")
+
+
+def create_prompt_batch(
+        client,
+        prompts,
+        batch_file: str,
+        system_prompt: str,
+        user_prompt: str,
+        description='',
+        text_key='text',
+        id_field='custom_id',
+        max_tokens=4096,
+        model='gpt-4o',
+        temperature=0.0,
+        user='cannlytics',
+        seed=4200,
+        verbose=True,
+    ):
+    """Create a batch of OpenAI prompts."""
+    # Create a batch file.
+    create_prompt_batch_file(
+        prompts,
+        batch_file,
+        system_prompt,
+        user_prompt,
+        text_key=text_key,
+        id_field=id_field,
+        max_tokens=max_tokens,
+        model=model,
+        temperature=temperature,
+        user=user,
+        seed=seed,
+    )
+
+    # Upload the batch file.
+    if verbose: logging.info(f"Uploading batch file: '{batch_file}'")
+    batch_input_file = client.files.create(
+        file=open(batch_file, "rb"),
+        purpose="batch",
+    )
+    if verbose: logging.info(f"Uploaded batch file: {batch_input_file.id}")
+
+    # Create the batch job.
+    job = client.batches.create(
+        input_file_id=batch_input_file.id,
+        endpoint="/v1/chat/completions",
+        completion_window="24h",
+        metadata={"description": description}
+    )
+    if verbose: logging.info(f'Created prompt batch: {job.id}')
+    return job.id
+
+
+def read_batch_data(batch_file, field=None):
+    """Merge a field from a batch."""
+    extraction = {}
+    with open(batch_file, 'r') as f:
+        batch_results = [json.loads(line) for line in f]
+    for result in batch_results:
+        custom_id = result["custom_id"]
+        content = result["response"]["body"]["choices"][0]["message"]["content"]
+        content_json = json.loads(content)
+        if field:
+            extraction[custom_id] = content_json[field]
+        else:
+            extraction[custom_id] = content_json
+    return extraction
+
+
+def save_prompt_batch_results(client, status, outfile):
+    """Retrieve the results of the batch job."""
+    content = client.files.content(status.output_file_id)
+    content.write_to_file(outfile)
