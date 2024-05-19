@@ -30,181 +30,23 @@ import pandas as pd
 # Specify where your data lives.
 DATA_DIR = 'D://data'
 
-# Specify data files.
-# TODO: Read lab results from HuggingFace.
-LAB_RESULT_DATASETS = [
-    {
-        "title": "California Lab Results",
-        "state": "CA",
-        "state_name": "California",
-        "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fcalifornia-flag.png?alt=media&token=f64aaaba-d9cf-4e6f-9f06-4d431cb01d31",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ca",
-        "observations": 1202,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ca/.csv",
-        "url": "",
-    },
-    {
-        "title": "Connecticut Lab Results",
-        "state": "CT",
-        "state_name": "Connecticut",
-        "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fconnecticut-flag.png?alt=media&token=bdac5bd6-4d1e-4652-aa39-55b247ed0a4b",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ct",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ct/.csv",
-        "url": "",
-    },
-    {
-        "title": "Florida Lab Results",
-        "state": "FL",
-        "state_name": "Florida",
-        "data_dir": "florida\lab_results\.datasets",
-        "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fflorida-flag.png?alt=media&token=f7129c6b-a2cf-4e21-9c0d-a060eb5a372d",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/fl",
-        "observations": 16167,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/fl/fl-lab-results-latest.csv",
-        "url": "",
-    },
-    {
-        "title": "Massachusetts Lab Results",
-        "state": "MA",
-        "state_name": "Massachusetts",
-        "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fmassachusetts-flag.png?alt=media&token=d500905e-522a-4577-bc9d-0e6f5534831c",
-        "description": "",
-        "tier": "Premium",
-        "path": "/results/ma",
-        "observations": 0,
-        "fields": 0,
-        "type": "results",
-        "file_ref": "data/lab_results/ma/.csv",
-        "url": "",
-    },
-    # {
-    #     "title": "Michigan Lab Results",
-    #     "state": "MI",
-    #     "state_name": "Michigan",
-    #     "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fmichigan-flag.png?alt=media&token=f8884f41-47cc-4883-88dd-18442518608a",
-    #     "description": "",
-    #     "tier": "Premium",
-    #     "path": "/results/mi",
-    #     "observations": 0,
-    #     "fields": 0,
-    #     "type": "results",
-    #     "file_ref": "data/lab_results/mi/.csv",
-    #     "url": "",
-    # },
-    {
-        "title": "Washington Lab Results",
-        "state": "WA",
-        "state_name": "Washington",
-        "image_url": "https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/assets%2Fimages%2Femojies%2Fstate-flags%2Fwashington-flag.png?alt=media&token=0df433c2-e3b2-419f-b4ce-b999f961ad62",
-        "description": "Curated cannabis traceability lab tests from Washington State from 2021 to 2023.",
-        "tier": "Premium",
-        "path": "/results/wa",
-        "observations": 59501,
-        "fields": 53,
-        "type": "results",
-        "file_ref": "data/lab_results/washington/ccrs-inventory-lab-results-2023-03-07.xlsx",
-        "url": "",
-    },
-]
-
 
 #----------------------------------------------------------------------#
-# Compile lab results to obtain strain data.
+# Aggregate all strain data.
 #----------------------------------------------------------------------#
 
-def get_lab_result_datafiles(data_dir: str):
-    """Get the most recent lab result datafiles for each state."""
-    datafiles = []
-    for dataset in LAB_RESULT_DATASETS:
-        state_name = dataset['state_name'].lower()
-        folder_path = os.path.join(data_dir, state_name, 'lab_results/*.xlsx')
-        files = glob.glob(folder_path)
-        if files:
-            most_recent_file = max(files, key=lambda f: f[-14:-5])
-            datafiles.append(most_recent_file)
-            print('Most recent file:', most_recent_file)
-        else:
-            print('No .xlsx files found in the folder.')
-
-
-def compile_strain_data(datafiles: list) -> pd.DataFrame:
-    """Compile strain data from lab results."""
-
-    # Read all lab results.
-    results = []
-    for datafile in datafiles:
-        df = pd.read_excel(datafile)
-        results.append(df)
-
-    # Aggregate all lab results.
-    results = pd.concat(results, ignore_index=True)
-
-    # TODO: Standardize the data!
-
-    # TODO: First, get all known strain names.
-
-    # TODO: Second, get all products that contain those strains.
-
-    # TODO: Third, calculate summary statistics for each strain.
-    strain_data = pd.DataFrame()
-    return strain_data
-
-
-#----------------------------------------------------------------------#
-# Begin to identify unique strain names.
-#----------------------------------------------------------------------#
-
-# TODO: Identify all unique known strains in the lab results.
-# - Washington
+# TODO: Get all results that contain strain names.
 # - California
+# - Washington
 
-
-#----------------------------------------------------------------------#
-# Use NLP to help identify unique strain names.
-#----------------------------------------------------------------------#
-
-# TODO: Identify common unigrams, bigrams, and trigram from product names
-# of lab results that do not have strain names.
+# TODO: Get all results with product names that contain those strains.
 # - Connecticut
 # - Florida
 # - Massachusetts
 # - Michigan
 
-# # Create natural language processing client.
-# # Use `en_core_web_sm` for speed and `en_core_web_lg` or `en_core_web_trf`
-# # for accuracy. For a blank model, use spacy.blank('en')
-# # Compile all of the product names into a single corpus.
-# # Handle strange characters, for example replace "_" with " ".
-# # Convert the corpus to a SpaCy document.
-# corpus = '. '.join([str(x) for x in strain_names])
-# corpus = corpus.replace('_', ' ')
-# nlp = spacy.load('en_core_web_lg')
-# doc = nlp(corpus)
-
-# # Identify unique unigrams, bi-grams, trigrams to use as strain names.
-# unigrams = list(set([x.text for x in ngrams(doc, 1, min_freq=1)]))
-# bigrams = list(set([x.text for x in ngrams(doc, 2, min_freq=1)]))
-# trigrams = list(set([x.text for x in ngrams(doc, 3, min_freq=1)]))
-# print('Unique unigrams:', len(unigrams))
-# print('Unique bigrams:', len(bigrams))
-# print('Unique trigrams:', len(trigrams))
-
-
 #----------------------------------------------------------------------#
-# Use AI to help identify unique strain names.
+# Use AI to identify all unique strain names.
 #----------------------------------------------------------------------#
 
 # Chunk by chunk:
@@ -222,38 +64,18 @@ def compile_strain_data(datafiles: list) -> pd.DataFrame:
 
 
 #----------------------------------------------------------------------#
-# Aggregate strain data.
-#----------------------------------------------------------------------#
-
-# TODO: Get all results that contain strain names.
-# - California
-# - Washington
-
-# TODO: Get all results with product names that contain those strains.
-# - Connecticut
-# - Florida
-# - Massachusetts
-# - Michigan
-
-# TODO: From WA traceability data, estimate:
-# - avg. yield per plant
-# - avg. growing time
-# - avg. price per gram
-
-
-#----------------------------------------------------------------------#
 # Calculate statistics for each strain.
 #----------------------------------------------------------------------#
 
-# DEV:
-datafiles = get_lab_result_datafiles(DATA_DIR)
-results = []
-for datafile in datafiles:
-    df = pd.read_excel(datafile)
-    results.append(df)
+# # DEV:
+# datafiles = get_lab_result_datafiles(DATA_DIR)
+# results = []
+# for datafile in datafiles:
+#     df = pd.read_excel(datafile)
+#     results.append(df)
 
 # FIXME: Calculate statistics for each strain.
-strain_data = results.groupby('strain_name').agg()
+# strain_data = results.groupby('strain_name').agg()
 # ✓ strain_id
 # - strain_name
 # - other_names
@@ -275,29 +97,24 @@ strain_data = results.groupby('strain_name').agg()
 # - lab_result_ids
 # - strain_image_url (create an image?)
 
-# Create a strain ID for each strain.
-strain_data['strain_id'] = strain_data['strain_name'].apply(
-    create_hash,
-    private_key='',
-)
+# # Create a strain ID for each strain.
+# strain_data['strain_id'] = strain_data['strain_name'].apply(
+#     create_hash,
+#     private_key='',
+# )
 
-# Get strain keywords.
-strain_data['keywords'] = strain_data['strain_name'].apply(
-    lambda x: str(x).lower().split()
-)
+# # Get strain keywords.
+# strain_data['keywords'] = strain_data['strain_name'].apply(
+#     lambda x: str(x).lower().split()
+# )
 
 
-def upload_strains(collection: str = 'public/data/strains') -> list:
+def upload_strains(
+        strain_data: pd.DataFrame,
+        collection: str = 'strains'
+    ) -> list:
     """Upload strain data to Firestore."""
-
-    # FIXME: Compile the strain data.
-    # strain_data = compile_strain_data()
-    strain_data = pd.DataFrame()
-
-    # Initialize Firebase.
     db = firebase.initialize_firebase()
-
-    # Compile the references and documents.
     refs, docs = [], []
     for _, row in strain_data.iterrows():
         doc = row.to_dict()
@@ -306,8 +123,6 @@ def upload_strains(collection: str = 'public/data/strains') -> list:
         ref = f'{collection}/{_id}'
         refs.append(ref)
         docs.append(doc)
-
-    # Upload the data to Firestore.
     firebase.update_documents(refs, docs, database=db)
     return docs
 
@@ -332,33 +147,10 @@ if __name__ == '__main__':
             subset = 'all'
     except KeyError:
         subset = 'all'
+
+    # FIXME: Aggregate all strains.
+    strain_data = pd.DataFrame()
     
     # Upload Firestore with cannabis license data.
-    all_results = upload_strains(subset=subset)
-    print('Uploaded strains data to Firestore.')
-
-
-# === DEV ===
-
-# Get strains from Firestore.
-strains = firebase.get_collection('public/data/strains')
-
-# Add keywords to strains.
-refs, updates = [], []
-for strain in strains:
-    # Get the name and convert it to lower case.
-    name = strain['strain_name'].lower()
-
-    # Tokenize the name into keywords and add the first letter of the name.
-    keywords = name.split() + [name[0]]
-
-    # Add unique keywords.
-    keywords = list(set(keywords))
-
-    # Add the document reference and the new keywords to the update lists.
-    doc_id = strain['id']
-    refs.append(f'public/data/strains/{doc_id}')
-    updates.append({'keywords': keywords})
-
-# Update the strains in Firestore.
-firebase.update_documents(refs, updates)
+    docs = upload_strains(subset=subset)
+    print(f'Uploaded {len(docs)} strains to Firestore.')

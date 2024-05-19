@@ -134,6 +134,12 @@ def curate_ccrs_strains(data_dir, stats_dir):
     return strain_stats
 
 
+# TODO: From WA traceability data, estimate:
+# - avg. yield per plant
+# - avg. growing time
+# - avg. price per gram
+
+
 # === Test ===
 # [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
