@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/8/2023
-Updated: 4/14/2024
+Updated: 5/19/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -53,6 +53,7 @@ from time import sleep
 
 # External imports:
 from cannlytics.data import create_sample_id
+from cannlytics.data.cache import Bogart
 from cannlytics.data.coas.coas import CoADoc
 from cannlytics.data.web import initialize_selenium
 import pandas as pd
@@ -144,6 +145,7 @@ def download_coa_pdfs(
             continue
         response = requests.get(url)
         filename = os.path.join(pdf_dir, obs[id_key] + '.pdf')
+        # TODO: Keep track of the URLs that have been downloaded in the cache.
         if os.path.exists(filename):
             continue
         with open(filename, 'wb') as pdf_file:
@@ -164,6 +166,7 @@ def parse_coa_pdfs(
     The `id_key` is used to match the PDF filename to the DataFrame.
     """
     all_results = []
+    # TODO: Keep track of parsed/failed COA PDFs in the cache.
     for _, row in data.iterrows():
         coa_pdf = row[id_key] + '.pdf'
         pdf_file_path = os.path.join(pdf_dir, coa_pdf)
@@ -249,12 +252,13 @@ def get_products_flower_co(
             product_url = card.find_element(By.CSS_SELECTOR, '.favorite-product-name a').get_attribute('href')
             
             # Skip the product if it's already recorded.
+            # TODO: Keep track of these URLs in the cache.
             if product_url in recorded:
                 continue
             recorded.append(product_url)
 
             # Get the total THC.
-            # TODO: Get other totals.
+            # Optional: Get other totals.
             try:
                 total_thc = card.find_element(By.CSS_SELECTOR, '.product-card-thc').text.strip()
             except:
@@ -491,48 +495,49 @@ def get_results_ca_flower_co(
 
     # Parse the corresponding COAs.
     # FIXME: For some reason this is causing a memory leak.
-    # parser = CoADoc()
-    # results = parse_coa_pdfs(
-    #     parser=parser,
-    #     data=product_data,
-    #     pdf_dir=pdf_dir,
-    #     verbose=verbose,
-    # )
+    parser = CoADoc()
+    results = parse_coa_pdfs(
+        parser=parser,
+        data=product_data,
+        pdf_dir=pdf_dir,
+        verbose=verbose,
+    )
 
-    # # Save the parsed COA data to a file.
-    # namespace = 'ca-results-flower-company'
-    # timestamp = datetime.now().strftime('%Y-%m-%d')
-    # results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
-    # parser.save(results, results_datafile)
-    # print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
+    # Save the parsed COA data to a file.
+    # TODO: Keep track of the datafile in the cache.
+    namespace = 'ca-results-flower-company'
+    timestamp = datetime.now().strftime('%Y-%m-%d')
+    results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
+    parser.save(results, results_datafile)
+    print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
 
     # # === Aggregate COAs ===
 
-    # # Aggregate product URLs that have been recorded.
-    # existing_products = []
-    # url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
-    # for url_file in url_files:
-    #     product_df = pd.read_csv(os.path.join(data_dir, url_file))
-    #     existing_products.append(product_df)
-    # existing_products = pd.concat(existing_products)
-    # existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
-    # print('Final number of products:', len(existing_products))
-    # products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
-    # existing_products.to_csv(products_datafile, index=False)
+    # Aggregate product URLs that have been recorded.
+    existing_products = []
+    url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
+    for url_file in url_files:
+        product_df = pd.read_csv(os.path.join(data_dir, url_file))
+        existing_products.append(product_df)
+    existing_products = pd.concat(existing_products)
+    existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
+    print('Final number of products:', len(existing_products))
+    products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
+    existing_products.to_csv(products_datafile, index=False)
 
-    # # Aggregate COA data that has been saved.
+    # Aggregate COA data that has been saved.
     all_results = []
-    # results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
-    # for results_file in results_files:
-    #     results_df = pd.read_excel(os.path.join(data_dir, results_file))
-    #     all_results.append(results_df)
-    # all_results = pd.concat(all_results)
-    # all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
-    # # all_results = all_results.loc[all_results['results'] != '[]']
-    # print('Final number of results:', len(all_results))
-    # all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
-    # all_results.to_excel(all_results_datafile, index=False)
-    # print(f'Saved {len(all_results)} results to: {all_results_datafile}')
+    results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
+    for results_file in results_files:
+        results_df = pd.read_excel(os.path.join(data_dir, results_file))
+        all_results.append(results_df)
+    all_results = pd.concat(all_results)
+    all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+    # all_results = all_results.loc[all_results['results'] != '[]']
+    print('Final number of results:', len(all_results))
+    all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
+    all_results.to_excel(all_results_datafile, index=False)
+    print(f'Saved {len(all_results)} results to: {all_results_datafile}')
 
     # FIXME: Upload data to Firestore.
 
