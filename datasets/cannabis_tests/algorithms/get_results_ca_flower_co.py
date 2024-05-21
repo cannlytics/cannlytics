@@ -131,57 +131,68 @@ def save_product_data(
 
 
 def download_coa_pdfs(
-        items: list[dict],
-        pdf_dir: str,
-        url_key: str = 'lab_results_url',
-        id_key: str = 'product_id',
-        verbose: bool = True,
-        pause: float = 10.0,
+        items,
+        pdf_dir,
+        cache=None,
+        url_key='lab_results_url',
+        id_key='product_id',
+        verbose=True,
+        pause=10.0
     ):
     """Download all of the COA PDFs."""
+    if not cache: cache = {}
     for obs in items:
         url = obs[url_key]
         if not url:
             continue
+        url_hash = cache.hash_url(url)
+        if cache.get(url_hash):
+            if verbose:
+                print(f'Skipped (cached): {url}')
+            continue
         response = requests.get(url)
         filename = os.path.join(pdf_dir, obs[id_key] + '.pdf')
-        # TODO: Keep track of the URLs that have been downloaded in the cache.
-        if os.path.exists(filename):
-            continue
         with open(filename, 'wb') as pdf_file:
             pdf_file.write(response.content)
             if verbose:
                 print(f'Downloaded PDF: {filename}')
+        cache.set(url_hash, {'status': 'downloaded', 'file': filename})
         sleep(pause)
+
 
 
 def parse_coa_pdfs(
         parser,
         data,
-        pdf_dir: str,
-        id_key: str = 'product_id',
-        verbose: bool = True,
+        pdf_dir,
+        cache,
+        id_key='product_id',
+        verbose=True,
     ):
-    """Parse corresponding COAs from a DataFrame in a PDF directory.
-    The `id_key` is used to match the PDF filename to the DataFrame.
-    """
+    """Parse corresponding COAs from a DataFrame in a PDF directory."""
     all_results = []
-    # TODO: Keep track of parsed/failed COA PDFs in the cache.
     for _, row in data.iterrows():
         coa_pdf = row[id_key] + '.pdf'
         pdf_file_path = os.path.join(pdf_dir, coa_pdf)
         if not os.path.exists(pdf_file_path):
+            continue
+        pdf_hash = cache.hash_file(pdf_file_path)
+        if cache.get(pdf_hash):
+            if verbose:
+                print(f'Skipped (cached parse): {pdf_file_path}')
+            all_results.append(cache.get(pdf_hash))
             continue
         try:
             coa_data = parser.parse(pdf_file_path)
             entry = {**row.to_dict(), **coa_data[0]}
             entry['coa_pdf'] = coa_pdf
             all_results.append(entry)
+            cache.set(pdf_hash, entry)
             if verbose:
                 print(f'Parsed COA: {pdf_file_path}')
         except Exception as e:
             if verbose:
-                print(f'Failed to parse COA: {pdf_file_path}')
+                print(f'Failed to parse COA: {pdf_file_path}', str(e))
             continue
     return pd.DataFrame(all_results)
 
