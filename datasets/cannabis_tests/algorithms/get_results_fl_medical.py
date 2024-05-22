@@ -4,7 +4,7 @@ Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/1/2023
-Updated: 5/8/2024
+Updated: 5/21/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -76,7 +76,6 @@ queries = [
     'aroma',
     'taste',
     'smell',
-    # TODO:
     'flavor',
 ]
 sort_by = 'new'

@@ -5,7 +5,7 @@ Copyright (c) 2023-2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 5/1/2024
+Updated: 5/21/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -428,10 +428,10 @@ if __name__ == '__main__':
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process
     # TODO: Keep track of already parsed COAs.
-    # parse_results_kaycha(
-    #     data_dir='D://data/florida/results',
-    #     pdf_dir='D://data/florida/results/pdfs',
-    #     reverse=False,
-    #     sort=True,
-    #     completed=completed
-    # )
+    parse_results_kaycha(
+        data_dir='D://data/florida/results',
+        pdf_dir='D://data/florida/results/pdfs',
+        reverse=False,
+        sort=True,
+        completed=completed
+    )

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 12/8/2023
-Updated: 5/19/2024
+Updated: 5/21/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -140,7 +140,7 @@ def download_coa_pdfs(
         pause=10.0
     ):
     """Download all of the COA PDFs."""
-    if not cache: cache = {}
+    if not cache: cache = Bogart()
     for obs in items:
         url = obs[url_key]
         if not url:
@@ -156,21 +156,21 @@ def download_coa_pdfs(
             pdf_file.write(response.content)
             if verbose:
                 print(f'Downloaded PDF: {filename}')
-        cache.set(url_hash, {'status': 'downloaded', 'file': filename})
+        cache.set(url_hash, {'type': 'download', 'url': url, 'file': filename})
         sleep(pause)
-
 
 
 def parse_coa_pdfs(
         parser,
         data,
         pdf_dir,
-        cache,
+        cache=None,
         id_key='product_id',
         verbose=True,
     ):
     """Parse corresponding COAs from a DataFrame in a PDF directory."""
     all_results = []
+    if not cache: cache = Bogart()
     for _, row in data.iterrows():
         coa_pdf = row[id_key] + '.pdf'
         pdf_file_path = os.path.join(pdf_dir, coa_pdf)
@@ -214,10 +214,12 @@ def price_to_float(price_str: str):
 
 def get_products_flower_co(
         data_dir: str,
+        cache = None,
         verbose: bool = True,
         headless: bool = True,
         pause_between_page: float = 30.0,
     ):
+    """Get products from Flower Company."""
 
     # Initialize the driver.
     driver = initialize_selenium(headless=headless)
@@ -236,7 +238,7 @@ def get_products_flower_co(
         brand_pages.append(link.get_attribute('href').replace(base_url, ''))
 
     # Open each brand/category page.
-    products, recorded = [], []
+    products, recorded = [], set(cache.get('product_urls') or [])
     for page in category_pages + brand_pages:
 
         # Get the brand/category page.
@@ -263,10 +265,9 @@ def get_products_flower_co(
             product_url = card.find_element(By.CSS_SELECTOR, '.favorite-product-name a').get_attribute('href')
             
             # Skip the product if it's already recorded.
-            # TODO: Keep track of these URLs in the cache.
             if product_url in recorded:
                 continue
-            recorded.append(product_url)
+            recorded.add(product_url)
 
             # Get the total THC.
             # Optional: Get other totals.
@@ -320,6 +321,9 @@ def get_products_flower_co(
                 'sativa_percentage': sativa_percentage,
                 'product_url': product_url,
             })
+
+    # Cache the product URLs.
+    cache.set('product_urls', list(recorded))
 
     # Open file of all saved product URLs.
     products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
@@ -453,7 +457,8 @@ def get_products_flower_co(
             'lab_results_url': lab_results_url,
             'image_url': image_url,
             'product_type': product_type,
-            # FIXME: This may be getting over-ridden.
+            # Note: `product_subtype` may be getting over-ridden.
+            # Deprecate `product_sub_type` once confirmed.
             'product_subtype': product_subtype,
             'product_sub_type': product_subtype,
             'product_description': product_description,
@@ -477,100 +482,104 @@ def get_products_flower_co(
 def get_results_ca_flower_co(
         pdf_dir,
         data_dir,
+        cache_path=None,
         verbose=True,
         namespace = 'ca-products-flower-company',
     ):
     """Get California cannabis lab results from the Flower Company."""
-
-    # === Download COAs ===
-
-    # Create directories if they don't exist.
     if not os.path.exists(pdf_dir): os.makedirs(pdf_dir)
     if not os.path.exists(data_dir): os.makedirs(data_dir)
-
-    # Find the product data.
-    data = get_products_flower_co(data_dir, verbose=verbose)
-
-    # Save the product data.
+    cache = Bogart(cache_path)
+    data = get_products_flower_co(data_dir, cache=cache, verbose=verbose)
     datafile = save_product_data(data, data_dir, namespace=namespace)
-    if verbose:
-        print(f'Saved {len(data)} products to: {datafile}')
-
-    # Download all of the COAs.
-    download_coa_pdfs(data, pdf_dir=pdf_dir, verbose=verbose)
-
-    # === Parse COAs ===
-
-    # Read the download product items.
-    product_data = pd.read_csv(datafile)
-
-    # Parse the corresponding COAs.
-    # FIXME: For some reason this is causing a memory leak.
-    parser = CoADoc()
-    results = parse_coa_pdfs(
-        parser=parser,
-        data=product_data,
-        pdf_dir=pdf_dir,
-        verbose=verbose,
-    )
-
-    # Save the parsed COA data to a file.
-    # TODO: Keep track of the datafile in the cache.
-    namespace = 'ca-results-flower-company'
-    timestamp = datetime.now().strftime('%Y-%m-%d')
-    results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
-    parser.save(results, results_datafile)
-    print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
-
-    # # === Aggregate COAs ===
-
-    # Aggregate product URLs that have been recorded.
-    existing_products = []
-    url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
-    for url_file in url_files:
-        product_df = pd.read_csv(os.path.join(data_dir, url_file))
-        existing_products.append(product_df)
-    existing_products = pd.concat(existing_products)
-    existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
-    print('Final number of products:', len(existing_products))
-    products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
-    existing_products.to_csv(products_datafile, index=False)
-
-    # Aggregate COA data that has been saved.
-    all_results = []
-    results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
-    for results_file in results_files:
-        results_df = pd.read_excel(os.path.join(data_dir, results_file))
-        all_results.append(results_df)
-    all_results = pd.concat(all_results)
-    all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
-    # all_results = all_results.loc[all_results['results'] != '[]']
-    print('Final number of results:', len(all_results))
-    all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
-    all_results.to_excel(all_results_datafile, index=False)
-    print(f'Saved {len(all_results)} results to: {all_results_datafile}')
-
-    # FIXME: Upload data to Firestore.
+    cache.set(cache.hash_file(datafile), {'type': 'datafile', 'file': datafile})
+    if verbose: print(f'Saved {len(data)} products to: {datafile}')
+    download_coa_pdfs(data, pdf_dir=pdf_dir, cache=cache, verbose=verbose)
+    return data
 
 
-    # FIXME: Upload files to Google Cloud Storage.
+# TODO: Turn the following into standalone functions.
+
+def parse_coas_ca_flower_co():
+    """Parse COAs from the Flower Company."""
+    pass
+
+# Aggregate product URLs that have been recorded.
+existing_products = []
+url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
+for url_file in url_files:
+    product_df = pd.read_csv(os.path.join(data_dir, url_file))
+    existing_products.append(product_df)
+existing_products = pd.concat(existing_products)
+existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
+print('Final number of products:', len(existing_products))
+products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
+existing_products.to_csv(products_datafile, index=False)
+
+# # Read the download product items.
+# product_data = pd.read_csv(datafile)
+
+# # Parse any un-parsed COAs.
+# # FIXME: For some reason this is causing a memory leak.
+# TODO: Ensure the PDF can be matched to the data.
+# parser = CoADoc()
+# results = parse_coa_pdfs(
+#     parser=parser,
+#     data=product_data,
+#     cache=cache,
+#     pdf_dir=pdf_dir,
+#     verbose=verbose,
+# )
+
+# # Save the parsed COA data to a file.
+# # TODO: Keep track of the datafile in the cache.
+# namespace = 'ca-results-flower-company'
+# timestamp = datetime.now().strftime('%Y-%m-%d')
+# results_datafile = os.path.join(data_dir, f'{namespace}-{timestamp}.xlsx')
+# parser.save(results, results_datafile)
+# print(f'Saved {len(results)} parsed COAs to: {results_datafile}')
+
+# Save all lab results.
+# all_results = []
+# results_files = [x for x in os.listdir(data_dir) if 'results' in x and 'all' not in x]
+# for results_file in results_files:
+#     results_df = pd.read_excel(os.path.join(data_dir, results_file))
+#     all_results.append(results_df)
+# all_results = pd.concat(all_results)
+# all_results.drop_duplicates(subset=['sample_id', 'results_hash'], inplace=True)
+# # all_results = all_results.loc[all_results['results'] != '[]']
+# print('Final number of results:', len(all_results))
+# all_results_datafile = os.path.join(data_dir, f'ca-all-results-flower-company.xlsx')
+# all_results.to_excel(all_results_datafile, index=False)
+# print(f'Saved {len(all_results)} results to: {all_results_datafile}')
+
+
+def archive_results_ca_flower_co():
+    """Archive the results from the Flower Company."""
+    pass
+
+    # # FIXME: Upload data to Firestore.
+
+
+    # # FIXME: Upload files to Google Cloud Storage.
 
 
 
-    # FIXME: Upload datafiles to Google Cloud Storage.
-
-
-    # Return the data.
-    return all_results
+    # # FIXME: Upload datafiles to Google Cloud Storage.
 
 
 # === Test ===
-# [✓] Tested: 2024-04-14 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-21 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
-    # Get results from the Flower Company.
+    # Get results.
     all_results = get_results_ca_flower_co(
         pdf_dir='D:/data/california/results/pdfs/flower-company',
         data_dir='D:/data/california/results/datasets/flower-company',
+        cache_path='D://data/.cache/results-ca-flower-co.jsonl',
         verbose=True,
     )
+
+    # Parse COAs.
+
+    # Archive results.

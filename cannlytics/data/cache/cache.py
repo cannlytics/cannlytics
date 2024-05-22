@@ -22,12 +22,16 @@ References:
 import hashlib
 import json
 import os
+from typing import Optional
 
 
 class Bogart(object):
     """A cache for storing cannabis data."""
 
-    def __init__(self, cache_path):
+    def __init__(self, cache_path: Optional[str] = None):
+        """Initialize the cache."""
+        if cache_path is None:
+            cache_path = os.path.join(os.getcwd(), '.cache', 'cache.jsonl')
         self.cache = self.load_cache(cache_path)
 
     def set(self, key, value):
@@ -91,7 +95,7 @@ class Bogart(object):
         return hasher.hexdigest()
 
 # === Tests ===
-# Tested: 2024-05-19 by Keegan Skeate <keegan@cannlytics.com>
+# Tested: 2024-05-21 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     from datetime import datetime
