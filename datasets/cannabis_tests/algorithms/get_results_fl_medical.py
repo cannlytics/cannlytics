@@ -26,6 +26,7 @@ from time import sleep
 
 # External imports:
 from bs4 import BeautifulSoup
+from cannlytics.data.cache import Bogart
 from cannlytics.data.coas import CoADoc
 from cannlytics.data.web import initialize_selenium
 from cannlytics.utils.constants import DEFAULT_HEADERS

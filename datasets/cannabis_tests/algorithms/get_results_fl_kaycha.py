@@ -5,7 +5,7 @@ Copyright (c) 2023-2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 5/21/2024
+Updated: 5/22/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -28,6 +28,7 @@ from typing import Optional
 
 # External imports:
 from bs4 import BeautifulSoup
+from cannlytics.data.cache import Bogart
 from cannlytics.data.coas.coas import CoADoc
 from cannlytics.data.coas.algorithms.kaycha import parse_kaycha_coa
 from cannlytics.utils.utils import (
@@ -150,6 +151,7 @@ def download_coas_kaycha(
         base: Optional[str] = 'https://yourcoa.com',
         columns: Optional[list] = None,
         pause: Optional[float] = 0.33,
+        cache: Optional[Bogart] = None,
     ):
     """Download Kaycha Labs COAs uploaded to the public web."""
 
@@ -161,6 +163,10 @@ def download_coas_kaycha(
     datasets_dir = os.path.join(data_dir, 'datasets')
     if not os.path.exists(datasets_dir):
         os.makedirs(datasets_dir)
+
+    # Initialize the cache.
+    if cache is None:
+        cache = Bogart()
 
     # Request each page until the maximum is reached.
     page = 0
@@ -238,16 +244,19 @@ def download_coas_kaycha(
             download_url = base + download_url
         sample_id = download_url.split('/')[-1].split('?')[0].split('&')[0]
         outfile = os.path.join(license_pdf_dir, f'{sample_id}.pdf')
-        if os.path.exists(outfile) and not overwrite:
+        url_hash = cache.hash_url(download_url)
+        if (os.path.exists(outfile) or cache.get(url_hash)) and not overwrite:
             print('Cached:', download_url)
+            # DEV: Ween off of os.path.exists and then remove the following line.
+            cache.set(url_hash, {'type': 'download', 'url': download_url, 'file': outfile})
             continue
+        cache.set(url_hash, {'type': 'download', 'url': download_url, 'file': outfile})
         try:
             coa_url = f'{base}/coa/download?sample={sample_id}'
             response = requests.get(coa_url, headers=DEFAULT_HEADERS)
             if response.status_code == 200:
                 if len(response.content) < MIN_FILE_SIZE:
-                    print('File size is small, retrying with Selenium:', coa_url)
-                    # coa_url = f'{base}/coa/coa-view?sample={sample_id}'
+                    print('File size is small, retrying with Selenium:', download_url)
                     response = requests.get(download_url, allow_redirects=True)
                     if response.status_code == 200:
                         redirected_url = response.url
@@ -256,10 +265,12 @@ def download_coas_kaycha(
                             download_dir=license_pdf_dir,
                         )
                         print('Downloaded with Selenium:', redirected_url)
+                        cache.set(url_hash, {'type': 'download', 'url': download_url, 'redirect_url': redirected_url})
                 else:
                     with open(outfile, 'wb') as pdf:
                         pdf.write(response.content)
                     print('Downloaded:', outfile)
+                    cache.set(url_hash, {'type': 'download', 'url': download_url, 'coa_url': coa_url, 'file': outfile})
             else:
                 print('Failed to download, retrying with Selenium:', coa_url)
                 response = requests.get(download_url, allow_redirects=True)
@@ -270,6 +281,7 @@ def download_coas_kaycha(
                         download_dir=license_pdf_dir,
                     )
                     print('Downloaded with Selenium:', redirected_url)
+                    cache.set(url_hash, {'type': 'download', 'url': download_url, 'redirect_url': redirected_url})
         except:
             coa_url = f'{base}/coa/coa-view?sample={sample_id}'
             response = requests.get(coa_url, allow_redirects=True)
@@ -280,6 +292,11 @@ def download_coas_kaycha(
                     download_dir=license_pdf_dir,
                 )
                 print('Downloaded with Selenium:', redirected_url)
+                cache.set(url_hash, {'type': 'download', 'url': download_url, 'coa_url': coa_url, 'redirect_url': redirected_url})
+            else:
+                print('Final fail to download with Selenium:', coa_url)
+                # Optional: Keep track of failed to download URLs.
+                # Optional: Try another way to download.
 
     # Return the COA URLs.
     return df
@@ -290,9 +307,12 @@ def get_results_kaycha(
         licenses=None,
         pause: Optional[float] = 0.33,
         verbose: Optional[bool] = False,
+        cache_path: Optional[str] = None,
         **kwargs
     ):
     """Get lab results published by Kaycha Labs on the public web."""
+    # Initialize the cache.
+    cache = Bogart(cache_path)
 
     # Download COAs for each licensee.
     coa_urls = []
@@ -308,6 +328,7 @@ def get_results_kaycha(
             dba=licensee['business_dba_name'],
             producer_license_number=producer_license_number,
             pause=pause,
+            cache=cache,
         )
         coa_urls.append(urls)
 
@@ -336,17 +357,19 @@ def parse_results_kaycha(
         reverse: Optional[bool] = True,
         sort: Optional[bool] = False,
         completed: Optional[list] = None,
+        cache_path: Optional[str] = None,
     ):
     """Parse lab results from Kaycha Labs COAs."""
     parser = CoADoc()
-    if temp_path is None:
-        temp_path = tempfile.mkdtemp()
+    cache = Bogart(cache_path)
+    if temp_path is None: temp_path = tempfile.mkdtemp()
     date = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     folders = os.listdir(pdf_dir)
     folders = [x for x in folders if x.startswith('MMTC')]
     if sort: folders = sorted(folders)
     if reverse: folders = reversed(folders)
     if completed is None: completed = []
+    all_results = []
     for folder in folders:
         if folder in completed:
             continue
@@ -357,12 +380,22 @@ def parse_results_kaycha(
         pdf_files = os.listdir(license_pdf_dir)
         if reverse: pdf_files = reversed(pdf_files)
 
-        # Parse the COAs for each licensee.
+        # Parse the COA PDFs for each licensee.
         print('Parsing %i COAs:' % len(pdf_files), folder)
         all_data = []
         for pdf_file in pdf_files:
             if not pdf_file.endswith('.pdf'):
                 continue
+
+            # Use cached data if available.
+            pdf_file_path = os.path.join(license_pdf_dir, pdf_file)
+            pdf_hash = cache.hash_file(pdf_file_path)
+            if cache.get(pdf_hash):
+                print('Cached parse:', pdf_file_path)
+                all_data.append(cache.get(pdf_hash))
+                continue
+
+            # Parse the PDF.
             try:
                 doc = os.path.join(license_pdf_dir, pdf_file)
                 coa_data = parse_kaycha_coa(
@@ -377,61 +410,66 @@ def parse_results_kaycha(
                 print('Parsed:', doc)
             except:
                 print('Error:', doc)
+
+            # Cache the data.
+            cache.set(pdf_hash, coa_data)
         
         # Save the data for each licensee.
+        all_results.extend(all_data)
         try:
             parser.save(all_data, outfile)
             print('Saved COA data:', outfile)
         except:
             print('Failed to save COA data.')
-    return all_data
+    
+    # Return all of the parsed data.
+    return all_results
 
 
 # === Test ===
-# [✓] Tested: 2024-04-21 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-22 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # [✓] TEST: Get Kaycha COAs.
-    data_dir = 'D://data/florida/results'
     kaycha_coas = get_results_kaycha(
-        data_dir=data_dir,
+        data_dir='D://data/florida/results',
         pause=3.33,
         verbose=True,
+        cache_path='D://data/.cache/results-kaycha.jsonl',
     )
 
-    completed = [
-        'MMTC-2015-0001', # Longest
-        # "MMTC-2015-0002",
-        # "MMTC-2015-0004",
-        # "MMTC-2015-0005",
-        # "MMTC-2016-0006",
-        # "MMTC-2015-0003",
-        # 'MMTC-2017-0009',
-        # 'MMTC-2016-0007',
-        # 'MMTC-2017-0008',
-        # 'MMTC-2017-0009',
-        # 'MMTC-2017-0010',
-        # 'MMTC-2017-0011',
-        # 'MMTC-2017-0012',
-        # 'MMTC-2017-0013',
-        # 'MMTC-2018-0014',
-        # 'MMTC-2019-0015',
-        # 'MMTC-2019-0016',
-        # 'MMTC-2019-0017',
-        # 'MMTC-2019-0018',
-        # 'MMTC-2019-0019',
-        # 'MMTC-2019-0020',
-        # 'MMTC-2019-0021',
-        # 'MMTC-2019-0022',
-    ]
-
     # [✓] TEST: Parse Kaycha COAs.
-    # Note: This is a super, super long process
-    # TODO: Keep track of already parsed COAs.
+    # Note: This is a super, super long process. Uncomment completed
+    # license numbers to parse COA PDFs for all other licenses.
     parse_results_kaycha(
         data_dir='D://data/florida/results',
         pdf_dir='D://data/florida/results/pdfs',
+        cache_path='D://data/.cache/results-fl-kaycha.jsonl',
         reverse=False,
         sort=True,
-        completed=completed
+        completed=[
+            # 'MMTC-2015-0001', # Longest
+            # "MMTC-2015-0002",
+            # "MMTC-2015-0004",
+            # "MMTC-2015-0005",
+            # "MMTC-2016-0006",
+            # "MMTC-2015-0003",
+            # 'MMTC-2017-0009',
+            # 'MMTC-2016-0007',
+            # 'MMTC-2017-0008',
+            # 'MMTC-2017-0009',
+            # 'MMTC-2017-0010',
+            # 'MMTC-2017-0011',
+            # 'MMTC-2017-0012',
+            # 'MMTC-2017-0013',
+            # 'MMTC-2018-0014',
+            # 'MMTC-2019-0015',
+            # 'MMTC-2019-0016',
+            # 'MMTC-2019-0017',
+            # 'MMTC-2019-0018',
+            # 'MMTC-2019-0019',
+            # 'MMTC-2019-0020',
+            # 'MMTC-2019-0021',
+            # 'MMTC-2019-0022',
+        ]
     )

@@ -5,7 +5,7 @@ Copyright (c) 2023-2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/18/2023
-Updated: 5/21/2024
+Updated: 5/22/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -26,6 +26,7 @@ import string
 from time import time, sleep
 
 # External imports:
+from cannlytics.data.cache import Bogart
 from cannlytics.data.coas.coas import CoADoc
 from cannlytics.data.coas.algorithms.terplife import parse_terplife_coa
 from cannlytics.data.web import initialize_selenium
@@ -38,7 +39,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 class TerpLifeLabs:
     """Download lab results from TerpLife Labs."""
 
-    def __init__(self, data_dir, namespace='terplife'):
+    def __init__(self, data_dir, namespace='terplife', cache_path=None):
         """Initialize the driver and directories."""
         self.data_dir = data_dir
         self.datasets_dir = os.path.join(data_dir, 'datasets', namespace)
@@ -46,6 +47,7 @@ class TerpLifeLabs:
         if not os.path.exists(self.datasets_dir): os.makedirs(self.datasets_dir)
         if not os.path.exists(self.pdf_dir): os.makedirs(self.pdf_dir)
         # self.driver = initialize_selenium(download_dir=self.pdf_dir)
+        self.cache = Bogart(cache_path)
 
     def get_results_terplife(
             self,
@@ -55,9 +57,11 @@ class TerpLifeLabs:
         ):
         """Get lab results published by TerpLife Labs on the public web."""
         start = datetime.now()
+        # FIXME: Refactor the following.
         # self.driver.get(url)
         # sleep(1)
-        with initialize_selenium(download_dir=self.pdf_dir, browser='edge') as driver:
+        # , browser='edge'
+        with initialize_selenium(download_dir=self.pdf_dir) as driver:
             self.driver = driver
             self.driver.get(url)
             for query in queries:
@@ -73,7 +77,7 @@ class TerpLifeLabs:
 
     def download_search_results(self, wait=30):
         """Download the results of a search."""
-        # FIXME: Wait for the table to load instead of simply waiting.
+        # TODO: Wait for the table to load instead of simply waiting.
         sleep(wait)
         load = EC.presence_of_element_located((By.CLASS_NAME, 'file-list'))
         table = WebDriverWait(self.driver, wait).until(load)
@@ -89,6 +93,9 @@ class TerpLifeLabs:
                 outfile = os.path.join(self.pdf_dir, file_name)
                 if os.path.exists(outfile):
                     print('Cached: %s' % outfile)
+                    # DEV: Ween off of this cache.set
+                    file_hash = self.cache.hash_file(outfile)
+                    self.cache.set(file_hash, {'type': 'download', 'file': outfile})
                     continue
             except:
                 print('ERROR FINDING: %s' % file_name)
@@ -110,8 +117,10 @@ class TerpLifeLabs:
                 download_button = self.driver.find_element(By.CLASS_NAME, 'lg-download')
                 download_button.click()
                 print('Downloaded: %s' % outfile)
-                # FIXME: Properly wait for the download to finish.
+                # TODO: Properly wait for the download to finish.
                 sleep(random.uniform(30, 31))
+                file_hash = self.cache.hash_file(outfile)
+                self.cache.set(file_hash, {'type': 'download', 'file': outfile})
             except:
                 print('ERROR DOWNLOADING: %s' % file_name)
                 continue
@@ -177,7 +186,7 @@ def add_letters(strings):
 
 
 # === Test ===
-# [✓] Tested: 2024-04-21 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-22 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Query by digit combinations.
@@ -203,34 +212,46 @@ if __name__ == '__main__':
     # Download TerpLife Labs COAs.
     # FIXME: This has a severe memory leak. Chrome may not being closed properly.
     DATA_DIR = 'D://data/florida/results'
-    downloader = TerpLifeLabs(DATA_DIR)
+    CACHE_PATH = 'D://data/.cache/results-fl-terplife.jsonl'
+    downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
     downloader.get_results_terplife(queries)
     downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 
-    # Find the recently downloaded PDFs.
-    days_ago = 365
-    pdf_dir = 'D://data/florida/results/pdfs/terplife'
-    current_time = time()
-    recent_threshold = days_ago * 24 * 60 * 60
-    recent_files = []
-    for filename in os.listdir(pdf_dir):
-        file_path = os.path.join(pdf_dir, filename)
-        if os.path.isfile(file_path):
-            modification_time = os.path.getmtime(file_path)
-            time_difference = current_time - modification_time
-            if time_difference <= recent_threshold:
-                recent_files.append(file_path)
+    # === TODO: Turn the following into methods of the class ===
+    cache = Bogart(CACHE_PATH)
 
-    # Parse the downloaded PDFs.
+    # # Find the recently downloaded PDFs.
+    # days_ago = 365
+    # pdf_dir = 'D://data/florida/results/pdfs/terplife'
+    # current_time = time()
+    # recent_threshold = days_ago * 24 * 60 * 60
+    # recent_files = []
+    # for filename in os.listdir(pdf_dir):
+    #     file_path = os.path.join(pdf_dir, filename)
+    #     if os.path.isfile(file_path):
+    #         modification_time = os.path.getmtime(file_path)
+    #         time_difference = current_time - modification_time
+    #         if time_difference <= recent_threshold:
+    #             recent_files.append(file_path)
+
+    # Parse the COA PDFs.
+    pdf_dir = 'D://data/florida/results/pdfs/terplife'
+    recent_files = os.listdir(pdf_dir)
     print('Parsing %i recently downloaded files...' % len(recent_files))
     parser = CoADoc()
     all_data = []
     for doc in recent_files:
         try:
+            pdf_hash = cache.hash_file(doc)
+            if cache.get(pdf_hash):
+                print('Cached parse:', doc)
+                all_data.append(cache.get(pdf_hash))
+                continue
             coa_data = parse_terplife_coa(parser, doc, verbose=True)
             all_data.append(coa_data)
+            cache.set(pdf_hash, coa_data)
             print(f'Parsed: {doc}')
         except Exception as e:
             print('Failed to parse:', doc)
