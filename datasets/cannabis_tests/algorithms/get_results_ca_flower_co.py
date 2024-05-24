@@ -504,17 +504,17 @@ def parse_coas_ca_flower_co():
     """Parse COAs from the Flower Company."""
     pass
 
-# Aggregate product URLs that have been recorded.
-existing_products = []
-url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
-for url_file in url_files:
-    product_df = pd.read_csv(os.path.join(data_dir, url_file))
-    existing_products.append(product_df)
-existing_products = pd.concat(existing_products)
-existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
-print('Final number of products:', len(existing_products))
-products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
-existing_products.to_csv(products_datafile, index=False)
+# # Aggregate product URLs that have been recorded.
+# existing_products = []
+# url_files = [x for x in os.listdir(data_dir) if 'products' in x and 'all' not in x]
+# for url_file in url_files:
+#     product_df = pd.read_csv(os.path.join(data_dir, url_file))
+#     existing_products.append(product_df)
+# existing_products = pd.concat(existing_products)
+# existing_products.drop_duplicates(subset=['product_url', 'total_thc'], inplace=True)
+# print('Final number of products:', len(existing_products))
+# products_datafile = os.path.join(data_dir, f'ca-all-products-flower-company.csv')
+# existing_products.to_csv(products_datafile, index=False)
 
 # # Read the download product items.
 # product_data = pd.read_csv(datafile)
