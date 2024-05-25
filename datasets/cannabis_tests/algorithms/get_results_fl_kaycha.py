@@ -59,10 +59,10 @@ FLORIDA_LICENSES = {
         'business_dba_name': 'Cookies Florida, Inc.',
         'slug': '',
     },
-    'MMTC-2015-0001': {
-        'business_dba_name': 'Curaleaf',
-        'slug': 'CURALEAF+FLORIDA+LLC',
-    },
+    # 'MMTC-2015-0001': {
+    #     'business_dba_name': 'Curaleaf',
+    #     'slug': 'CURALEAF+FLORIDA+LLC',
+    # },
     'MMTC-2015-0003': {
         'business_dba_name': 'Fluent ',
         'slug': 'Fluent',
@@ -119,22 +119,22 @@ FLORIDA_LICENSES = {
         'business_dba_name': 'Sunnyside*',
         'slug': 'Sunnyside',
     },
-    'MMTC-2015-0004': {
-        'business_dba_name': 'Surterra Wellness',
-        'slug': 'Surterra+Wellness',
-    },
-    'MMTC-2019-0020': {
-        'business_dba_name': 'The Flowery',
-        'slug': 'The+Flowery',
-    },
-    'MMTC-2015-0005': {
-        'business_dba_name': 'Trulieve',
-        'slug': 'Trulieve',
-    },
-    'MMTC-2017-0009': {
-        'business_dba_name': 'VidaCann',
-        'slug': 'VidaCann',
-    },
+    # 'MMTC-2015-0004': {
+    #     'business_dba_name': 'Surterra Wellness',
+    #     'slug': 'Surterra+Wellness',
+    # },
+    # 'MMTC-2019-0020': {
+    #     'business_dba_name': 'The Flowery',
+    #     'slug': 'The+Flowery',
+    # },
+    # 'MMTC-2015-0005': {
+    #     'business_dba_name': 'Trulieve',
+    #     'slug': 'Trulieve',
+    # },
+    # 'MMTC-2017-0009': {
+    #     'business_dba_name': 'VidaCann',
+    #     'slug': 'VidaCann',
+    # },
 }
 
 # Define the minimum file size for a PDF.

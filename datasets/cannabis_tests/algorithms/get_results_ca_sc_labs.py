@@ -113,10 +113,10 @@ prefixes = [
     # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 start_day = 1
-days = 30
+days = 22
 start_year = 2024
 end_year = 2024
-start_month = 1
+start_month = 5
 end_month = 5
 pause = 3.33
 
