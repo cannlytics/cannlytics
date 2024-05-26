@@ -196,6 +196,7 @@
     "carbofuran",
     "Carbofuran",
     "carene",
+    "carophyllene",
     "Carpinteria",
     "Carree",
     "Carto",
@@ -894,6 +895,7 @@
     "ulid",
     "ultrafast",
     "unapprove",
+    "unextracted",
     "unfinish",
     "unigram",
     "unigrams",
@@ -953,8 +955,7 @@
     "zipcode",
     "zipcodes",
     "zoneinfo",
-    "zorder",
-    "unextracted"
+    "zorder"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
