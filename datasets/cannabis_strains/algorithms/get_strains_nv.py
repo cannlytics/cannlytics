@@ -2,10 +2,11 @@
 # External imports:
 import pandas as pd
 
-# TODO: Read curated Nevada lab result data.
+# Read curated Nevada lab result data.
 stats_dir = 'D://data/nevada/results/datasets'
 datafile = f'{stats_dir}/nv-results-latest.csv'
 results = pd.read_csv(datafile)
+print()
 
 # # Restrict to flower.
 # flower_types = ['Marijuana Flowers/Buds', 'Small/Popcorn Buds']

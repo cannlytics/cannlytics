@@ -19,6 +19,7 @@ from datetime import datetime
 
 # External imports:
 import pandas as pd
+from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
 
 # Define standard columns.
@@ -126,7 +127,7 @@ def collect_data(data_dir, columns, dtype_spec):
 
 def standardize_analyte_names(df, analyte_mapping):
     """Standardize analyte names."""
-    df.columns = [analyte_mapping.get(col, col) for col in df.columns]
+    df.columns = [analyte_mapping.get(snake_case(col), snake_case(col)) for col in df.columns]
     return df
 
 def augment_fields(df):
@@ -137,7 +138,9 @@ def augment_fields(df):
     # Calculate the total terpenes
     terpene_columns = [
         'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene', 'alpha_terpinolene', 
-        'beta_pinene', 'beta_caryophyllene', 'beta_myrcene', 'carophyllene_oxide', 
+        'beta_pinene', 'beta_caryophyllene', 'beta_myrcene',
+        # FIXME: This is a misspelling.
+        # 'carophyllene_oxide', 
         'limonene', 'linalool'
     ]
     # TODO: Also include 'Other Terpenes'.
@@ -173,6 +176,7 @@ def combine_redundant_columns(df):
         'Whole Wet Plant',
     ]
     for col in df.columns:
+        matched = False
         for product_type in product_types:
             if product_type in col and '(' not in col:
                 base_name = col.split(product_type)[0].strip()
@@ -182,6 +186,9 @@ def combine_redundant_columns(df):
                 else:
                     combined_results[base_name] = combined_results[base_name].fillna(df[col])
                     print('Combined column:', base_name)
+                matched = True
+        if matched:
+            continue
         if '(' in col and ')' in col:
             base_name = col.split('(')[0].strip()
             if base_name not in combined_results:
@@ -202,10 +209,10 @@ if __name__ == '__main__':
 
     # Collect Nevada lab results
     data_dir = r'D:\data\public-records\Nevada-001'
-    results = collect_data(data_dir, columns, dtype_spec)
+    data = collect_data(data_dir, columns, dtype_spec)
 
     # Pivot the data to get results for each package label
-    results = results.pivot_table(
+    results = data.pivot_table(
         index=['label', 'producer', 'lab', 'product_name', 'product_type', 'date_tested', 'date_packaged', 'date_finished'],
         columns='test_type',
         values='test_result',
@@ -215,7 +222,7 @@ if __name__ == '__main__':
 
     # Combine redundant columns
     results = combine_redundant_columns(results)
-    print('Combined redundant columns:', results.columns)
+    print('Combined redundant columns.')
     list(results.columns)
 
     # Standardize the analyte names
@@ -226,10 +233,15 @@ if __name__ == '__main__':
     results = augment_fields(results)
     print('Augmented fields.')
 
+    # TODO: Ensure all numeric columns are numeric.
+    non_numeric = [
+        'label', 'producer', 'lab', 'product_name',
+        'product_type', 'date_tested', 'date_packaged', 'date_finished'
+    ]
+
     # Optional: Drop nuisance columns.
-    # drop = [
-    #     'Sub-Contract Testing',
-    # ]
+    drop = ['']
+    results = results.drop(columns=drop, errors='ignore')
 
     # Save the curated results
     stats_dir = 'D://data/nevada/results/datasets'
