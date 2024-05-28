@@ -207,15 +207,15 @@ if __name__ == '__main__':
     # queries += add_letters(long_letters)
     # queries += add_digits(long_digits)
     # queries.reverse()
-    print('All queries:', queries)
+    # print('All queries:', queries)
 
     # Download TerpLife Labs COAs.
     # FIXME: This has a severe memory leak. Chrome may not being closed properly.
     DATA_DIR = 'D://data/florida/results'
     CACHE_PATH = 'D://data/.cache/results-fl-terplife.jsonl'
-    downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
-    downloader.get_results_terplife(queries)
-    downloader.quit()
+    # downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
+    # downloader.get_results_terplife(queries)
+    # downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 
@@ -244,7 +244,8 @@ if __name__ == '__main__':
     all_data = []
     for doc in recent_files:
         try:
-            pdf_hash = cache.hash_file(doc)
+            filename = os.path.join(pdf_dir, doc)
+            pdf_hash = cache.hash_file(filename)
             if cache.get(pdf_hash):
                 print('Cached parse:', doc)
                 all_data.append(cache.get(pdf_hash))

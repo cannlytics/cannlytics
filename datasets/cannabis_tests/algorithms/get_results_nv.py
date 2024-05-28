@@ -204,7 +204,7 @@ def combine_redundant_columns(df):
 
 
 # === Test ===
-# [✓] Tested: 2024-05-25 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-27 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Collect Nevada lab results
@@ -223,25 +223,33 @@ if __name__ == '__main__':
     # Combine redundant columns
     results = combine_redundant_columns(results)
     print('Combined redundant columns.')
-    list(results.columns)
 
     # Standardize the analyte names
     results = standardize_analyte_names(results, ANALYTES)
     print('Standardized analyte names.')
 
-    # Augment fields with additional calculated metrics
-    results = augment_fields(results)
-    print('Augmented fields.')
+    # Drop nuisance columns.
+    drop = ['']
+    results = results.drop(columns=drop, errors='ignore')
 
-    # TODO: Ensure all numeric columns are numeric.
+    # Ensure all numeric columns are numeric.
     non_numeric = [
         'label', 'producer', 'lab', 'product_name',
         'product_type', 'date_tested', 'date_packaged', 'date_finished'
     ]
+    numeric_cols = results.columns.difference(non_numeric)
+    for col in numeric_cols:
+        results[col] = pd.to_numeric(results[col], errors='coerce')
+    print('Converted columns to numeric.')
 
-    # Optional: Drop nuisance columns.
-    drop = ['']
-    results = results.drop(columns=drop, errors='ignore')
+    # Augment fields with additional calculated metrics
+    results = augment_fields(results)
+    print('Augmented fields.')
+
+
+
+
+    # TODO: Augment licensee data.
 
     # Save the curated results
     stats_dir = 'D://data/nevada/results/datasets'
