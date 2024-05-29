@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/25/2024
-Updated: 5/25/2024
+Updated: 5/28/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -21,6 +21,7 @@ from datetime import datetime
 import pandas as pd
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
+
 
 # Define standard columns.
 columns = {
@@ -132,29 +133,27 @@ def standardize_analyte_names(df, analyte_mapping):
 
 def augment_fields(df):
     """Augment the DataFrame with additional calculated fields."""
-    # Calculate the total cannabinoids
-    df['total_cannabinoids'] = df[['cbd', 'cbda', 'cbn', 'delta_8_thc', 'delta_9_thc', 'thca']].sum(axis=1)
+    # Calculate total cannabinoids.
+    df['total_cannabinoids'] = df[['cbd', 'cbda', 'cbn', 'delta_8_thc',
+                                   'delta_9_thc', 'thca']].sum(axis=1)
 
-    # Calculate the total terpenes
+    # Calculate total terpenes.
     terpene_columns = [
-        'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene', 'alpha_terpinolene', 
-        'beta_pinene', 'beta_caryophyllene', 'beta_myrcene',
-        # FIXME: This is a misspelling.
-        # 'carophyllene_oxide', 
-        'limonene', 'linalool'
+        'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene', 'alpha_terpinene', 
+        'terpinolene', 'beta_pinene', 'beta_caryophyllene', 'beta_myrcene', 
+        'd_limonene', 'linalool', 'caryophyllene_oxide', 'other_terpenes'
     ]
-    # TODO: Also include 'Other Terpenes'.
     df['total_terpenes'] = df[terpene_columns].sum(axis=1)
 
-    # Calculate the total THC to total CBD ratio
-    df['total_thc'] = df['delta_9_thc'] + 0.877 * df['thca']
-    df['total_cbd'] = df['cbd'] + 0.877 * df['cbda']
-    df['thc_cbd_ratio'] = df['total_thc'] / df['total_cbd']
+    # Calculate the total THC to total CBD ratio.
+    df['total_thc'] = round(df['delta_9_thc'] + 0.877 * df['thca'], 2)
+    df['total_cbd'] = round(df['cbd'] + 0.877 * df['cbda'], 2)
+    df['thc_cbd_ratio'] = round(df['total_thc'] / df['total_cbd'], 2)
 
-    # Calculate the total cannabinoids to total terpenes ratio
-    df['cannabinoids_terpenes_ratio'] = df['total_cannabinoids'] / df['total_terpenes']
+    # Calculate the total cannabinoids to total terpenes ratio.
+    df['cannabinoids_terpenes_ratio'] = round(df['total_cannabinoids'] / df['total_terpenes'], 2)
 
-    # Convert date_tested to datetime, reconvert in case of any remaining inconsistencies
+    # Convert dates to datetime, reconverting in case of any remaining inconsistencies.
     df['date_tested'] = pd.to_datetime(df['date_tested'], format='mixed', errors='coerce')
     df['date_tested'] = pd.to_datetime(df['date_tested'], format='mixed', errors='coerce')
 
@@ -162,45 +161,65 @@ def augment_fields(df):
     return df
 
 
-def combine_redundant_columns(df):
+def combine_redundant_columns(df, product_types=None, verbose=False):
     """Combine redundant columns and extract units and product types."""
     combined_results = {}
-    product_types = [
-        'Infused Edible',
-        'Infused Non-Edible',
-        'Non-Solvent Concentrate',
-        'R&D Testing',
-        'Raw Plant Material',
-        'Solvent Based Concentrate',
-        'Sub-Contract',
-        'Whole Wet Plant',
-    ]
     for col in df.columns:
         matched = False
-        for product_type in product_types:
-            if product_type in col and '(' not in col:
-                base_name = col.split(product_type)[0].strip()
-                if base_name not in combined_results:
-                    combined_results[base_name] = df[col]
-                    print('New column:', base_name)
-                else:
-                    combined_results[base_name] = combined_results[base_name].fillna(df[col])
-                    print('Combined column:', base_name)
-                matched = True
+        if product_types is not None:
+            for product_type in product_types:
+                if product_type in col and '(' not in col:
+                    base_name = col.split(product_type)[0].strip()
+                    if base_name not in combined_results:
+                        combined_results[base_name] = df[col]
+                        if verbose:
+                            print('New column:', base_name)
+                    else:
+                        combined_results[base_name] = combined_results[base_name].fillna(df[col])
+                        if verbose:
+                            print('Combined column:', base_name)
+                    matched = True
         if matched:
             continue
         if '(' in col and ')' in col:
             base_name = col.split('(')[0].strip()
             if base_name not in combined_results:
                 combined_results[base_name] = df[col]
-                print('New column:', base_name)
+                if verbose:
+                    print('New column:', base_name)
             else:
                 combined_results[base_name] = combined_results[base_name].fillna(df[col])
-                print('Combined column:', base_name)
+                if verbose:
+                    print('Combined column:', base_name)
         elif col not in combined_results:
-            print('New column:', col)
+            if verbose:
+                print('New column:', col)
             combined_results[col] = df[col]
     return pd.DataFrame(combined_results)
+
+
+def combine_similar_columns(df, similar_columns):
+    """Combine similar columns with different spellings or capitalization."""
+    for correct_name, similar_name in similar_columns.items():
+        if correct_name in df.columns and similar_name in df.columns:
+            df[similar_name] = df[similar_name].fillna(df[correct_name])
+            df.drop(columns=[correct_name], inplace=True)
+        elif correct_name in df.columns:
+            df.rename(columns={correct_name: similar_name}, inplace=True)
+    return df
+
+
+def augment_metadata(results, data, columns):
+    """Reattach missing columns from `data` to `results` using the first observed value."""
+    for key in list(columns.keys()):
+        if key not in results.columns:
+            if col in data.columns:
+                first_value = data[key].dropna().iloc[0] if not data[key].dropna().empty else None
+                results[key] = first_value
+            else:
+                results[key] = None
+    return results
+
 
 
 # === Test ===
@@ -221,8 +240,36 @@ if __name__ == '__main__':
     print('Number of Nevada test samples:', len(results))
 
     # Combine redundant columns
-    results = combine_redundant_columns(results)
+    product_types = [
+        'Infused Edible',
+        'Infused Non-Edible',
+        'Non-Solvent Concentrate',
+        'R&D Testing',
+        'Raw Plant Material',
+        'Solvent Based Concentrate',
+        'Sub-Contract',
+        'Whole Wet Plant',
+    ]
+    results = combine_redundant_columns(results, product_types=product_types)
     print('Combined redundant columns.')
+
+    # Combine similar columns.
+    similar_columns = {
+        'Beta Pinene': 'beta_pinene',
+        'Beta-Pinene': 'beta_pinene',
+        'Carophyllene Oxide': 'caryophyllene_oxide',
+        'Caryophyllene Oxide': 'caryophyllene_oxide',
+        'Delta 8 THC': 'delta_8_thc',
+        'Delta-8 THC': 'delta_8_thc',
+        'Delta 9 THC': 'delta_9_thc',
+        'Delta-9 THC': 'delta_9_thc',
+        'THCA': 'thca',
+        'THCa': 'thca',
+        'Total Yeast and Mold': 'total_yeast_and_mold',
+        'Yeast and Mold': 'total_yeast_and_mold',
+    }
+    results = combine_similar_columns(results, similar_columns)
+    print('Combined similar columns.')
 
     # Standardize the analyte names
     results = standardize_analyte_names(results, ANALYTES)
@@ -246,10 +293,58 @@ if __name__ == '__main__':
     results = augment_fields(results)
     print('Augmented fields.')
 
+    # FIXME: Augment sample metadata.
+    # Note: If any value is not null, then the result value is the first observed value.
+    # - sample_id
+    # - package_type
+    # - quantity
+    # - units_id
+    # - unit_of_measure_name
+    # - unit_of_measure_abbreviation
+    # - lab_testing_state
+    # - lab_testing_state_name
+    # - remediation_date
+    # - remediation_recorded_datetime
+    # - lab_test_detail_id
+    # - test_performed_date
+    # - lab_test_result_document_file_id
+    # - archived_date
+
+    # FIXME: Augment boolean metadata.
+    # Note: If any value is True, then the result value is True.
+    # - contains_remediated_product
+    # - product_requires_remediation
+    # - is_on_hold
+    # - is_process_validation_testing_sample
+    # - is_testing_sample
+    # Note: If any value is False, then the result value is False.
+    # - overall_passed
+    # - test_passed
+
+    # FIXME: augment lab data:
+    # - lab_license_number
+    # Example:
+    labs = list(results['lab'].unique())
+    for lab in labs:
+        lab_data = data.loc[data['lab'] == lab]
+        lab_license_number = lab_data['lab_license_number'].dropna().iloc[0]
+        results.loc[results['lab'] == lab, 'lab_license_number'] = lab_license_number
+
+    # FIXME: Augment producer data:
+    # - producer_license_number
+    # Example:
+    producers = list(results['producer'].unique())
+    for producer in producers:
+        producer_data = data.loc[data['producer'] == producer]
+        producer_license_number = producer_data['producer_license_number'].dropna().iloc[0]
+        results.loc[results['producer'] == producer, 'producer_license_number'] = producer_license_number
 
 
+    #  === TODO: Augment licensee data. ===
 
-    # TODO: Augment licensee data.
+    # Read NV license data.
+    datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\licenses-nv-2024-05-13.csv"
+    licenses = pd.read_csv(datafile, low_memory=False)
 
     # Save the curated results
     stats_dir = 'D://data/nevada/results/datasets'
