@@ -86,6 +86,7 @@ class TerpLifeLabs:
         for row in rows:
 
             # Skip if the file has already be downloaded.
+            file_name = ''
             try:
                 file_name = row.find_element(By.CLASS_NAME, 'file-item-name').text
                 if file_name == 'COAS':
@@ -213,9 +214,9 @@ if __name__ == '__main__':
     # FIXME: This has a severe memory leak. Chrome may not being closed properly.
     DATA_DIR = 'D://data/florida/results'
     CACHE_PATH = 'D://data/.cache/results-fl-terplife.jsonl'
-    # downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
-    # downloader.get_results_terplife(queries)
-    # downloader.quit()
+    downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
+    downloader.get_results_terplife(queries)
+    downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 

@@ -400,6 +400,7 @@ ANALYTES = {
     'stec_e_coli': 'e_coli',
     'stec': 'e_coli',
     'escherichia_coli_specific': 'e_coli',
+    'shiga_toxin_producing_e_coli': 'e_coli',
     'iso_butane': 'isobutane',
     'YM': 'total_yeast_and_mold',
     'CC': 'total_coliforms',
@@ -434,6 +435,14 @@ ANALYTES = {
     'alpha_fenchyl_alcohol': 'fenchol',
     'total_terpineol': 'terpineol',
     'trans_caryophyllene': 'beta_caryophyllene',
+    'pathogenic_aspergillus_spp': 'aspergillus_spp',
+    'a_terreus': 'aspergillus_terreus',
+    'abamectin': 'avermectin_b1b',
+    '2_propanol_ipa': 'isopropyl_alcohol',
+    'total_a_atoxins': 'total_aflatoxins',
+    'total_of_aflatoxin_b_1_b_2_g_1_and_g_2': 'total_aflatoxins',
+    'foreign_materials': 'foreign_matter',
+    'filth_and_foreign_matter': 'foreign_matter',
     # 'below_quantification_limit_alpha_ocimene': 'alpha_ocimene',
     # 'below_quantification_limit_beta_ocimene': 'beta_ocimene',
     # 'below_quantification_limit_alpha_humulene': 'alpha_humulene',
@@ -633,11 +642,12 @@ STANDARD_FIELDS = {
     'pesticides_status_status': 'pesticides_status',
     'terpenoid_method': 'terpenes_method',
     'total_a_atoxins': 'total_aflatoxins',
+    'total_of_aflatoxin_b_1_b_2_g_1_and_g_2': 'total_aflatoxins',
     'water_activity_status_method': 'water_activity_method',
     'water_activity_status_status': 'water_activity_status',
     'moisture_content_status': 'moisture_status',
     'percent_moisture_status': 'moisture_status',
-    'total_d_9_thc_mg_per_package': 'total_thc_mg_per_package'
+    'total_d_9_thc_mg_per_package': 'total_thc_mg_per_package',
 }
 
 # A map of standard units by analysis to use when no units are obtainable.

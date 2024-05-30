@@ -18,6 +18,7 @@ import os
 from datetime import datetime
 
 # External imports:
+from matplotlib import pyplot as plt
 import pandas as pd
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
@@ -131,7 +132,7 @@ def standardize_analyte_names(df, analyte_mapping):
     df.columns = [analyte_mapping.get(snake_case(col), snake_case(col)) for col in df.columns]
     return df
 
-def augment_fields(df):
+def augment_calculations(df):
     """Augment the DataFrame with additional calculated fields."""
     # Calculate total cannabinoids.
     df['total_cannabinoids'] = df[['cbd', 'cbda', 'cbn', 'delta_8_thc',
@@ -200,26 +201,41 @@ def combine_redundant_columns(df, product_types=None, verbose=False):
 
 def combine_similar_columns(df, similar_columns):
     """Combine similar columns with different spellings or capitalization."""
-    for correct_name, similar_name in similar_columns.items():
-        if correct_name in df.columns and similar_name in df.columns:
-            df[similar_name] = df[similar_name].fillna(df[correct_name])
-            df.drop(columns=[correct_name], inplace=True)
-        elif correct_name in df.columns:
-            df.rename(columns={correct_name: similar_name}, inplace=True)
+    for target_col, col_variants in similar_columns.items():
+        if target_col not in df.columns:
+            df[target_col] = pd.NA
+        for col in col_variants:
+            if col in df.columns:
+                df[target_col] = df[target_col].combine_first(df[col])
+                df.drop(columns=[col], inplace=True)
     return df
 
 
 def augment_metadata(results, data, columns):
-    """Reattach missing columns from `data` to `results` using the first observed value."""
-    for key in list(columns.keys()):
-        if key not in results.columns:
-            if col in data.columns:
-                first_value = data[key].dropna().iloc[0] if not data[key].dropna().empty else None
-                results[key] = first_value
-            else:
-                results[key] = None
-    return results
+    """Reattach missing columns from `data` to `results`."""
+    
+    # Augment sample-specific metadata.
+    sample_metadata_cols = [
+        'sample_id', 'package_type', 'quantity', 'units_id', 'unit_of_measure_name',
+        'unit_of_measure_abbreviation', 'lab_testing_state', 'lab_testing_state_name',
+        'remediation_date', 'remediation_recorded_datetime', 'lab_test_detail_id',
+        'test_performed_date', 'lab_test_result_document_file_id', 'archived_date',
+        'lab_license_number', 'producer_license_number'
+    ]
+    for col in sample_metadata_cols:
+        if col not in results.columns:
+            results[col] = results['label'].map(data.drop_duplicates('label').set_index('label')[col])
 
+    # Augment boolean metadata
+    boolean_metadata_cols = [
+        'contains_remediated_product', 'product_requires_remediation', 'is_on_hold',
+        'is_process_validation_testing_sample', 'is_testing_sample', 'overall_passed', 'test_passed'
+    ]
+    for col in boolean_metadata_cols:
+        if col not in results.columns:
+            results[col] = results['label'].map(data.groupby('label')[col].transform(lambda x: any(x) if x.name in ['overall_passed', 'test_passed'] else all(x)))
+
+    return results
 
 
 # === Test ===
@@ -255,18 +271,12 @@ if __name__ == '__main__':
 
     # Combine similar columns.
     similar_columns = {
-        'Beta Pinene': 'beta_pinene',
-        'Beta-Pinene': 'beta_pinene',
-        'Carophyllene Oxide': 'caryophyllene_oxide',
-        'Caryophyllene Oxide': 'caryophyllene_oxide',
-        'Delta 8 THC': 'delta_8_thc',
-        'Delta-8 THC': 'delta_8_thc',
-        'Delta 9 THC': 'delta_9_thc',
-        'Delta-9 THC': 'delta_9_thc',
-        'THCA': 'thca',
-        'THCa': 'thca',
-        'Total Yeast and Mold': 'total_yeast_and_mold',
-        'Yeast and Mold': 'total_yeast_and_mold',
+        'beta_pinene': ['Beta Pinene', 'Beta-Pinene'],
+        'caryophyllene_oxide': ['Carophyllene Oxide', 'Caryophyllene Oxide'],
+        'delta_8_thc': ['Delta 8 THC', 'Delta-8 THC'],
+        'delta_9_thc': ['Delta 9 THC', 'Delta-9 THC'],
+        'thca': ['THCA', 'THCa'],
+        'total_yeast_and_mold': ['Total Yeast and Mold', 'Yeast and Mold']
     }
     results = combine_similar_columns(results, similar_columns)
     print('Combined similar columns.')
@@ -289,62 +299,30 @@ if __name__ == '__main__':
         results[col] = pd.to_numeric(results[col], errors='coerce')
     print('Converted columns to numeric.')
 
-    # Augment fields with additional calculated metrics
-    results = augment_fields(results)
+    # Augment metadata.
+    results = augment_metadata(results, data, columns)
+    print('Augmented metadata.')
+
+    # Augment additional calculated metrics.
+    results = augment_calculations(results)
     print('Augmented fields.')
 
-    # FIXME: Augment sample metadata.
-    # Note: If any value is not null, then the result value is the first observed value.
-    # - sample_id
-    # - package_type
-    # - quantity
-    # - units_id
-    # - unit_of_measure_name
-    # - unit_of_measure_abbreviation
-    # - lab_testing_state
-    # - lab_testing_state_name
-    # - remediation_date
-    # - remediation_recorded_datetime
-    # - lab_test_detail_id
-    # - test_performed_date
-    # - lab_test_result_document_file_id
-    # - archived_date
 
-    # FIXME: Augment boolean metadata.
-    # Note: If any value is True, then the result value is True.
-    # - contains_remediated_product
-    # - product_requires_remediation
-    # - is_on_hold
-    # - is_process_validation_testing_sample
-    # - is_testing_sample
-    # Note: If any value is False, then the result value is False.
-    # - overall_passed
-    # - test_passed
-
-    # FIXME: augment lab data:
-    # - lab_license_number
-    # Example:
-    labs = list(results['lab'].unique())
-    for lab in labs:
-        lab_data = data.loc[data['lab'] == lab]
-        lab_license_number = lab_data['lab_license_number'].dropna().iloc[0]
-        results.loc[results['lab'] == lab, 'lab_license_number'] = lab_license_number
-
-    # FIXME: Augment producer data:
-    # - producer_license_number
-    # Example:
-    producers = list(results['producer'].unique())
-    for producer in producers:
-        producer_data = data.loc[data['producer'] == producer]
-        producer_license_number = producer_data['producer_license_number'].dropna().iloc[0]
-        results.loc[results['producer'] == producer, 'producer_license_number'] = producer_license_number
+    # DEV:
+    analyte = 'delta_9_thc'
+    upper_limit = 10
+    lower_limit = 0
+    sample = results.loc[(results[analyte] > lower_limit) & (results[analyte] < upper_limit)]
+    sample[analyte].hist(bins=100)
+    plt.xlim(lower_limit, upper_limit)
+    plt.show()
 
 
     #  === TODO: Augment licensee data. ===
 
-    # Read NV license data.
-    datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\licenses-nv-2024-05-13.csv"
-    licenses = pd.read_csv(datafile, low_memory=False)
+    # # Read NV license data.
+    # datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\licenses-nv-2024-05-13.csv"
+    # licenses = pd.read_csv(datafile, low_memory=False)
 
     # Save the curated results
     stats_dir = 'D://data/nevada/results/datasets'
