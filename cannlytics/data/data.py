@@ -1,10 +1,10 @@
 """
 Data Tools | Cannlytics
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 4/21/2022
-Updated: 9/8/2022
+Updated: 5/30/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Internal imports.
@@ -13,7 +13,7 @@ import hmac
 import json
 import os
 import re
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 # External imports.
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -233,6 +233,44 @@ def write_to_worksheet(ws, values):
                 ws.cell(row=r_idx, column=c_idx, value=value)
             except ValueError:
                 ws.cell(row=r_idx, column=c_idx, value=str(value))
+
+
+def save_with_copyright(
+        data: pd.DataFrame,
+        outfile: str,
+        dataset_name: Optional[str] = '',
+        publisher: Optional[str] = '',
+        author: Optional[str] = '',
+        license_name: Optional[str] = 'CC BY 4.0',
+        license_url: Optional[str] = 'https://creativecommons.org/licenses/by/4.0/',
+        license_description: Optional[str] = None,
+        year: Optional[int] = None, # Optional: Make year redundant.
+        created_date: Optional[str] = None,
+        sources: Optional[List[str]] = [],
+        source_urls: Optional[List[str]] = [],
+    ) -> None:
+    updated_date = pd.Timestamp.now().strftime('%Y-%m-%d')
+    if created_date is None: created_date = updated_date
+    if year is None: year = pd.Timestamp.now().year
+    if license_description is None: license_description = "The files associated with this dataset are licensed under a Creative Commons Attribution 4.0 International license.\n\nYou can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party."
+    copyright_content = pd.DataFrame({
+        'Dataset': [dataset_name],
+        'Copyright': [f'Copyright © {year} {publisher}'],
+        'Authors': [author],
+        'License': [license_name],
+        'License URL': [license_url],
+        'License Description': [license_description],
+        'Created': [created_date],
+        'Updated': [updated_date]
+    })
+    sources_content = pd.DataFrame({
+        'name': sources,
+        'url': source_urls
+    })
+    with pd.ExcelWriter(outfile, engine='xlsxwriter') as writer:
+        data.to_excel(writer, sheet_name='Data', index=False)
+        copyright_content.T.to_excel(writer, sheet_name='Copyright', header=False)
+        sources_content.to_excel(writer, sheet_name='Sources', index=False)
 
 
 # === Tests ===

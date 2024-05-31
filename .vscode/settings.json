@@ -955,7 +955,10 @@
     "zipcode",
     "zipcodes",
     "zoneinfo",
-    "zorder"
+    "zorder",
+    "showmeans",
+    "ANOVA",
+    "yerr"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

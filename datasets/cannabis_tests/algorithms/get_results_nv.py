@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/25/2024
-Updated: 5/28/2024
+Updated: 5/30/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
@@ -14,15 +14,16 @@ Description:
 
 """
 # Standard imports:
-import os
 from datetime import datetime
+from glob import glob
+import os
 
 # External imports:
-from matplotlib import pyplot as plt
-import pandas as pd
+from cannlytics.data import save_with_copyright
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
-
+from matplotlib import pyplot as plt
+import pandas as pd
 
 # Define standard columns.
 columns = {
@@ -132,35 +133,35 @@ def standardize_analyte_names(df, analyte_mapping):
     df.columns = [analyte_mapping.get(snake_case(col), snake_case(col)) for col in df.columns]
     return df
 
-def augment_calculations(df):
+def augment_calculations(
+        df,
+        cannabinoids=None,
+        terpenes=None,
+        delta_9_thc='delta_9_thc',
+        thca='thca',
+        cbd='cbd',
+        cbda='cbda',
+    ):
     """Augment the DataFrame with additional calculated fields."""
     # Calculate total cannabinoids.
-    df['total_cannabinoids'] = df[['cbd', 'cbda', 'cbn', 'delta_8_thc',
-                                   'delta_9_thc', 'thca']].sum(axis=1)
+    if cannabinoids is not None:
+        df['total_cannabinoids'] = round(df[cannabinoids].sum(axis=1), 2)
 
     # Calculate total terpenes.
-    terpene_columns = [
-        'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene', 'alpha_terpinene', 
-        'terpinolene', 'beta_pinene', 'beta_caryophyllene', 'beta_myrcene', 
-        'd_limonene', 'linalool', 'caryophyllene_oxide', 'other_terpenes'
-    ]
-    df['total_terpenes'] = df[terpene_columns].sum(axis=1)
+    if terpenes is not None:
+        df['total_terpenes'] = round(df[terpenes].sum(axis=1), 2)
 
     # Calculate the total THC to total CBD ratio.
-    df['total_thc'] = round(df['delta_9_thc'] + 0.877 * df['thca'], 2)
-    df['total_cbd'] = round(df['cbd'] + 0.877 * df['cbda'], 2)
+    df['total_thc'] = round(df[delta_9_thc] + 0.877 * df[thca], 2)
+    df['total_cbd'] = round(df[cbd] + 0.877 * df[cbda], 2)
     df['thc_cbd_ratio'] = round(df['total_thc'] / df['total_cbd'], 2)
 
     # Calculate the total cannabinoids to total terpenes ratio.
-    df['cannabinoids_terpenes_ratio'] = round(df['total_cannabinoids'] / df['total_terpenes'], 2)
-
-    # Convert dates to datetime, reconverting in case of any remaining inconsistencies.
-    df['date_tested'] = pd.to_datetime(df['date_tested'], format='mixed', errors='coerce')
-    df['date_tested'] = pd.to_datetime(df['date_tested'], format='mixed', errors='coerce')
+    if cannabinoids is not None and terpenes is not None:
+        df['cannabinoids_terpenes_ratio'] = round(df['total_cannabinoids'] / df['total_terpenes'], 2)
 
     # Return the augmented data.
     return df
-
 
 def combine_redundant_columns(df, product_types=None, verbose=False):
     """Combine redundant columns and extract units and product types."""
@@ -198,7 +199,6 @@ def combine_redundant_columns(df, product_types=None, verbose=False):
             combined_results[col] = df[col]
     return pd.DataFrame(combined_results)
 
-
 def combine_similar_columns(df, similar_columns):
     """Combine similar columns with different spellings or capitalization."""
     for target_col, col_variants in similar_columns.items():
@@ -210,41 +210,29 @@ def combine_similar_columns(df, similar_columns):
                 df.drop(columns=[col], inplace=True)
     return df
 
-
-def augment_metadata(results, data, columns):
+def augment_metadata(results, data, sample_columns, boolean_columns,):
     """Reattach missing columns from `data` to `results`."""
-    
-    # Augment sample-specific metadata.
-    sample_metadata_cols = [
-        'sample_id', 'package_type', 'quantity', 'units_id', 'unit_of_measure_name',
-        'unit_of_measure_abbreviation', 'lab_testing_state', 'lab_testing_state_name',
-        'remediation_date', 'remediation_recorded_datetime', 'lab_test_detail_id',
-        'test_performed_date', 'lab_test_result_document_file_id', 'archived_date',
-        'lab_license_number', 'producer_license_number'
-    ]
-    for col in sample_metadata_cols:
+    for col in sample_columns:
         if col not in results.columns:
             results[col] = results['label'].map(data.drop_duplicates('label').set_index('label')[col])
-
-    # Augment boolean metadata
-    boolean_metadata_cols = [
-        'contains_remediated_product', 'product_requires_remediation', 'is_on_hold',
-        'is_process_validation_testing_sample', 'is_testing_sample', 'overall_passed', 'test_passed'
-    ]
-    for col in boolean_metadata_cols:
+    for col in boolean_columns:
         if col not in results.columns:
             results[col] = results['label'].map(data.groupby('label')[col].transform(lambda x: any(x) if x.name in ['overall_passed', 'test_passed'] else all(x)))
-
     return results
 
-
 # === Test ===
-# [✓] Tested: 2024-05-27 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-30 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # === Read the results ===
+
+    # TODO: Read the datafile from HuggingFace.
 
     # Collect Nevada lab results
     data_dir = r'D:\data\public-records\Nevada-001'
     data = collect_data(data_dir, columns, dtype_spec)
+
+    # === Standardize the results ===
 
     # Pivot the data to get results for each package label
     results = data.pivot_table(
@@ -300,36 +288,115 @@ if __name__ == '__main__':
     print('Converted columns to numeric.')
 
     # Augment metadata.
-    results = augment_metadata(results, data, columns)
+    sample_columns = [
+        'sample_id', 'package_type', 'quantity', 'units_id', 'unit_of_measure_name',
+        'unit_of_measure_abbreviation', 'lab_testing_state', 'lab_testing_state_name',
+        'remediation_date', 'remediation_recorded_datetime', 'lab_test_detail_id',
+        'test_performed_date', 'lab_test_result_document_file_id', 'archived_date',
+        'lab_license_number', 'producer_license_number'
+    ]
+    boolean_columns = [
+        'contains_remediated_product', 'product_requires_remediation', 'is_on_hold',
+        'is_process_validation_testing_sample', 'is_testing_sample', 'overall_passed', 'test_passed'
+    ]
+    results = augment_metadata(results, data, sample_columns, boolean_columns)
     print('Augmented metadata.')
 
     # Augment additional calculated metrics.
-    results = augment_calculations(results)
+    cannabinoids = ['cbd', 'cbda', 'cbn', 'delta_8_thc', 'delta_9_thc', 'thca']
+    terpenes = [
+        'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene', 'alpha_terpinene', 
+        'terpinolene', 'beta_pinene', 'beta_caryophyllene', 'beta_myrcene', 
+        'd_limonene', 'linalool', 'caryophyllene_oxide', 'other_terpenes'
+    ]
+    results = augment_calculations(results, cannabinoids, terpenes)
     print('Augmented fields.')
 
+    # Convert dates to datetime and ensure they are timezone unaware.
+    date_columns = [
+        'date_tested', 'test_performed_date', 'date_packaged',
+        'date_finished', 'remediation_date', 'archived_date'
+    ]
+    for col in date_columns:
+        if col in results.columns:
+            results[col] = pd.to_datetime(results[col], errors='coerce').dt.tz_localize(None)
 
-    # DEV:
-    analyte = 'delta_9_thc'
-    upper_limit = 10
-    lower_limit = 0
-    sample = results.loc[(results[analyte] > lower_limit) & (results[analyte] < upper_limit)]
-    sample[analyte].hist(bins=100)
-    plt.xlim(lower_limit, upper_limit)
-    plt.show()
+    #  === Augment licensee data. ===
 
+    # Read NV lab license data.
+    lab_columns = {
+        'CEID': 'lab_id',
+        'premise_county': 'lab_county',
+        'premise_state': 'lab_state',
+    }
+    lab_datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\labs-nv-2023-12-17T11-41-34.csv"
+    lab_licenses = pd.read_csv(lab_datafile, low_memory=False)
+    lab_licenses['license_number'] = lab_licenses['license_number'].astype(str)
+    lab_licenses.set_index('license_number', inplace=True)
+    lab_licenses.rename(columns=lab_columns, inplace=True)
 
-    #  === TODO: Augment licensee data. ===
+    # Read NV licenses.
+    license_columns = {
+        'CEID': 'producer_id',
+        'license_type': 'producer_license_type',
+        'premise_county': 'producer_county',
+        'premise_state': 'producer_state',
+        'business_legal_name': 'producer_legal_name',
+    }
+    data_dir = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv"
+    license_files = sorted(
+        glob(os.path.join(data_dir, '*licenses*.csv')),
+        key=os.path.getmtime,
+        reverse=True
+    )
+    all_licenses = pd.concat(
+        (pd.read_csv(file, low_memory=False) for file in license_files),
+        ignore_index=True
+    )
+    all_licenses['license_number'] = all_licenses['license_number'].astype(str)
+    all_licenses = all_licenses.drop_duplicates(subset='license_number', keep='first')
+    all_licenses.set_index('license_number', inplace=True)
+    all_licenses.rename(columns=license_columns, inplace=True)
 
-    # # Read NV license data.
-    # datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\licenses-nv-2024-05-13.csv"
-    # licenses = pd.read_csv(datafile, low_memory=False)
+    # Augment lab license data.
+    labs = list(results['lab_license_number'].unique())
+    for lab in labs:
+        if lab in lab_licenses.index:
+            license_data = lab_licenses.loc[lab]
+            for key in lab_columns.values():
+                if key in lab_licenses.columns:
+                    results[key] = results['lab_license_number'].map(lab_licenses[key])
 
-    # Save the curated results
+    # Augment producer license data.
+    producers = list(results['producer_license_number'].unique())
+    for producer in producers:
+        if producer in all_licenses.index:
+            license_data = all_licenses.loc[producer]
+            for key in license_columns.values():
+                if key in all_licenses.columns:
+                    results[key] = results['producer_license_number'].map(all_licenses[key])
+
+    # === Save the results. ===
+
+    # Sort the columns.
+    non_numeric_cols = non_numeric + sample_columns + boolean_columns + date_columns
+    non_numeric_cols += list(lab_columns.values()) + list(license_columns.values())
+    numeric_cols = [col for col in results.columns if col not in non_numeric_cols]
+    numeric_cols_sorted = sorted(numeric_cols)
+    results = results[non_numeric_cols + numeric_cols_sorted]
+
+    # Save the results with copyright and sources sheets.
     stats_dir = 'D://data/nevada/results/datasets'
     date = datetime.now().strftime('%Y-%m-%d')
-    if not os.path.exists(stats_dir):
-        os.makedirs(stats_dir)
+    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
     outfile = f'{stats_dir}/nv-results-{date}.xlsx'
-    results.to_excel(outfile, index=False)
-    results.to_csv(f'{stats_dir}/nv-results-latest.csv', index=False)
-    print('Nevada lab results archived:', outfile)
+    save_with_copyright(
+        results,
+        outfile,
+        dataset_name='Nevada Cannabis Lab Results',
+        author='Keegan Skeate',
+        publisher='Cannlytics',
+        sources=['Nevada Cannabis Compliance Board'],
+        source_urls=['https://ccb.nv.gov/'],
+    )
+    print('Saved Nevada lab results:', outfile)

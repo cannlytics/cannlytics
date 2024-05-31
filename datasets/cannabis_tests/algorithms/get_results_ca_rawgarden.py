@@ -318,11 +318,10 @@ if __name__ == '__main__':
     STORAGE_REF = 'data/lab_results/rawgarden'
 
     # Create directories if they don't already exist.
-    # TODO: Edit `ENV_FILE` and `DATA_DIR` as needed for your desired setup.
-    # ENV_FILE = '../../../../.env'
-    DATA_DIR = 'D:/data/california/lab_results'
-    COA_DATA_DIR = f'{DATA_DIR}/rawgarden'
-    COA_PDF_DIR = f'{COA_DATA_DIR}/pdfs'
+    # Note: Edit `ENV_FILE` and `DATA_DIR` as needed for your desired setup.
+    DATA_DIR = 'D:/data/california/results'
+    COA_DATA_DIR = f'{DATA_DIR}/datasets/rawgarden'
+    COA_PDF_DIR = f'{COA_DATA_DIR}/pdfs/rawgarden'
     TEMP_PATH = f'{COA_DATA_DIR}/tmp'
     if not os.path.exists(DATA_DIR): os.makedirs(DATA_DIR)
     if not os.path.exists(COA_DATA_DIR): os.makedirs(COA_DATA_DIR)

@@ -5,24 +5,25 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/25/2024
-Updated: 5/29/2024
+Updated: 5/30/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Description:
 
-    Curate Nevada lab result data obtained through public records requests.
+    Curate Rhode Island lab result data obtained through public records requests.
 
 """
 # Standard imports:
+from datetime import datetime
 import os
 
 # External imports:
+from cannlytics.data import save_with_copyright
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
 from dotenv import dotenv_values
 import numpy as np
 import pandas as pd
-
 
 # Define columns.
 columns = {
@@ -85,7 +86,6 @@ def read_and_standardize_excel(file_path, columns):
         print(f"Error reading {file_path}: {e}")
         return pd.DataFrame()
 
-
 def extract_test_details(data):
     """Extract test_name, units, and product_type from test_type."""
     data[['test_name', 'units', 'product_type']] = data['test_type'].str.extract(r'(.+?) \((.+?)\) (.+)')
@@ -101,32 +101,37 @@ def pivot_data(data):
     ).reset_index()
     results['date_tested'] = pd.to_datetime(results['date_tested'], errors='coerce')
     results['month'] = results['date_tested'].dt.to_period('M')
+    results['year'] = results['date_tested'].dt.year
     return results
 
-def augment_calculations(df):
+def augment_calculations(
+        df,
+        cannabinoids=None,
+        terpenes=None,
+        delta_9_thc='delta_9_thc',
+        thca='thca',
+        cbd='cbd',
+        cbda='cbda',
+    ):
     """Augment the DataFrame with additional calculated fields."""
-    # Define cannabinoids and terpenes.
-    cannabinoids = ['CBD', 'CBDA', 'Delta-9 THC', 'THCA']
-    terpenes = [
-        'Alpha-Bisabolol', 'Alpha-Humulene', 'Alpha-Pinene', 'Alpha-Terpinene',
-        'Beta-Caryophyllene', 'Beta-Myrcene', 'Beta-Pinene', 'Caryophyllene Oxide',
-        'Limonene', 'Linalool', 'Nerolidol'
-    ]
-
     # Calculate total cannabinoids.
-    df['total_thc'] = df['Delta-9 THC'] + (df['THCA'] * 0.877)
-    df['total_cbd'] = df['CBD'] + (df['CBDA'] * 0.877)
-    df['total_cannabinoids'] = df[cannabinoids].sum(axis=1)
+    if cannabinoids is not None:
+        df['total_cannabinoids'] = round(df[cannabinoids].sum(axis=1), 2)
 
     # Calculate total terpenes.
-    df['total_terpenes'] = df[terpenes].sum(axis=1)
+    if terpenes is not None:
+        df['total_terpenes'] = round(df[terpenes].sum(axis=1), 2)
 
-    # Calculate the THC to CBD ratio.
-    df['thc_cbd_ratio'] = df['total_thc'] / df['total_cbd']
+    # Calculate the total THC to total CBD ratio.
+    df['total_thc'] = round(df[delta_9_thc] + 0.877 * df[thca], 2)
+    df['total_cbd'] = round(df[cbd] + 0.877 * df[cbda], 2)
+    df['thc_cbd_ratio'] = round(df['total_thc'] / df['total_cbd'], 2)
 
     # Calculate the total cannabinoids to total terpenes ratio.
-    df['cannabinoids_terpenes_ratio'] = df['total_cannabinoids'] / df['total_terpenes']
+    if cannabinoids is not None and terpenes is not None:
+        df['cannabinoids_terpenes_ratio'] = round(df['total_cannabinoids'] / df['total_terpenes'], 2)
 
+    # Return the augmented data.
     return df
 
 def standardize_analyte_names(df, analyte_mapping):
@@ -134,9 +139,22 @@ def standardize_analyte_names(df, analyte_mapping):
     df.columns = [analyte_mapping.get(snake_case(col), snake_case(col)) for col in df.columns]
     return df
 
+def combine_similar_columns(df, similar_columns):
+    """Combine similar columns with different spellings or capitalization."""
+    for target_col, col_variants in similar_columns.items():
+        if target_col not in df.columns:
+            df[target_col] = pd.NA
+        for col in col_variants:
+            if col in df.columns:
+                df[target_col] = df[target_col].combine_first(df[col])
+                df.drop(columns=[col], inplace=True)
+    return df
+
 # === Test ===
-# [✓] Tested: 2024-05-28 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-05-30 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
+
+    # TODO: Read the datafile from HuggingFace.
     
     # Collect Rhode Island lab results
     data_dir = r'D:\data\public-records\Rhode Island\Rhode Island'
@@ -146,152 +164,58 @@ if __name__ == '__main__':
     # Extract test details
     data = extract_test_details(data)
 
-    # Restrict to passed tests.
-    data = data[data['status'] == True]
-
     # Pivot the data to get results for each sample.
     results = pivot_data(data)
     print('Number of Rhode Island samples:', len(results))
+
+    # Combine similar names.
+    similar_columns = {
+        'total_yeast_and_mold': ['Total Yeast and MOld', 'Total Yeast and Mold'],
+        '1_2_dichloroethane': ['1,2 Dichlorethane', '1,2 Dichloroethane'],
+        'total_cbd': ['Total CBD'],
+        'total_thc': ['Total THC'],
+        '3_methylpentane': ['3 Methylpetane', '3 Methylpentane'],
+        'n_methylpyrrolidone': ['N Methylpyrrolidone', 'N methylpyrrlidone'],
+        'n_n_dimethylacetamide': ['N,N Dimethyacetamide', 'N,N Dimethylacetamide'],
+    }
+    results = combine_similar_columns(results, similar_columns)
 
     # Standardize the analyte names
     results = standardize_analyte_names(results, ANALYTES)
     print('Standardized analyte names.')
 
     # Augment additional calculated metrics.
+    cannabinoids = ['cbd', 'cbda', 'delta_9_thc', 'thca']
+    terpenes = [
+        'alpha_bisabolol', 'alpha_humulene', 'alpha_pinene',
+        'alpha_terpinene', 'beta_caryophyllene', 'beta_myrcene',
+        'beta_pinene', 'caryophyllene_oxide', 'd_limonene', 'linalool',
+        'nerolidol', 'other_terpenes'
+    ]
     results = augment_calculations(results)
     print('Augmented fields.')
 
+    # Sort the columns.
+    non_numeric = [
+        'sample_id', 'producer_license_number', 'lab', 'label',
+        'date_tested', 'product_type', 'month', 'year'
+    ]
+    numeric_cols = results.columns.difference(non_numeric)
+    numeric_cols_sorted = sorted(numeric_cols)
+    results = results[non_numeric + numeric_cols_sorted]
 
-# === OLD ===
-
-# data_dir = r'D:\data\public-records\Rhode Island\Rhode Island'
-# data = []
-# for root, dirs, files in os.walk(data_dir):
-#     for file in files:
-#         if 'no data' in file.lower():
-#             continue
-#         print('Reading:', file)
-#         datafile = os.path.join(root, file)
-#         if file.endswith('.csv'):
-#             df = pd.read_csv(datafile, usecols=columns.keys(), encoding='latin1')  # Use 'latin1' encoding
-#         elif file.endswith('.xlsx'):
-#             df = pd.read_excel(datafile, usecols=columns.keys())  # Read .xlsx files correctly
-#         df.rename(columns=columns, inplace=True)
-#         data.append(df)
-# data = pd.concat(data, ignore_index=True)
-# print('Number of Rhode Island tests:', len(data))
-
-# # Extract test_name, units, and product_type from test_type.
-# data[['test_name', 'units', 'product_type']] = data['test_type'].str.extract(r'(.+?) \((.+?)\) (.+)')
-
-# # Restrict to passed tests.
-# data = data[data['status'] == True]
-
-# # Pivot the data to get results for each sample.
-# results = data.pivot_table(
-#     index=['sample_id', 'producer_license_number', 'lab', 'label', 'date_tested', 'product_type'],
-#     columns='test_name',
-#     values='test_result',
-#     aggfunc='first'
-# ).reset_index()
-# results['date_tested'] = pd.to_datetime(results['date_tested'], errors='coerce')
-# results['month'] = results['date_tested'].dt.to_period('M')
-# print('Number of Rhode Island samples:', len(results))
-
-# # Calculate the total cannabinoids.
-# ri_cannabinoids = [
-#     'CBD',
-#     'CBDA',
-#     'Delta-9 THC',
-#     'THCA',
-# ]
-# ri_terpenes = [
-#     'Alpha-Bisabolol',
-#     'Alpha-Humulene',
-#     'Alpha-Pinene',
-#     'Alpha-Terpinene',
-#     'Beta-Caryophyllene',
-#     'Beta-Myrcene',
-#     'Beta-Pinene',
-#     'Caryophyllene Oxide',
-#     'Limonene',
-#     'Linalool',
-#     'Nerolidol',
-# ]
-# results['total_thc'] = results['Total THC']
-# results['total_cbd'] = results['Total CBD']
-# results['total_cannabinoids'] = results['total_thc'] + results['total_cbd']
-# results['total_terpenes'] = results[ri_terpenes].sum(axis=1)
-
-# # Calculate the total THC to total CBD ratio.
-# results['thc_cbd_ratio'] = results['total_thc'] / results['total_cbd']
-
-# # Calculate the total cannabinoids to total terpenes ratio.
-# results['cannabinoids_terpenes_ratio'] = results['total_cannabinoids'] / results['total_terpenes']
-
-
-# === Analyze Rhode Island lab results ===
-
-# # Visualize market share by lab by month as a timeseries.
-# market_share = results.groupby(['month', 'lab']).size().unstack().fillna(0)
-# market_share = market_share.div(market_share.sum(axis=1), axis=0)
-# market_share.plot.area(
-#     title='Market Share by Lab by Month in Rhode Island',
-#     figsize=(13, 8),
-# )
-# plt.xlabel('')
-# plt.savefig(f'{assets_dir}/ri-market-share-by-lab-by-month.png', dpi=300, bbox_inches='tight', transparent=False)
-# plt.show()
-
-# # Visualize tests per capita by month.
-# ri_population = {
-#     2023: 1_095_962,
-#     2022: 1_093_842,
-#     2021: 1_097_092,
-#     2020: 1_096_444,
-#     2019: 1_058_158,
-# }
-# results['year'] = results['date_tested'].dt.year
-# results['population'] = results['year'].map(ri_population)
-# tests_per_capita = results.groupby('month').size() / (results.groupby('month')['population'].first() / 100_000)
-# fig, ax = plt.subplots(figsize=(13, 8))
-# tests_per_capita.plot(ax=ax, title='Cannabis Tests per 100,000 People by Month in Rhode Island')
-# ax.set_ylabel('Tests per 100,000 People')
-# plt.show()
-
-# # Visualize average total THC by month over time.
-# results['date_tested'] = pd.to_datetime(results['date_tested'])
-# results['total_thc'] = results['total_thc'].astype(float)
-# results['month'] = results['date_tested'].dt.to_period('M')
-# average_total_thc = results.groupby('month')['total_thc'].mean()
-# fig, ax = plt.subplots(figsize=(13, 8))
-# average_total_thc.index = average_total_thc.index.to_timestamp()
-# ax.plot(average_total_thc.index, average_total_thc.values, label='Monthly Average Total THC', color='royalblue', lw=5)
-# ax.scatter(results['date_tested'], results['total_thc'], color='royalblue', s=10, alpha=0.5, label='Daily Individual Results')
-# ax.set_xlabel('')
-# ax.set_ylabel('Total THC (%)')
-# ax.set_title('Average Total THC by Month in Rhode Island')
-# ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-# ax.xaxis.set_major_locator(mdates.MonthLocator((1,4,7,10)))
-# plt.xticks(rotation=45)
-# plt.ylim(5, 37.5)
-# plt.savefig(f'{assets_dir}/ri-total-thc.png', dpi=300, bbox_inches='tight', transparent=False)
-# plt.show()
-
-# # Visualize average total CBD by month over time.
-# results['total_cbd'] = results['total_cbd'].astype(float)
-# sample = results.loc[results['total_cbd'] < 1]
-# average_total_cbd = sample.groupby('month')['total_cbd'].mean()
-# fig, ax = plt.subplots(figsize=(13, 8))
-# average_total_cbd.index = average_total_cbd.index.to_timestamp()
-# ax.plot(average_total_cbd.index, average_total_cbd.values, label='Monthly Average Total CBD', color='royalblue', lw=5)
-# ax.scatter(sample['date_tested'], sample['total_cbd'], color='royalblue', s=10, alpha=0.5, label='Daily Individual Results')
-# ax.set_xlabel('')
-# ax.set_ylabel('Total CBD (%)')
-# ax.set_title('Average Total CBD by Month in Rhode Island in Low CBD Samples (<1%)')
-# ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-# ax.xaxis.set_major_locator(mdates.MonthLocator((1,4,7,10)))
-# plt.xticks(rotation=45)
-# plt.ylim(0, 0.33)
-# plt.savefig(f'{assets_dir}/ri-total-cbd.png', dpi=300, bbox_inches='tight', transparent=False)
-# plt.show()
+    # Save the results with copyright and sources sheets.
+    stats_dir = 'D://data/rhode-island/results/datasets'
+    date = datetime.now().strftime('%Y-%m-%d')
+    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
+    outfile = f'{stats_dir}/ri-results-{date}.xlsx'
+    save_with_copyright(
+        results,
+        outfile,
+        dataset_name='Rhode Island Cannabis Lab Results',
+        author='Keegan Skeate',
+        publisher='Cannlytics',
+        sources=['Rhode Island Office Of Cannabis Regulation'],
+        source_urls=['https://dbr.ri.gov/office-cannabis-regulation'],
+    )
+    print('Saved Rhode Island lab results:', outfile)

@@ -1,3 +1,12 @@
+"""
+Analyze Cannabis Lab Results | Nevada
+Copyright (c) 2024 Cannlytics
+
+Authors: Keegan Skeate <https://github.com/keeganskeate>
+Created: 5/30/2024
+Updated: 5/30/2024
+License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
+"""
 
 # Standard imports:
 import os
