@@ -6,16 +6,32 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 1/1/2023
-Updated: 1/15/2024
+Updated: 6/1/2024
 License: CC-BY 4.0 <https://huggingface.co/datasets/cannlytics/cannabis_tests/blob/main/LICENSE>
 
 Original author: Cannabis Data
 Original license: MIT <https://github.com/cannabisdata/cannabisdata/blob/main/LICENSE>
 
-Data Source:
+Data Sources:
 
-    - WSLCB PRR (latest)
-    URL: <https://lcb.app.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz>
+    - [February 2023 CCRS Traceability Report](https://lcb.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml)
+    - [March 2023 CCRS Traceability Report](https://lcb.box.com/s/lg50ow8qx2xki2d4lr6raj0c2r22v711)
+    - [April 2023 CCRS Traceability Report](https://lcb.box.com/s/bj3g5inm77n8mrf7gk0h07f1o13dkfc7)
+    - [May 2023 CCRS Traceability Report](https://lcb.box.com/s/dzlcx9uzt3t1td8enzbtbgknw6oh9bzw)
+    - [June 2023 CCRS Traceability Report](https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o)
+    - [July 2023 CCRS Traceability Report](https://lcb.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz)
+    - [August 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo)
+    - [September 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo)
+    - [October 2023 monthly CCRS traceability data report](https://lcb.box.com/s/qt9xd2oqp2wqqz4xuppzuphhjvwfm67j)
+    - [November 2023 CCRS Traceability Report](https://lcb.box.com/s/pr8razl8bs3lu74ayk1d8a7iq8padhy1)
+    - [December 2023 CCRS Traceability Report](https://lcb.app.box.com/s/4vweufdqsmg41t2zadr56r4dcwqmvlit)
+    - [January 2024 CCRS Traceability Report](https://lcb.box.com/s/rb6di0vxgsycns134wq7i329m6d0qoin)
+    - [February and March 2024 CCRS Traceability Report](https://lcb.box.com/s/hqcfxcbkh4w8ixucatz43awbq6zw8b0z)
+    - [April 2024 CCRS Traceability Report](https://lcb.box.com/s/12kocnn0pvdejybb24x7mhf9n7sbc7hi)
+
+References:
+
+    - [WSLCB Guidance Sheets](https://lcb.box.com/s/n5f1eyybvjxfs8w49y4ztlqyzgd4842d)
 
 """
 # Standard imports:
@@ -251,23 +267,23 @@ if __name__ == '__main__':
 
     # Curate lab results for each release.
     releases = [
-        # 'CCRS PRR (4-4-23)',
-        # 'CCRS PRR (5-7-23)',
-        # 'CCRS PRR (6-6-23)',
-        # 'CCRS PRR (8-4-23)',
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
-        # 'CCRS PRR (1-2-24)',
-        # 'CCRS PRR (2-2-24)',
-        # 'CCRS PRR (3-27-24)',
-        # 'CCRS PRR (4-2-24)',
+        # 'CCRS PRR (8-4-23)', # Contains all prior releases.
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
+        'CCRS PRR (2-2-24)',
+        'CCRS PRR (3-27-24)',
+        'CCRS PRR (4-2-24)',
         'CCRS PRR (5-2-24)',
     ]
     for release in releases:
         data_dir = os.path.join(base, release, release)
-        lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
-        manager.create_log('Curated %i WA lab results.' % len(lab_results))
+        try:
+            lab_results = curate_ccrs_lab_results(manager, data_dir, stats_dir)
+            manager.create_log('Curated %i WA lab results.' % len(lab_results))
+        except:
+            manager.create_log('Failed to curate WA lab results:' + data_dir)
 
     # Aggregate lab results.
     all_results = []
