@@ -230,6 +230,7 @@ def curate_ccrs_lab_results(
     lab_results.rename(columns=columns, inplace=True)
 
     # Anonymize the data.
+    # FIXME: This does not appear to be anonymizing `created_by`.
     lab_results = anonymize(lab_results)
 
     # Standardize the column names.

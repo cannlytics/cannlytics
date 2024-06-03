@@ -24,6 +24,9 @@ import pandas as pd
 from cannlytics.utils.utils import hash_file
 
 
+# TODO: Integrate cache.
+
+
 #-----------------------------------------------------------------------
 # Read all lab results.
 #-----------------------------------------------------------------------

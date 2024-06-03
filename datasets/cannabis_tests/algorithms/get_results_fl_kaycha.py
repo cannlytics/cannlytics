@@ -432,12 +432,12 @@ def parse_results_kaycha(
 if __name__ == '__main__':
 
     # [✓] TEST: Get Kaycha COAs.
-    kaycha_coas = get_results_kaycha(
-        data_dir='D://data/florida/results',
-        pause=3.33,
-        verbose=True,
-        cache_path='D://data/.cache/results-kaycha.jsonl',
-    )
+    # kaycha_coas = get_results_kaycha(
+    #     data_dir='D://data/florida/results',
+    #     pause=3.33,
+    #     verbose=True,
+    #     cache_path='D://data/.cache/results-kaycha.jsonl',
+    # )
 
     # [✓] TEST: Parse Kaycha COAs.
     # Note: This is a super, super long process. Uncomment completed
@@ -449,28 +449,28 @@ if __name__ == '__main__':
         reverse=False,
         sort=True,
         completed=[
-            'MMTC-2015-0001', # Longest
-            "MMTC-2015-0002",
-            "MMTC-2015-0004",
-            # "MMTC-2015-0005",
-            # "MMTC-2016-0006",
-            # "MMTC-2015-0003",
-            # 'MMTC-2017-0009',
-            # 'MMTC-2016-0007',
-            # 'MMTC-2017-0008',
-            # 'MMTC-2017-0009',
-            # 'MMTC-2017-0010',
-            # 'MMTC-2017-0011',
-            # 'MMTC-2017-0012',
-            # 'MMTC-2017-0013',
-            # 'MMTC-2018-0014',
-            # 'MMTC-2019-0015',
-            # 'MMTC-2019-0016',
-            # 'MMTC-2019-0017',
-            # 'MMTC-2019-0018',
-            # 'MMTC-2019-0019',
-            # 'MMTC-2019-0020',
-            # 'MMTC-2019-0021',
-            # 'MMTC-2019-0022',
+            # 'MMTC-2015-0001', # Longest
+            # "MMTC-2015-0002",
+            # "MMTC-2015-0004",
+            "MMTC-2015-0005",
+            "MMTC-2016-0006",
+            "MMTC-2015-0003",
+            'MMTC-2017-0009',
+            'MMTC-2016-0007',
+            'MMTC-2017-0008',
+            'MMTC-2017-0009',
+            'MMTC-2017-0010',
+            'MMTC-2017-0011',
+            'MMTC-2017-0012',
+            'MMTC-2017-0013',
+            'MMTC-2018-0014',
+            'MMTC-2019-0015',
+            'MMTC-2019-0016',
+            'MMTC-2019-0017',
+            'MMTC-2019-0018',
+            'MMTC-2019-0019',
+            'MMTC-2019-0020',
+            'MMTC-2019-0021',
+            'MMTC-2019-0022',
         ]
     )

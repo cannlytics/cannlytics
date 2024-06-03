@@ -29,6 +29,9 @@ import pandas as pd
 import os
 
 
+# TODO: Integrate cache.
+
+
 #-----------------------------------------------------------------------
 # Parse all FL COAs.
 #-----------------------------------------------------------------------
@@ -39,33 +42,33 @@ data_dirs = [
     # r"D:\data\florida\results\pdfs\mtl",
     # r"D:\data\florida\results\pdfs\green-scientific-labs",
     # Labs with parsing algorithms:
-    r"D:\data\florida\results\pdfs\terplife",
+    # r"D:\data\florida\results\pdfs\terplife",
     r"D:\data\florida\results\pdfs\acs",
-    r"D:\data\florida\results\pdfs\fl-medical-trees",
     r"D:\data\florida\results\pdfs/jungleboys",
+    # r"D:\data\florida\results\pdfs\fl-medical-trees",
     # Kaycha Labs:
-    r"D:\data\florida\results\pdfs\MMTC-2015-0001",
-    r"D:\data\florida\results\pdfs\MMTC-2015-0002",
-    r"D:\data\florida\results\pdfs\MMTC-2015-0003",
-    r"D:\data\florida\results\pdfs\MMTC-2015-0004",
-    r"D:\data\florida\results\pdfs\MMTC-2015-0005",
-    r"D:\data\florida\results\pdfs\MMTC-2016-0006",
-    r"D:\data\florida\results\pdfs\MMTC-2016-0007",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0008",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0009",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0010",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0011",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0012",
-    r"D:\data\florida\results\pdfs\MMTC-2017-0013",
-    r"D:\data\florida\results\pdfs\MMTC-2018-0014",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0015",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0016",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0017",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0018",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0019",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0020",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0021",
-    r"D:\data\florida\results\pdfs\MMTC-2019-0022",
+    # r"D:\data\florida\results\pdfs\MMTC-2015-0001",
+    # r"D:\data\florida\results\pdfs\MMTC-2015-0002",
+    # r"D:\data\florida\results\pdfs\MMTC-2015-0003",
+    # r"D:\data\florida\results\pdfs\MMTC-2015-0004",
+    # r"D:\data\florida\results\pdfs\MMTC-2015-0005",
+    # r"D:\data\florida\results\pdfs\MMTC-2016-0006",
+    # r"D:\data\florida\results\pdfs\MMTC-2016-0007",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0008",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0009",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0010",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0011",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0012",
+    # r"D:\data\florida\results\pdfs\MMTC-2017-0013",
+    # r"D:\data\florida\results\pdfs\MMTC-2018-0014",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0015",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0016",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0017",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0018",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0019",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0020",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0021",
+    # r"D:\data\florida\results\pdfs\MMTC-2019-0022",
 ]
 
 

@@ -215,8 +215,8 @@ if __name__ == '__main__':
     DATA_DIR = 'D://data/florida/results'
     CACHE_PATH = 'D://data/.cache/results-fl-terplife.jsonl'
     downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
-    downloader.get_results_terplife(queries)
-    downloader.quit()
+    # downloader.get_results_terplife(queries)
+    # downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 
