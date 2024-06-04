@@ -4,168 +4,155 @@ Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 5/7/2024
+Updated: 6/3/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
 from datetime import datetime
 import json
 import os
-
-from dotenv import dotenv_values
+from typing import List, Optional
 
 # External imports:
-from cannlytics.data.coas import get_result_value
-from cannlytics.data.coas.coas import CoADoc
-from cannlytics.firebase.firebase import initialize_firebase
+from cannlytics.data.cache import Bogart
+from cannlytics.data.coas import CoADoc, get_result_value
+from cannlytics.firebase import initialize_firebase
 from cannlytics.lims.compounds import cannabinoids, terpenes
+from dotenv import dotenv_values
 import pandas as pd
 
-from cannlytics.utils.utils import hash_file
+def get_pdf_files(
+        pdf_dir,
+        min_file_size: Optional[int] = 21_000,
+    ) -> list:
+    """Get all of the PDFs in the nested directory."""
+    pdfs = []
+    for root, _, files in os.walk(pdf_dir):
+        for file in files:
+            if file.endswith('.pdf'):
+                file_path = os.path.join(root, file)
+                file_size = os.path.getsize(file_path)
+                if file_size >= min_file_size:
+                    pdfs.append(file_path)
+    return pdfs
+
+def parse_coa_pdfs(
+        pdfs: List[str],
+        parser: Optional[CoADoc] = None,
+        cache: Optional[Bogart] = None,
+        reverse: Optional[bool] = False,
+        verbose: Optional[bool] = True,
+    ) -> list:
+    """Parse corresponding COAs from a DataFrame in a PDF directory.
+    The `id_key` is used to match the PDF filename to the DataFrame.
+    """
+    all_results = []
+    if parser is None: parser = CoADoc()
+    if verbose: print(f'Parsing {len(pdfs)} PDFs...')
+    if reverse: pdfs = pdfs[::-1]
+    for pdf in pdfs:
+        if not os.path.exists(pdf):
+            if verbose: print(f'PDF not found: {pdf}')
+            continue
+        pdf_hash = cache.hash_file(pdf)
+        if cache is not None:
+            if cache.get(pdf_hash):
+                if verbose: print('Cached:', pdf)
+                all_results.append(cache.get(pdf_hash))
+                continue
+        try:
+            coa_data = parser.parse_pdf(pdf, verbose=verbose)
+            if isinstance(coa_data, list): coa_data = coa_data[0]
+            coa_data['coa_pdf'] = os.path.basename(pdf)
+            all_results.append(coa_data)
+            if cache is not None: cache.set(pdf_hash, coa_data)
+            if verbose: print(f'Parsed PDF: {pdf}')
+        except Exception as e:
+            parser.quit()
+            if verbose:
+                print(f'Failed to parse PDF: {pdf}')
+                print(e)
+    return all_results
 
 
-# TODO: Integrate cache.
+# Initialize cache.
+cache_path = 'D://data/.cache/results-ca.jsonl'
+cache = Bogart(cache_path)
 
-
-#-----------------------------------------------------------------------
-# Read all lab results.
-#-----------------------------------------------------------------------
-
-# def parse_coa_pdfs(
-#         parser: CoADoc,
-#         data,
-#         pdf_dir: str,
-#         id_key: str = 'product_id',
-#         verbose: bool = True,
-#     ):
-#     """Parse corresponding COAs from a DataFrame in a PDF directory.
-#     The `id_key` is used to match the PDF filename to the DataFrame.
-#     """
-#     all_results = []
-#     for _, row in data.iterrows():
-#         coa_pdf = row[id_key] + '.pdf'
-#         pdf_file_path = os.path.join(pdf_dir, coa_pdf)
-#         if not os.path.exists(pdf_file_path):
-#             continue
-#         try:
-#             coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
-#             if isinstance(coa_data, list):
-#                 entry = {**row.to_dict(), **coa_data[0]}
-#             else:
-#                 entry = {**row.to_dict(), **coa_data}
-#             entry['coa_pdf'] = coa_pdf
-#             all_results.append(entry)
-#             if verbose:
-#                 print(f'Parsed COA: {pdf_file_path}')
-#         except Exception as e:
-#             if verbose:
-#                 print(f'Failed to parse COA: {pdf_file_path}')
-#                 print(e)
-#             continue
-#     return pd.DataFrame(all_results)
-
-# Find all of the COA PDFs in the nested directory.
+# Get all of the PDFs.
 pdf_dir = 'D://data/california/results/pdfs'
-pdf_files = []
-for root, dirs, files in os.walk(pdf_dir):
-    for file in files:
-        if file.endswith('.pdf'):
-            pdf_files.append(os.path.join(root, file))
-   
-# Parse the COAs.
-parser = CoADoc()
-product_data = pd.DataFrame(pdf_files, columns=['coa_pdf'])
-product_data['product_id'] = product_data['coa_pdf'].apply(
-    lambda x: x.split('/pdfs\\')[-1].replace('.pdf', '')
-)
-# all_results = parse_coa_pdfs(
-#     parser=parser,
-#     data=product_data,
-#     pdf_dir=pdf_dir,
-#     verbose=True,
-# )
-# FIXME: This process is super long, creating memory leaks with Chrome
-# processes.
-id_key = 'product_id'
-verbose = True
-all_results = []
-for _, row in product_data.iterrows():
-    coa_pdf = row[id_key] + '.pdf'
-    pdf_file_path = os.path.join(pdf_dir, coa_pdf)
-    if not os.path.exists(pdf_file_path):
-        continue
-    try:
-        coa_data = parser.parse_pdf(pdf_file_path, verbose=verbose)
-        if isinstance(coa_data, list):
-            entry = {**row.to_dict(), **coa_data[0]}
-        else:
-            entry = {**row.to_dict(), **coa_data}
-        entry['coa_pdf'] = coa_pdf
-        all_results.append(entry)
-        if verbose:
-            print(f'Parsed COA: {pdf_file_path}')
-    except Exception as e:
-        if verbose:
-            print(f'Failed to parse COA: {pdf_file_path}')
-            print(e)
-        continue
+pdfs = get_pdf_files(pdf_dir)
 
-# Fill missing `producer_state` with FL.
-all_results['producer_state'] = all_results['producer_state'].fillna('CA')
+# Parse the PDFs.
+all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=True)
 
-# Save the parsed COA data to a file.
+# Fill missing states.
+STATE = 'CA'
+all_results = pd.DataFrame(all_results)
+all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
+all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
+
+# # FIXME: Get the results for known compounds.
+# for a in cannabinoids + terpenes:
+#     print('Augmenting:', a)
+#     all_results[a] = all_results['results'].apply(lambda x: get_result_value(x, a))
+
+# Save all of the parsed data.
 data_dir = 'D://data/california/results/datasets'
 date = pd.Timestamp.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
+outfile = os.path.join(data_dir, f'ca-results-{date}.xlsx')
+parser = CoADoc()
 try:
     parser.save(all_results, outfile)
 except:
     all_results.to_excel(outfile, index=False)
-print(f'Saved {len(all_results)} CA results: {outfile}')
+# TODO: Copy outfile to latest file.
+
+print(f'Saved {len(all_results)} {STATE} results: {outfile}')
 
 
 #-----------------------------------------------------------------------
-# Read all lab results.
+# Refactor: Aggregate all lab results.
 #-----------------------------------------------------------------------
 
-# Aggregate CA results.
-datafiles = []
-data_dirs = [
-    # "D://data/california/results/datasets/sclabs",
-    "D://data//california/results/datasets/flower-company",
-    "D://data/california/results/datasets",
-]
-for data_dir in data_dirs:
-    files = os.listdir(data_dir)
-    files = [os.path.join(data_dir, x) for x in files if x.endswith('.xlsx')]
-    files = [x for x in files if 'all' not in x and 'urls' not in x]
-    datafiles.extend(files)
-print('Number of datafiles:', len(datafiles))
-all_results = []
-for datafile in datafiles:
-    print('Reading:', datafile)
-    try:
-        data = pd.read_excel(datafile)
-    except:
-        print('Error reading:', datafile)
-        continue
-    all_results.append(data)
-all_results = pd.concat(all_results, ignore_index=True)
-all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
-all_results.drop_duplicates(subset=['sample_id', 'results_hash'], keep='first', inplace=True)
-all_results = all_results.loc[all_results['results'] != '[]']
-print('Number of results:', len(all_results))
+# # Aggregate CA results.
+# datafiles = []
+# data_dirs = [
+#     # "D://data/california/results/datasets/sclabs",
+#     "D://data//california/results/datasets/flower-company",
+#     "D://data/california/results/datasets",
+# ]
+# for data_dir in data_dirs:
+#     files = os.listdir(data_dir)
+#     files = [os.path.join(data_dir, x) for x in files if x.endswith('.xlsx')]
+#     files = [x for x in files if 'all' not in x and 'urls' not in x]
+#     datafiles.extend(files)
+# print('Number of datafiles:', len(datafiles))
+# all_results = []
+# for datafile in datafiles:
+#     print('Reading:', datafile)
+#     try:
+#         data = pd.read_excel(datafile)
+#     except:
+#         print('Error reading:', datafile)
+#         continue
+#     all_results.append(data)
+# all_results = pd.concat(all_results, ignore_index=True)
+# all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
+# all_results.drop_duplicates(subset=['sample_id', 'results_hash'], keep='first', inplace=True)
+# all_results = all_results.loc[all_results['results'] != '[]']
+# print('Number of results:', len(all_results))
 
-# Get the results for known compounds.
-for a in cannabinoids + terpenes:
-    print('Augmenting:', a)
-    all_results[a] = all_results['results'].apply(lambda x: get_result_value(x, a))
+# # Get the results for known compounds.
+# for a in cannabinoids + terpenes:
+#     print('Augmenting:', a)
+#     all_results[a] = all_results['results'].apply(lambda x: get_result_value(x, a))
 
-# Save the results.
-date = pd.Timestamp.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
-all_results.to_excel(outfile, index=False)
-print(f'Saved {len(all_results)} CA results:', outfile)
+# # Save the results.
+# date = pd.Timestamp.now().strftime('%Y-%m-%d')
+# outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
+# all_results.to_excel(outfile, index=False)
+# print(f'Saved {len(all_results)} CA results:', outfile)
 
 
 #-----------------------------------------------------------------------
@@ -212,6 +199,8 @@ for a in cannabinoids + terpenes:
 #-----------------------------------------------------------------------
 # Upload COA PDFs to Google Cloud Storage.
 #-----------------------------------------------------------------------
+
+# FIXME: Refactor into re-usable functions.
 
 # Use a local cache to keep track of lab results in Firestore,
 # PDFs in Google Cloud Storage, and which datafiles are in Cloud Storage.

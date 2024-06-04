@@ -1861,6 +1861,7 @@ class CoADoc:
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
         try:
+            self.driver.close()
             self.driver.quit()
         except:
             pass
