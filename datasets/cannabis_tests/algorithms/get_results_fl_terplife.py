@@ -207,7 +207,7 @@ if __name__ == '__main__':
     # Create new lists with the combinations
     # queries += add_letters(long_letters)
     # queries += add_digits(long_digits)
-    # queries.reverse()
+    queries.reverse()
     # print('All queries:', queries)
 
     # Download TerpLife Labs COAs.
@@ -215,8 +215,8 @@ if __name__ == '__main__':
     DATA_DIR = 'D://data/florida/results'
     CACHE_PATH = 'D://data/.cache/results-fl-terplife.jsonl'
     downloader = TerpLifeLabs(DATA_DIR, cache_path=CACHE_PATH)
-    # downloader.get_results_terplife(queries)
-    # downloader.quit()
+    downloader.get_results_terplife(queries)
+    downloader.quit()
 
     # Optional: Search TerpLife for known strains.
 
@@ -237,33 +237,33 @@ if __name__ == '__main__':
     #         if time_difference <= recent_threshold:
     #             recent_files.append(file_path)
 
-    # Parse the COA PDFs.
-    pdf_dir = 'D://data/florida/results/pdfs/terplife'
-    recent_files = os.listdir(pdf_dir)
-    print('Parsing %i recently downloaded files...' % len(recent_files))
-    parser = CoADoc()
-    all_data = []
-    for doc in recent_files:
-        try:
-            filename = os.path.join(pdf_dir, doc)
-            pdf_hash = cache.hash_file(filename)
-            if cache.get(pdf_hash):
-                print('Cached parse:', doc)
-                all_data.append(cache.get(pdf_hash))
-                continue
-            coa_data = parse_terplife_coa(parser, doc, verbose=True)
-            all_data.append(coa_data)
-            cache.set(pdf_hash, coa_data)
-            print(f'Parsed: {doc}')
-        except Exception as e:
-            print('Failed to parse:', doc)
-            print(e)
+    # # Parse the COA PDFs.
+    # pdf_dir = 'D://data/florida/results/pdfs/terplife'
+    # recent_files = os.listdir(pdf_dir)
+    # print('Parsing %i recently downloaded files...' % len(recent_files))
+    # parser = CoADoc()
+    # all_data = []
+    # for doc in recent_files:
+    #     try:
+    #         filename = os.path.join(pdf_dir, doc)
+    #         pdf_hash = cache.hash_file(filename)
+    #         if cache.get(pdf_hash):
+    #             print('Cached parse:', doc)
+    #             all_data.append(cache.get(pdf_hash))
+    #             continue
+    #         coa_data = parse_terplife_coa(parser, doc, verbose=True)
+    #         all_data.append(coa_data)
+    #         cache.set(pdf_hash, coa_data)
+    #         print(f'Parsed: {doc}')
+    #     except Exception as e:
+    #         print('Failed to parse:', doc)
+    #         print(e)
 
-    # Save all of the data.
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    output_dir = 'D://data/florida/results/datasets/terplife'
-    outfile = os.path.join(output_dir, f'fl-results-terplife-{timestamp}.xlsx')
-    all_results = pd.DataFrame(all_data)
-    all_results.replace(r'\\u0000', '', regex=True, inplace=True)
-    parser.save(all_results, outfile)
-    print('Saved %i COA data:' % len(all_results), outfile)
+    # # Save all of the data.
+    # timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    # output_dir = 'D://data/florida/results/datasets/terplife'
+    # outfile = os.path.join(output_dir, f'fl-results-terplife-{timestamp}.xlsx')
+    # all_results = pd.DataFrame(all_data)
+    # all_results.replace(r'\\u0000', '', regex=True, inplace=True)
+    # parser.save(all_results, outfile)
+    # print('Saved %i COA data:' % len(all_results), outfile)
