@@ -275,42 +275,42 @@ if __name__ == '__main__':
 
 # === DEV ===
 
-# Parse all COAs in directory.
-parser = CoADoc()
-license_number = GLASS_HOUSE_FARMS['producer_license_number']
-license_pdf_dir = os.path.join(pdf_dir, license_number)
+# # Parse all COAs in directory.
+# parser = CoADoc()
+# license_number = GLASS_HOUSE_FARMS['producer_license_number']
+# license_pdf_dir = os.path.join(pdf_dir, license_number)
 
-# Parse the data from all COAs.
-coa_data = []
-for _, result in all_results.iterrows():
-    lab_result_id = result['lab_result_id']
-    coa_pdf = f'{lab_result_id}.pdf'
-    pdf_file = os.path.join(license_pdf_dir, coa_pdf)  
-    if not os.path.exists(pdf_file):
-        print('File not found:', pdf_file)
-        continue
-    try:
-        parsed = parser.parse(pdf_file)
-        entry = {**result.to_dict(), **parsed[0]}
-        entry['coa_pdf'] = coa_pdf
-        coa_data.append(entry)
-        print('Parsed:', pdf_file)
-    except:
-        print('Error parsing:', pdf_file)
-        continue
+# # Parse the data from all COAs.
+# coa_data = []
+# for _, result in all_results.iterrows():
+#     lab_result_id = result['lab_result_id']
+#     coa_pdf = f'{lab_result_id}.pdf'
+#     pdf_file = os.path.join(license_pdf_dir, coa_pdf)  
+#     if not os.path.exists(pdf_file):
+#         print('File not found:', pdf_file)
+#         continue
+#     try:
+#         parsed = parser.parse(pdf_file)
+#         entry = {**result.to_dict(), **parsed[0]}
+#         entry['coa_pdf'] = coa_pdf
+#         coa_data.append(entry)
+#         print('Parsed:', pdf_file)
+#     except:
+#         print('Error parsing:', pdf_file)
+#         continue
 
-# Save the lab results.
-date = datetime.now().strftime('%Y-%m-%d')
-outfile = os.path.join(data_dir, f'ca-results-glass-house-{date}.xlsx')
-try:
-    parser.save(coa_data, outfile)
-except:
-    try:
-        coa_df = pd.DataFrame(coa_data)
-        coa_df.to_excel(outfile, index=False)
-    except:
-        print('Error saving:', outfile)
-print('Saved %i results:' % len(coa_data), outfile)
+# # Save the lab results.
+# date = datetime.now().strftime('%Y-%m-%d')
+# outfile = os.path.join(data_dir, f'ca-results-glass-house-{date}.xlsx')
+# try:
+#     parser.save(coa_data, outfile)
+# except:
+#     try:
+#         coa_df = pd.DataFrame(coa_data)
+#         coa_df.to_excel(outfile, index=False)
+#     except:
+#         print('Error saving:', outfile)
+# print('Saved %i results:' % len(coa_data), outfile)
 
 
 # # === Aggregate lab results ===

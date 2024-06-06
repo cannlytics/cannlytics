@@ -45,7 +45,7 @@ cache = Bogart(cache_path)
 pdfs = get_pdf_files(pdf_dir)
 
 # DEV: Cut the PDFS in half.
-pdfs = pdfs[:len(pdfs) // 2]
+# pdfs = pdfs[:len(pdfs) // 2]
 
 # Parse the PDFs.
 all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=True)
@@ -76,35 +76,11 @@ print('Saved %i COA data:' % len(all_results), outfile)
 # Aggregate all lab results.
 #-----------------------------------------------------------------------
 
-# # Aggregate lab results.
-# data_dir = "D://data/florida/results/datasets"
-# datafiles = os.listdir(data_dir)
-# datafiles = [os.path.join(data_dir, x) for x in datafiles if x.endswith('.xlsx')]
-# datafiles = [x for x in datafiles if 'all' not in x and 'urls' not in x]
-# print('Number of datafiles:', len(datafiles))
-# all_results = []
-# for datafile in datafiles:
-#     print('Reading:', datafile)
-#     try:
-#         data = pd.read_excel(datafile)
-#     except:
-#         print('Failed to read:', datafile)
-#         continue
-#     all_results.append(data)
-# all_results = pd.concat(all_results, ignore_index=True)
-# all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
-# all_results.drop_duplicates(subset=['sample_hash', 'results_hash'], keep='first', inplace=True)
-# all_results = all_results.loc[all_results['results'] != '[]']
-# print('Number of unique results:', len(all_results))
+# Merge secondary cache.
+cache_to_merge = 'D://data/.cache/results-fl-kaycha.jsonl'
+cache.merge_caches(cache_to_merge)
+print('Merged cache:', cache_to_merge)
 
-# # Fill missing `producer_state` with FL.
-# all_results['producer_state'] = all_results['producer_state'].fillna('FL')
-
-# # Save the results locally.
-# date = pd.Timestamp.now().strftime('%Y-%m-%d')
-# outfile = os.path.join(data_dir, f'all-fl-results-{date}.xlsx')
-# all_results.to_excel(outfile, index=False)
-# print(f'Saved {len(all_results)} FL results:', outfile)
 
 
 #-----------------------------------------------------------------------

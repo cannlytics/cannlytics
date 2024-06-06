@@ -958,7 +958,10 @@
     "zorder",
     "showmeans",
     "ANOVA",
-    "yerr"
+    "yerr",
+    "spinosyn",
+    "monoterpenoids",
+    "sesquiterpenoids"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

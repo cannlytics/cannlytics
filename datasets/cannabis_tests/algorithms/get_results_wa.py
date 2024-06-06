@@ -21,7 +21,8 @@ Data Sources:
     - [June 2023 CCRS Traceability Report](https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o)
     - [July 2023 CCRS Traceability Report](https://lcb.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz)
     - [August 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo)
-    - [September 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo)
+    # FIXME: Missing september report
+    - [September 2023 CCRS Traceability Report]()
     - [October 2023 monthly CCRS traceability data report](https://lcb.box.com/s/qt9xd2oqp2wqqz4xuppzuphhjvwfm67j)
     - [November 2023 CCRS Traceability Report](https://lcb.box.com/s/pr8razl8bs3lu74ayk1d8a7iq8padhy1)
     - [December 2023 CCRS Traceability Report](https://lcb.app.box.com/s/4vweufdqsmg41t2zadr56r4dcwqmvlit)
@@ -268,15 +269,15 @@ if __name__ == '__main__':
 
     # Curate lab results for each release.
     releases = [
-        # 'CCRS PRR (8-4-23)', # Contains all prior releases.
-        'CCRS PRR (9-5-23)',
-        'CCRS PRR (11-2-23)',
-        'CCRS PRR (12-2-23)',
-        'CCRS PRR (1-2-24)',
-        'CCRS PRR (2-2-24)',
-        'CCRS PRR (3-27-24)',
-        'CCRS PRR (4-2-24)',
-        'CCRS PRR (5-2-24)',
+        'CCRS PRR (8-4-23)', # Contains all prior releases.
+        # 'CCRS PRR (9-5-23)',
+        # 'CCRS PRR (11-2-23)',
+        # 'CCRS PRR (12-2-23)',
+        # 'CCRS PRR (1-2-24)',
+        # 'CCRS PRR (2-2-24)',
+        # 'CCRS PRR (3-27-24)',
+        # 'CCRS PRR (4-2-24)',
+        # 'CCRS PRR (5-2-24)',
     ]
     for release in releases:
         data_dir = os.path.join(base, release, release)

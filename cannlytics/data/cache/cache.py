@@ -24,6 +24,8 @@ import json
 import os
 from typing import Optional
 
+import pandas as pd
+
 
 class Bogart(object):
     """A cache for storing cannabis data."""
@@ -93,10 +95,27 @@ class Bogart(object):
             buf = file.read()
             hasher.update(buf)
         return hasher.hexdigest()
+    
+    def merge_caches(self, cache_path):
+        """Merge another .jsonl cache file into this cache, keeping unique hashes."""
+        if os.path.exists(cache_path):
+            with open(cache_path, 'r') as file:
+                for line in file:
+                    entry = json.loads(line)
+                    for key, value in entry.items():
+                        if key not in self.cache:
+                            self.cache[key] = value
+                            self.append_cache(key, value)
+    
+    def to_df(self):
+        """Return the cache as a DataFrame."""
+        values = list(self.cache.values())
+        values = [x[0] if isinstance(x, list) else x for x in values]
+        return pd.DataFrame.from_records(values)
 
 # === Tests ===
 # Tested: 2024-05-21 by Keegan Skeate <keegan@cannlytics.com>
-if __name__ == '__main__':
+if __name__ == '__main__' and False:
 
     from datetime import datetime
 
