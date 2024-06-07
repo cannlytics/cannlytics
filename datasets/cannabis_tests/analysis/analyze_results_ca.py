@@ -159,14 +159,14 @@ for a in cannabinoids + terpenes:
 
 # Use a local cache to keep track of lab results in Firestore,
 # PDFs in Google Cloud Storage, and which datafiles are in Cloud Storage.
-cache_dir = 'D://data/california/cache'
-cache_file = os.path.join(cache_dir, 'results-ca.json')
-if os.path.exists(cache_file):
-    with open(cache_file, 'r') as f:
-        cache = json.load(f)
-else:
-    cache = {}
-    os.makedirs(cache_dir, exist_ok=True)
+# cache_dir = 'D://data/california/cache'
+# cache_file = os.path.join(cache_dir, 'results-ca.json')
+# if os.path.exists(cache_file):
+#     with open(cache_file, 'r') as f:
+#         cache = json.load(f)
+# else:
+#     cache = {}
+#     os.makedirs(cache_dir, exist_ok=True)
 
 # Match COA PDFs with the results.
 pdf_dir = 'D://data/florida/results/pdfs'
@@ -195,6 +195,7 @@ firebase_api_key = config['FIREBASE_API_KEY']
 
 # Upload datafiles to Google Cloud Storage.
 # Checks if the file has been uploaded according to the local cache.
+# FIXME:
 for datafile in datafiles:
     filename = os.path.split(datafile)[-1]
     if filename not in cache.get('datafiles', []):
@@ -205,14 +206,15 @@ for datafile in datafiles:
         #     bucket_name=bucket_name,
         # )
         print('Uploaded:', file_ref)
-        cache.setdefault('datafiles', []).append(filename)
+        # FIXME:
+        # cache.setdefault('datafiles', []).append(filename)
 
 # Upload PDFs to Google Cloud Storage.
 # Checks if the file has been uploaded according to the local cache.
 print('Number of unique COA PDFs:', len(coa_pdfs))
 for sample_hash, pdf_path in coa_pdfs.items():
     print('Uploading:', pdf_path)
-    pdf_hash = hash_file(pdf_path)
+    pdf_hash = cache.hash_file(pdf_path)
 
     if pdf_hash not in cache.get('pdfs', []):
 
@@ -242,7 +244,8 @@ for sample_hash, pdf_path in coa_pdfs.items():
         # all_results.loc[all_results['sample_hash'] == sample_hash, 'short_url'] = short_url
 
         # Cache the PDF.
-        cache.setdefault('pdfs', []).append(pdf_hash)
+        # FIXME:
+        # cache.setdefault('pdfs', []).append(pdf_hash)
 
 # Upload the raw data to Firestore.
 # Checks if the data has been uploaded according to the local cache.
@@ -253,7 +256,8 @@ for _, obs in all_results.iterrows():
     if doc_id not in cache.get('results', []):
         refs.append(f'{collection}/{doc_id}')
         updates.append(obs.to_dict())
-        cache.setdefault('results', []).append(doc_id)
+        # FIXME:
+        # cache.setdefault('results', []).append(doc_id)
 # if refs:
 #     update_documents(refs, updates, database=db)
 #     print('Uploaded %i results to Firestore.' % len(refs))
@@ -261,6 +265,6 @@ for _, obs in all_results.iterrows():
 # TODO: Save the statistics to Firestore.
 
 # Save the updated cache
-with open(cache_file, 'w') as f:
-    json.dump(cache, f)
-    print('Saved cache:', cache_file)
+# with open(cache_file, 'w') as f:
+#     json.dump(cache, f)
+#     print('Saved cache:', cache_file)

@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/14/2024
-Updated: 5/19/2024
+Updated: 6/6/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -24,6 +24,7 @@ import json
 import os
 from typing import Optional
 
+# External imports:
 import pandas as pd
 
 
@@ -34,13 +35,42 @@ class Bogart(object):
         """Initialize the cache."""
         if cache_path is None:
             cache_path = os.path.join(os.getcwd(), '.cache', 'cache.jsonl')
-        self.cache = self.load_cache(cache_path)
+        self.cache = self.load(cache_path)
+
+    def append(self, key, value):
+        """Append a single entry to the .jsonl file."""
+        os.makedirs(os.path.dirname(self.cache_path), exist_ok=True)
+        with open(self.cache_path, 'a') as file:
+            json.dump({key: value}, file)
+            file.write('\n')
+    
+    def load(self, cache_path):
+        """Load the cache from a .jsonl file."""
+        cache = {}
+        self.cache_path = cache_path
+        if os.path.exists(self.cache_path):
+            with open(self.cache_path, 'r') as file:
+                for line in file:
+                    try:
+                        entry = json.loads(line)
+                        cache.update(entry)
+                    except json.JSONDecodeError:
+                        print(f"Skipping invalid line in cache: {line}")
+        return cache
+
+    def save(self):
+        """Save the entire cache to a .jsonl file."""
+        os.makedirs(os.path.dirname(self.cache_path), exist_ok=True)
+        with open(self.cache_path, 'w') as file:
+            for key, value in self.cache.items():
+                json.dump({key: value}, file)
+                file.write('\n')
 
     def set(self, key, value):
         """Set a value in the cache."""
         if key not in self.cache:
             self.cache[key] = value
-            self.append_cache(key, value)
+            self.append(key, value)
 
     def get(self, key):
         """Get a value from the cache."""
@@ -50,39 +80,13 @@ class Bogart(object):
         """Expire a key in the cache."""
         if key in self.cache:
             del self.cache[key]
-            self.save_cache()
+            self.save()
 
-    def clear_cache(self):
+    def clear(self):
         """Clear the cache."""
         if os.path.exists(self.cache_path):
             os.remove(self.cache_path)
         self.cache = {}
-
-    def load_cache(self, cache_path):
-        """Load the cache from a .jsonl file."""
-        cache = {}
-        self.cache_path = cache_path
-        if os.path.exists(self.cache_path):
-            with open(self.cache_path, 'r') as file:
-                for line in file:
-                    entry = json.loads(line)
-                    cache.update(entry)
-        return cache
-
-    def save_cache(self):
-        """Save the entire cache to a .jsonl file."""
-        os.makedirs(os.path.dirname(self.cache_path), exist_ok=True)
-        with open(self.cache_path, 'w') as file:
-            for key, value in self.cache.items():
-                json.dump({key: value}, file)
-                file.write('\n')
-
-    def append_cache(self, key, value):
-        """Append a single entry to the .jsonl file."""
-        os.makedirs(os.path.dirname(self.cache_path), exist_ok=True)
-        with open(self.cache_path, 'a') as file:
-            json.dump({key: value}, file)
-            file.write('\n')
 
     def hash_url(self, url):
         """Hash a URL to use as a cache key."""
@@ -95,8 +99,8 @@ class Bogart(object):
             buf = file.read()
             hasher.update(buf)
         return hasher.hexdigest()
-    
-    def merge_caches(self, cache_path):
+
+    def merge(self, cache_path):
         """Merge another .jsonl cache file into this cache, keeping unique hashes."""
         if os.path.exists(cache_path):
             with open(cache_path, 'r') as file:
@@ -105,8 +109,8 @@ class Bogart(object):
                     for key, value in entry.items():
                         if key not in self.cache:
                             self.cache[key] = value
-                            self.append_cache(key, value)
-    
+                            self.append(key, value)
+
     def to_df(self):
         """Return the cache as a DataFrame."""
         values = list(self.cache.values())
@@ -145,5 +149,5 @@ if __name__ == '__main__' and False:
     print('Cache expired:', cache.get(url_hash))
 
     # Clear the cache.
-    cache.clear_cache()
+    cache.clear()
     print('Cache cleared.')
