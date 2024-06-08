@@ -48,7 +48,7 @@ pdfs = get_pdf_files(pdf_dir)
 # pdfs = pdfs[:len(pdfs) // 2]
 
 # Parse the PDFs.
-all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=True)
+all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=False)
 
 # Fill missing state.
 STATE = 'FL'

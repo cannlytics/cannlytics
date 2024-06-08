@@ -33,13 +33,13 @@ pdf_dir = 'D://data/california/results/pdfs'
 pdfs = get_pdf_files(pdf_dir)
 
 # DEV: Cut the PDFS in half.
-import random
-random.seed(42)
-pdfs = pdfs[:len(pdfs) // 2]
-pdfs = random.sample(pdfs, len(pdfs))
+# import random
+# random.seed(42)
+# pdfs = pdfs[:len(pdfs) // 2]
+# pdfs = random.sample(pdfs, len(pdfs))
 
 # Parse the PDFs.
-all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=True)
+all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=False)
 
 # Fill missing state.
 STATE = 'CA'

@@ -191,14 +191,15 @@ def get_product_results_the_flowery(
         sleep(0.3)
 
         # Download the PDF.
-        try:
-            response = requests.get(coa_url, headers=DEFAULT_HEADERS)
-            with open(outfile, 'wb') as pdf:
-                pdf.write(response.content)
-            print('Downloaded: %s' % outfile)
-            sleep(3.33)
-        except:
-            print('Failed to download: %s' % coa_url)
+        # FIXME: This is failing every time.
+        # try:
+        response = requests.get(coa_url, headers=DEFAULT_HEADERS)
+        with open(outfile, 'wb') as pdf:
+            pdf.write(response.content)
+        print('Downloaded: %s' % outfile)
+        sleep(3.33)
+        # except:
+        #     print('Failed to download: %s' % coa_url)
 
     # Merge The Flowery data with the COA data.
     the_flowery = {'business_dba_name': 'The Flowery'}

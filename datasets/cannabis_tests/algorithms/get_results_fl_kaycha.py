@@ -318,8 +318,8 @@ def get_results_kaycha(
     coa_urls = []
     if licenses is None:
         licenses = FLORIDA_LICENSES
-    items = reversed(licenses.items())
-    # items = licenses.items()
+    # items = reversed(licenses.items())
+    items = licenses.items()
     for producer_license_number, licensee in items:
         print('Getting COAs for %s' % licensee['business_dba_name'])
         urls = download_coas_kaycha(
