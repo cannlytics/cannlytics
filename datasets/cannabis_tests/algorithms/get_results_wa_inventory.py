@@ -452,7 +452,7 @@ def curate_ccrs_inventory(
 
 
 # === Test ===
-# [✓] Tested: 2023-08-14 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-06-08 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Initialize.
@@ -473,6 +473,11 @@ if __name__ == '__main__':
         'CCRS PRR (5-2-24)',
     ]
     for release in reversed(releases):
-        data_dir = os.path.join(base, release, release)
-        curate_ccrs_inventory(manager, data_dir, stats_dir)
-        manager.create_log('✓ Finished curating inventory for ' + release)
+        try:
+            data_dir = os.path.join(base, release, release)
+            curate_ccrs_inventory(manager, data_dir, stats_dir)
+            manager.create_log('✓ Finished curating inventory for ' + release)
+        except Exception as e:
+            manager.create_log('Failed to curate inventory for ' + release)
+            manager.create_log(str(e))
+            continue

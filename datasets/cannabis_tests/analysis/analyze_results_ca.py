@@ -4,7 +4,7 @@ Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 6/3/2024
+Updated: 6/8/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
@@ -15,7 +15,7 @@ from typing import List, Optional
 
 # External imports:
 from cannlytics.data.cache import Bogart
-from cannlytics.data.coas import CoADoc, get_result_value
+from cannlytics.data.coas import CoADoc, get_result_value, standardize_results
 from cannlytics.firebase import initialize_firebase
 from cannlytics.lims.compounds import cannabinoids, terpenes
 from dotenv import dotenv_values
@@ -69,6 +69,18 @@ print(f'Saved {len(all_results)} {STATE} results: {outfile}')
 #-----------------------------------------------------------------------
 # Refactor: Aggregate all lab results.
 #-----------------------------------------------------------------------
+
+# Define compounds.
+# TODO: Add pesticides, heavy metals, residual solvents, etc.
+compounds = list(terpenes.keys()) + list(cannabinoids.keys())
+
+# Read CA lab results.
+ca_cache_path = r"D:\data\.cache\results-ca.jsonl"
+ca_results = Bogart(ca_cache_path).to_df()
+ca_results = standardize_results(ca_results, compounds)
+ca_results['lab_state'] = ca_results['lab_state'].fillna('CA')
+ca_results['producer_state'] = ca_results['producer_state'].fillna('CA')
+print('Number of CA results:', len(ca_results))
 
 # # Aggregate CA results.
 # datafiles = []

@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/19/2024
-Updated: 6/4/2024
+Updated: 6/8/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -18,7 +18,7 @@ import os
 # External imports:
 from cannlytics.data import save_with_copyright
 from cannlytics.data.cache import Bogart
-from cannlytics.data.coas import CoADoc, get_result_value
+from cannlytics.data.coas import CoADoc, get_result_value, standardize_results
 from cannlytics.firebase import (
     initialize_firebase,
     create_short_url,
@@ -48,7 +48,7 @@ pdfs = get_pdf_files(pdf_dir)
 # pdfs = pdfs[:len(pdfs) // 2]
 
 # Parse the PDFs.
-all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=False)
+all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=True)
 
 # Fill missing state.
 STATE = 'FL'
@@ -76,10 +76,32 @@ print('Saved %i COA data:' % len(all_results), outfile)
 # Aggregate all lab results.
 #-----------------------------------------------------------------------
 
-# Merge secondary cache.
-cache_to_merge = 'D://data/.cache/results-fl-kaycha.jsonl'
-cache.merge_caches(cache_to_merge)
-print('Merged cache:', cache_to_merge)
+# # Merge secondary cache.
+# cache_to_merge = 'D://data/.cache/results-fl-kaycha.jsonl'
+# cache.merge_caches(cache_to_merge)
+# print('Merged cache:', cache_to_merge)
+
+# Define compounds.
+# TODO: Add pesticides, heavy metals, residual solvents, etc.
+compounds = list(terpenes.keys()) + list(cannabinoids.keys())
+
+# Read CA lab results.
+ca_cache_path = r"D:\data\.cache\results-ca.jsonl"
+ca_results = Bogart(ca_cache_path).to_df()
+ca_results = standardize_results(ca_results, compounds)
+ca_results['lab_state'] = ca_results['lab_state'].fillna('CA')
+ca_results['producer_state'] = ca_results['producer_state'].fillna('CA')
+print('Number of CA results:', len(ca_results))
+
+# # Find al unique terpenes and cannabinoids and see if there are any new compounds.
+# unidentified_compounds = set()
+# for index, row in all_results.iterrows():
+#     results = json.loads(row['results'])
+#     for result in results:
+#         if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
+#             unidentified_compounds.add(result['key'])
+# unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
+# print('Unidentified compounds:', len(unidentified_compounds))
 
 
 
@@ -87,28 +109,16 @@ print('Merged cache:', cache_to_merge)
 # Calculate statistics.
 #-----------------------------------------------------------------------
 
-# Find al unique terpenes and cannabinoids and see if there are any new compounds.
-unidentified_compounds = set()
-for index, row in all_results.iterrows():
-    results = json.loads(row['results'])
-    for result in results:
-        if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
-            unidentified_compounds.add(result['key'])
-unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
-print('Unidentified compounds:', len(unidentified_compounds))
-
-# Get the results for each cannabinoid and terpene.
-for a in cannabinoids + terpenes:
-    print('Augmenting:', a)
-    all_results[a] = all_results['results'].apply(
-        lambda x: get_result_value(x, a, key='key')
-    )
-
 # TODO: Ensure totals are calculated:
 # - total_cannabinoids
 # - total_thc
 # - total_cbd
 # - total_terpenes
+
+# TODO: Augment interesting statistics:
+# - thc_to_cbd_ratio
+# - beta_pinene_to_d_limonene_ratio
+# - monoterpene_to_sesquiterpene_ratio
 
 # TODO: Calculate averages, medians, standard deviations, and percentiles
 # for cannabinoids and terpenes.

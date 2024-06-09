@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 1/23/2024
+Updated: 6/8/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -215,6 +215,45 @@ def get_result_value(
         return convert_to_numeric(result, strip=True)
     except:
         return result
+
+def json_to_list(results):
+    """Ensure results are in the correct format."""
+    if isinstance(results, str):
+        try:
+            return json.loads(results)
+        except:
+            return ast.literal_eval(results)
+    return results
+
+def standardize_result(result, analyte, analytes = ANALYTES, key='key', value='value'):
+    """Ensure results are in the correct format."""
+    result_data = pd.DataFrame(result)
+    try:
+        result_data[key] = result_data[key].map(analytes).fillna(result_data[key])
+    except:
+        return None
+    try:
+        return result_data.loc[result_data[key] == analyte, value].iloc[0]
+    except:
+        return None
+
+def standardize_results(
+        df,
+        compounds,
+        results_key='results',
+        key='key',
+    ) -> pd.DataFrame:
+    """Standardize terpenes from results."""
+    df[results_key] = df[results_key].apply(json_to_list)
+    for c in compounds:
+        try:
+            df[c] = df[results_key].apply(
+                lambda x: standardize_result(x, c, key=key)
+            )
+            df[c] = pd.to_numeric(df[c], errors='coerce')
+        except KeyError:
+            print(f"{c} not found in results.")
+    return df
 
 
 class CoADoc:
