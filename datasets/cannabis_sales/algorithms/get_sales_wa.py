@@ -525,21 +525,18 @@ if __name__ == '__main__':
     # Specify where your data lives.
     base = 'D://data/washington/'
     releases = [
-        # 'CCRS PRR (3-6-23)',
-        # 'CCRS PRR (4-4-23)',
-        # 'CCRS PRR (5-7-23)',
-        # 'CCRS PRR (6-6-23)',
-        # 'CCRS PRR (8-4-23)',
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
-        # 'CCRS PRR (1-2-24)',
-        # 'CCRS PRR (2-2-24)',
-        # 'CCRS PRR (3-27-24)',
-        # 'CCRS PRR (4-2-24)',
+        'CCRS PRR (8-4-23)', # Contains all prior releases.
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
+        'CCRS PRR (2-2-24)',
+        'CCRS PRR (3-27-24)',
+        'CCRS PRR (4-2-24)',
         'CCRS PRR (5-2-24)',
     ]
-    for release in reversed(releases):
+    # for release in reversed(releases):
+    for release in releases:
 
         data_dir = f'{base}/{release}/{release}/'
         stats_dir = f'{base}/stats/'

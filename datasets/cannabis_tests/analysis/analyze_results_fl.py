@@ -66,6 +66,9 @@ def analyze_results_fl(
     # Get all of the PDFs.
     pdfs = get_pdf_files(pdf_dir)
 
+    # Sort the PDFs by modified date
+    pdfs.sort(key=os.path.getmtime)
+
     # Parse the PDFs.
     all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
@@ -94,12 +97,10 @@ def analyze_results_fl(
 if __name__ == '__main__':
     
     analyze_results_fl(
-        cache_path = 'D://data/.cache/results-ca.jsonl',
-        pdf_dir = 'D://data/california/results/pdfs',
-        output_dir = 'D://data/california/results/datasets',
-        # compounds: List[str] = None,
-        # reverse: bool = False,
-        # save: bool = True,
+        cache_path = 'D://data/.cache/results-fl.jsonl',
+        pdf_dir = 'D://data/florida/results/pdfs',
+        output_dir = 'D://data/florida/results/datasets',
+        reverse=False,
     )
 
 

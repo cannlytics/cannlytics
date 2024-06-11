@@ -53,6 +53,9 @@ def analyze_results_ca(
     # Get all of the PDFs.
     pdfs = get_pdf_files(pdf_dir)
 
+    # Sort the PDFs by modified date
+    pdfs.sort(key=os.path.getmtime)
+
     # Parse the PDFs.
     all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
