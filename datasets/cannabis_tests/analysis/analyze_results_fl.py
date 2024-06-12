@@ -100,7 +100,7 @@ if __name__ == '__main__':
         cache_path = 'D://data/.cache/results-fl.jsonl',
         pdf_dir = 'D://data/florida/results/pdfs',
         output_dir = 'D://data/florida/results/datasets',
-        reverse=False,
+        reverse=True,
     )
 
 

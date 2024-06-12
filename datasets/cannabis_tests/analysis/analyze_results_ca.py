@@ -88,6 +88,7 @@ if __name__ == '__main__':
         cache_path='D://data/.cache/results-ca.jsonl',
         pdf_dir='D://data/california/results/pdfs',
         output_dir='D://data/california/results/datasets',
+        reverse=True,
         # compounds: List[str] = None,
         # reverse: bool = False,
         # save: bool = True,
