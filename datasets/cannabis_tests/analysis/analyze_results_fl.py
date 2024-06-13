@@ -72,26 +72,26 @@ def analyze_results_fl(
     # Parse the PDFs.
     all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
-    # Fill missing state.
-    STATE = 'FL'
-    all_results = pd.DataFrame(all_results)
-    all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
-    all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
+    # # Fill missing state.
+    # STATE = 'FL'
+    # all_results = pd.DataFrame(all_results)
+    # all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
+    # all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
 
-    # Save all of the data.
-    date = datetime.now().strftime('%Y-%m-%d')
-    outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
-    all_results.replace(r'\\u0000', '', regex=True, inplace=True)
-    save_with_copyright(
-        all_results,
-        outfile,
-        dataset_name='Florida Cannabis Lab Results',
-        author='Keegan Skeate',
-        publisher='Cannlytics',
-        sources=['Kaycha Labs', 'TerpLife Labs'],
-        source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
-    )
-    print('Saved %i COA data:' % len(all_results), outfile)
+    # # Save all of the data.
+    # date = datetime.now().strftime('%Y-%m-%d')
+    # outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
+    # all_results.replace(r'\\u0000', '', regex=True, inplace=True)
+    # save_with_copyright(
+    #     all_results,
+    #     outfile,
+    #     dataset_name='Florida Cannabis Lab Results',
+    #     author='Keegan Skeate',
+    #     publisher='Cannlytics',
+    #     sources=['Kaycha Labs', 'TerpLife Labs'],
+    #     source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
+    # )
+    # print('Saved %i COA data:' % len(all_results), outfile)
 
 # === Test ===
 if __name__ == '__main__':
