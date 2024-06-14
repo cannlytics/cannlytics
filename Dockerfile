@@ -7,7 +7,7 @@
 # License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 # Python setup.
-FROM python:3.10-slim
+FROM python:3.12.0b1-slim
 
 # Environment Variables.
 ENV APP=website \
