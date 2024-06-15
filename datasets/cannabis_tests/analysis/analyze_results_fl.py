@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/19/2024
-Updated: 6/9/2024
+Updated: 6/15/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -32,18 +32,18 @@ from cannlytics.firebase import (
     update_documents,
     upload_file,
 )
-from cannlytics.lims.compounds import cannabinoids, terpenes
+from cannlytics.compounds import cannabinoids, terpenes
 from cannlytics.utils.utils import hash_file
 import pandas as pd
 
 # Internal imports:
+from analyze_results import calc_results_stats, calc_aggregate_results_stats
+
 
 def analyze_results_fl(
     cache_path: str,
     pdf_dir: str,
     reverse: bool = False,
-    # compounds: List[str] = None,
-    # save: bool = True,
 ) -> pd.DataFrame:
     """
     Analyze Florida lab results.
@@ -68,26 +68,6 @@ def analyze_results_fl(
     # Parse the PDFs.
     parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
-    # # Fill missing state.
-    # STATE = 'FL'
-    # all_results = pd.DataFrame(all_results)
-    # all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
-    # all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
-
-    # # Save all of the data.
-    # date = datetime.now().strftime('%Y-%m-%d')
-    # outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
-    # all_results.replace(r'\\u0000', '', regex=True, inplace=True)
-    # save_with_copyright(
-    #     all_results,
-    #     outfile,
-    #     dataset_name='Florida Cannabis Lab Results',
-    #     author='Keegan Skeate',
-    #     publisher='Cannlytics',
-    #     sources=['Kaycha Labs', 'TerpLife Labs'],
-    #     source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
-    # )
-    # print('Saved %i COA data:' % len(all_results), outfile)
 
 # === Test ===
 if __name__ == '__main__':
@@ -101,16 +81,44 @@ if __name__ == '__main__':
 
     # Read the cache.
     results = Bogart('D://data/.cache/results-fl.jsonl').to_df()
+    print('Read %i results from cache.' % len(results))
 
-    # Define compounds.
-    # TODO: Add pesticides, heavy metals, residual solvents, etc.
-    compounds = list(terpenes.keys()) + list(cannabinoids.keys())
+    # TODO: Figure out why there are duplicates.
+
+    # Drop duplicates.
+    results = results.drop_duplicates(subset=['sample_hash'])
+
+    # TODO: Identify the same COA parsed multiple ways.
+    multiple_coas = results['coa_pdf'].value_counts()
+    print('Multiple COAs:', multiple_coas[multiple_coas > 1])
+
+    # FIXME: Handle:
+    # - `download.pdf`
+    # - `DA20618004-002.pdf`
 
     # Standardize the data.
+    # TODO: Add pesticides, heavy metals, residual solvents, etc.
     state = 'FL'
+    cannabinoid_keys = list(cannabinoids.keys())
+    terpene_keys = list(terpenes.keys())
+    compounds = cannabinoid_keys + terpene_keys
     results = standardize_results(results, compounds)
     results['lab_state'] = results['lab_state'].fillna(state)
     results['producer_state'] = results['producer_state'].fillna(state)
+
+    # Calculate results statistics.
+    results = calc_results_stats(
+        results,
+        cannabinoid_keys=cannabinoid_keys,
+        terpene_keys=terpene_keys,
+    )
+
+    # Calculate aggregate statistics.
+    stats = calc_aggregate_results_stats(
+        results,
+        cannabinoid_keys=cannabinoid_keys,
+        terpene_keys=terpene_keys,
+    )
 
     # # Save all of the data.
     # output_dir = 'D://data/florida/results/datasets'
@@ -127,32 +135,6 @@ if __name__ == '__main__':
     #     source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
     # )
     # print('Saved %i COA data:' % len(results), outfile)
-
-
-
-#-----------------------------------------------------------------------
-# Calculate statistics.
-#-----------------------------------------------------------------------
-
-# TODO: Ensure totals are calculated:
-# - total_cannabinoids
-# - total_thc
-# - total_cbd
-# - total_terpenes
-
-# TODO: Augment interesting statistics:
-# - thc_to_cbd_ratio
-# - beta_pinene_to_d_limonene_ratio
-# - monoterpene_to_sesquiterpene_ratio
-
-# TODO: Calculate averages, medians, standard deviations, and percentiles
-# for cannabinoids and terpenes.
-# Time series:
-# - daily
-# - weekly
-# - monthly
-# - quarterly
-# - yearly
 
 
 #-----------------------------------------------------------------------
@@ -268,18 +250,3 @@ if __name__ == '__main__':
 # with open(cache_file, 'w') as f:
 #     json.dump(cache, f)
 #     print('Saved cache:', cache_file)
-
-
-#-----------------------------------------------------------------------
-# DEV
-#-----------------------------------------------------------------------
-
-# # Find al unique terpenes and cannabinoids and see if there are any new compounds.
-# unidentified_compounds = set()
-# for index, row in all_results.iterrows():
-#     results = json.loads(row['results'])
-#     for result in results:
-#         if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
-#             unidentified_compounds.add(result['key'])
-# unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
-# print('Unidentified compounds:', len(unidentified_compounds))

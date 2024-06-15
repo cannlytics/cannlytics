@@ -27,7 +27,7 @@ from cannlytics.ai.ai import (
     extract_data,
     read_batch_data,
 )
-from cannlytics.lims.compounds import cannabinoids, terpenes
+from cannlytics.compounds import cannabinoids, terpenes
 from dotenv import dotenv_values
 import logging
 import requests
@@ -71,7 +71,7 @@ plt.rcParams.update({
 # Extract data from COAs with AI.
 #-----------------------------------------------------------------------
 
-from cannlytics.lims.compounds import cannabinoids, terpenes
+from cannlytics.compounds import cannabinoids, terpenes
 
 # Metadata prompt.
 EXTRACT_COA_METADATA_PROMPT = """Given text from a COA, return any found data, defined in the following table, as JSON. Not all fields may be present in the text. Only return JSON and always return at least an empty object if no data is found. Exclude any field that cannot be found.

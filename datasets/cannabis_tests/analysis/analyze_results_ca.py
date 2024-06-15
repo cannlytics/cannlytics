@@ -4,7 +4,7 @@ Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/10/2023
-Updated: 6/8/2024
+Updated: 6/15/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # Standard imports:
@@ -18,17 +18,18 @@ from cannlytics.data.cache import Bogart
 from cannlytics.data.coas import CoADoc, get_result_value, standardize_results
 from cannlytics.data.coas.parsing import get_coa_files, parse_coa_pdfs
 from cannlytics.firebase import initialize_firebase
-from cannlytics.lims.compounds import cannabinoids, terpenes
+from cannlytics.compounds import cannabinoids, terpenes
 from dotenv import dotenv_values
 import pandas as pd
+
+# Internal imports:
+from analyze_results import calc_results_stats, calc_aggregate_results_stats
+
 
 def analyze_results_ca(
     cache_path: str,
     pdf_dir: str,
-    output_dir: str,
-    compounds: List[str] = None,
     reverse: bool = False,
-    save: bool = True,
 ) -> pd.DataFrame:
     """
     Analyze California lab results.
@@ -58,25 +59,25 @@ def analyze_results_ca(
     # Parse the PDFs.
     all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
-    # Fill missing state.
-    STATE = 'CA'
-    all_results = pd.DataFrame(all_results)
-    all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
-    all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
+    # # Fill missing state.
+    # STATE = 'CA'
+    # all_results = pd.DataFrame(all_results)
+    # all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
+    # all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
 
-    # Standardize the results.
-    all_results = standardize_results(all_results, compounds)
+    # # Standardize the results.
+    # all_results = standardize_results(all_results, compounds)
 
-    # Save all of the parsed data.
-    if save:
-        date = pd.Timestamp.now().strftime('%Y-%m-%d')
-        outfile = os.path.join(output_dir, f'ca-results-{date}.xlsx')
-        parser = CoADoc()
-        try:
-            parser.save(all_results, outfile)
-        except:
-            all_results.to_excel(outfile, index=False)
-        print(f'Saved {len(all_results)} {STATE} results: {outfile}')
+    # # Save all of the parsed data.
+    # if save:
+    #     date = pd.Timestamp.now().strftime('%Y-%m-%d')
+    #     outfile = os.path.join(output_dir, f'ca-results-{date}.xlsx')
+    #     parser = CoADoc()
+    #     try:
+    #         parser.save(all_results, outfile)
+    #     except:
+    #         all_results.to_excel(outfile, index=False)
+    #     print(f'Saved {len(all_results)} {STATE} results: {outfile}')
 
     return all_results
 
@@ -86,86 +87,53 @@ if __name__ == '__main__':
     analyze_results_ca(
         cache_path='D://data/.cache/results-ca.jsonl',
         pdf_dir='D://data/california/results/pdfs',
-        output_dir='D://data/california/results/datasets',
         reverse=True,
     )
 
-#-----------------------------------------------------------------------
-# Refactor: Aggregate all lab results.
-#-----------------------------------------------------------------------
+    # Read the cache.
+    results = Bogart('D://data/.cache/results-ca.jsonl').to_df()
+    print('Read %i results from cache.' % len(results))
 
-# # Define compounds.
-# # TODO: Add pesticides, heavy metals, residual solvents, etc.
-# compounds = list(terpenes.keys()) + list(cannabinoids.keys())
+    # TODO: Figure out why there are duplicates.
 
-# # Read CA lab results.
-# ca_cache_path = r"D:\data\.cache\results-ca.jsonl"
-# ca_results = Bogart(ca_cache_path).to_df()
-# ca_results = standardize_results(ca_results, compounds)
-# ca_results['lab_state'] = ca_results['lab_state'].fillna('CA')
-# ca_results['producer_state'] = ca_results['producer_state'].fillna('CA')
-# print('Number of CA results:', len(ca_results))
+    # Drop duplicates.
+    results = results.drop_duplicates(subset=['sample_hash'])
+    print('Number of unique results:', len(results))
 
-# === OLD ===
+    # TODO: Identify the same COA parsed multiple ways.
+    multiple_coas = results['coa_pdf'].value_counts()
+    print('Multiple COAs:', multiple_coas[multiple_coas > 1])
 
-# # Aggregate CA results.
-# datafiles = []
-# data_dirs = [
-#     # "D://data/california/results/datasets/sclabs",
-#     "D://data//california/results/datasets/flower-company",
-#     "D://data/california/results/datasets",
-# ]
-# for data_dir in data_dirs:
-#     files = os.listdir(data_dir)
-#     files = [os.path.join(data_dir, x) for x in files if x.endswith('.xlsx')]
-#     files = [x for x in files if 'all' not in x and 'urls' not in x]
-#     datafiles.extend(files)
-# print('Number of datafiles:', len(datafiles))
-# all_results = []
-# for datafile in datafiles:
-#     print('Reading:', datafile)
-#     try:
-#         data = pd.read_excel(datafile)
-#     except:
-#         print('Error reading:', datafile)
-#         continue
-#     all_results.append(data)
-# all_results = pd.concat(all_results, ignore_index=True)
-# all_results.sort_values('coa_parsed_at', ascending=False, inplace=True)
-# all_results.drop_duplicates(subset=['sample_id', 'results_hash'], keep='first', inplace=True)
-# all_results = all_results.loc[all_results['results'] != '[]']
-# print('Number of results:', len(all_results))
+    # FIXME: Handle:
+    # - `download.pdf`
+    # - `DA20618004-002.pdf`
 
-# # Get the results for known compounds.
-# for a in cannabinoids + terpenes:
-#     print('Augmenting:', a)
-#     all_results[a] = all_results['results'].apply(lambda x: get_result_value(x, a))
+    # TODO: Drop all non-standard columns.
 
-# # Save the results.
-# date = pd.Timestamp.now().strftime('%Y-%m-%d')
-# outfile = os.path.join(data_dir, f'all-ca-results-{date}.xlsx')
-# all_results.to_excel(outfile, index=False)
-# print(f'Saved {len(all_results)} CA results:', outfile)
+    # Standardize the data.
+    # TODO: Add pesticides, heavy metals, residual solvents, etc.
+    state = 'CA'
+    cannabinoid_keys = list(cannabinoids.keys())
+    terpene_keys = list(terpenes.keys())
+    compounds = cannabinoid_keys + terpene_keys
+    results = standardize_results(results, compounds)
+    results['lab_state'] = results['lab_state'].fillna(state)
+    results['producer_state'] = results['producer_state'].fillna(state)
 
+    # Calculate results statistics.
+    results = calc_results_stats(
+        results,
+        cannabinoid_keys=cannabinoid_keys,
+        terpene_keys=terpene_keys,
+    )
 
-#-----------------------------------------------------------------------
-# TODO: Calculate statistics.
-#-----------------------------------------------------------------------
+    # Calculate aggregate statistics.
+    stats = calc_aggregate_results_stats(
+        results,
+        cannabinoid_keys=cannabinoid_keys,
+        terpene_keys=terpene_keys,
+    )
 
-# TODO: Ensure totals are calculated:
-# - total_cannabinoids
-# - total_thc
-# - total_cbd
-# - total_terpenes
-
-# TODO: Calculate averages, medians, standard deviations, and percentiles
-# for cannabinoids and terpenes.
-# Time series:
-# - daily
-# - weekly
-# - monthly
-# - quarterly
-# - yearly
 
 
 #-----------------------------------------------------------------------

@@ -44,7 +44,7 @@ import numpy as np
 
 # External imports:
 from cannlytics.firebase import initialize_firebase, update_documents
-from cannlytics.lims.compounds import cannabinoids, terpenes
+from cannlytics.compounds import cannabinoids, terpenes
 from cannlytics.utils import find_latest_file, kebab_case
 from cannlytics.lims.results import PRODUCT_TYPES
 import pandas as pd
