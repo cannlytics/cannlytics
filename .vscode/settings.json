@@ -961,7 +961,16 @@
     "yerr",
     "spinosyn",
     "monoterpenoids",
-    "sesquiterpenoids"
+    "sesquiterpenoids",
+    "axvspan",
+    "lightcoral",
+    "NORML",
+    "idxmin",
+    "vectorize",
+    "vectorizer",
+    "tfidf",
+    "argmax",
+    "ents"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",

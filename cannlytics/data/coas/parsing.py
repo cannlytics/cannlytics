@@ -1,25 +1,38 @@
+"""
+COA Parsing Tools
+Copyright (c) 2024 Cannlytics
+
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+Created: 6/14/2024
+Updated: 6/14/2024
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+"""
 # Standard imports:
 import os
-from typing import List, Optional
+from typing import Any, List, Optional
 
 # External imports:
-from cannlytics.data.cache import Bogart
-from cannlytics.data.coas import CoADoc
+from ..cache import Bogart
+from .coas import CoADoc
 
-def get_pdf_files(
+def get_coa_files(
         pdf_dir,
         min_file_size: Optional[int] = 21_000,
+        ext: Optional[Any] = '.pdf',
     ) -> list:
-    """Get all of the PDFs in the nested directory."""
-    pdfs = []
+    """Get all of the COAs in the nested directory."""
+    filenames = []
+    if isinstance(ext, str): ext = [ext]
     for root, _, files in os.walk(pdf_dir):
         for file in files:
-            if file.endswith('.pdf'):
+            extension = os.path.splitext(file)[1]
+            if extension in ext:
                 file_path = os.path.join(root, file)
                 file_size = os.path.getsize(file_path)
                 if file_size >= min_file_size:
-                    pdfs.append(file_path)
-    return pdfs
+                    filenames.append(file_path)
+    return filenames
 
 def parse_coa_pdfs(
         pdfs: List[str],

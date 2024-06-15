@@ -59,82 +59,82 @@ FLORIDA_LICENSES = {
         'business_dba_name': 'Cookies Florida, Inc.',
         'slug': '',
     },
-    # 'MMTC-2015-0001': {
-    #     'business_dba_name': 'Curaleaf',
-    #     'slug': 'CURALEAF+FLORIDA+LLC',
-    # },
-    # 'MMTC-2015-0003': {
-    #     'business_dba_name': 'Fluent ',
-    #     'slug': 'Fluent',
-    # },
-    # 'MMTC-2019-0019': {
-    #     'business_dba_name': 'Gold Leaf',
-    #     'slug': 'Gold+Leaf',
-    # },
-    # 'MMTC-2019-0021': {
-    #     'business_dba_name': 'Green Dragon',
-    #     'slug': 'Green+Dragon',
-    # },
-    # 'MMTC-2016-0007': {
-    #     'business_dba_name': 'GrowHealthy',
-    #     'slug': 'GrowHealthy',
-    # },
-    # 'MMTC-2017-0013': {
-    #     'business_dba_name': 'GTI (Rise Dispensaries)',
-    #     'slug': 'GTI',
-    # },
-    # 'MMTC-2018-0014': {
-    #     'business_dba_name': 'House of Platinum Cannabis',
-    #     'slug': '',
-    # },
-    # 'MMTC-2019-0016': {
-    #     'business_dba_name': 'Insa - Cannabis for Real Life',
-    #     'slug': 'Insa',
-    # },
-    # 'MMTC-2019-0015': {
-    #     'business_dba_name': 'Jungle Boys',
-    #     'slug': 'Jungle+Boys',
-    # },
-    # 'MMTC-2017-0010': {
-    #     'business_dba_name': 'MüV',
-    #     'slug': 'Altmed+Florida',
-    # },
-    # 'MMTC-2016-0006': {
-    #     'business_dba_name': 'Planet 13 Florida, Inc.',
-    #     'slug': '',
-    # },
-    # 'MMTC-2019-0022': {
-    #     'business_dba_name': 'Revolution Florida',
-    #     'slug': 'Revolution',
-    # },
-    # 'MMTC-2019-0017': {
-    #     'business_dba_name': 'Sanctuary Cannabis',
-    #     'slug': 'Sanctuary',
-    # },
-    # 'MMTC-2017-0012': {
-    #     'business_dba_name': 'Sunburn',
-    #     'slug': '',
-    # },
-    # 'MMTC-2017-0008': {
-    #     'business_dba_name': 'Sunnyside*',
-    #     'slug': 'Sunnyside',
-    # },
-    # 'MMTC-2015-0004': {
-    #     'business_dba_name': 'Surterra Wellness',
-    #     'slug': 'Surterra+Wellness',
-    # },
-    # 'MMTC-2019-0020': {
-    #     'business_dba_name': 'The Flowery',
-    #     'slug': 'The+Flowery',
-    # },
-    # 'MMTC-2015-0005': {
-    #     'business_dba_name': 'Trulieve',
-    #     'slug': 'Trulieve',
-    # },
-    # 'MMTC-2017-0009': {
-    #     'business_dba_name': 'VidaCann',
-    #     'slug': 'VidaCann',
-    # },
+    'MMTC-2015-0001': {
+        'business_dba_name': 'Curaleaf',
+        'slug': 'CURALEAF+FLORIDA+LLC',
+    },
+    'MMTC-2015-0003': {
+        'business_dba_name': 'Fluent ',
+        'slug': 'Fluent',
+    },
+    'MMTC-2019-0019': {
+        'business_dba_name': 'Gold Leaf',
+        'slug': 'Gold+Leaf',
+    },
+    'MMTC-2019-0021': {
+        'business_dba_name': 'Green Dragon',
+        'slug': 'Green+Dragon',
+    },
+    'MMTC-2016-0007': {
+        'business_dba_name': 'GrowHealthy',
+        'slug': 'GrowHealthy',
+    },
+    'MMTC-2017-0013': {
+        'business_dba_name': 'GTI (Rise Dispensaries)',
+        'slug': 'GTI',
+    },
+    'MMTC-2018-0014': {
+        'business_dba_name': 'House of Platinum Cannabis',
+        'slug': '',
+    },
+    'MMTC-2019-0016': {
+        'business_dba_name': 'Insa - Cannabis for Real Life',
+        'slug': 'Insa',
+    },
+    'MMTC-2019-0015': {
+        'business_dba_name': 'Jungle Boys',
+        'slug': 'Jungle+Boys',
+    },
+    'MMTC-2017-0010': {
+        'business_dba_name': 'MüV',
+        'slug': 'Altmed+Florida',
+    },
+    'MMTC-2016-0006': {
+        'business_dba_name': 'Planet 13 Florida, Inc.',
+        'slug': '',
+    },
+    'MMTC-2019-0022': {
+        'business_dba_name': 'Revolution Florida',
+        'slug': 'Revolution',
+    },
+    'MMTC-2019-0017': {
+        'business_dba_name': 'Sanctuary Cannabis',
+        'slug': 'Sanctuary',
+    },
+    'MMTC-2017-0012': {
+        'business_dba_name': 'Sunburn',
+        'slug': '',
+    },
+    'MMTC-2017-0008': {
+        'business_dba_name': 'Sunnyside*',
+        'slug': 'Sunnyside',
+    },
+    'MMTC-2015-0004': {
+        'business_dba_name': 'Surterra Wellness',
+        'slug': 'Surterra+Wellness',
+    },
+    'MMTC-2019-0020': {
+        'business_dba_name': 'The Flowery',
+        'slug': 'The+Flowery',
+    },
+    'MMTC-2015-0005': {
+        'business_dba_name': 'Trulieve',
+        'slug': 'Trulieve',
+    },
+    'MMTC-2017-0009': {
+        'business_dba_name': 'VidaCann',
+        'slug': 'VidaCann',
+    },
 }
 
 # Define the minimum file size for a PDF.

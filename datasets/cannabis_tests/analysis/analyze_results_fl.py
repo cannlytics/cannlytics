@@ -24,6 +24,7 @@ from cannlytics.data.coas import (
     get_result_value,
     standardize_results,
 )
+from cannlytics.data.coas.parsing import get_coa_files, parse_coa_pdfs
 from cannlytics.firebase import (
     initialize_firebase,
     create_short_url,
@@ -36,15 +37,13 @@ from cannlytics.utils.utils import hash_file
 import pandas as pd
 
 # Internal imports:
-from parse_results import get_pdf_files, parse_coa_pdfs
 
 def analyze_results_fl(
     cache_path: str,
     pdf_dir: str,
-    output_dir: str,
-    compounds: List[str] = None,
     reverse: bool = False,
-    save: bool = True,
+    # compounds: List[str] = None,
+    # save: bool = True,
 ) -> pd.DataFrame:
     """
     Analyze Florida lab results.
@@ -52,10 +51,7 @@ def analyze_results_fl(
     Args:
         cache_path (str): The path to the cache file.
         pdf_dir (str): The directory where the PDFs are stored.
-        output_dir (str): The directory where the datasets are saved.
-        compounds (List[str]): The list of compounds to analyze.
         reverse (bool): Whether to reverse the order of the results.
-        save (bool): Whether to save the results to a file.
 
     Returns:
         pd.DataFrame: The analyzed results.
@@ -64,13 +60,13 @@ def analyze_results_fl(
     cache = Bogart(cache_path)
 
     # Get all of the PDFs.
-    pdfs = get_pdf_files(pdf_dir)
+    pdfs = get_coa_files(pdf_dir)
 
     # Sort the PDFs by modified date
     pdfs.sort(key=os.path.getmtime)
 
     # Parse the PDFs.
-    all_results = parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
+    parse_coa_pdfs(pdfs, cache=cache, reverse=reverse)
 
     # # Fill missing state.
     # STATE = 'FL'
@@ -96,65 +92,42 @@ def analyze_results_fl(
 # === Test ===
 if __name__ == '__main__':
     
+    # Parse all of the COAs.
     analyze_results_fl(
         cache_path = 'D://data/.cache/results-fl.jsonl',
         pdf_dir = 'D://data/florida/results/pdfs',
-        output_dir = 'D://data/florida/results/datasets',
         reverse=True,
     )
 
+    # Read the cache.
+    results = Bogart('D://data/.cache/results-fl.jsonl').to_df()
 
-#-----------------------------------------------------------------------
-# Aggregate all lab results.
-#-----------------------------------------------------------------------
+    # Define compounds.
+    # TODO: Add pesticides, heavy metals, residual solvents, etc.
+    compounds = list(terpenes.keys()) + list(cannabinoids.keys())
 
-# # Merge secondary cache.
-# cache_to_merge = 'D://data/.cache/results-fl-kaycha.jsonl'
-# cache.merge_caches(cache_to_merge)
-# print('Merged cache:', cache_to_merge)
+    # Standardize the data.
+    state = 'FL'
+    results = standardize_results(results, compounds)
+    results['lab_state'] = results['lab_state'].fillna(state)
+    results['producer_state'] = results['producer_state'].fillna(state)
 
-# # Define compounds.
-# # TODO: Add pesticides, heavy metals, residual solvents, etc.
-# compounds = list(terpenes.keys()) + list(cannabinoids.keys())
+    # # Save all of the data.
+    # output_dir = 'D://data/florida/results/datasets'
+    # date = datetime.now().strftime('%Y-%m-%d')
+    # outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
+    # results.replace(r'\\u0000', '', regex=True, inplace=True)
+    # save_with_copyright(
+    #     results,
+    #     outfile,
+    #     dataset_name='Florida Cannabis Lab Results',
+    #     author='Keegan Skeate',
+    #     publisher='Cannlytics',
+    #     sources=['Kaycha Labs', 'TerpLife Labs'],
+    #     source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
+    # )
+    # print('Saved %i COA data:' % len(results), outfile)
 
-# # Read CA lab results.
-# ca_cache_path = r"D:\data\.cache\results-ca.jsonl"
-# ca_results = Bogart(ca_cache_path).to_df()
-# ca_results = standardize_results(ca_results, compounds)
-# ca_results['lab_state'] = ca_results['lab_state'].fillna('CA')
-# ca_results['producer_state'] = ca_results['producer_state'].fillna('CA')
-# print('Number of CA results:', len(ca_results))
-
-# # Find al unique terpenes and cannabinoids and see if there are any new compounds.
-# unidentified_compounds = set()
-# for index, row in all_results.iterrows():
-#     results = json.loads(row['results'])
-#     for result in results:
-#         if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
-#             unidentified_compounds.add(result['key'])
-# unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
-# print('Unidentified compounds:', len(unidentified_compounds))
-
-# # Fill missing state.
-# STATE = 'FL'
-# all_results = pd.DataFrame(all_results)
-# all_results['lab_state'] = all_results['lab_state'].fillna(STATE)
-# all_results['producer_state'] = all_results['producer_state'].fillna(STATE)
-
-# # Save all of the data.
-# date = datetime.now().strftime('%Y-%m-%d')
-# outfile = os.path.join(output_dir, f'fl-results-{date}.xlsx')
-# all_results.replace(r'\\u0000', '', regex=True, inplace=True)
-# save_with_copyright(
-#     all_results,
-#     outfile,
-#     dataset_name='Florida Cannabis Lab Results',
-#     author='Keegan Skeate',
-#     publisher='Cannlytics',
-#     sources=['Kaycha Labs', 'TerpLife Labs'],
-#     source_urls=['https://yourcoa.com', 'https://www.terplifelabs.com'],
-# )
-# print('Saved %i COA data:' % len(all_results), outfile)
 
 
 #-----------------------------------------------------------------------
@@ -295,3 +268,18 @@ if __name__ == '__main__':
 # with open(cache_file, 'w') as f:
 #     json.dump(cache, f)
 #     print('Saved cache:', cache_file)
+
+
+#-----------------------------------------------------------------------
+# DEV
+#-----------------------------------------------------------------------
+
+# # Find al unique terpenes and cannabinoids and see if there are any new compounds.
+# unidentified_compounds = set()
+# for index, row in all_results.iterrows():
+#     results = json.loads(row['results'])
+#     for result in results:
+#         if result.get('analysis') == 'cannabinoids' or result.get('analysis') == 'terpenes':
+#             unidentified_compounds.add(result['key'])
+# unidentified_compounds = unidentified_compounds - set(cannabinoids + terpenes)
+# print('Unidentified compounds:', len(unidentified_compounds))

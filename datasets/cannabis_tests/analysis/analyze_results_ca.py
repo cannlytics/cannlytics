@@ -16,14 +16,11 @@ from typing import List, Optional
 # External imports:
 from cannlytics.data.cache import Bogart
 from cannlytics.data.coas import CoADoc, get_result_value, standardize_results
+from cannlytics.data.coas.parsing import get_coa_files, parse_coa_pdfs
 from cannlytics.firebase import initialize_firebase
 from cannlytics.lims.compounds import cannabinoids, terpenes
 from dotenv import dotenv_values
 import pandas as pd
-
-# Internal imports:
-from parse_results import get_pdf_files, parse_coa_pdfs
-
 
 def analyze_results_ca(
     cache_path: str,
@@ -50,8 +47,10 @@ def analyze_results_ca(
     # Initialize cache.
     cache = Bogart(cache_path)
 
+    # TODO: Remove duplicates in the PDF dir.
+
     # Get all of the PDFs.
-    pdfs = get_pdf_files(pdf_dir)
+    pdfs = get_coa_files(pdf_dir)
 
     # Sort the PDFs by modified date
     pdfs.sort(key=os.path.getmtime)
@@ -89,9 +88,6 @@ if __name__ == '__main__':
         pdf_dir='D://data/california/results/pdfs',
         output_dir='D://data/california/results/datasets',
         reverse=True,
-        # compounds: List[str] = None,
-        # reverse: bool = False,
-        # save: bool = True,
     )
 
 #-----------------------------------------------------------------------
