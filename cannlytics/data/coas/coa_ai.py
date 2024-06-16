@@ -30,13 +30,13 @@ import requests
 
 # Internal imports:
 from cannlytics import __version__
-from cannlytics.ai import (
-    AI_WARNING,
-    INSTRUCTIONAL_PROMPT,
-    initialize_openai,
-    get_messages_price,
-    split_into_token_chunks,
-)
+# from cannlytics.ai import (
+#     AI_WARNING,
+#     INSTRUCTIONAL_PROMPT,
+#     initialize_openai,
+#     get_messages_price,
+#     split_into_token_chunks,
+# )
 from cannlytics.data import create_hash, create_sample_id
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import DEFAULT_HEADERS

@@ -17,7 +17,7 @@ import gc
 import os
 
 # External imports:
-from cannlytics.data import save_with_copyright
+# from cannlytics.data import save_with_copyright
 from cannlytics.data.cache import Bogart
 from cannlytics.data.coas import (
     CoADoc,

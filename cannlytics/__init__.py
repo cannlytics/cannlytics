@@ -10,10 +10,9 @@ Updated: 8/13/2023
 import cannlytics.auth as auth
 import cannlytics.data as data
 import cannlytics.firebase as firebase
-import cannlytics.lims as lims
 import cannlytics.metrc as metrc
-import cannlytics.stats as stats
 import cannlytics.utils as utils
+import cannlytics.compounds as compounds
 
 
 __all__ = [
@@ -21,10 +20,9 @@ __all__ = [
     auth,
     data,
     firebase,
-    lims,
     metrc,
-    stats,
     utils,
+    compounds,
 ]
 __title__ = 'cannlytics'
 __version__ = '0.0.18'

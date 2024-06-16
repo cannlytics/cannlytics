@@ -15,7 +15,7 @@ from typing import List, Optional
 
 # External imports:
 from cannlytics.data.cache import Bogart
-from cannlytics.data.coas import CoADoc, get_result_value, standardize_results
+from cannlytics.data.coas import standardize_results
 from cannlytics.data.coas.parsing import get_coa_files, parse_coa_pdfs
 from cannlytics.firebase import initialize_firebase
 from cannlytics.compounds import cannabinoids, terpenes
