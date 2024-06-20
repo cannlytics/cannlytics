@@ -186,16 +186,19 @@ def merge_lab_results(
                 filename = os.path.join(directory, datafile)
 
                 # Read the standardized inventory.
-                try:
-                    data = pd.read_excel(
-                        filename,
-                        dtype=fields,
-                        parse_dates=parse_dates,
-                        usecols=use_cols,
-                    )
-                except:
-                    manager.create_log('Failed to read: ' + filename)
-                    continue
+                # FIXME:
+                # try:
+                print('READING INVENTORY FILE:', filename)
+                data = pd.read_excel(
+                    filename,
+                    dtype=fields,
+                    parse_dates=parse_dates,
+                    usecols=use_cols,
+                    engine='openpyxl',
+                )
+                # except:
+                #     manager.create_log('Failed to read: ' + filename)
+                #     continue
                 data[on] = data[on].astype(str)
                 data.drop_duplicates(subset=on, inplace=True)
                 
@@ -462,7 +465,7 @@ if __name__ == '__main__':
 
     # Curate the inventory for each release.
     releases = [
-        'CCRS PRR (8-4-23)', # Contains all prior releases.
+        # 'CCRS PRR (8-4-23)', # Contains all prior releases.
         'CCRS PRR (9-5-23)',
         'CCRS PRR (11-2-23)',
         'CCRS PRR (12-2-23)',
@@ -472,7 +475,7 @@ if __name__ == '__main__':
         'CCRS PRR (4-2-24)',
         'CCRS PRR (5-2-24)',
     ]
-    for release in reversed(releases):
+    for release in releases:
         try:
             data_dir = os.path.join(base, release, release)
             curate_ccrs_inventory(manager, data_dir, stats_dir)
