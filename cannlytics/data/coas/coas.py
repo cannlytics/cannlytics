@@ -222,7 +222,10 @@ def json_to_list(results):
         try:
             return json.loads(results)
         except:
-            return ast.literal_eval(results)
+            try:
+                return ast.literal_eval(results)
+            except:
+                return results
     return results
 
 def standardize_result(result, analyte, analytes = ANALYTES, key='key', value='value'):
