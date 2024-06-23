@@ -94,29 +94,70 @@ if __name__ == '__main__':
     results = Bogart('D://data/.cache/results-ca.jsonl').to_df()
     print('Read %i results from cache.' % len(results))
 
+    # Separate the errors.
+    errors = results[~results['error'].isna()]
+    results = results[results['error'].isna()]
+    print('Number of errors:', len(errors))
+    print('Number of valid results:', len(results))
+
+    # Identify all of the unique errors.
+    unique_errors = errors['error'].unique()
+    print(errors['error'].value_counts())
+
+    def find_example_coa_for_errors(errors_df, error_counts):
+        sorted_errors = error_counts.index.tolist()
+        example_coas = []
+        
+        for error in sorted_errors:
+            example_coa_pdf = errors_df[errors_df['error'] == error].iloc[0]['coa_pdf']
+            example_coas.append({'error': error, 'example_coa_pdf': example_coa_pdf})
+        
+        return pd.DataFrame(example_coas)
+
+    # Get example COAs for each unique error
+    error_counts = errors['error'].value_counts()
+    example_coas = find_example_coa_for_errors(errors, error_counts)
+
+    # Display the examples
+    print("Example COAs for each unique error:")
+    print(example_coas)
+
+
     # TODO: Figure out why there are duplicates.
+
+    # Group by `coa_pdf` to find duplicates
+    duplicate_groups = results[results.duplicated(subset=['coa_pdf'], keep=False)]
+    grouped = duplicate_groups.groupby('coa_pdf')
+    for coa_pdf, group in grouped:
+        print(f'\nCOA PDF: {coa_pdf}')
+        unique_hashes = group['sample_hash'].unique()
+        if len(unique_hashes) > 1:
+            print(f'- Warning: Different sample_hashes found!')
+        else:
+            print(f'- All records have the same sample_hash.')
+
+    # # DEV: Identify the same COA parsed multiple ways.
+    # multiple_coas = results['coa_pdf'].value_counts()
+    # multiple_coas = multiple_coas[multiple_coas > 1]
+    # print('Number of samples with Multiple COAs:', len(multiple_coas))
 
     # Drop duplicates.
     results = results.drop_duplicates(subset=['sample_hash'])
     print('Number of unique results:', len(results))
 
-    # TODO: Identify the same COA parsed multiple ways.
-    multiple_coas = results['coa_pdf'].value_counts()
-    print('Multiple COAs:', multiple_coas[multiple_coas > 1])
 
-    # FIXME: Handle:
-    # - `download.pdf`
-    # - `DA20618004-002.pdf`
 
     # TODO: Drop all non-standard columns.
 
-    # Standardize the data.
+    # Standardize analytes.
     # TODO: Add pesticides, heavy metals, residual solvents, etc.
-    state = 'CA'
     cannabinoid_keys = list(cannabinoids.keys())
     terpene_keys = list(terpenes.keys())
     compounds = cannabinoid_keys + terpene_keys
     results = standardize_results(results, compounds)
+
+    # Standardize state.
+    state = 'CA'
     results['lab_state'] = results['lab_state'].fillna(state)
     results['producer_state'] = results['producer_state'].fillna(state)
 

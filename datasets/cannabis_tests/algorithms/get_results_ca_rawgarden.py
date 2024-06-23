@@ -490,9 +490,8 @@ if __name__ == '__main__':
     # datafile_hash = create_hash(coa_df)
 
     # Define where the data lives.
-    data_dir = 'D://data/california/results'
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
+    data_dir = 'D://data/california/results/datasets/rawgarden'
+    if not os.path.exists(data_dir): os.makedirs(data_dir)
 
     # Save Raw Garden COA data as JSON.
     coa_data = pd.DataFrame(parsed)
@@ -528,7 +527,6 @@ if __name__ == '__main__':
 
     # Save Raw Garden lab results.
     date = datetime.now().strftime('%Y-%m-%d')
-    data_dir = 'D://data/california/lab_results'
     outfile = os.path.join(data_dir, f'fl-results-rawgarden-{date}.csv')
     aggregate.to_csv(outfile, index=False)
     print('Saved Raw Garden lab results:', outfile)
