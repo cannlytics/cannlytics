@@ -196,6 +196,15 @@ def get_kaycha_terpenes(parser, page, obs, results):
         if key == 'total_terpenes':
             continue
         values = line[first_value:].strip().split(' ')
+        # Note: Fix the `key` and `name` of the previous result for long analyte names.
+        if len(values) == 1:
+            name = f'{results[-1]["name"]}{name}'
+            key = parser.analytes.get(snake_case(name), snake_case(name))
+            results[-1]['name'] = name
+            results[-1]['key'] = key
+            continue
+        elif len(values) < 3:
+            continue
         results.append({
             'analysis': 'terpenes',
             'key': key,
@@ -210,7 +219,6 @@ def get_kaycha_terpenes(parser, page, obs, results):
     return obs, results
 
 
-# UNDER DEVELOPMENT:
 def parse_kaycha_coa(
         parser,
         doc: Any,
@@ -259,6 +267,7 @@ def parse_kaycha_coa(
         obs['coa_urls'] = json.dumps([{'url': coa_url, 'filename': filename}])
 
     # Get lab details.
+    # FIXME: Make this code more robust.
     parts = lines[5].split(',')
     city, state, zipcode = [x.strip() for x in parts[:3]]
     obs['lab_street'] = lines[4].title()
@@ -267,6 +276,7 @@ def parse_kaycha_coa(
     obs['lab_zipcode'] = zipcode
 
     # Get sample details.
+    # FIXME: Make this code more robust.
     obs['product_name'] = lines[1]
     obs['strain_name'] = lines[2]
     obs['product_type'] = lines[3].split(':')[-1].strip()
