@@ -5,7 +5,7 @@ Copyright (c) 2022-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 6/3/2023
+Updated: 6/24/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -108,8 +108,8 @@ KAYCHA_LABS = {
     'lims': 'Kaycha Labs',
     'lab': 'Kaycha Labs',
     'lab_image_url': 'https://www.kaychalabs.com/wp-content/uploads/2020/06/newlogo-2.png',
-    'lab_address': '4101 SW 47th Ave, Suite 105, Davie, FL 33314',
-    'lab_street': '4101 SW 47th Ave, Suite 105',
+    'lab_address': '4131 SW 47th Ave, Suite 1408, Davie, FL 33314',
+    'lab_street': '4131 SW 47th Ave, Suite 1408',
     'lab_city': 'Davie',
     'lab_county': 'Broward',
     'lab_state': 'FL',
@@ -266,25 +266,36 @@ def parse_kaycha_coa(
         filename = coa_url.split('/')[-1].split('?')[0] + '.pdf'
         obs['coa_urls'] = json.dumps([{'url': coa_url, 'filename': filename}])
 
-    # Get lab details.
-    # FIXME: Make this code more robust.
-    parts = lines[5].split(',')
-    city, state, zipcode = [x.strip() for x in parts[:3]]
-    obs['lab_street'] = lines[4].title()
-    obs['lab_city'] = city.title()
-    obs['lab_state'] = state
-    obs['lab_zipcode'] = zipcode
+    # Get lab details. Note: Falls back to constants at the end.
+    try:
+        try:
+            parts = lines[5].split(',')
+            city, state, zipcode = [x.strip() for x in parts[:3]]
+            obs['lab_street'] = lines[4].title()
+            obs['lab_city'] = city.title()
+            obs['lab_state'] = state
+            obs['lab_zipcode'] = zipcode
+        except:
+            obs['lab_street'] = lines[3].split('Matrix:')[0].strip()
+            parts = lines[4].split(',')
+            obs['lab_city'] = parts[0]
+            obs['lab_state'] = parts[1]
+            obs['lab_zipcode'] = parts[2]
+    except:
+        pass
 
     # Get sample details.
-    # FIXME: Make this code more robust.
+    # Optional: Make this code more robust.
     obs['product_name'] = lines[1]
     obs['strain_name'] = lines[2]
-    obs['product_type'] = lines[3].split(':')[-1].strip()
-    obs['lab_id'] = lines[6].split(':')[-1].strip()
-    # TODO: Get product_subtype
+
+    # Deprecated: This data can be collected with other sample details.
+    # obs['product_type'] = lines[3].split(':')[-1].strip()
+    # obs['lab_id'] = lines[6].split(':')[-1].strip()
 
     # Get additional sample details.
-    # FIXME: These are dry weight! People want wet weight.
+    # TODO: These are dry weight! People want wet weight.
+    # TODO: Get product_subtype
     results = []
     totals = ['total_thc', 'total_cbd', 'total_cannabinoids']
     for i, line in enumerate(lines):
@@ -410,7 +421,7 @@ def parse_kaycha_coa(
                 continue
 
             # Split the page in half.
-            # FIXME: This is spliting the text wrong.
+            # FIXME: This is splitting the text wrong.
             midpoint = 0.48
             left = page.within_bbox((0, 0, page.width * midpoint, page.height)).extract_text()
             right = page.within_bbox((page.width * midpoint, 0, page.width, page.height)).extract_text()
@@ -525,22 +536,6 @@ def parse_kaycha_coa(
                     'status': values[-2]
                 })
                 break
-
-    # FIXME: Save the image data to Firebase Storage.
-    # image_index = 5
-    # try:
-    #     temp_dir = tempfile.gettempdir()
-    #     file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
-    #     file_path = os.path.join(temp_dir, 'image_data.png')
-    #     image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
-    #     parser.save_image_data(image_data, image_file=file_path)
-    #     bucket_name = config['FIREBASE_STORAGE_BUCKET']
-    #     firebase.upload_file(file_ref, file_path, bucket_name=bucket_name)
-    #     download_url = firebase.get_file_url(file_ref, bucket_name=bucket_name)
-    #     obs['images'] = [{'ref': file_ref, 'url': download_url, 'filename': 'image_data.png'}]
-    # except:
-    #     print('Failed to get image data.')
-    #     obs['images'] = []
 
     # Get all the lines with methods.
     method_lines = ''

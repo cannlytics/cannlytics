@@ -290,6 +290,23 @@ strain_data['keywords'] = strain_data['strain_name'].apply(
 # Images
 #----------------------------------------------------------------------#
 
+# === DEV ===
+# FIXME: Save the image data to Firebase Storage.
+# image_index = 5
+# try:
+#     temp_dir = tempfile.gettempdir()
+#     file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
+#     file_path = os.path.join(temp_dir, 'image_data.png')
+#     image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
+#     parser.save_image_data(image_data, image_file=file_path)
+#     bucket_name = config['FIREBASE_STORAGE_BUCKET']
+#     firebase.upload_file(file_ref, file_path, bucket_name=bucket_name)
+#     download_url = firebase.get_file_url(file_ref, bucket_name=bucket_name)
+#     obs['images'] = [{'ref': file_ref, 'url': download_url, 'filename': 'image_data.png'}]
+# except:
+#     print('Failed to get image data.')
+#     obs['images'] = []
+
 # Upload all images to strain gallery.
 
 
