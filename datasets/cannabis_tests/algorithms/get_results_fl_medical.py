@@ -84,10 +84,10 @@ subreddit = 'FLMedicalTrees'
 driver.get(f"https://www.reddit.com/r/{subreddit}/search/?q={query}&sort={sort_by}")
 sleep(5)
 
-# Scroll to load posts (manually or automatically).
-for _ in range(10):
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    sleep(2)
+# # Scroll to load posts (manually or automatically).
+# for _ in range(10):
+#     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+#     sleep(2)
 
 # Collect post details.
 data = []
@@ -135,7 +135,7 @@ print('Saved post data:', datafile)
 #-----------------------------------------------------------------------
 
 # DEV:
-data = pd.read_excel(r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data\fl-medical-trees-posts-2024-05-07-11-45-14.xlsx")
+data = pd.read_excel(r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data\fl-medical-trees-posts-2024-06-25-18-59-50.xlsx")
 data = data.to_dict(orient='records')
 recorded_posts = [x['post_id'] for x in data]
 
@@ -151,14 +151,15 @@ def initialize_reddit(config):
     return reddit
 
 
-# Read already collected posts.
-data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
-post_datafiles = [os.path.join(data_dir, x) for x in os.listdir(data_dir) if 'posts' in x and 'results' not in x]
-posts = pd.concat([pd.read_excel(x) for x in post_datafiles])
-posts.drop_duplicates(subset=['post_id', 'coa_url', 'redirect_url'], inplace=True)
-collected_posts = list(set(posts['post_id'].values) - set(recorded_posts))
-print('Total number of already collected posts:', len(collected_posts))
-print('Number of posts to collect:', len(data) - len(collected_posts))
+# # Read already collected posts.
+collected_posts = []
+# data_dir = r"C:\Users\keega\Documents\cannlytics\cannabis-data-science\season-4\155-seed-to-smoke\data"
+# post_datafiles = [os.path.join(data_dir, x) for x in os.listdir(data_dir) if 'posts' in x and 'results' not in x]
+# posts = pd.concat([pd.read_excel(x) for x in post_datafiles])
+# posts.drop_duplicates(subset=['post_id', 'coa_url', 'redirect_url'], inplace=True)
+# collected_posts = list(set(posts['post_id'].values) - set(recorded_posts))
+# print('Total number of already collected posts:', len(collected_posts))
+# print('Number of posts to collect:', len(data) - len(collected_posts))
 
 # Initialize Reddit.
 config = dotenv_values('.env')

@@ -852,14 +852,20 @@ def download_file_with_selenium(
             download_dir=download_dir,
         )
     driver.get(url)
-    presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
-    el = WebDriverWait(driver, 10).until(presence)
     if method == 'iframe':
+        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
+        el = WebDriverWait(driver, 10).until(presence)
         driver.switch_to.frame(el)
         presence = EC.presence_of_element_located((By.ID, el_id))
         download_button = WebDriverWait(driver, wait).until(presence)
         download_button.click()
+    elif method == 'button':
+        presence = EC.presence_of_element_located((By.ID, el_id))
+        download_button = WebDriverWait(driver, wait).until(presence)
+        download_button.click()
     else:
+        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
+        el = WebDriverWait(driver, 10).until(presence)
         pdf_url = el.get_attribute('href')
         response = requests.get(pdf_url)
         if response.status_code == 200:
