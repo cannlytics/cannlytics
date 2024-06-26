@@ -13,7 +13,7 @@ django-feather==0.3.0
 django-livereload-server==0.4
 django-permissions-policy==4.15.0
 django-robohash-svg==0.9.5
-djangorestframework==3.14.0
+djangorestframework==3.15.2
 firebase_admin==6.1.0
 fredapi==0.5.0
 google-auth==2.18.0
