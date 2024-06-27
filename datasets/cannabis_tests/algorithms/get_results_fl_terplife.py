@@ -191,23 +191,23 @@ def add_letters(strings):
 if __name__ == '__main__':
 
     # Query by digit combinations.
-    # queries = get_day_month_combinations()
-    # queries += [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
-    queries = []
+    queries = get_day_month_combinations()
+    queries += [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+    # queries = []
 
     # Query by alphabetic combinations.
     specific_letters = [x for x in string.ascii_lowercase]
     queries += [a + b for a in specific_letters for b in string.ascii_lowercase]
 
     # Drill down on specific queries.
-    # long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
-    #                 'io', 'ie', 'fm', 'bu', 'bf', 'at', 'aq', 'ao']
-    # long_digits = ['81', '61', '51', '41', '40', '30', '20']
+    long_letters = [ 'wu', 'us', 'tp', 'qd', 'oo', 'og', 'nd', 'mh', 'it',
+                    'io', 'ie', 'fm', 'bu', 'bf', 'at', 'aq', 'ao']
+    long_digits = ['81', '61', '51', '41', '40', '30', '20']
 
     # Create new lists with the combinations
-    # queries += add_letters(long_letters)
-    # queries += add_digits(long_digits)
-    # queries.reverse()
+    queries += add_letters(long_letters)
+    queries += add_digits(long_digits)
+    queries.reverse()
     print('All queries:', queries)
 
     # Download TerpLife Labs COAs.
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     # Optional: Search TerpLife for known strains.
 
     # === TODO: Turn the following into methods of the class ===
-    cache = Bogart(CACHE_PATH)
+    # cache = Bogart(CACHE_PATH)
 
     # # Find the recently downloaded PDFs.
     # days_ago = 365

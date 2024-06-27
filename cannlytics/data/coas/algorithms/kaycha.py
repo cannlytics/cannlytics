@@ -40,11 +40,11 @@ Data Points:
     ✓ lab_longitude (augmented)
     ✓ producer
     - producer_address
-    - producer_street
-    - producer_city
-    - producer_state
-    - producer_zipcode
-    - producer_license_number
+    ✓ producer_street
+    ✓ producer_city
+    ✓ producer_state
+    ✓ producer_zipcode
+    ✓ producer_license_number
     ✓ distributor
     ✓ distributor_address
     ✓ distributor_street
@@ -138,10 +138,12 @@ KAYCHA_LABS_COA = {
         'Batch Date': 'date_harvested', # FIXME: This date is not being parsed correctly.
         'Sample Size Received': 'sample_weight',
         'Total Batch Size': 'batch_size',
+        'Total Amount': 'batch_size',
         'Retail Product Size': 'product_size',
         'Ordered': 'date_received',
         'Sampled': 'date_collected',
         'Completed': 'date_tested',
+        'Revision Date': 'date_tested',
         # 'Sampling Method': 'method_sampling',
         # TODO: Also get `date_revised` if it exists.
         # TODO: Get `revision_reason` if it is revised.
@@ -283,6 +285,24 @@ def parse_kaycha_coa(
             obs['lab_zipcode'] = parts[2]
     except:
         pass
+    # FIXME: Get lab license number.
+
+    # Try to get producer details.
+    try:
+        top_left = front_page.within_bbox((0, front_page.height * 0.25, front_page.width * 0.5, front_page.height * 0.5))
+        producer_lines = top_left.extract_text().split('\n')
+        obs['producer'] = producer_lines[0]
+        for i, line in enumerate(producer_lines[1:]):
+            if 'License #' in line:
+                obs['producer_license_number'] = line.split(':')[-1].strip()
+            if ', US' in line:
+                parts = line.split(',')
+                obs['producer_street'] = producer_lines[i]
+                obs['producer_city'] = parts[0].strip()
+                obs['producer_state'] = parts[1].strip()
+                obs['producer_zipcode'] = parts[2].strip()
+    except:
+        pass
 
     # Get sample details.
     # Optional: Make this code more robust.
@@ -305,7 +325,7 @@ def parse_kaycha_coa(
             field = key.lower()
             cell = line.lower()
             if f'{field}:' in cell or f'{field} :' in cell:
-                obs[value] = line.split(':')[-1].strip()
+                obs[value] = line.split(':', maxsplit=1)[-1].strip()
             elif f'{field}#' in cell:
                 obs[value] = line.split('#')[-1].strip()
 
@@ -361,17 +381,6 @@ def parse_kaycha_coa(
                 })
             break
 
-    # FIXME: Get lab license number.
-    # State License # CMTL-0002
-
-    # TODO: Try to get producer details from licenses data.
-    # - producer_address
-    # - producer_street
-    # - producer_city
-    # - producer_state
-    # - producer_zipcode
-    # - producer_license_number
-
     # Get analyses and status data.
     analyses = []
     safety_results = text.split('SAFETY RESULTS')[-1].split('Cannabinoid')[0].split('\n')
@@ -406,6 +415,8 @@ def parse_kaycha_coa(
                     name = line[:first_value].strip()
                     key = parser.analytes.get(snake_case(name), snake_case(name))
                     values = line[first_value:].strip().split(' ')
+                    if len(values) < 3:
+                        continue
                     results.append({
                         'analysis': 'residual_solvents',
                         'key': key,
