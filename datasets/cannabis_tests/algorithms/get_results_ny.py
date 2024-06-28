@@ -56,96 +56,109 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 #-----------------------------------------------------------------------
 # Get Jetty Extracts COAs.
 #-----------------------------------------------------------------------
+try:
 
-# Define the URL.
-url = 'https://jettyextracts.com/coa-new-york/'
+    # Define the URL.
+    url = 'https://jettyextracts.com/coa-new-york/'
 
-# Define the PDF directory.
-pdf_dir = 'D://data/new-york/jetty-extracts/pdfs'
-os.makedirs(pdf_dir, exist_ok=True)
+    # Define the PDF directory.
+    pdf_dir = 'D://data/new-york/jetty-extracts/pdfs'
+    os.makedirs(pdf_dir, exist_ok=True)
 
-# TODO: Download the CSV programmatically.
-datafile = r"D:\data\new-york\jetty-extracts\jetty-extracts-coas-2024-06-24.csv"
-coas = pd.read_csv(datafile)
+    # TODO: Download the CSV programmatically.
+    datafile = r"D:\data\new-york\jetty-extracts\jetty-extracts-coas-2024-06-24.csv"
+    coas = pd.read_csv(datafile)
 
-# Download the COAs from the CSV.
-last_column = coas.columns[-1]
-folder_urls = coas[last_column].values
-for folder_url in reversed(folder_urls):
-    try:
-        gdown.download_folder(folder_url, output=pdf_dir, quiet=False)
-        sleep(3.33)
-    except:
-        print('Failed to download:', folder_url)
+    # Download the COAs from the CSV.
+    last_column = coas.columns[-1]
+    folder_urls = coas[last_column].values
+    for folder_url in reversed(folder_urls):
+        try:
+            gdown.download_folder(folder_url, output=pdf_dir, quiet=False)
+            sleep(3.33)
+        except:
+            print('Failed to download:', folder_url)
+
+except:
+    print('Failed to download Jetty Extracts COAs.')
 
 
 #-----------------------------------------------------------------------
 # Get My COAs.
 #-----------------------------------------------------------------------
 
-# Define the URL.
-url = 'https://www.mycoa.info/'
+try:
 
-# Define the PDF directory.
-pdf_dir = 'D://data/new-york/my-coa/pdfs'
-os.makedirs(pdf_dir, exist_ok=True)
+    # Define the URL.
+    url = 'https://www.mycoa.info/'
 
-# Get all of the PDF links.
-driver = initialize_selenium(headless=False, download_dir=pdf_dir)
-driver.get(url)
-sleep(5)
-pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'dropbox.com/s')]")
-pdf_urls = [link.get_attribute('href') for link in pdf_links]
-print(f'Found {len(pdf_links)} PDF links.')
+    # Define the PDF directory.
+    pdf_dir = 'D://data/new-york/my-coa/pdfs'
+    os.makedirs(pdf_dir, exist_ok=True)
 
-# Download all of the PDFs from Dropbox.
-for pdf_url in pdf_urls:
-    driver.get(pdf_url)
-    sleep(3.33)
-    wait = WebDriverWait(driver, 10)
-    download_button = wait.until(EC.presence_of_element_located((By.XPATH, "//button[@aria-label='Download']")))
-    download_button.click()
-    sleep(3.33)
-    print('Downloaded:', pdf_url)
-print('All PDFs have been downloaded.')
+    # Get all of the PDF links.
+    driver = initialize_selenium(headless=False, download_dir=pdf_dir)
+    driver.get(url)
+    sleep(5)
+    pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'dropbox.com/s')]")
+    pdf_urls = [link.get_attribute('href') for link in pdf_links]
+    print(f'Found {len(pdf_links)} PDF links.')
 
-# Close the Selenium driver
-driver.quit()
+    # Download all of the PDFs from Dropbox.
+    for pdf_url in pdf_urls:
+        driver.get(pdf_url)
+        sleep(3.33)
+        wait = WebDriverWait(driver, 10)
+        download_button = wait.until(EC.presence_of_element_located((By.XPATH, "//button[@aria-label='Download']")))
+        download_button.click()
+        sleep(3.33)
+        print('Downloaded:', pdf_url)
+    print('All PDFs have been downloaded.')
+
+    # Close the Selenium driver
+    driver.quit()
+
+except:
+    print('Failed to download My COAs.')
 
 
 #-----------------------------------------------------------------------
 # Get Hudson Cannabis COAs.
 #-----------------------------------------------------------------------
+try:
 
-# Define the URL.
-url = 'https://www.hudsoncannabis.co/coas'
+    # Define the URL.
+    url = 'https://www.hudsoncannabis.co/coas'
 
-# Define the PDF directory.
-pdf_dir = 'D://data/new-york/hudson-cannabis/pdfs'
-os.makedirs(pdf_dir, exist_ok=True)
+    # Define the PDF directory.
+    pdf_dir = 'D://data/new-york/hudson-cannabis/pdfs'
+    os.makedirs(pdf_dir, exist_ok=True)
 
-# Find all of the PDF Links.
-driver = initialize_selenium(headless=False, download_dir=pdf_dir)
-driver.get(url)
-wait = WebDriverWait(driver, 10)
-wait.until(EC.presence_of_element_located((By.ID, "root")))
-sleep(5)
-pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'drive.google.com/file')]")
-print(f'Found {len(pdf_links)} PDF links.')
+    # Find all of the PDF Links.
+    driver = initialize_selenium(headless=False, download_dir=pdf_dir)
+    driver.get(url)
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.presence_of_element_located((By.ID, "root")))
+    sleep(5)
+    pdf_links = driver.find_elements(By.XPATH, "//a[contains(@href, 'drive.google.com/file')]")
+    print(f'Found {len(pdf_links)} PDF links.')
 
-# Download each PDF.
-for link in pdf_links:
-    pdf_url = link.get_attribute('href')
-    pdf_name = pdf_url.split('/')[-2] + '.pdf'
-    save_path = os.path.join(pdf_dir, pdf_name)
-    print(f'Downloading {pdf_name} from {pdf_url}')
-    download_google_drive_file(pdf_url, save_path)
-    sleep(3.33)
+    # Download each PDF.
+    for link in pdf_links:
+        pdf_url = link.get_attribute('href')
+        pdf_name = pdf_url.split('/')[-2] + '.pdf'
+        save_path = os.path.join(pdf_dir, pdf_name)
+        print(f'Downloading {pdf_name} from {pdf_url}')
+        download_google_drive_file(pdf_url, save_path)
+        sleep(3.33)
 
-print('All PDFs have been downloaded.')
+    print('All PDFs have been downloaded.')
 
-# Close the Selenium driver
-driver.quit()
+    # Close the Selenium driver
+    driver.quit()
+
+except:
+    print('Failed to download Hudson Cannabis COAs.')
 
 
 #-----------------------------------------------------------------------
@@ -510,10 +523,8 @@ def download_kaycha_coa(url, outfile):
             return redirected_url
 
 
-# Define the minimum file size for a PDF.
-MIN_FILE_SIZE = 21 * 1024
-
 # Download all PDFs.
+MIN_FILE_SIZE = 21 * 1024
 pdf_dir = r'D:\data\new-york\NYSCannabis\pdfs'
 os.makedirs(pdf_dir, exist_ok=True)
 redirect_urls = {}
@@ -592,9 +603,9 @@ except:
     print('No posts to curate.')
 
 
-#-----------------------------------------------------------------------
-# Parse COA data from the PDFs.
-#-----------------------------------------------------------------------
+-----------------------------------------------------------------------
+Parse COA data from the PDFs.
+-----------------------------------------------------------------------
 
 # Parse COA data from the PDFs.
 parser = CoADoc()
