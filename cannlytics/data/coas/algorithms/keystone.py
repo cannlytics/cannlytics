@@ -294,6 +294,10 @@ def parse_keystone_coa(
     # - microbes
     # - mycotoxins
     # - residual_solvents
+    # - water_activity
+    # - moisture_content
+    # - foreign_matter
+    # - etc?
 
     # Close the report.
     report.close()

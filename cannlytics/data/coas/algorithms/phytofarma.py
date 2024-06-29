@@ -483,6 +483,10 @@ def parse_historic_phyto_farma_coa(
     # - microbes
     # - mycotoxins
     # - residual_solvents
+    # - water_activity
+    # - moisture_content
+    # - foreign_matter
+    # - etc?
 
     # Turn dates to ISO format.
     date_columns = [x for x in obs.keys() if x.startswith('date')]
