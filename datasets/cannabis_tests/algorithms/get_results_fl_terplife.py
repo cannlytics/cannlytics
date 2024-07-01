@@ -191,9 +191,9 @@ def add_letters(strings):
 if __name__ == '__main__':
 
     # Query by digit combinations.
-    queries = get_day_month_combinations()
-    queries += [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
-    # queries = []
+    # queries = get_day_month_combinations()
+    # queries += [''.join(map(str, x)) for x in itertools.product(range(10), repeat=2)]
+    queries = []
 
     # Query by alphabetic combinations.
     specific_letters = [x for x in string.ascii_lowercase]
@@ -205,8 +205,8 @@ if __name__ == '__main__':
     long_digits = ['81', '61', '51', '41', '40', '30', '20']
 
     # Create new lists with the combinations
-    queries += add_letters(long_letters)
-    queries += add_digits(long_digits)
+    # queries += add_letters(long_letters)
+    # queries += add_digits(long_digits)
     queries.reverse()
     print('All queries:', queries)
 

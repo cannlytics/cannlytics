@@ -96,7 +96,7 @@ def remove_leading_numbers(lines: List[str]) -> List[str]:
     return [re.sub(r'^\d+\s*', '', line) for line in lines]
 
 
-def calculate_total_terpenes(results):
+def calculate_total_terpenes(results, places=2):
     """Calculate total terpenes from a list of results."""
     total = 0
     for result in results:
@@ -106,7 +106,7 @@ def calculate_total_terpenes(results):
                 total += value
             except:
                 pass
-    return total
+    return round(total, places)
 
 
 def get_keystone_terpenes(text, compounds, results, analytes):
