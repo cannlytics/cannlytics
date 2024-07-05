@@ -975,4 +975,6 @@
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
+  "interactiveWindow.showExecutionHint": false,
+  "interactiveWindow.executeWithShiftEnter": true,
 }

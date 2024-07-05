@@ -122,7 +122,7 @@ def find_first_value(
         (int): Returns the index of the first value.
     """
     if breakpoints is None:
-        breakpoints = [' \d+', 'ND', '<']
+        breakpoints = [' \d+', 'ND', 'NQ', '<']
     detects = []
     for breakpoint in breakpoints:
         try:

@@ -220,11 +220,21 @@ def format_date(x, pos):
 
 
 # Read results.
+cache = Bogart('D://data/.cache/results-ny.jsonl')
 results = cache.to_df()
 print('Number of results:', len(results))
 
 # Standardize results.
 compounds = list(cannabinoids.keys()) + list(terpenes.keys())
+# # DEV:
+# compounds = [
+#     'delta_9_thc',
+#     'thca',
+#     'alpha_humulene',
+#     'beta_caryophyllene',
+#     'beta_pinene',
+#     'd_limonene',
+# ]
 results['date'] = pd.to_datetime(results['date_tested'], format='mixed')
 results['week'] = results['date'].dt.to_period('W').astype(str)
 results['month'] = results['date'].dt.to_period('M').astype(str)
@@ -240,7 +250,35 @@ results = results.sort_values('date')
 # Lab analysis
 #-----------------------------------------------------------------------
 
-# Visualize the number of results by lab over time.
+# # FIXME: Visualize the number of results by lab over time.
+# weekly_tests = results.groupby(['week', 'lab']).size().reset_index(name='count')
+# pivot_table = weekly_tests.pivot_table(values='count', index='week', columns='lab', aggfunc='sum').fillna(0)
+# plt.figure(figsize=(15, 8))
+# colors = sns.color_palette('tab20', n_colors=len(pivot_table.columns))
+# bottom = pd.Series([0] * len(pivot_table.index), index=pivot_table.index)
+# for lab, color in zip(pivot_table.columns, colors):
+#     plt.bar(
+#         pivot_table.index,
+#         pivot_table[lab],
+#         bottom=bottom,
+#         label=lab,
+#         color=color,
+#         edgecolor='grey',  # Add border
+#         alpha=0.8,  # Add transparency
+#     )
+#     bottom += pivot_table[lab]
+# plt.title('Number of Lab Results by Lab', pad=10)
+# plt.xlabel('Week')
+# plt.ylabel('Number of Results')
+# plt.xticks(rotation=45)
+# ticks = plt.gca().get_xticks()
+# plt.gca().set_xticks(ticks[::4])  # Show every 4th xtick
+# plt.legend(loc='upper right', title='Lab', ncol=2)
+# plt.tight_layout()
+# plt.savefig(os.path.join(assets_dir, 'lab-timeseries.png'))
+# plt.show()
+
+# This one is good:
 sample = results.dropna(subset=['date'])
 plt.figure(figsize=(18, 8))
 ax = sns.countplot(data=sample, x='week', hue='lab', palette='tab10')
@@ -277,12 +315,44 @@ producer_names = {
     'Hudson Cannabis c/o Hudson Valley Hemp Company, LLC': 'Hudson Cannabis',
     'Milton, NY, 12547, US': 'Unknown',
 }
-results['dba'] = results['producer'].map(producer_names)
+results['producer_dba'] = results['producer'].map(producer_names)
 
-# Visualize the number of results by producer over time.
+# FIXME: Visualize the number of results by producer over time.
+# results['week'] = results['date'].dt.to_period('W').dt.start_time
+# weekly_tests = results.groupby(['week', 'dba']).size().reset_index(name='count')
+# pivot_table = weekly_tests.pivot_table(values='count', index='week', columns='dba', aggfunc='sum').fillna(0)
+# plt.figure(figsize=(21, 9))
+# colors = sns.color_palette('tab20', n_colors=len(pivot_table.columns))
+# bottom = None
+# for dba, color in zip(pivot_table.columns, colors):
+#     plt.bar(
+#         pivot_table.index,
+#         pivot_table[dba],
+#         bottom=bottom,
+#         label=dba,
+#         color=color,
+#         edgecolor='grey',  # Add border
+#         alpha=0.8,  # Add transparency
+#     )
+#     if bottom is None:
+#         bottom = pivot_table[dba]
+#     else:
+#         bottom += pivot_table[dba]
+# plt.title('Number of Lab Results by Producer', pad=10)
+# plt.xlabel('Week')
+# plt.ylabel('Number of Results')
+# plt.xticks(rotation=45)
+# ticks = plt.gca().get_xticks()
+# plt.gca().set_xticks(ticks[::4])  # Show every 4th xtick
+# plt.legend(loc='upper right', title='Producer', ncol=2)
+# plt.tight_layout()
+# plt.savefig(os.path.join(assets_dir, 'producer-timeseries.png'))
+# plt.show()
+
+# This one is good.
 sample = results.dropna(subset=['date'])
 plt.figure(figsize=(18, 8))
-ax = sns.countplot(data=sample, x='week', hue='dba', palette='tab10')
+ax = sns.countplot(data=sample, x='week', hue='producer_dba', palette='tab10')
 plt.title('Number of Lab Results by Producer', pad=10)
 plt.xlabel('')
 plt.ylabel('Number of Results')
@@ -493,7 +563,7 @@ create_scatter_plot(
 
 
 #-----------------------------------------------------------------------
-#  Regression analysis on THCA.
+# Regression analysis on THCA.
 #-----------------------------------------------------------------------
 
 from patsy import dmatrices
@@ -508,3 +578,14 @@ sample['month_num'] = sample['month'].rank(method='dense').astype(int) - 1
 y, X = dmatrices('thca ~ month_num + C(lab) + C(dba)', data=sample, return_type='dataframe')
 model = sm.OLS(y, X).fit()
 print(model.summary().as_latex())
+
+
+#-----------------------------------------------------------------------
+# TODO: Save the results.
+#-----------------------------------------------------------------------
+
+# Save the results.
+last_test_date = results['date'].max().strftime('%Y-%m-%d')
+outfile = f'D://data/new-york/ny-results-{last_test_date}.xlsx'
+results.to_excel(outfile, index=False)
+print('Saved:', outfile)
