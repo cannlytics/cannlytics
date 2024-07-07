@@ -110,10 +110,10 @@ prefixes = [
     'W', 'V', 'X', 'Y',
     'H', 'Z',
     # Unknown if used
-    # 'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G',  'I', 'O',
     ]
 start_day = 1
-days = 2
+days = 6
 start_year = 2024
 end_year = 2024
 start_month = 7

@@ -60,6 +60,8 @@ This dataset is a collection of public cannabis lab test results.
 
 The dataset is partitioned into the various sources of lab results.
 
+<!-- TODO: Automate dataset metadata -->
+
 | Dataset | Key | Observations |
 |--------|--------|--------------|
 | California | `ca` | 1202 |
