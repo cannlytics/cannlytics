@@ -56,10 +56,10 @@ print(f'Saved standardized MCR Labs results: {outfile}')
 
 # Read MA lab results.
 datafiles = [
-    r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-Apr-Dec2021-FINAL.csv",
-    r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2022-FINAL.csv",
-    r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jan-June-FINAL.csv",
-    r"D:\data\massachusetts\TestingTHC-THCA-YeastMold-2023-Jul-Sep-FINAL.csv",
+    r"D:\data\public-records\Massachusetts\TestingTHC-THCA-YeastMold-Apr-Dec2021-FINAL.csv",
+    r"D:\data\public-records\Massachusetts\TestingTHC-THCA-YeastMold-2022-FINAL.csv",
+    r"D:\data\public-records\Massachusetts\TestingTHC-THCA-YeastMold-2023-Jan-June-FINAL.csv",
+    r"D:\data\public-records\Massachusetts\TestingTHC-THCA-YeastMold-2023-Jul-Sep-FINAL.csv",
 ]
 ma_results = pd.concat([pd.read_csv(datafile) for datafile in datafiles])
 
@@ -104,8 +104,10 @@ pivot_df['date'] = pd.to_datetime(pivot_df['date_tested'])
 pivot_df['month_year'] = pivot_df['date'].dt.to_period('M')
 print(len(pivot_df))
 
-print(pivot_df.head())
-
+# Save the data.
+last_date = pivot_df['date'].max().strftime('%Y-%m-%d')
+datafile = f'D://data/massachusetts/ma-results-{last_date}.csv'
+pivot_df.to_csv(datafile, index=False)
 
 # === Visualize the number of tests per month ===
 

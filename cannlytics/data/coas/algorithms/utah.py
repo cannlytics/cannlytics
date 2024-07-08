@@ -357,18 +357,6 @@ def parse_utah_coa(
                 'status': row[4],
             })
 
-    # TODO: Get residual solvents?
-    residual_solvents = False
-    for page in report.pages[1:]:
-        text = page.extract_text()
-        if 'Residual' in text:
-            print("Get thee RESIDUALS!!!")
-            print(doc)
-            print(page.page_number)
-            residual_solvents = True
-            analyses.append('residual_solvents')
-            break
-
     # Get terpenes.
     terpenes = False
     for page in report.pages[1:]:
@@ -546,8 +534,59 @@ def parse_historic_utah_coa(
     # TODO: Get heavy metal results.
 
 
-    # TODO: Get pesticide results.
-
+    # Get pesticide results.
+    pesticides = False
+    for page in report.pages[1:]:
+        text = page.extract_text()
+        if 'Pesticide' in text:
+            pesticides = True
+            analyses.append('pesticides')
+            lines = text.split('\n')
+            rows = extract_lines(lines, 'Pesticide')
+            rows = extract_lines(rows, 'Analyte', 'Analysis')
+            for line in rows:
+                if ' of ' in line: continue
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                results.append({
+                    'analysis': 'pesticides',
+                    'key': key,
+                    'name': name,
+                    'cas': values[0],
+                    'value': values[1],
+                    'limit': values[2],
+                    'status': values[3],
+                })
+            break
+    
+    # Get pesticides results on the next page.
+    if pesticides:
+        try:
+            page = report.pages[report.pages.index(page) + 1]
+            text = page.extract_text()
+        except:
+            text = ''
+        if 'Pesticide' in text:
+            lines = text.split('\n')
+            rows = extract_lines(lines, 'Pesticide')
+            rows = extract_lines(rows, 'Analyte', 'Analysis')
+            for line in rows:
+                if 'Analysis' in line: continue
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                results.append({
+                    'analysis': 'pesticides',
+                    'key': key,
+                    'name': name,
+                    'cas': values[0],
+                    'value': values[1],
+                    'limit': values[2],
+                    'status': values[3],
+                })
 
     # Get terpene results.
     for page in report.pages[1:]:
@@ -619,7 +658,11 @@ if __name__ == '__main__':
     assert coa_data is not None
 
     # [✓] TEST: Parse historic Utah COAs.
-    doc = r'D:\\data\\public-records\\Utah\\F0778 Dragonfly Greenhouse J1_ 230201HB - SERVICE SAMPLE.pdf'
-    parser = CoADoc()
-    coa_data = parse_historic_utah_coa(parser, doc)
-    assert coa_data is not None
+    docs = [
+        r'D:\\data\\public-records\\Utah\\F0778 Dragonfly Greenhouse J1_ 230201HB - SERVICE SAMPLE.pdf',
+        r'D:\\data\\public-records\\Utah\\F0344 Harvest Jack Herer.pdf',
+    ]
+    for doc in docs:
+        parser = CoADoc()
+        coa_data = parse_historic_utah_coa(parser, doc)
+        assert coa_data is not None

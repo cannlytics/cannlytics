@@ -9,6 +9,7 @@ License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/m
 """
 # External imports:
 from datetime import datetime
+import os
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib import cm
@@ -35,8 +36,10 @@ def save_figure(filename, dpi=300, bbox_inches='tight'):
 
 # === Get the data ===
 
-# Read MA lab results.
-mi_results = pd.read_excel('./data/Metrc_Flower_Potency_Final_2.17.23.xlsx')
+# Read the results.
+data_dir = r'D:\data\public-records\Michigan'
+datafile = os.path.join(data_dir, 'Michigan_Metrc_Flower_Potency_Final_2.17.23.xlsx')
+mi_results = pd.read_excel(datafile)
 
 
 # === Clean the data ===
@@ -56,6 +59,12 @@ mi_results = mi_results.rename(columns={
 # Add a date column.
 mi_results['date'] = pd.to_datetime(mi_results['date_tested'])
 mi_results['month_year'] = mi_results['date'].dt.to_period('M')
+
+# Save the data.
+last_date = mi_results['date'].max().strftime('%Y-%m-%d')
+datafile = f'D://data/michigan/mi-results-{last_date}.csv'
+mi_results.to_csv(datafile, index=False)
+
 
 # Exclude outliers.
 sample = mi_results.loc[
