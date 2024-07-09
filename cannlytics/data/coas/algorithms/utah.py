@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/4/2024
-Updated: 7/4/2024
+Updated: 7/8/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -237,6 +237,7 @@ def parse_utah_coa(
         })
 
     # Get microbes.
+    # TODO: Check if mycotoxins are being collected.
     microbes = False
     for page in report.pages[1:]:
         text = page.extract_text()
@@ -461,7 +462,7 @@ def parse_historic_utah_coa(
         rows.extend(right_section.extract_text().split('\n'))
     else:
         print("FIXME: One or more target texts were not found on the page.")
-        print(doc)
+        print(report.stream.name)
     fields = coa_parameters['fields']
     for line in rows:
         for field, key in fields.items():
@@ -483,33 +484,33 @@ def parse_historic_utah_coa(
         value = ' '.join(parts).replace('Description:', '').strip().replace('  ', ' ')
         obs['product_name'] = value
 
-    # TODO: Get analyses.
-    analyses = []
-
-
+    # Get analyses and results.
     # TODO: Get methods.
-
+    analyses, results = [], []
 
     # Get cannabinoid results.
-    results = []
     text = front_page.extract_text()
     if 'Cannabinoid Analysis' in text:
         analyses.append('cannabinoids')
         lines = text.split('\n')
         rows = extract_lines(lines, 'Analyte', 'Total Cannabinoids')
-        rows = extract_lines(rows, None, 'Foreign Matter')
+        rows = extract_lines(rows, None, 'Analysis')
         for line in rows:
+            if 'Analysis' in line or 'Analyte' in line or ' & ' in line:
+                continue
             first_value = find_first_value(line)
             name = line[:first_value].strip()
             key = parser.analytes.get(snake_case(name), snake_case(name))
             values = line[first_value:].strip().split(' ')
-            results.append({
+            result = {
                 'analysis': 'cannabinoids',
                 'key': key,
                 'name': name,
-                'value': values[0],
-                'mg_g': values[-1],
-            })
+                'value': convert_to_numeric(values[0]),
+            }
+            if len(values) > 1:
+                result['mg_g'] = convert_to_numeric(values[-1])
+            results.append(result)
 
         # Get total cannabinoids.
         total_cannabinoids = False
@@ -522,76 +523,171 @@ def parse_historic_utah_coa(
         if not total_cannabinoids:
             obs['total_cannabinoids'] = calculate_total(results, analysis='cannabinoids')
 
-    # TODO: Get foreign matter results.
+    # Get foreign matter results.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Foreign Matter Analysis' in text:
+            analyses.append('foreign_matter')
+            lines = text.split('\n')
+            for row in reversed(lines):
+                if 'Foreign Matter' in row:
+                    values = row.replace('Foreign Matter', '').strip().split(' ')
+                    status = values[-1]
+                    value = values[0]
+                    note = None
+                    if len(values) > 2:
+                        note = ' '.join(values[1:-1])
+                    if str(status).lower() == 'fail':
+                        obs['status'] = 'Fail'
+                    results.append({
+                        'analysis': 'foreign_matter',
+                        'key': 'foreign_matter',
+                        'name': 'Foreign Matter',
+                        'value': value,
+                        'status': status,
+                        'note': note,
+                    })
+                    break
+            break
 
+    # Get moisture content and water activity.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Moisture Content' in text:
+            lines = text.split('\n')
+            for line in lines:
+                if line.startswith('Moisture Content (%)'):
+                    analyses.append('moisture_content')
+                    value = line.split(' ')[-1].replace('%', '')
+                    obs['moisture_content'] = convert_to_numeric(value)
+                elif line.startswith('Water Activity'):
+                    analyses.append('water_activity')
+                    values = line.split(' ')
+                    obs['water_activity'] = convert_to_numeric(values[2])
+                    if str(values[-1]).lower() != 'pass':
+                        obs['status'] = values[-1]
+                    break
+            break
 
-    # TODO: Get moisture content and water activity.
+    # Get microbe results.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Microbial Analysis' in text:
+            analyses.append('microbes')
+            lines = text.split('\n')
+            rows = extract_lines(lines, 'Microbial Analysis', 'Notes')
+            rows = extract_lines(rows, 'Analyte', 'DET = ')
+            for line in rows:
+                if 'Analysis' in line or 'Analyte' in line or ' of ' in line or 'Organism' in line:
+                    continue
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                if len(values) == 2:
+                    limit = None
+                else:
+                    try:
+                        limit = convert_to_numeric(str(values[1]).replace(',', ''))
+                    except:
+                        break
+                results.append({
+                    'analysis': 'microbes',
+                    'key': key,
+                    'name': name,
+                    'value': convert_to_numeric(values[0]),
+                    'limit': limit,
+                    'status': values[-1],
+                })
+            break
 
+    # Get mycotoxin results.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Mycotoxin Analysis' in text:
+            analyses.append('mycotoxins')
+            lines = text.split('\n')
+            rows = extract_lines(lines, 'Mycotoxin', 'ND =')
+            rows = extract_lines(rows, None, 'Note')
+            for line in rows:
+                if 'Analysis' in line or 'Analyte' in line or ' of ' in line:
+                    continue
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                results.append({
+                    'analysis': 'mycotoxins',
+                    'key': key,
+                    'name': name,
+                    'value': convert_to_numeric(values[0]),
+                    'limit': convert_to_numeric(values[1]),
+                    'status': values[-1],
+                })
+            break
 
-    # TODO: Get microbe results.
-
-
-    # TODO: Get heavy metal results.
-
+    # Get heavy metal results.
+    for page in report.pages:
+        text = page.extract_text()
+        if 'Heavy Metal Analysis' in text:
+            analyses.append('heavy_metals')
+            lines = text.split('\n')
+            rows = extract_lines(lines, 'Heavy Metal')
+            rows = extract_lines(rows, 'Analyte', 'Analysis')
+            rows = extract_lines(rows, None, 'Note')
+            for line in rows:
+                if 'Analysis' in line or 'Analyte' in line or ' of ' in line:
+                    continue
+                first_value = find_first_value(line)
+                name = line[:first_value].strip()
+                key = parser.analytes.get(snake_case(name), snake_case(name))
+                values = line[first_value:].strip().split(' ')
+                if len(values) > 3:
+                    cas = values[0]
+                else:
+                    cas = None
+                results.append({
+                    'analysis': 'heavy_metals',
+                    'key': key,
+                    'name': name,
+                    'cas': cas,
+                    'value': convert_to_numeric(values[-3]),
+                    'limit': convert_to_numeric(values[-2]),
+                    'status': values[-1],
+                })
+            break
 
     # Get pesticide results.
-    pesticides = False
-    for page in report.pages[1:]:
+    for page in report.pages:
         text = page.extract_text()
-        if 'Pesticide' in text:
-            pesticides = True
+        if 'Pesticide Analysis' in text:
             analyses.append('pesticides')
             lines = text.split('\n')
             rows = extract_lines(lines, 'Pesticide')
             rows = extract_lines(rows, 'Analyte', 'Analysis')
             for line in rows:
-                if ' of ' in line: continue
+                if 'Analysis' in line or 'Analyte' in line or ' of ' in line:
+                    continue
                 first_value = find_first_value(line)
                 name = line[:first_value].strip()
                 key = parser.analytes.get(snake_case(name), snake_case(name))
                 values = line[first_value:].strip().split(' ')
+                if len(values) != 4:
+                    continue
                 results.append({
                     'analysis': 'pesticides',
                     'key': key,
                     'name': name,
                     'cas': values[0],
-                    'value': values[1],
-                    'limit': values[2],
-                    'status': values[3],
-                })
-            break
-    
-    # Get pesticides results on the next page.
-    if pesticides:
-        try:
-            page = report.pages[report.pages.index(page) + 1]
-            text = page.extract_text()
-        except:
-            text = ''
-        if 'Pesticide' in text:
-            lines = text.split('\n')
-            rows = extract_lines(lines, 'Pesticide')
-            rows = extract_lines(rows, 'Analyte', 'Analysis')
-            for line in rows:
-                if 'Analysis' in line: continue
-                first_value = find_first_value(line)
-                name = line[:first_value].strip()
-                key = parser.analytes.get(snake_case(name), snake_case(name))
-                values = line[first_value:].strip().split(' ')
-                results.append({
-                    'analysis': 'pesticides',
-                    'key': key,
-                    'name': name,
-                    'cas': values[0],
-                    'value': values[1],
-                    'limit': values[2],
+                    'value': convert_to_numeric(values[1]),
+                    'limit': convert_to_numeric(values[2]),
                     'status': values[3],
                 })
 
     # Get terpene results.
-    for page in report.pages[1:]:
+    for page in report.pages:
         text = page.extract_text()
-        if 'Terpene' in text:
+        if 'Terpene Analysis' in text:
             analyses.append('terpenes')
             lines = text.split('\n')
             rows = extract_lines(lines, 'Terpene Analysis')
@@ -612,7 +708,7 @@ def parse_historic_utah_coa(
                     'key': key,
                     'name': name,
                     'cas': cas,
-                    'value': values[-1],
+                    'value': convert_to_numeric(values[-1]),
                 })
             break
 
@@ -661,6 +757,13 @@ if __name__ == '__main__':
     docs = [
         r'D:\\data\\public-records\\Utah\\F0778 Dragonfly Greenhouse J1_ 230201HB - SERVICE SAMPLE.pdf',
         r'D:\\data\\public-records\\Utah\\F0344 Harvest Jack Herer.pdf',
+        r'D:\\data\\public-records\\Utah\\Zion Flower COA - Fatso.pdf',
+        r'D:\data\public-records\Utah\P0462 {FAIL} Zion Cultivars Watermelon Soda Shake  3.5g.pdf',
+        r'D:\data\public-records\Utah\F0452 Cocomero Gelatti X Grumpz.pdf',
+        r'D:\data\public-records\Utah\F0646 Harvest of Utah Mochi X Gelato.pdf',
+        r'D:\data\public-records\Utah\P0046 H of U Jack Herer Prepack.pdf',
+        r'D:\data\public-records\Utah\F0371 Wholesome Gorilla OG Trim.pdf',
+        r'D:\data\public-records\Utah\F0349 Wholesome Ag Kiwi.pdf',
     ]
     for doc in docs:
         parser = CoADoc()

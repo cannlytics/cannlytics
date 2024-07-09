@@ -1,3 +1,12 @@
+"""
+Analyze Results | Utah
+Copyright (c) 2023-2024 Cannlytics
+
+Authors: Keegan Skeate <https://github.com/keeganskeate>
+Created: 7/4/2024
+Updated: 7/8/2024
+License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
+"""
 # Standard imports.
 import os
 from datetime import datetime
@@ -103,6 +112,9 @@ def parse_coa_pdfs(
 
 # Initialize COA parsing.
 cache = Bogart('D://data/.cache/results-ut.jsonl')
+
+# DEV: Clear the cache.
+cache.clear()
 
 # Parse COAs.
 all_results = parse_coa_pdfs(
