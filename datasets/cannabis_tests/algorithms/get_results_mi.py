@@ -6,6 +6,11 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/23/2023
 Updated: 10/25/2023
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
+
+Data Sources:
+    
+    - Public records request
+
 """
 # External imports:
 from datetime import datetime

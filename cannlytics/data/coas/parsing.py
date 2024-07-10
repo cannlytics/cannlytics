@@ -9,6 +9,7 @@ Updated: 6/14/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
+import json
 import os
 from typing import Any, List, Optional
 
@@ -71,3 +72,17 @@ def parse_coa_pdfs(
                 print(e)
                 cache.set(pdf_hash, {'coa_pdf': os.path.basename(pdf), 'error': str(e)})
     return all_results
+
+
+def find_unique_analytes(df, analyses = [], key='key'):
+    """Find unique analytes in a list of results."""
+    analytes = set()
+    for _, row in df.iterrows():
+        results = json.loads(row['results'])
+        for result in results:
+            if analyses:
+                if result.get('analysis') in analyses:
+                    analytes.add(result[key])
+            else:
+                analytes.add(result[key])
+    return analytes

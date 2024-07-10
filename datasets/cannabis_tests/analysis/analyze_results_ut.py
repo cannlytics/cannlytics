@@ -4,28 +4,27 @@ Copyright (c) 2023-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/4/2024
-Updated: 7/8/2024
+Updated: 7/9/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
-# Standard imports.
+# Standard imports:
 import os
-from datetime import datetime
-import json
-from typing import Any, List, Optional
+from typing import List
 from zipfile import ZipFile
 
-# External imports.
+# External imports:
+import matplotlib.pyplot as plt
 import pandas as pd
-import pdfplumber
+import seaborn as sns
 
-# Internal imports.
+# Internal imports:
 from cannlytics import __version__
 from cannlytics.data.cache import Bogart
 from cannlytics.data.coas.parsing import get_coa_files
-from cannlytics.data.data import create_hash, create_sample_id, find_first_value
-from cannlytics.utils.utils import convert_to_numeric, snake_case
 from cannlytics.data.coas import CoADoc
 from cannlytics.data.coas.algorithms.utah import parse_utah_coa
+from cannlytics.data.coas import standardize_results
+from cannlytics.data.coas.parsing import find_unique_analytes
 
 
 #-----------------------------------------------------------------------
@@ -123,17 +122,62 @@ all_results = parse_coa_pdfs(
     cache=cache,
 )
 
+# Read results.
+results = cache.to_df()
+print('Number of results:', len(results))
+
+# Standardize time.
+results['date'] = pd.to_datetime(results['date_tested'], format='mixed')
+results['week'] = results['date'].dt.to_period('W').astype(str)
+results['month'] = results['date'].dt.to_period('M').astype(str)
+results = results.sort_values('date')
+
+# Standardize compounds.
+# Note: Removes nuisance analytes.
+analytes = find_unique_analytes(results)
+nuisance_analytes = [
+    'det_detected',
+    'global_shortages_of_laboratory_suppliesto',
+    'here_recorded_may_not_be_used_as_an_endorsement_for_a_product',
+    'information_see',
+    'information_see_https_totoag_utah_govto_2021_to_04_to_29_toudaf_temporarily_adjusts_medical_cannabis_testing_protocols_due_to',
+    'nd_not_detected',
+    'notes',
+    'notes_sample_was_tested_as_received_the_cannabinoid_results_were_not_adjusted_for_moisture_content',
+    'phtatpthso_togtoaegn_utetashti_nggo_vwto_2_a_0_s',
+    'recorded_the_results_here_recorded_may_not_be_used_as_an_endorsement_for_a_product',
+    'results_pertain_only_to_the_test_sample_listed_in_this_report',
+    'see_https_totoag_utah_govto_2021_to_04_to_29_toudaf_temporarily_adjusts_medical_cannabis_testing_protocols_due_to_global',
+    'shortages_of_laboratory_suppliesto',
+    'tac_2500000',
+    'tac_t',
+    'this_report_may_not_be_reproduced_except_in_its_entirety',
+    'total_cbd',
+    'total_thc',
+]
+analytes = analytes - set(nuisance_analytes)
+# TODO: Alphabetize the analytes.
+analytes = sorted(list(analytes))
+results = standardize_results(results, analytes)
+
+# Save the results.
+last_test_date = results['date'].max().strftime('%Y-%m-%d')
+outfile = f'D://data/utah/ut-results-{last_test_date}.xlsx'
+latest = f'D://data/utah/ut-results-latest.csv'
+results.to_excel(outfile, index=False)
+results.to_csv(latest, index=False)
+print('Saved:', outfile)
+print('Saved:', latest)
+
+# Print out features.
+print('Number of features:', len(analytes))
+print('Features:', list(results.columns))
+features = {x: 'string' for x in results.columns}
+
 
 #-----------------------------------------------------------------------
 # Analyze Utah results.
 #-----------------------------------------------------------------------
-
-from cannlytics.data.coas import standardize_results
-from cannlytics.compounds import cannabinoids, terpenes
-import matplotlib.pyplot as plt
-from matplotlib.dates import MonthLocator, DateFormatter
-import seaborn as sns
-
 
 def format_date(x, pos):
     try:
@@ -149,30 +193,22 @@ plt.rcParams.update({
     'font.size': 24,
 })
 
-# Read results.
-results = cache.to_df()
-print('Number of results:', len(results))
+# FIXME: Read the curated results.
 
-# Standardize time.
-results['date'] = pd.to_datetime(results['date_tested'], format='mixed')
-results['week'] = results['date'].dt.to_period('W').astype(str)
-results['month'] = results['date'].dt.to_period('M').astype(str)
-results = results.sort_values('date')
+# # Read results.
+# results = cache.to_df()
+# print('Number of results:', len(results))
 
-# Standardize compounds.
-compounds = list(cannabinoids.keys()) + list(terpenes.keys())
-# # DEV:
-# compounds = [
-#     'delta_9_thc',
-#     'thca',
-#     'alpha_humulene',
-#     'beta_caryophyllene',
-#     'beta_pinene',
-#     'd_limonene',
-# ]
-results = standardize_results(results, compounds)
+# # Standardize time.
+# results['date'] = pd.to_datetime(results['date_tested'], format='mixed')
+# results['week'] = results['date'].dt.to_period('W').astype(str)
+# results['month'] = results['date'].dt.to_period('M').astype(str)
+# results = results.sort_values('date')
 
-# Sort the results by date.
+# # Standardize compounds.
+# analytes = find_unique_analytes(results)
+# results = standardize_results(results, analytes)
+
 
 
 #-----------------------------------------------------------------------
@@ -302,7 +338,7 @@ ny_flower_types = [
     'Flower',
 ]
 ny_flower = ny_results.loc[ny_results['product_type'].isin(ny_flower_types)]
-ny_flower = standardize_results(ny_flower, compounds)
+ny_flower = standardize_results(ny_flower, analytes)
 ny_flower['state'] = 'NY'
 ny_flower['date'] = pd.to_datetime(ny_flower['date_tested'], format='mixed')
 ny_flower['week'] = ny_flower['date'].dt.to_period('W').astype(str)
@@ -375,14 +411,3 @@ create_scatter_plot(
     filename='ut-alpha-humulene-to-beta-caryophyllene.png',
     annotate=False
 )
-
-
-#-----------------------------------------------------------------------
-# Save the results.
-#-----------------------------------------------------------------------
-
-# Save the results.
-last_test_date = results['date'].max().strftime('%Y-%m-%d')
-outfile = f'D://data/utah/ut-results-{last_test_date}.xlsx'
-results.to_excel(outfile, index=False)
-print('Saved:', outfile)

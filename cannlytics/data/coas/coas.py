@@ -248,15 +248,17 @@ def standardize_results(
     ) -> pd.DataFrame:
     """Standardize terpenes from results."""
     df[results_key] = df[results_key].apply(json_to_list)
+    new_columns = {}
     for c in compounds:
         try:
-            df[c] = df[results_key].apply(
+            new_columns[c] = df[results_key].apply(
                 lambda x: standardize_result(x, c, key=key)
             )
-            df[c] = pd.to_numeric(df[c], errors='coerce')
+            new_columns[c] = pd.to_numeric(new_columns[c], errors='coerce')
         except KeyError:
             print(f"{c} not found in results.")
-    return df
+    augmented_df = pd.DataFrame(new_columns)
+    return pd.concat([df, augmented_df], axis=1)
 
 
 class CoADoc:

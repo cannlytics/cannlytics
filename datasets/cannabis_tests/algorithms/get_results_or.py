@@ -12,6 +12,10 @@ Description:
 
     Curate Oregon lab result data obtained through public records requests.
 
+Data Sources:
+    
+    - Public records request by Jamie Toth.
+
 """
 # Standard imports:
 from datetime import datetime

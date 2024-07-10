@@ -12,6 +12,10 @@ Description:
 
     Curate Nevada lab result data obtained through public records requests.
 
+Data Sources:
+    
+    - Public records request
+
 """
 # Standard imports:
 from datetime import datetime

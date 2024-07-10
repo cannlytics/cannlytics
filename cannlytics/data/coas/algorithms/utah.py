@@ -127,6 +127,30 @@ def calculate_total(results, analysis='cannabinoids', places=2):
     return round(total, places)
 
 
+def calculate_total_cannabinoid(
+        results: List[dict],
+        base_key: Optional[str] = 'delta_9_thc',
+        acid_key: Optional[str] = 'thca',
+        decarb: Optional[float] = 0.877,
+    ) -> float:
+    """Calculates total THC given a list of results.
+    """
+    results_data = pd.DataFrame(results)
+    try:
+        base = results_data.loc[results_data['key'] == base_key].iloc[0]['value']
+    except IndexError:
+        base = 0
+    try:
+        acid = results_data.loc[results_data['key'] == acid_key].iloc[0]['value']
+    except IndexError:
+        acid = 0
+    base = convert_to_numeric(base)
+    if not isinstance(base, float): base = 0
+    acid = convert_to_numeric(acid)
+    if isinstance(acid, float): base += acid * decarb
+    return base
+
+
 def parse_utah_coa(
         parser,
         doc: Any,
@@ -496,7 +520,7 @@ def parse_historic_utah_coa(
         rows = extract_lines(lines, 'Analyte', 'Total Cannabinoids')
         rows = extract_lines(rows, None, 'Analysis')
         for line in rows:
-            if 'Analysis' in line or 'Analyte' in line or ' & ' in line:
+            if 'Analysis' in line or 'Analyte' in line or ' & ' in line or ' of ' in line:
                 continue
             first_value = find_first_value(line)
             name = line[:first_value].strip()
@@ -522,6 +546,10 @@ def parse_historic_utah_coa(
                 break
         if not total_cannabinoids:
             obs['total_cannabinoids'] = calculate_total(results, analysis='cannabinoids')
+        
+        # Calculate total THC and total CBD.
+        obs['total_thc'] = calculate_total_cannabinoid(results)
+        obs['total_cbd'] = calculate_total_cannabinoid(results, base_key='cbd', acid_key='cbda')
 
     # Get foreign matter results.
     for page in report.pages:
@@ -694,7 +722,8 @@ def parse_historic_utah_coa(
             rows = extract_lines(rows, 'Analysis')
             rows = extract_lines(rows, 'Analyte', 'Analysis')
             for line in rows:
-                if 'Analysis' in line: continue
+                if 'Analysis' in line or 'Analyte' in line or ' of ' in line:
+                    continue
                 first_value = find_first_value(line)
                 name = line[:first_value].strip()
                 key = parser.analytes.get(snake_case(name), snake_case(name))

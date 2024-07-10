@@ -1,93 +1,81 @@
 ---
-pretty_name: cannabis_tests
-annotations_creators:
-  - expert-generated
-language_creators:
-  - expert-generated
+pretty_name: cannabis_results
 license:
   - cc-by-4.0
 tags:
   - cannabis
-  - lab results
+  - lab
   - tests
+  - results
 configs:
   - config_name: all
-    data_files: "data/all/all-lab-results-latest.csv"
+    data_files: "data/all/all-results-latest.csv"
+  - config_name: ak
+    data_files: "data/ak/ak-results-latest.csv"
   - config_name: ca
-    data_files: "data/all/ca-lab-results-latest.csv"
+    data_files: "data/ca/ca-results-latest.csv"
+  - config_name: ct
+    data_files: "data/ct/ct-results-latest.csv"
+  - config_name: fl
+    data_files: "data/fl/fl-results-latest.csv"
+  - config_name: ma
+    data_files: "data/ma/ma-results-latest.csv"
+  - config_name: md
+    data_files: "data/md/md-results-latest.csv"
+  - config_name: mi
+    data_files: "data/mi/mi-results-latest.csv"
+  - config_name: nv
+    data_files: "data/nv/nv-results-latest.csv"
+  - config_name: ny
+    data_files: "data/ny/ny-results-latest.csv"
+  - config_name: or
+    data_files: "data/or/or-results-latest.csv"
+  - config_name: ri
+    data_files: "data/ri/ri-results-latest.csv"
+  - config_name: ut
+    data_files: "data/ut/ut-results-latest.csv"
+  - config_name: wa
+    data_files: "data/wa/wa-results-latest.csv"
 ---
 
-# Cannabis Tests
+# Cannabis Results
 
-<div style="margin-top:1rem; margin-bottom: 1rem;">
-  <img width="240px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fdatasets%2Fcannabis_tests%2Fcannabis_tests_curated_by_cannlytics.png?alt=media&token=22e4d1da-6b30-4c3f-9ff7-1954ac2739b2">
-</div>
+This is a repository of public cannabis lab test results obtained through public records requests and certificates of analysis (COAs) available online. Lab results are useful for cannabis cultivators, processors, retailers, consumers, and everyone else interested in cannabis. The repository contains raw data and curated datafiles for states with permitted cannabis markets where data is available. The curated datafiles are cleaned and standardized for ease of use, but may contain errors. The raw data is provided for transparency, reproducibility, and for you to improve upon.
 
-## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [Dataset Description](#dataset-description)
-  - [Dataset Summary](#dataset-summary)
-- [Dataset Structure](#dataset-structure)
-  - [Data Instances](#data-instances)
-  - [Data Fields](#data-fields)
-  - [Data Splits](#data-splits)
-- [Dataset Creation](#dataset-creation)
-  - [Curation Rationale](#curation-rationale)
-  - [Source Data](#source-data)
-  - [Data Collection and Normalization](#data-collection-and-normalization)
-  - [Personal and Sensitive Information](#personal-and-sensitive-information)
-- [Considerations for Using the Data](#considerations-for-using-the-data)
-  - [Social Impact of Dataset](#social-impact-of-dataset)
-  - [Discussion of Biases](#discussion-of-biases)
-  - [Other Known Limitations](#other-known-limitations)
-- [Additional Information](#additional-information)
-  - [Dataset Curators](#dataset-curators)
-  - [License](#license)
-  - [Citation](#citation)
-  - [Contributions](#contributions)
+> Notes: Any data of individuals and/or their contact information may not be used for commercial purposes. The data represents only a subset of the population of cannabis lab results, and the non-random nature of data collection should be taken into consideration.
 
-## Dataset Description
+> Curated by [🔥Cannlytics](https://cannlytics.com), a for-profit cannabis data and analytics company.
 
-- **Homepage:** <https://github.com/cannlytics/cannlytics>
-- **Repository:** <https://huggingface.co/datasets/cannlytics/cannabis_tests>
-- **Point of Contact:** <dev@cannlytics.com>
+## Datasets
 
-### Dataset Summary
+The data is split into datasets for each state where data is available.
 
-This dataset is a collection of public cannabis lab test results.
+<!-- Automated Table -->
+| Dataset | State | Sources | Observations |
+|--------|------|---------|--------------|
+| `ak` | AK |  |  |
+| `ca-flower-co` | CA |  | 12915 |
+| `ca-glass-house` | CA | [Glass House Farms Strains](https://glasshousefarms.org/strains/) | 12915 |
+| `ca-rawgarden` | CA |  | 12915 |
+| `ca-sc-labs` | CA |  | 12915 |
+| `ct` | CT |  | 21622 |
+| `fl-flowery` | FL | [The Flowery](https://support.theflowery.co) | 17993 |
+| `fl-jungleboys` | FL | [Jungle Boys Florida](https://jungleboysflorida.com) | 17993 |
+| `fl-kaycha` | FL | [Florida Labs](https://knowthefactsmmj.com/cmtl/), [Florida Licenses](https://knowthefactsmmj.com/mmtc/), [Kaycha Labs](https://yourcoa.com) | 17993 |
+| `fl-medical` | FL |  | 17993 |
+| `fl-terplife` | FL | [TerpLife Labs](https://www.terplifelabs.com) | 17993 |
+| `ma` | MA | [MCR Labs Test Results](https://reports.mcrlabs.com) | 7554 |
+| `md` | MD | Public records request from the Maryland Medical Cannabis Commission (MMCC). | 95738 |
+| `mi` | MI |  | 45637 |
+| `nv` | NV |  |  |
+| `ny` | NY |  |  |
+| `or` | OR |  |  |
+| `psi-labs` | PSI | PSI Labs Test Results, ChromeDriver, Automation Cartoon, Efficiency Cartoon, SHA in Python, Split / Explode a column of dictionaries into separate columns with pandas, Tidyverse: Wide and Long Data Tables, Web Scraping using Selenium and Python |  |
+| `ri` | RI |  |  |
+| `wa` | WA | [February 2023 CCRS Traceability Report](https://lcb.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml), [March 2023 CCRS Traceability Report](https://lcb.box.com/s/lg50ow8qx2xki2d4lr6raj0c2r22v711), [April 2023 CCRS Traceability Report](https://lcb.box.com/s/bj3g5inm77n8mrf7gk0h07f1o13dkfc7), [May 2023 CCRS Traceability Report](https://lcb.box.com/s/dzlcx9uzt3t1td8enzbtbgknw6oh9bzw), [June 2023 CCRS Traceability Report](https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o), [July 2023 CCRS Traceability Report](https://lcb.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz), [August 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo), [September 2023 CCRS Traceability Report](), [October 2023 monthly CCRS traceability data report](https://lcb.box.com/s/qt9xd2oqp2wqqz4xuppzuphhjvwfm67j), [November 2023 CCRS Traceability Report](https://lcb.box.com/s/pr8razl8bs3lu74ayk1d8a7iq8padhy1), [December 2023 CCRS Traceability Report](https://lcb.app.box.com/s/4vweufdqsmg41t2zadr56r4dcwqmvlit), [January 2024 CCRS Traceability Report](https://lcb.box.com/s/rb6di0vxgsycns134wq7i329m6d0qoin), [February and March 2024 CCRS Traceability Report](https://lcb.box.com/s/hqcfxcbkh4w8ixucatz43awbq6zw8b0z), [April 2024 CCRS Traceability Report](https://lcb.box.com/s/12kocnn0pvdejybb24x7mhf9n7sbc7hi), [WSLCB Guidance Sheets](https://lcb.box.com/s/n5f1eyybvjxfs8w49y4ztlqyzgd4842d) | 69400 |
+| `wa-inventory` | WA |  | 69400 |
 
-## Dataset Structure
-
-The dataset is partitioned into the various sources of lab results.
-
-<!-- TODO: Automate dataset metadata -->
-
-| Dataset | Key | Observations |
-|--------|--------|--------------|
-| California | `ca` | 1202 |
-| Connecticut | `ct` | 17325 |
-| Florida | `fl` | 16167 |
-| Massachusetts | `ma` | 7482 |
-| Michigan | `mi` | Coming soon |
-| Washington | `wa` | 59501 |
-
-### Data Instances
-
-You can load the `details` for each of the dataset files. For example:
-
-```py
-from datasets import load_dataset
-
-# Download Raw Garden lab result details.
-dataset = load_dataset('cannlytics/cannabis_tests', 'rawgarden')
-details = dataset['details']
-assert len(details) > 0
-print('Downloaded %i observations.' % len(details))
-```
-
-> Note: Configurations for `results` and `values` are planned. For now, you can create these data with `CoADoc().save(details, out_file)`.
-
-### Data Fields
+## Data Points
 
 Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect encounter in the parsed COA data.
 
@@ -153,133 +141,28 @@ Each result can contain the following fields.
 | `loq` | 0.1 | The limit of quantification for the result analyte. Values above the `lod` but below the `loq` are typically reported as `<LOQ`. |
 | `status` | "pass" | The pass / fail status for contaminant screening analyses. |
 
-### Data Splits
+## Using the Data
 
-The data is split into `details`, `results`, and `values` data. Configurations for `results` and `values` are planned. For now, you can create these data with:
+You can use [`datasets`](https://pypi.org/project/datasets/) to download the data.
 
 ```py
-from cannlytics.data.coas import CoADoc
 from datasets import load_dataset
-import pandas as pd
 
-# Download Raw Garden lab result details.
-repo = 'cannlytics/cannabis_tests'
-dataset = load_dataset(repo, 'rawgarden')
-details = dataset['details']
-
-# Save the data locally with "Details", "Results", and "Values" worksheets.
-outfile = 'details.xlsx'
-parser = CoADoc()
-parser.save(details.to_pandas(), outfile)
-
-# Read the values.
-values = pd.read_excel(outfile, sheet_name='Values')
-
-# Read the results.
-results = pd.read_excel(outfile, sheet_name='Results')
+# Download CA results.
+dataset = load_dataset('cannlytics/cannabis_results', 'ca')
+data = dataset['data']
+assert len(data) > 0
+print('Downloaded %i observations.' % len(data))
 ```
 
-<!-- Training data is used for training your models. Validation data is used for evaluating your trained models, to help you determine a final model. Test data is used to evaluate your final model. -->
+## Contributors
 
-## Dataset Creation
+Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
 
-### Curation Rationale
-
-Certificates of analysis (CoAs) are abundant for cannabis cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! CoADoc puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
-
-### Source Data
-
-| Data Source | URL |
-|-------------|-----|
-| MCR Labs Test Results | <https://reports.mcrlabs.com> |
-| PSI Labs Test Results | <https://results.psilabs.org/test-results/> |
-| Raw Garden Test Results | <https://rawgarden.farm/lab-results/> |
-| SC Labs Test Results | <https://client.sclabs.com/> |
-| Washington State Lab Test Results | <https://lcb.app.box.com/s/e89t59s0yb558tjoncjsid710oirqbgd> |
-
-#### Data Collection and Normalization
-
-You can recreate the dataset using the open source algorithms in the repository. First clone the repository:
+## License
 
 ```
-git clone https://huggingface.co/datasets/cannlytics/cannabis_tests
-```
-
-You can then install the algorithm Python (3.9+) requirements:
-
-```
-cd cannabis_tests
-pip install -r requirements.txt
-```
-
-Then you can run all of the data-collection algorithms:
-
-```
-python algorithms/main.py
-```
-
-Or you can run each algorithm individually. For example:
-
-```
-python algorithms/get_results_mcrlabs.py
-```
-
-In the `algorithms` directory, you can find the data collection scripts described in the table below.
-
-| Algorithm |  Organization | Description | 
-|-----------|---------------|-------------|
-| `get_results_mcrlabs.py` | MCR Labs | Get lab results published by MCR Labs. |
-| `get_results_psilabs.py` | PSI Labs | Get historic lab results published by MCR Labs. |
-| `get_results_rawgarden.py` | Raw Garden | Get lab results Raw Garden publishes for their products. |
-| `get_results_sclabs.py` | SC Labs | Get lab results published by SC Labs. |
-| `get_results_washington.py` | Washington State | Get historic lab results obtained through a FOIA request in Washington State. |
-
-### Personal and Sensitive Information
-
-The dataset includes public addresses and contact information for related cannabis licensees. It is important to take care to use these data points in a legal manner.
-
-## Considerations for Using the Data
-
-### Social Impact of Dataset
-
-Arguably, there is substantial social impact that could result from the study of cannabis, therefore, researchers and data consumers alike should take the utmost care in the use of this dataset.
-
-### Discussion of Biases
-
-Cannlytics is a for-profit data and analytics company that primarily serves cannabis businesses. The data are not randomly collected and thus sampling bias should be taken into consideration.
-
-### Other Known Limitations
-
-The data represents only a subset of the population of cannabis lab results. Non-standard values are coded as follows.
-
-| Actual | Coding |
-|--------|--------|
-| `'ND'` | `0.000000001` |
-| `'No detection in 1 gram'` | `0.000000001` |
-| `'Negative/1g'` | `0.000000001` |
-| '`PASS'` | `0.000000001` |
-| `'<LOD'` | `0.00000001` |
-| `'< LOD'` | `0.00000001` |
-| `'<LOQ'` | `0.0000001` |
-| `'< LOQ'` | `0.0000001` |
-| `'<LLOQ'` | `0.0000001` |
-| `'≥ LOD'` | `10001` |
-| `'NR'` | `None` |
-| `'N/A'` | `None` |
-| `'na'` | `None` |
-| `'NT'` | `None` |
-
-## Additional Information
-
-### Dataset Curators
-
-Curated by [🔥Cannlytics](https://cannlytics.com)<br>
-<dev@cannlytics.com>
-
-### License
-
-```
-Copyright (c) 2022 Cannlytics and the Cannabis Data Science Team
+Copyright (c) 2022-2024 Cannlytics
 
 The files associated with this dataset are licensed under a 
 Creative Commons Attribution 4.0 International license.
@@ -292,30 +175,3 @@ the dataset. Note that further permission may be required for
 any content within the dataset that is identified as belonging
 to a third party.
 ```
-
-### Citation
-
-Please cite the following if you use the code examples in your research:
-
-```bibtex
-@misc{cannlytics2022,
-  title={Cannabis Data Science},
-  author={Skeate, Keegan and O'Sullivan-Sutherland, Candace},
-  journal={https://github.com/cannlytics/cannabis-data-science},
-  year={2022}
-}
-```
-
-### Contributions
-
-Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
-
-
-
-<!-- NEW:
-
-Archival process:
-
-
-
--->

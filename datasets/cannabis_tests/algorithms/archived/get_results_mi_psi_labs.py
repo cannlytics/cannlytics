@@ -18,34 +18,6 @@ Description:
 
     3. Create and use re-usable prediction models.
 
-Data Sources:
-
-    - PSI Labs Test Results
-    URL: <https://results.psilabs.org/test-results/>
-
-Resources:
-
-    - ChromeDriver
-    URL: <https://chromedriver.chromium.org/home>
-
-    - Automation Cartoon
-    URL: https://xkcd.com/1319/
-
-    - Efficiency Cartoon
-    URL: https://xkcd.com/1445/
-
-    - SHA in Python
-    URL: https://www.geeksforgeeks.org/sha-in-python/
-
-    - Split / Explode a column of dictionaries into separate columns with pandas
-    URL: https://stackoverflow.com/questions/38231591/split-explode-a-column-of-dictionaries-into-separate-columns-with-pandas
-
-    - Tidyverse: Wide and Long Data Tables
-    URL: https://rstudio-education.github.io/tidyverse-cookbook/tidy.html
-
-    - Web Scraping using Selenium and Python
-    URL: <https://www.scrapingbee.com/blog/selenium-python/>
-
 Setup:
 
     1. Create a data folder `../../.datasets/lab_results/psi_labs/raw_data`.
@@ -59,6 +31,10 @@ Note:
 
     It does not appear that new lab results are being added to the
     PSI Labs test results website as of 2022-01-01.
+    
+Data Sources:
+
+    - [PSI Labs Test Results](https://results.psilabs.org/test-results/)
 
 """
 # Standard imports.

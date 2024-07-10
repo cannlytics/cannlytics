@@ -6,6 +6,13 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/24/2024
 Updated: 6/24/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Data Sources:
+    
+    - 
+    -
+    -
+
 """
 # Standard imports:
 from datetime import datetime
