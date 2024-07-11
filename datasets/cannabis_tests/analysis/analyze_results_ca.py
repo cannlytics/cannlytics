@@ -151,29 +151,29 @@ if __name__ == '__main__':
 
     # Standardize analytes.
     # TODO: Add pesticides, heavy metals, residual solvents, etc.
-    cannabinoid_keys = list(cannabinoids.keys())
-    terpene_keys = list(terpenes.keys())
-    compounds = cannabinoid_keys + terpene_keys
-    results = standardize_results(results, compounds)
+    # cannabinoid_keys = list(cannabinoids.keys())
+    # terpene_keys = list(terpenes.keys())
+    # compounds = cannabinoid_keys + terpene_keys
+    # results = standardize_results(results, compounds)
 
     # Standardize state.
     state = 'CA'
     results['lab_state'] = results['lab_state'].fillna(state)
     results['producer_state'] = results['producer_state'].fillna(state)
 
-    # Calculate results statistics.
-    results = calc_results_stats(
-        results,
-        cannabinoid_keys=cannabinoid_keys,
-        terpene_keys=terpene_keys,
-    )
+    # # Calculate results statistics.
+    # results = calc_results_stats(
+    #     results,
+    #     cannabinoid_keys=cannabinoid_keys,
+    #     terpene_keys=terpene_keys,
+    # )
 
-    # Calculate aggregate statistics.
-    stats = calc_aggregate_results_stats(
-        results,
-        cannabinoid_keys=cannabinoid_keys,
-        terpene_keys=terpene_keys,
-    )
+    # # Calculate aggregate statistics.
+    # stats = calc_aggregate_results_stats(
+    #     results,
+    #     cannabinoid_keys=cannabinoid_keys,
+    #     terpene_keys=terpene_keys,
+    # )
 
 
 

@@ -10,6 +10,7 @@ tags:
 configs:
   - config_name: all
     data_files: "data/all/all-results-latest.csv"
+    default: true
   - config_name: ak
     data_files: "data/ak/ak-results-latest.csv"
   - config_name: ca
@@ -18,6 +19,8 @@ configs:
     data_files: "data/ct/ct-results-latest.csv"
   - config_name: fl
     data_files: "data/fl/fl-results-latest.csv"
+  - config_name: hi
+    data_files: "data/hi/hi-results-latest.csv"
   - config_name: ma
     data_files: "data/ma/ma-results-latest.csv"
   - config_name: md
@@ -155,10 +158,6 @@ assert len(data) > 0
 print('Downloaded %i observations.' % len(data))
 ```
 
-## Contributors
-
-Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.
-
 ## License
 
 ```
@@ -175,3 +174,7 @@ the dataset. Note that further permission may be required for
 any content within the dataset that is identified as belonging
 to a third party.
 ```
+
+## Contributors
+
+Thanks to [🔥Cannlytics](https://cannlytics.com), [@candy-o](https://github.com/candy-o), [@hcadeaux](https://huggingface.co/hcadeaux), [@keeganskeate](https://github.com/keeganskeate), [The CESC](https://thecesc.org), and the entire [Cannabis Data Science Team](https://meetup.com/cannabis-data-science/members) for their contributions.

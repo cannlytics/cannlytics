@@ -25,9 +25,6 @@ import os
 from cannlytics.data import save_with_copyright
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
-from dotenv import dotenv_values
-from matplotlib import pyplot as plt
-import numpy as np
 import pandas as pd
 
 # Define standard columns.
@@ -117,7 +114,7 @@ def augment_calculations(
 
 def standardize_analyte_names(df, analyte_mapping):
     """Standardize analyte names."""
-    results.columns = [col.split('(')[0].strip() for col in results.columns]
+    df.columns = [col.split('(')[0].strip() for col in df.columns]
     df.columns = [analyte_mapping.get(snake_case(col), snake_case(col)) for col in df.columns]
     return df
 
@@ -140,15 +137,11 @@ def convert_mg_g_to_percentage(df):
         df.rename(columns={col: col.replace('(mg/g)', '').strip()}, inplace=True)
     return df
 
-# === Test ===
-# [✓] Tested: 2024-05-30 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
-
-    # TODO: Read the datafile from HuggingFace.
+def get_results_or(data_dir: str, output_dir: str) -> pd.DataFrame:
+    """Get results for Oregon."""
 
     # Read Oregon lab results.
-    datafile = "D:\data\public-records\Oregon\Oregon\Oregon data 5-7-24 (rich)\Anonymized Test Data Feb 2021 to April 2024.csv"
-    data = collect_data(datafile, columns, dtype_spec)
+    data = collect_data(data_dir, columns, dtype_spec)
     print('Number of Oregon tests:', len(data))
 
     # Pivot the data to get results for each sample.
@@ -221,18 +214,42 @@ if __name__ == '__main__':
     numeric_cols_sorted = sorted(numeric_cols)
     results = results[non_numeric + numeric_cols_sorted]
 
-    # Save the results with copyright and sources sheets.
-    stats_dir = 'D://data/oregon/results/datasets'
-    date = datetime.now().strftime('%Y-%m-%d')
-    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
-    outfile = f'{stats_dir}/or-results-{date}.xlsx'
-    save_with_copyright(
-        results,
-        outfile,
-        dataset_name='Oregon Cannabis Lab Results',
-        author='Jamie Toth (data acquisition), Keegan Skeate (curation)',
-        publisher='Cannlytics',
-        sources=['Oregon Liquor and Cannabis Commission', 'Jamie Toth'],
-        source_urls=['https://www.oregon.gov/olcc/marijuana/pages/default.aspx', 'https://jamietoth.com'],
-    )
-    print('Saved Oregon lab results:', outfile)
+    # # Save the results with copyright and sources sheets.
+    # date = datetime.now().strftime('%Y-%m-%d')
+    # if not os.path.exists(output_dir): os.makedirs(output_dir)
+    # outfile = f'{output_dir}/or-results-{date}.xlsx'
+    # save_with_copyright(
+    #     results,
+    #     outfile,
+    #     dataset_name='Oregon Cannabis Lab Results',
+    #     author='Jamie Toth (data acquisition), Keegan Skeate (curation)',
+    #     publisher='Cannlytics',
+    #     sources=['Oregon Liquor and Cannabis Commission', 'Jamie Toth'],
+    #     source_urls=['https://www.oregon.gov/olcc/marijuana/pages/default.aspx', 'https://jamietoth.com'],
+    # )
+    # print('Saved Oregon lab results:', outfile)
+
+    # Save the results.
+    outfile = os.path.join(output_dir, 'or-results-latest.xlsx')
+    outfile_csv = os.path.join(output_dir, 'or-results-latest.csv')
+    outfile_json = os.path.join(output_dir, 'or-results-latest.jsonl')
+    results.to_excel(outfile, index=False)
+    results.to_csv(outfile_csv, index=False)
+    results.to_json(outfile_json, orient='records', lines=True)
+    print('Saved Excel:', outfile)
+    print('Saved CSV:', outfile_csv)
+    print('Saved JSON:', outfile_json)
+
+    # Return the results.
+    return results
+
+# === Test ===
+# [✓] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
+
+    # Define where the data lives.
+    data_dir = "D:\data\public-records\Oregon\Oregon\Oregon data 5-7-24 (rich)\Anonymized Test Data Feb 2021 to April 2024.csv"
+    output_dir = 'D://data/oregon/results/datasets'
+
+    # Curate results.
+    get_results_or(data_dir=data_dir, output_dir=output_dir)

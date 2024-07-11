@@ -18,15 +18,12 @@ Data Sources:
 
 """
 # Standard imports:
-from datetime import datetime
 from glob import glob
 import os
 
 # External imports:
-from cannlytics.data import save_with_copyright
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
-from matplotlib import pyplot as plt
 import pandas as pd
 
 # Define standard columns.
@@ -224,16 +221,17 @@ def augment_metadata(results, data, sample_columns, boolean_columns,):
             results[col] = results['label'].map(data.groupby('label')[col].transform(lambda x: any(x) if x.name in ['overall_passed', 'test_passed'] else all(x)))
     return results
 
-# === Test ===
-# [✓] Tested: 2024-05-30 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
+def get_results_nv(
+        data_dir: str,
+        output_dir: str,
+        licenses_dir: str,
+        labs_dir: str,
+    ) -> pd.DataFrame:
+    """Get results for Oregon."""
 
     # === Read the results ===
 
-    # TODO: Read the datafile from HuggingFace.
-
     # Collect Nevada lab results
-    data_dir = r'D:\data\public-records\Nevada-001'
     data = collect_data(data_dir, columns, dtype_spec)
 
     # === Standardize the results ===
@@ -333,8 +331,7 @@ if __name__ == '__main__':
         'premise_county': 'lab_county',
         'premise_state': 'lab_state',
     }
-    lab_datafile = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\labs-nv-2023-12-17T11-41-34.csv"
-    lab_licenses = pd.read_csv(lab_datafile, low_memory=False)
+    lab_licenses = pd.read_csv(labs_dir, low_memory=False)
     lab_licenses['license_number'] = lab_licenses['license_number'].astype(str)
     lab_licenses.set_index('license_number', inplace=True)
     lab_licenses.rename(columns=lab_columns, inplace=True)
@@ -347,9 +344,8 @@ if __name__ == '__main__':
         'premise_state': 'producer_state',
         'business_legal_name': 'producer_legal_name',
     }
-    data_dir = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv"
     license_files = sorted(
-        glob(os.path.join(data_dir, '*licenses*.csv')),
+        glob(os.path.join(licenses_dir, '*licenses*.csv')),
         key=os.path.getmtime,
         reverse=True
     )
@@ -369,7 +365,9 @@ if __name__ == '__main__':
             license_data = lab_licenses.loc[lab]
             for key in lab_columns.values():
                 if key in lab_licenses.columns:
+                    # FIXME: Does this need to be changed?
                     results[key] = results['lab_license_number'].map(lab_licenses[key])
+                    # results[key] = results['lab_license_number'].map(license_data[key])
 
     # Augment producer license data.
     producers = list(results['producer_license_number'].unique())
@@ -378,7 +376,9 @@ if __name__ == '__main__':
             license_data = all_licenses.loc[producer]
             for key in license_columns.values():
                 if key in all_licenses.columns:
+                    # FIXME: Does this need to be changed?
                     results[key] = results['producer_license_number'].map(all_licenses[key])
+                    # results[key] = results['lab_license_number'].map(license_data[key])
 
     # === Save the results. ===
 
@@ -389,18 +389,50 @@ if __name__ == '__main__':
     numeric_cols_sorted = sorted(numeric_cols)
     results = results[non_numeric_cols + numeric_cols_sorted]
 
-    # Save the results with copyright and sources sheets.
-    stats_dir = 'D://data/nevada/results/datasets'
-    date = datetime.now().strftime('%Y-%m-%d')
-    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
-    outfile = f'{stats_dir}/nv-results-{date}.xlsx'
-    save_with_copyright(
-        results,
-        outfile,
-        dataset_name='Nevada Cannabis Lab Results',
-        author='Keegan Skeate',
-        publisher='Cannlytics',
-        sources=['Nevada Cannabis Compliance Board'],
-        source_urls=['https://ccb.nv.gov/'],
+    # # Save the results with copyright and sources sheets.
+    # stats_dir = 'D://data/nevada/results/datasets'
+    # date = datetime.now().strftime('%Y-%m-%d')
+    # if not os.path.exists(stats_dir): os.makedirs(stats_dir)
+    # outfile = f'{stats_dir}/nv-results-{date}.xlsx'
+    # save_with_copyright(
+    #     results,
+    #     outfile,
+    #     dataset_name='Nevada Cannabis Lab Results',
+    #     author='Keegan Skeate',
+    #     publisher='Cannlytics',
+    #     sources=['Nevada Cannabis Compliance Board'],
+    #     source_urls=['https://ccb.nv.gov/'],
+    # )
+    # print('Saved Nevada lab results:', outfile)
+
+    # Save the results.
+    outfile = os.path.join(output_dir, 'nv-results-latest.xlsx')
+    outfile_csv = os.path.join(output_dir, 'nv-results-latest.csv')
+    outfile_json = os.path.join(output_dir, 'nv-results-latest.jsonl')
+    results.to_excel(outfile, index=False)
+    results.to_csv(outfile_csv, index=False)
+    results.to_json(outfile_json, orient='records', lines=True)
+    print('Saved Excel:', outfile)
+    print('Saved CSV:', outfile_csv)
+    print('Saved JSON:', outfile_json)
+
+    # Return the results.
+    return results
+
+# === Test ===
+# [✓] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
+
+    # Define where the data lives.
+    data_dir = 'D://data/public-records/Nevada-001'
+    licenses_dir = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv"
+    labs_dir = r"C:\Users\keega\Documents\cannlytics\cannlytics\datasets\cannabis_licenses\data\nv\labs-nv-2023-12-17T11-41-34.csv"
+    output_dir = 'D://data/nevada/results/datasets'
+
+    # Curate results.
+    get_results_nv(
+        data_dir=data_dir,
+        output_dir=output_dir,
+        licenses_dir=licenses_dir,
+        labs_dir=labs_dir,
     )
-    print('Saved Nevada lab results:', outfile)

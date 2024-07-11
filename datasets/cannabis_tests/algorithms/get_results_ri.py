@@ -25,7 +25,6 @@ import os
 from cannlytics.data import save_with_copyright
 from cannlytics.utils import snake_case
 from cannlytics.utils.constants import ANALYTES
-from dotenv import dotenv_values
 import numpy as np
 import pandas as pd
 
@@ -154,14 +153,9 @@ def combine_similar_columns(df, similar_columns):
                 df.drop(columns=[col], inplace=True)
     return df
 
-# === Test ===
-# [✓] Tested: 2024-05-30 by Keegan Skeate <keegan@cannlytics>
-if __name__ == '__main__':
+def get_results_ri(data_dir: str, output_dir: str) -> pd.DataFrame:
 
-    # TODO: Read the datafile from HuggingFace.
-    
     # Collect Rhode Island lab results
-    data_dir = r'D:\data\public-records\Rhode Island\Rhode Island'
     data = collect_data(data_dir, columns, dtype_spec)
     print('Number of Rhode Island tests:', len(data))
 
@@ -208,18 +202,42 @@ if __name__ == '__main__':
     numeric_cols_sorted = sorted(numeric_cols)
     results = results[non_numeric + numeric_cols_sorted]
 
-    # Save the results with copyright and sources sheets.
-    stats_dir = 'D://data/rhode-island/results/datasets'
-    date = datetime.now().strftime('%Y-%m-%d')
-    if not os.path.exists(stats_dir): os.makedirs(stats_dir)
-    outfile = f'{stats_dir}/ri-results-{date}.xlsx'
-    save_with_copyright(
-        results,
-        outfile,
-        dataset_name='Rhode Island Cannabis Lab Results',
-        author='Keegan Skeate',
-        publisher='Cannlytics',
-        sources=['Rhode Island Office Of Cannabis Regulation'],
-        source_urls=['https://dbr.ri.gov/office-cannabis-regulation'],
-    )
-    print('Saved Rhode Island lab results:', outfile)
+    # # Save the results with copyright and sources sheets.
+    # date = datetime.now().strftime('%Y-%m-%d')
+    # if not os.path.exists(output_dir): os.makedirs(output_dir)
+    # outfile = f'{output_dir}/ri-results-{date}.xlsx'
+    # save_with_copyright(
+    #     results,
+    #     outfile,
+    #     dataset_name='Rhode Island Cannabis Lab Results',
+    #     author='Keegan Skeate',
+    #     publisher='Cannlytics',
+    #     sources=['Rhode Island Office Of Cannabis Regulation'],
+    #     source_urls=['https://dbr.ri.gov/office-cannabis-regulation'],
+    # )
+    # print('Saved Rhode Island lab results:', outfile)
+
+    # Save the results.
+    outfile = os.path.join(output_dir, 'ri-results-latest.xlsx')
+    outfile_csv = os.path.join(output_dir, 'ri-results-latest.csv')
+    outfile_json = os.path.join(output_dir, 'ri-results-latest.jsonl')
+    results.to_excel(outfile, index=False)
+    results.to_csv(outfile_csv, index=False)
+    results.to_json(outfile_json, orient='records', lines=True)
+    print('Saved Excel:', outfile)
+    print('Saved CSV:', outfile_csv)
+    print('Saved JSON:', outfile_json)
+
+    # Return the results.
+    return results
+
+# === Test ===
+# [✓] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics>
+if __name__ == '__main__':
+
+    # Define where the data lives.
+    data_dir = 'D://data/public-records/Rhode Island/Rhode Island'
+    output_dir = 'D://data/rhode-island/results/datasets'
+
+    # Curate results.
+    get_results_ri(data_dir=data_dir, output_dir=output_dir)

@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 9/10/2022
-Updated: 7/9/2024
+Updated: 7/10/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # External imports:
@@ -17,14 +17,14 @@ import pandas as pd
 
 # Define constants.
 _SCRIPT = 'cannabis_results.py'
-_VERSION = '2024.07.09'
+_VERSION = '2024.07.10'
 _HOMEPAGE = 'https://huggingface.co/datasets/cannlytics/cannabis_results'
 _LICENSE = "https://opendatacommons.org/licenses/by/4-0/"
 _DESCRIPTION = """\
 Cannabis results is a dataset of curated cannabis lab test results. The dataset consists of sub-datasets for each state with any public cannabis lab tests, as well as a sub-dataset that includes all results.
 """
 _CITATION = """\
-@inproceedings{cannlytics2023cannabis_tests,
+@inproceedings{cannlytics2024cannabis_results,
   author    = {Skeate, Keegan and O'Sullivan-Sutherland, Candace},
   title     = {Cannabis Results},
   month     = {July},
@@ -41,6 +41,7 @@ SUBSETS = [
     # 'ca',
     # 'ct',
     # 'fl',
+    'hi',
     # 'ma',
     # 'md',
     # 'mi',

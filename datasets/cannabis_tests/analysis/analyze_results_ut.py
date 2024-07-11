@@ -170,9 +170,9 @@ print('Saved:', outfile)
 print('Saved:', latest)
 
 # Print out features.
-print('Number of features:', len(analytes))
-print('Features:', list(results.columns))
 features = {x: 'string' for x in results.columns}
+print('Number of features:', len(features))
+print('Features:', features)
 
 
 #-----------------------------------------------------------------------
