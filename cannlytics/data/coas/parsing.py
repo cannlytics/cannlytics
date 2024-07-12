@@ -9,6 +9,7 @@ Updated: 6/14/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
+import ast
 import json
 import os
 from typing import Any, List, Optional
@@ -78,7 +79,17 @@ def find_unique_analytes(df, analyses = [], key='key'):
     """Find unique analytes in a list of results."""
     analytes = set()
     for _, row in df.iterrows():
-        results = json.loads(row['results'])
+        results = row['results']
+        if isinstance(results, str):
+            try:
+                results = json.loads(results)
+            except:
+                try:
+                    results = ast.literal_eval(results)
+                except:
+                    continue
+        elif isinstance(results, float):
+            continue
         for result in results:
             if analyses:
                 if result.get('analysis') in analyses:

@@ -149,7 +149,7 @@ def get_results_md(data_dir: str, output_dir: str) -> pd.DataFrame:
     return all_results
 
 # === Tests ===
-# [ ] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics.com>
+# [✓] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
 
     # Define where the data lives.

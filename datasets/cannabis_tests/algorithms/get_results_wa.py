@@ -260,7 +260,7 @@ if __name__ == '__main__':
         # 'CCRS PRR (2-2-24)',
         # 'CCRS PRR (3-27-24)',
         # 'CCRS PRR (4-2-24)',
-        # 'CCRS PRR (5-2-24)',
+        'CCRS PRR (5-2-24)',
         'CCRS PRR (6-2-24)',
     ]
     for release in releases:

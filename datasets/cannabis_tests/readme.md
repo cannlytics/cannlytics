@@ -11,8 +11,8 @@ configs:
   - config_name: all
     data_files: "data/all/all-results-latest.csv"
     default: true
-  - config_name: ak
-    data_files: "data/ak/ak-results-latest.csv"
+  # - config_name: ak
+  #   data_files: "data/ak/ak-results-latest.csv"
   - config_name: ca
     data_files: "data/ca/ca-results-latest.csv"
   - config_name: ct
@@ -54,29 +54,7 @@ This is a repository of public cannabis lab test results obtained through public
 The data is split into datasets for each state where data is available.
 
 <!-- Automated Table -->
-| Dataset | State | Sources | Observations |
-|--------|------|---------|--------------|
-| `ak` | AK |  |  |
-| `ca-flower-co` | CA |  | 12915 |
-| `ca-glass-house` | CA | [Glass House Farms Strains](https://glasshousefarms.org/strains/) | 12915 |
-| `ca-rawgarden` | CA |  | 12915 |
-| `ca-sc-labs` | CA |  | 12915 |
-| `ct` | CT |  | 21622 |
-| `fl-flowery` | FL | [The Flowery](https://support.theflowery.co) | 17993 |
-| `fl-jungleboys` | FL | [Jungle Boys Florida](https://jungleboysflorida.com) | 17993 |
-| `fl-kaycha` | FL | [Florida Labs](https://knowthefactsmmj.com/cmtl/), [Florida Licenses](https://knowthefactsmmj.com/mmtc/), [Kaycha Labs](https://yourcoa.com) | 17993 |
-| `fl-medical` | FL |  | 17993 |
-| `fl-terplife` | FL | [TerpLife Labs](https://www.terplifelabs.com) | 17993 |
-| `ma` | MA | [MCR Labs Test Results](https://reports.mcrlabs.com) | 7554 |
-| `md` | MD | Public records request from the Maryland Medical Cannabis Commission (MMCC). | 95738 |
-| `mi` | MI |  | 45637 |
-| `nv` | NV |  |  |
-| `ny` | NY |  |  |
-| `or` | OR |  |  |
-| `psi-labs` | PSI | PSI Labs Test Results, ChromeDriver, Automation Cartoon, Efficiency Cartoon, SHA in Python, Split / Explode a column of dictionaries into separate columns with pandas, Tidyverse: Wide and Long Data Tables, Web Scraping using Selenium and Python |  |
-| `ri` | RI |  |  |
-| `wa` | WA | [February 2023 CCRS Traceability Report](https://lcb.box.com/s/l9rtua9132sqs63qnbtbw13n40by0yml), [March 2023 CCRS Traceability Report](https://lcb.box.com/s/lg50ow8qx2xki2d4lr6raj0c2r22v711), [April 2023 CCRS Traceability Report](https://lcb.box.com/s/bj3g5inm77n8mrf7gk0h07f1o13dkfc7), [May 2023 CCRS Traceability Report](https://lcb.box.com/s/dzlcx9uzt3t1td8enzbtbgknw6oh9bzw), [June 2023 CCRS Traceability Report](https://lcb.box.com/s/d0g3mhtdyohhi4ic3zucekpnz017fy9o), [July 2023 CCRS Traceability Report](https://lcb.box.com/s/plb3dr2fvsuvgixb38g10tbwqos73biz), [August 2023 CCRS Traceability Report](https://lcb.box.com/s/59jw6qdt7sbg36g0xa2vw0ysr8us8cpo), [September 2023 CCRS Traceability Report](), [October 2023 monthly CCRS traceability data report](https://lcb.box.com/s/qt9xd2oqp2wqqz4xuppzuphhjvwfm67j), [November 2023 CCRS Traceability Report](https://lcb.box.com/s/pr8razl8bs3lu74ayk1d8a7iq8padhy1), [December 2023 CCRS Traceability Report](https://lcb.app.box.com/s/4vweufdqsmg41t2zadr56r4dcwqmvlit), [January 2024 CCRS Traceability Report](https://lcb.box.com/s/rb6di0vxgsycns134wq7i329m6d0qoin), [February and March 2024 CCRS Traceability Report](https://lcb.box.com/s/hqcfxcbkh4w8ixucatz43awbq6zw8b0z), [April 2024 CCRS Traceability Report](https://lcb.box.com/s/12kocnn0pvdejybb24x7mhf9n7sbc7hi), [WSLCB Guidance Sheets](https://lcb.box.com/s/n5f1eyybvjxfs8w49y4ztlqyzgd4842d) | 69400 |
-| `wa-inventory` | WA |  | 69400 |
+
 
 ## Data Points
 

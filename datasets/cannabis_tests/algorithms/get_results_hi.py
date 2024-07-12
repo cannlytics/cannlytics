@@ -232,7 +232,7 @@ def extract_samples(datafile, verbose=True):
 
 
 # === Tests ===
-# [ ] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics.com>
+# [✓] Tested: 2024-07-10 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
         
     # Define where the data lives.
@@ -258,10 +258,9 @@ if __name__ == '__main__':
     results = results.sort_values('date')
 
     # Save the results.
-    last_test_date = results['date'].max().strftime('%Y-%m-%d')
-    outfile = f'D://data/hawaii/hi-results-{last_test_date}.xlsx'
-    outfile_csv = f'D://data/hawaii/hi-results-latest.csv'
-    outfile_json = f'D://data/hawaii/hi-results-latest.jsonl'
+    outfile = 'D://data/hawaii/hi-results-latest.xlsx'
+    outfile_csv = 'D://data/hawaii/hi-results-latest.csv'
+    outfile_json = 'D://data/hawaii/hi-results-latest.jsonl'
     results.to_excel(outfile, index=False)
     results.to_csv(outfile_csv, index=False)
     results.to_json(outfile_json, orient='records', lines=True)
@@ -269,7 +268,7 @@ if __name__ == '__main__':
     print('Saved CSV:', outfile_csv)
     print('Saved JSON:', outfile_json)
 
-    # Print out features.
+    # Print out the features.
     features = {x: 'string' for x in results.columns}
     print('Number of features:', len(features))
     print('Features:', features)

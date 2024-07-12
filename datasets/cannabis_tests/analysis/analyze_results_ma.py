@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/1/2024
-Updated: 3/13/2024
+Updated: 7/11/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 """
 # External imports:
@@ -82,9 +82,16 @@ ma_results = ma_results.rename(columns={
     'TestPerformedDate': 'date_tested',
 })
 
+# Standardize state.
+state = 'MA'
+ma_results['lab_state'] = state
+ma_results['producer_state'] = state
+
 # Add a date column.
 ma_results['date'] = pd.to_datetime(ma_results['date_tested'])
-ma_results['month_year'] = ma_results['date'].dt.to_period('M')
+ma_results['week'] = ma_results['date'].dt.to_period('W').astype(str)
+ma_results['month'] = ma_results['date'].dt.to_period('M').astype(str)
+ma_results = ma_results.sort_values('date')
 
 # Creating a pivot table
 pivot_df = ma_results.pivot_table(
@@ -101,23 +108,36 @@ pivot_df.rename({
     'Total Yeast and Mold (CFU/g) Raw Plant Material': 'yeast_and_mold'
 }, axis=1, inplace=True)
 pivot_df['date'] = pd.to_datetime(pivot_df['date_tested'])
-pivot_df['month_year'] = pivot_df['date'].dt.to_period('M')
+pivot_df['week'] = pivot_df['date'].dt.to_period('W').astype(str)
+pivot_df['month'] = pivot_df['date'].dt.to_period('M').astype(str)
 print(len(pivot_df))
 
 # Save the data.
-last_date = pivot_df['date'].max().strftime('%Y-%m-%d')
-datafile = f'D://data/massachusetts/ma-results-{last_date}.csv'
-pivot_df.to_csv(datafile, index=False)
+outfile = 'D://data/massachusetts/ma-results-latest.xlsx'
+outfile_csv = 'D://data/massachusetts/ma-results-latest.csv'
+outfile_json = 'D://data/massachusetts/ma-results-latest.jsonl'
+pivot_df.to_excel(outfile, index=False)
+pivot_df.to_csv(outfile_csv, index=False)
+pivot_df.to_json(outfile_json, orient='records', lines=True)
+print('Saved Excel:', outfile)
+print('Saved CSV:', outfile_csv)
+print('Saved JSON:', outfile_json)
+
+# Print out the features.
+features = {x: 'string' for x in pivot_df.columns}
+print('Number of features:', len(features))
+print('Features:', features)
+
 
 # === Visualize the number of tests per month ===
 
 # Count the number of tests per month.
-monthly_tests = pivot_df.groupby('month_year').size().reset_index(name='n_tests')
+monthly_tests = pivot_df.groupby('month').size().reset_index(name='n_tests')
 
 # # Plot the number of tests per month.
 # plt.figure(figsize=(15, 8))
 # fig, ax = plt.subplots()
-# monthly_tests.plot(x='month_year', y='n_tests', kind='bar', ax=ax, color='k')
+# monthly_tests.plot(x='month', y='n_tests', kind='bar', ax=ax, color='k')
 # ax.set_title('Number of MA Cannabis Tests per Month')
 # ax.set_xlabel('Month')
 # ax.set_ylabel('Number of Tests')

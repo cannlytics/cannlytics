@@ -411,10 +411,12 @@ def get_results_nv(
     outfile_json = os.path.join(output_dir, 'nv-results-latest.jsonl')
     results.to_excel(outfile, index=False)
     results.to_csv(outfile_csv, index=False)
-    results.to_json(outfile_json, orient='records', lines=True)
+    # FIXME: This causes an ValueError
+    # ValueError: DataFrame columns must be unique for orient='records'.
+    # results.to_json(outfile_json, orient='records', lines=True)
     print('Saved Excel:', outfile)
     print('Saved CSV:', outfile_csv)
-    print('Saved JSON:', outfile_json)
+    # print('Saved JSON:', outfile_json)
 
     # Return the results.
     return results

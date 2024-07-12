@@ -9,9 +9,10 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 Data Sources:
     
-    - 
-    -
-    -
+    - [Jetty Extracts](https://jettyextracts.com/coa-new-york/)
+    - [MFNY]('https://www.mycoa.info/')
+    - [Hudson Cannabis](https://www.hudsoncannabis.co/coas)
+    - [NYSCannabis](https://www.reddit.com/r/NYSCannabis)
 
 """
 # Standard imports:

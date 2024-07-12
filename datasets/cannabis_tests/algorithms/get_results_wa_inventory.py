@@ -474,7 +474,7 @@ if __name__ == '__main__':
         # 'CCRS PRR (2-2-24)',
         # 'CCRS PRR (3-27-24)',
         # 'CCRS PRR (4-2-24)',
-        # 'CCRS PRR (5-2-24)',
+        'CCRS PRR (5-2-24)',
         'CCRS PRR (6-2-24)',
     ]
     for release in releases:
@@ -486,3 +486,28 @@ if __name__ == '__main__':
             manager.create_log('Failed to curate inventory for ' + release)
             manager.create_log(str(e))
             continue
+
+    # Aggregate lab results.
+    all_results = []
+    datafiles = os.listdir(os.path.join(stats_dir, 'lab_results'))
+    datafiles = [os.path.join(stats_dir, 'lab_results', x) for x in datafiles if \
+                  not x.startswith('~') and \
+                  not 'aggregate' in x and \
+                  'inventory' in x]
+    datafiles += [
+        r"D:\data\washington\wa-lab-results-2022-01-26.xlsx",
+        r"D:\data\washington\wa-lab-results-2023-08-30.xlsx",
+    ]
+    for datafile in datafiles:
+        data = pd.read_excel(datafile)
+        all_results.append(data)
+    results = pd.concat(all_results)
+    results.drop_duplicates(subset=['lab_result_id', 'updated_date'], inplace=True)
+    results.sort_values(by=['created_date'], inplace=True)
+    print('Number of results:', len(results))
+    outfile = os.path.join(stats_dir, 'lab_results', 'wa-results-latest.xlsx')
+    outfile_csv = os.path.join(stats_dir, 'lab_results', 'wa-results-latest.csv')
+    results.to_excel(outfile, index=False)
+    results.to_csv(outfile_csv, index=False)
+    manager.create_log('Saved aggregate lab results to: ' + outfile)
+    manager.create_log('Saved aggregate lab results to: ' + outfile_csv)

@@ -4,7 +4,7 @@ Copyright (c) 2023 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/23/2023
-Updated: 10/25/2023
+Updated: 7/11/2024
 License: MIT License <https://github.com/cannlytics/cannabis-data-science/blob/main/LICENSE>
 
 Data Sources:
@@ -61,15 +61,35 @@ mi_results = mi_results.rename(columns={
     'Med AU': 'medical',
 })
 
+# Standardize state.
+state = 'MI'
+mi_results['lab_state'] = state
+mi_results['producer_state'] = state
+
 # Add a date column.
-mi_results['date'] = pd.to_datetime(mi_results['date_tested'])
-mi_results['month_year'] = mi_results['date'].dt.to_period('M')
+mi_results['date'] = pd.to_datetime(mi_results['date_tested'], format='mixed')
+mi_results['week'] = mi_results['date'].dt.to_period('W').astype(str)
+mi_results['month'] = mi_results['date'].dt.to_period('M').astype(str)
+mi_results = mi_results.sort_values('date')
 
-# Save the data.
-last_date = mi_results['date'].max().strftime('%Y-%m-%d')
-datafile = f'D://data/michigan/mi-results-{last_date}.csv'
-mi_results.to_csv(datafile, index=False)
+# Save the results.
+outfile = 'D://data/michigan/mi-results-latest.xlsx'
+outfile_csv = 'D://data/michigan/mi-results-latest.csv'
+outfile_json = 'D://data/michigan/mi-results-latest.jsonl'
+mi_results.to_excel(outfile, index=False)
+mi_results.to_csv(outfile_csv, index=False)
+mi_results.to_json(outfile_json, orient='records', lines=True)
+print('Saved Excel:', outfile)
+print('Saved CSV:', outfile_csv)
+print('Saved JSON:', outfile_json)
 
+# Print out features.
+features = {x: 'string' for x in mi_results.columns}
+print('Number of features:', len(features))
+print('Features:', features)
+
+
+# === Analyze tests by month. ===
 
 # Exclude outliers.
 sample = mi_results.loc[
@@ -79,11 +99,8 @@ sample = mi_results.loc[
 ]
 print('Number of samples:', len(sample))
 
-
-# === Analyze tests by month. ===
-
 # Visualize the frequency of tests by month/year.
-test_frequency = sample['month_year'].value_counts().sort_index()
+test_frequency = sample['month'].value_counts().sort_index()
 subsample = test_frequency[2:-1]
 subsample.index = subsample.index.to_timestamp()
 plt.figure(figsize=(12, 8))
@@ -106,8 +123,8 @@ plt.show()
 # === Analyze medical vs. adult-use testing. ===
 
 # Visualize adult-use vs. medical tests over time.
-grouped = sample.groupby(['month_year', 'medical']).size().reset_index(name='counts')
-pivot_grouped = grouped.pivot(index='month_year', columns='medical', values='counts').fillna(0)
+grouped = sample.groupby(['month', 'medical']).size().reset_index(name='counts')
+pivot_grouped = grouped.pivot(index='month', columns='medical', values='counts').fillna(0)
 pivot_grouped = pivot_grouped.apply(pd.to_numeric, errors='coerce')
 pivot_grouped.index = pivot_grouped.index.to_timestamp()
 pivot_grouped = pivot_grouped[2:-1]
