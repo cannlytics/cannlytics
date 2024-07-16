@@ -46,39 +46,39 @@ import requests
 # - House of Platinum Cannabis
 # - Cookies Florida, Inc.
 FLORIDA_LICENSES = {
-    # 'MMTC-2015-0002': {
-    #     'business_dba_name': 'Ayr Cannabis Dispensary',
-    #     'business_legal_name': 'Liberty Health Sciences, FL',
-    #     'slug': 'Liberty+Health+Sciences%2C+FL',
-    # },
-    # 'MMTC-2017-0011': {
-    #     'business_dba_name': 'Cannabist',
-    #     'slug': 'Cannabist',
-    # },
-    # 'MMTC-2019-0018': {
-    #     'business_dba_name': 'Cookies Florida, Inc.',
-    #     'slug': '',
-    # },
-    # 'MMTC-2015-0001': {
-    #     'business_dba_name': 'Curaleaf',
-    #     'slug': 'CURALEAF+FLORIDA+LLC',
-    # },
-    # 'MMTC-2015-0003': {
-    #     'business_dba_name': 'Fluent ',
-    #     'slug': 'Fluent',
-    # },
-    # 'MMTC-2019-0019': {
-    #     'business_dba_name': 'Gold Leaf',
-    #     'slug': 'Gold+Leaf',
-    # },
-    # 'MMTC-2019-0021': {
-    #     'business_dba_name': 'Green Dragon',
-    #     'slug': 'Green+Dragon',
-    # },
-    # 'MMTC-2016-0007': {
-    #     'business_dba_name': 'GrowHealthy',
-    #     'slug': 'GrowHealthy',
-    # },
+    'MMTC-2015-0002': {
+        'business_dba_name': 'Ayr Cannabis Dispensary',
+        'business_legal_name': 'Liberty Health Sciences, FL',
+        'slug': 'Liberty+Health+Sciences%2C+FL',
+    },
+    'MMTC-2017-0011': {
+        'business_dba_name': 'Cannabist',
+        'slug': 'Cannabist',
+    },
+    'MMTC-2019-0018': {
+        'business_dba_name': 'Cookies Florida, Inc.',
+        'slug': '',
+    },
+    'MMTC-2015-0001': {
+        'business_dba_name': 'Curaleaf',
+        'slug': 'CURALEAF+FLORIDA+LLC',
+    },
+    'MMTC-2015-0003': {
+        'business_dba_name': 'Fluent ',
+        'slug': 'Fluent',
+    },
+    'MMTC-2019-0019': {
+        'business_dba_name': 'Gold Leaf',
+        'slug': 'Gold+Leaf',
+    },
+    'MMTC-2019-0021': {
+        'business_dba_name': 'Green Dragon',
+        'slug': 'Green+Dragon',
+    },
+    'MMTC-2016-0007': {
+        'business_dba_name': 'GrowHealthy',
+        'slug': 'GrowHealthy',
+    },
     'MMTC-2017-0013': {
         'business_dba_name': 'GTI (Rise Dispensaries)',
         'slug': 'GTI',

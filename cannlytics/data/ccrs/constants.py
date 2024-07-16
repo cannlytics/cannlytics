@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 4/12/2022
-Updated: 1/15/2024
+Updated: 7/15/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Helpful CCRS constants.
@@ -810,6 +810,34 @@ CCRS_ANALYTES = {
     'Residual Solvent - 22-methylbutane (ppm)': {'key': 'methylbutane', 'type': 'Residual Solvent', 'units': 'ppm'},
     'Residual Solvent - 23-DimethylButane (ppm)': {'key': 'dimethylbutane', 'type': 'Residual Solvent', 'units': 'ppm'},
     'Residual Solvent - Isobutane (ppm)': {'key': 'isobutane', 'type': 'Residual Solvent', 'units': 'ppm'},
+    "Residual Solvents Ethyl_Acetate ppm": {"key": "ethyl_acetate", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents iso-Propanol ppm": {"key": "isopropanol", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Dichloromethane ppm": {"key": "dichloromethane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents iso-Pentane ppm": {"key": "isopentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Toluene ppm": {"key": "toluene", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Chloroform ppm": {"key": "chloroform", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Heptanes ppm": {"key": "heptane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Acetone ppm": {"key": "acetone", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents 2-Methylpentane ppm": {"key": "2_methylpentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Neopentane ppm": {"key": "neopentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Pentanes ppm": {"key": "pentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents n-Pentane ppm": {"key": "n_pentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Propane ppm": {"key": "propane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents n-Hexane ppm": {"key": "n_hexane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents 3-Methylpentane ppm": {"key": "3_methylpentane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Benzene ppm": {"key": "benzene", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents n-Heptane ppm": {"key": "n_heptane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Propanes ppm": {"key": "propane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents iso-Butane ppm": {"key": "isobutane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Hexanes ppm": {"key": "hexane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Methanol ppm": {"key": "methanol", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents meta/para-Xylene ppm": {"key": "mp_xylene", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents ortho-Xylene ppm": {"key": "o_xylene", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Ethanol ppm": {"key": "ethanol", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Butanes ppm": {"key": "butane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Cyclohexane ppm": {"key": "cyclohexane", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents Total Xylenes ppm": {"key": "total_xylenes", "type": "Residual Solvent", "units": "ppm"},
+    "Residual Solvents n-Butane ppm": {"key": "butane", "type": "Residual Solvent", "units": "ppm"},
 }
 
 # CCRS plant constants.

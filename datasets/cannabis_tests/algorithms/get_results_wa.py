@@ -233,7 +233,7 @@ def curate_ccrs_lab_results(
 
 
 # === Test ===
-# [✓] Tested: 2024-01-15 by Keegan Skeate <keegan@cannlytics>
+# [✓] Tested: 2024-07-15 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     # Debug variables.
@@ -253,14 +253,14 @@ if __name__ == '__main__':
     releases = [
         # 'CCRS PRR (8-4-23)', # Contains all prior releases.
         # 'CCRS PRR (9-5-23)',
-        'CCRS PRR (10-2-23)',
+        # 'CCRS PRR (10-2-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
         # 'CCRS PRR (1-2-24)',
         # 'CCRS PRR (2-2-24)',
         # 'CCRS PRR (3-27-24)',
         # 'CCRS PRR (4-2-24)',
-        'CCRS PRR (5-2-24)',
+        # 'CCRS PRR (5-2-24)',
         'CCRS PRR (6-2-24)',
     ]
     for release in releases:
@@ -277,6 +277,7 @@ if __name__ == '__main__':
     datafiles = [os.path.join(stats_dir, 'lab_results', x) for x in datafiles if \
                   not x.startswith('~') and \
                   not 'aggregate' in x and \
+                  not 'latest' in x and \
                   not 'inventory' in x]
     for datafile in datafiles:
         data = pd.read_excel(datafile)
