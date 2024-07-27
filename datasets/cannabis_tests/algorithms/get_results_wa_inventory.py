@@ -467,15 +467,16 @@ if __name__ == '__main__':
     releases = [
         # 'CCRS PRR (8-4-23)', # Contains all prior releases.
         # 'CCRS PRR (9-5-23)',
-        'CCRS PRR (10-2-23)',
+        # 'CCRS PRR (10-2-23)',
         # 'CCRS PRR (11-2-23)',
         # 'CCRS PRR (12-2-23)',
         # 'CCRS PRR (1-2-24)',
         # 'CCRS PRR (2-2-24)',
         # 'CCRS PRR (3-27-24)',
         # 'CCRS PRR (4-2-24)',
-        'CCRS PRR (5-2-24)',
-        'CCRS PRR (6-2-24)',
+        # 'CCRS PRR (5-2-24)',
+        # 'CCRS PRR (6-2-24)',
+        'CCRS PRR (7-2-24)',
     ]
     for release in releases:
         try:
