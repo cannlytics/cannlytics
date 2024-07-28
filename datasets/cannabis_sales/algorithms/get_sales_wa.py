@@ -500,6 +500,7 @@ def calculate_and_save_stats(
     stats = stats_to_df(daily_licensee_sales)
 
     # Save the compiled statistics.
+    # FIXME: This is causing a `KeyError: 'date'` error.
     min_date = stats['date'].min()
     max_date = stats['date'].max()
     stats_file = f'{sales_stats_dir}/sales-by-licensee-{min_date}-to-{max_date}.xlsx'
