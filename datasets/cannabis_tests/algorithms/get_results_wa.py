@@ -286,7 +286,7 @@ if __name__ == '__main__':
     results = pd.concat(all_results)
     results.drop_duplicates(subset=['lab_result_id', 'updated_date'], inplace=True)
     results.sort_values(by=['created_date'], inplace=True)
-    print('Number of results:', len(results))
+    print('Total number of results:', len(results))
     outfile = os.path.join(stats_dir, 'lab_results', 'wa-lab-results-aggregate.xlsx')
     results.to_excel(outfile, index=False)
     manager.create_log('Saved aggregate lab results to: ' + outfile)

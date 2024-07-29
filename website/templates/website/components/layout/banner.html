@@ -56,21 +56,18 @@
     {% endif %} {% endcomment %}
 
     <!-- Help button -->
-    <a
+    {% comment %} <a
       class="text-dark background-hover d-flex align-items-center"
       href="{% url 'page' page='support' %}"
       title="Get the support that your company needs."
     >
-      {% comment %} <svg class="" style="width:20px;height:20px;">
-        <use href="{% static "website/images/emojies/atronaut.svg" %}#atronaut-emoji"></use>
-      </svg> {% endcomment %}
       <small>
         <b class="serif">Services</b>
       </small>
-    </a>
+    </a> {% endcomment %}
 
     <!-- Documentation button -->
-    <span class="px-2">|</span>
+    {% comment %} <span class="px-2">|</span>
     <a
       class="text-dark background-hover d-flex align-items-center"
       href="https://docs.cannlytics.com"
@@ -80,10 +77,10 @@
       <small>
         <b class="serif">Docs</b>
       </small>
-    </a>
+    </a> {% endcomment %}
 
     <!-- Donate button -->
-    <span class="px-2">|</span>
+    {% comment %} <span class="px-2">|</span>
     <a
       class="text-dark background-hover d-flex align-items-center me-3"
       href="https://opencollective.com/cannlytics-company"
@@ -93,7 +90,7 @@
       <small>
         <b class="serif">Donate</b>
       </small>
-    </a>
+    </a> {% endcomment %}
 
     {% comment %} <!-- Github star button -->
     <span class="px-2">|</span>
