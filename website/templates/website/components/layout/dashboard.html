@@ -6,151 +6,94 @@
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/5/2021
-  Updated: 4/27/2024
+  Updated: 7/29/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
 {% extends "website/index.html" %}
 {% load static %}
 {% block material %}
 
-<!-- Mobile Navigation -->
-<nav
-  id="mobile-navigation"
-  class="navbar navbar-expand-lg navbar-light d-lg-none"
->
-  <div class="container-fluid">
-    <a
-      class="navbar-brand"
-      href="{% url 'index' %}"
-      aria-label="Cannlytics"
-    >
-      <img
-        src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
-        class="light-only"
-        height="24px"
-        alt="Cannlytics"
-      >
-      <img
-        src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
-        class="dark-only"
-        height="24px"
-        alt="Cannlytics"
-      >
+{% comment %} <!-- Mobile Navigation (unneeded or refactor?) -->
+<nav id="mobile-navigation" class="lg:hidden bg-white shadow-md">
+  <div class="container mx-auto flex items-center justify-between p-4">
+    <a href="{% url 'index' %}" aria-label="Cannlytics" class="flex items-center">
+      <img src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}" class="light-only h-6" alt="Cannlytics">
+      <img src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}" class="dark-only h-6" alt="Cannlytics">
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+      </svg>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='licenses' %}">Companies</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='results' %}">Lab Results</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'page' page='strains' %}">Strains</a>
-        </li>
-      </ul>
-    </div>
   </div>
-</nav>
-
-<!-- Dashboard -->
-<div class="d-flex">
-  <div id="sidebar" class="p-1 pt-3 d-none d-lg-flex flex-column">
-    
-    <!-- Logo -->
-    <div class="sidebar-icon-collapsed d-none text-center mb-2">
-      <a href="{% url 'index' %}" aria-label="Cannlytics">
-        <img src="{% static 'website/images/logos/cannlytics_calyx_detailed.svg' %}" alt="Cannlytics" height="24px">
-      </a>
-    </div>
-
-    <!-- Brand name -->
-    <h2 class="fs-5 ms-3">
-      <a
-        class="navbar-brand"
-        href="{% url 'index' %}"
-        aria-label="Cannlytics"
-      >
-        <img
-          src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}"
-          class="light-only"
-          height="30px"
-          alt="Cannlytics"
-        >
-        <img
-          src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}"
-          class="dark-only"
-          height="30px"
-          alt="Cannlytics"
-        >
-      </a>
-    </h2>
-
-    <!-- Navigation -->
-    <ul class="nav flex-column mb-auto markdown pt-2">
-      <!-- Optional pages:
-        - coas
-        - compounds
-        - producers
-        - retailers
-        - reports
-      -->
-      <li class="nav-item {% if '/licenses' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='licenses' %}"
-        >
-          <i class="bi bi-people" data-bs-toggle="tooltip" data-bs-title="Companies"></i>
-          <span class="link-text serif ms-1">Companies</span>
-        </a>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="flex flex-col items-center space-y-4 py-4">
+      <li>
+        <a class="text-gray-700 hover:text-gray-900" href="{% url 'page' page='licenses' %}">Companies</a>
       </li>
-      <li class="nav-item {% if '/results' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='results' %}"
-        >
-          <i class="bi bi-file-earmark-text" data-bs-toggle="tooltip" data-bs-title="Lab Results"></i>
-          <span class="link-text serif ms-1">Lab Results</span>
-        </a>
+      <li>
+        <a class="text-gray-700 hover:text-gray-900" href="{% url 'page' page='results' %}">Lab Results</a>
       </li>
-      <li class="nav-item {% if '/strains' in request.path %}active{% endif %}">
-        <a
-          class="nav-link fs-6"
-          href="{% url 'page' page='strains' %}"
-        >
-          <i class="bi bi-flower3" data-bs-toggle="tooltip" data-bs-title="Strains"></i>
-          <span class="link-text serif ms-1">Strains</span>
-        </a>
+      <li>
+        <a class="text-gray-700 hover:text-gray-900" href="{% url 'page' page='strains' %}">Strains</a>
       </li>
     </ul>
-
-    <!-- Collapse button -->
-    <div>
-    <button
-      id="toggleSidebar"
-      class="btn btn-outline-secondary text-secondary mb-3"
-    >
-      <i class="bi bi-chevron-left"></i>
-    </button>
   </div>
+</nav> {% endcomment %}
 
+<!-- Dashboard -->
+<div class="flex min-h-screen bg-gray-100">
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="fixed top-0 left-0 h-full w-56 bg-white shadow-lg p-4 lg:flex flex-col hidden transition-transform transform">
+    <!-- Brand name -->
+    <div class="flex items-center justify-center mb-6">
+      <a href="{% url 'index' %}" aria-label="Cannlytics">
+        <img src="{% static 'website/images/logos/cannlytics_logo_with_text_light.svg' %}" class="light-only h-8" alt="Cannlytics">
+        <img src="{% static 'website/images/logos/cannlytics_logo_with_text_dark.svg' %}" class="dark-only h-8" alt="Cannlytics">
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav>
+      <ul class="space-y-2">
+        <li class="{% if '/licenses' in request.path %}bg-gray-200{% endif %} p-2 rounded hover:bg-gray-100">
+          <a href="{% url 'page' page='licenses' %}" class="flex items-center text-gray-700">
+            <i class="bi bi-people mr-3"></i> Companies
+          </a>
+        </li>
+        <li class="{% if '/results' in request.path %}bg-gray-200{% endif %} p-2 rounded hover:bg-gray-100">
+          <a href="{% url 'page' page='results' %}" class="flex items-center text-gray-700">
+            <i class="bi bi-file-earmark-text mr-3"></i> Lab Results
+          </a>
+        </li>
+        <li class="{% if '/strains' in request.path %}bg-gray-200{% endif %} p-2 rounded hover:bg-gray-100">
+          <a href="{% url 'page' page='strains' %}" class="flex items-center text-gray-700">
+            <i class="bi bi-flower3 mr-3"></i> Strains
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <!-- Collapse button -->
+    <div class="mt-auto text-center">
+      <button id="toggleSidebar" class="border border-gray-300 text-gray-600 p-2 rounded focus:outline-none">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+    </div>
   </div>
 
   <!-- Main Dashboard -->
-  <div class="main-content w-100 pb-5">
-
+  <div class="flex-1 lg:ml-56 p-6 transition-all">
     <!-- Header -->
-    {% include "website/components/layout/banner.html" %}
-
-    <!-- Material -->
-    <div id="dashboard">{% block dashboard %}{% endblock %}</div>
-    
+    <header class="mb-6">
+      {% include "website/components/layout/banner.html" %}
+    </header>
+    <!-- Content -->
+    <main id="dashboard">
+      {% block dashboard %}{% endblock %}
+    </main>
   </div>
-
 </div>
+
 
 {% endblock %}
 
@@ -160,10 +103,15 @@
 <script>
 
   // Initialize the dashboard.
-  cannlytics.website.initializeDashboard();
+  // cannlytics.website.initializeDashboard();
 
   // Initialize tooltips.
-  cannlytics.ui.enableTooltips();
+  // cannlytics.ui.enableTooltips();
+
+  document.getElementById('toggleSidebar').addEventListener('click', function() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('lg:-translate-x-full');
+  });
 
 </script>
 

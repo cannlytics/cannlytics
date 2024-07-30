@@ -59,7 +59,7 @@
     "docs:serve": "mkdocs serve",
     "docs:docker": "docker run --rm -it -p 8000:8000 -v \"%cd%\":/docs squidfunk/mkdocs-material",
     "docs:publish": "firebase deploy --project cannlytics --only hosting:docs",
-    "website:start": "conda activate cds & npm-run-all --parallel website:serve website:livereload website:dev",
+    "website:start": "conda activate cds & npm-run-all --parallel website:serve website:livereload website:dev website:tailwind",
     "website:serve": "cd website & webpack serve --env development & cd ../",
     "website:livereload": "set PROJECT=website & python manage.py livereload --ignore-static-dirs",
     "website:dev": "set PROJECT=website & python manage.py runserver",
@@ -70,7 +70,8 @@
     "website:deploy": "firebase deploy --project cannlytics --only hosting:cannlytics",
     "website:docker": "docker build . --tag gcr.io/cannlytics/cannlytics-website:latest & docker push gcr.io/cannlytics/cannlytics-website:latest",
     "website:publish": "conda activate cds & npm run website:build & npm run website:collectstatic & npm run website:docker & npm run website:run & npm run website:deploy",
-    "website:clean": "rimraf website/static/website/js/bundles/hot"
+    "website:clean": "rimraf website/static/website/js/bundles/hot",
+    "website:tailwind": "npx tailwindcss -i ./website/assets/css/input.css -o ./website/static/website/css/output.css --watch"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",

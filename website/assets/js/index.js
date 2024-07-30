@@ -23,7 +23,7 @@ import { strainsJS } from './strains/strains.js';
 import { licensesJS } from './licenses/licenses.js';
 import { retailersJS } from './retailers/retailers.js';
 
-import '../css/cannlytics.scss';
+// import '../css/cannlytics.scss';
 
 export {
   analytics,

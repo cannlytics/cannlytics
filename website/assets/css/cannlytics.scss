@@ -45,7 +45,10 @@ $btn-hover-bg-shade-amount: 20%;
 $btn-hover-bg-tint-amount: 20%;
 
 // Import bootstrap.
-@import 'bootstrap/scss/bootstrap';
+// @import 'bootstrap/scss/bootstrap';
+
+// Use Tailwind.
+
 
 
 .btn-outline-primary:hover {
@@ -1917,13 +1920,7 @@ body.dark .callout {
 .main-content.expanded-margin {
   margin-left: 225px;
 }
-// .grid-view .card {
-//   width: calc(33.333% - 20px);
-//   margin: 10px;
-// }
-// .list-view .card {
-//   margin: 10px 0;
-// }
+
 
 /*--------------------------------------------------------------------------
   Sidebar

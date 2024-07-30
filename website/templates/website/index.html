@@ -1,25 +1,98 @@
 <!doctype html>
-<html>
+<html lang="en-US">
 <!--
   Index Template | Cannlytics Website
   Copyright (c) 2021-2024 Cannlytics
 
   Authors: Keegan Skeate <https://github.com/keeganskeate>
   Created: 1/7/2021
-  Updated: 2/10/2024
+  Updated: 7/29/2024
   License: MIT License <https://github.com/cannlytics/cannlytics-website/blob/main/LICENSE>
 -->
-{% extends "website/base.html" %}
-{% block page %}
+{% load static %}
+<head>
+  <!-- Metadata -->
+  <meta charset="utf-8">
+  <meta name="theme-color" content="#281e52"/>
+  <meta name="description" content="Superpower your lab with open-source cannabis analytics made with love.">
+  <meta name="author" content="Keegan Skeate">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Header -->
-  {% comment %} {% include "website/components/layout/header.html" %} {% endcomment %}
+  <!-- Icons and Manifest -->
+  <link rel="icon" href="{% static 'website/images/logos/favicon.ico' %}">
+  <link rel="icon" sizes="32x32" type="image/png" href="{% static 'website/images/logos/favicon-32x32.png' %}">
+  <link rel="icon" sizes="16x16" type="image/png" href="{% static 'website/images/logos/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'website/images/logos/apple-touch-icon.png' %}">
+  <link rel="mask-icon" color="#e48632" href="{% static 'website/images/logos/safari-pinned-tab.svg' %}">
+  <link rel="shortcut icon" href="{% static 'website/images/logos/favicon.ico' %}" type="image/x-icon">
+  
+  <!-- Manifest -->
+  {% comment %} <link rel="manifest" href="{% static 'manifest.webmanifest' %}"> {% endcomment %}
+
+  <!-- Title -->
+  <title>{% block title %}Cannlytics{% endblock title %}</title>
+
+  <!-- jQuery -->
+  {% comment %} <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script> {% endcomment %}
+
+  <!-- Cannlytics JavaScript and CSS Module -->
+  {% comment %} FIXME: Smoothly switch between dev and production. {% endcomment %}
+
+  <!-- PRODUCTION: -->
+  {% comment %} <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js'%}?{{ version }}"></script> {% endcomment %}
+  
+  <!-- DEV: -->
+  <script id="cannlytics" src="{% static 'website/js/bundles/cannlytics.min.js' %}?v={{ now|date:"YmdHis" }}"></script>
+
+  <!-- Tailwind CSS -->
+  <link href="{% static 'website/css/output.css' %}" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Page-specific stylesheets -->
+  {% block page_css %}{% endblock page_css %}
+
+  <!-- Dashboard stylesheets -->
+  {% block dashboard_css %}{% endblock dashboard_css %}
+
+</head>
+
+<!-- Body -->
+<body class="base dashboard" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
   <!-- Material -->
   <div id="material">{% block material %}{% endblock %}</div>
 
-  <!-- Footer -->
-  {% comment %} {% include "website/components/layout/footer.html" %} {% endcomment %}
+  <!-- Website JavaScript -->
+  <script>
+    // cannlytics.website.initialize();
 
-{% endblock %}
+    document.getElementById('toggleSidebar').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('lg:-translate-x-full');
+    });
+
+  </script>
+
+  <!-- Login Dialog -->
+  {% include "website/components/dialogs/sign_in_dialog.html" %}
+
+  <!-- 21+ age verification. -->
+  {% include "website/components/dialogs/age_verification_dialog.html" %}
+
+  <!-- General Notifications -->
+  {% comment %} {% include "website/components/notifications/notification_toast.html" %} {% endcomment %}
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
+
+  <!-- Page-specific JavaScript -->
+  {% block page_js %}{% endblock %}
+
+  <!-- Dashboard JavaScript -->
+  {% block dashboard_js %}{% endblock %}
+
+</body>
+
 </html>

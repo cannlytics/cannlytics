@@ -5,15 +5,14 @@
   Created: 11/15/2021
   Updated: 6/22/2023
 -->
-<ul class="navbar-nav align-items-start align-items-lg-center me-3 ms-auto requires-auth visually-hidden">
+<ul class="flex flex-col lg:flex-row items-start lg:items-center ml-auto hidden requires-auth">
 
   <!-- User icon menu button -->
-  <li class="nav-item">
-
+  <li class="relative">
     <!-- User photo button -->
     <a
       id="navbarUserMenu"
-      class="nav-link dropdown-toggle py-0"
+      class="flex items-center py-0"
       href="#"
       role="button"
       data-bs-toggle="dropdown"
@@ -22,7 +21,7 @@
     >
       <img
         id="user-photo"
-        class="rounded-circle"
+        class="rounded-full"
         style="max-width:30px; max-height:30px;"
         src=""
         title="User Menu"
@@ -32,105 +31,52 @@
     <!-- User menu -->
     <ul
       id="user-menu"
-      class="dropdown-menu dropdown-menu-end bg-light shadow mx-2"
+      class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
       aria-labelledby="navbarUserMenu"
-      style="z-index:10000;"
     >
 
       <!-- User name and email -->
-      <li class="px-3 pt-1">
-        <h5 class="fs-6 serif text-dark" id="user-name"></h5>
-        <h6 class="fs-6"><small class="serif text-secondary" id="user-email"></small></h6>
+      <li class="px-4 py-2">
+        <h5 class="text-sm font-serif text-gray-800" id="user-name"></h5>
+        <h6 class="text-xs font-serif text-gray-600" id="user-email"></h6>
       </li>
-      <li><hr class="dropdown-divider"></li>
+      <li><hr class="border-gray-200"></li>
 
       <!-- Account -->
       <li>
         <a
-          class="dropdown-item background-hover"
+          class="block px-4 py-2 text-sm font-serif text-gray-700 hover:bg-gray-100"
           href="{% url 'page' page='account' %}"
         >
-          <small class="serif">Your account</small>
+          Your account
         </a>
       </li>
 
-      {% comment %} <!-- Change password -->
-      <li>
-        <a
-          class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='password-reset' %}"
-        >
-          <i class="bi bi-key me-1"></i> 
-          <small class="serif">Change your password</small>
-        </a>
-      </li> {% endcomment %}
-
-      {% comment %} <!-- Manage subscription -->
-      <li>
-        <a
-          class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='subscriptions' %}"
-        >
-          <i class="bi bi-credit-card me-1"></i> 
-          <small class="serif">Manage your subscription</small>
-        </a>
-      </li> {% endcomment %}
-
-      {% comment %} <!-- Manage API keys -->
-      <li>
-        <a
-          class="serif dropdown-item background-hover"
-          href="{% url 'section' page='account' section='api-keys' %}"
-        >
-          <i class="bi bi-key me-1"></i>
-          <small class="serif">Manage your API keys</small>
-        </a>
-      </li> {% endcomment %}
-
       <!-- Toggle theme button -->
-      <li class="pt-1">
+      <li>
         <a
-          class="dropdown-item background-hover"
+          class="block px-4 py-2 text-sm font-serif text-gray-700 hover:bg-gray-100"
           href="javascript:void(0);"
           onclick="cannlytics.website.changeTheme()"
           style="display: flex; align-items: center;"
         >
-          {% comment %} <svg
-            class="light-theme-icon me-1"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 32 32"
-          >
-            <path d="M16.529 22v0c-3.038 0-5.5-2.462-5.5-5.5s2.462-5.5 5.5-5.5c3.038 0 5.5 2.462 5.5 5.5s-2.462 5.5-5.5 5.5zM16.529 21c2.485 0 4.5-2.015 4.5-4.5s-2.015-4.5-4.5-4.5c-2.485 0-4.5 2.015-4.5 4.5s2.015 4.5 4.5 4.5v0zM16.529 7c-0.276 0-0.5 0.216-0.5 0.495v2.009c0 0.274 0.232 0.495 0.5 0.495 0.276 0 0.5-0.216 0.5-0.495v-2.009c0-0.274-0.232-0.495-0.5-0.495v0zM23.267 9.791c-0.195-0.195-0.506-0.201-0.704-0.003l-1.421 1.421c-0.193 0.193-0.186 0.514 0.003 0.704 0.195 0.195 0.506 0.201 0.704 0.003l1.421-1.421c0.193-0.193 0.186-0.514-0.003-0.704v0zM26.058 16.529c0-0.276-0.216-0.5-0.495-0.5h-2.009c-0.274 0-0.495 0.232-0.495 0.5 0 0.276 0.216 0.5 0.495 0.5h2.009c0.274 0 0.495-0.232 0.495-0.5v0zM23.267 23.267c0.195-0.195 0.201-0.506 0.003-0.704l-1.421-1.421c-0.193-0.193-0.514-0.186-0.704 0.003-0.195 0.195-0.201 0.506-0.003 0.704l1.421 1.421c0.193 0.193 0.514 0.186 0.704-0.003v0zM16.529 26.058c0.276 0 0.5-0.216 0.5-0.495v-2.009c0-0.274-0.232-0.495-0.5-0.495-0.276 0-0.5 0.216-0.5 0.495v2.009c0 0.274 0.232 0.495 0.5 0.495v0zM9.791 23.267c0.195 0.195 0.506 0.201 0.704 0.003l1.421-1.421c0.193-0.193 0.186-0.514-0.003-0.704-0.195-0.195-0.506-0.201-0.704-0.003l-1.421 1.421c-0.193 0.193-0.186 0.514 0.003 0.704v0zM7 16.529c0 0.276 0.216 0.5 0.495 0.5h2.009c0.274 0 0.495-0.232 0.495-0.5 0-0.276-0.216-0.5-0.495-0.5h-2.009c-0.274 0-0.495 0.232-0.495 0.5v0zM9.791 9.791c-0.195 0.195-0.201 0.506-0.003 0.704l1.421 1.421c0.193 0.193 0.514 0.186 0.704-0.003 0.195-0.195 0.201-0.506 0.003-0.704l-1.421-1.421c-0.193-0.193-0.514-0.186-0.704 0.003v0z"></path>
-          </svg>
-          <svg
-            class="dark-theme-icon me-1"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 32 32"
-          >
-            <path d="M18.214 11.762l-1.214 3.238-1.214-3.238-2.286-0.762 2.286-0.762 1.214-3.238 1.214 3.238 2.286 0.762-2.286 0.762zM22.214 18.238l-1.214-3.238-1.214 3.238-2.286 0.762 2.286 0.762 1.214 3.238 1.214-3.238 2.286-0.762-2.286-0.762zM14.836 22.331c-0.597 2.392-2.76 4.163-5.336 4.163-3.038 0-5.5-2.462-5.5-5.5 0-2.577 1.772-4.739 4.163-5.337 0.351-0.088 0.716-0.142 1.091-0.158-0.165 0.468-0.254 0.971-0.254 1.495 0 2.485 2.015 4.5 4.5 4.5 0.524 0 1.027-0.090 1.495-0.254-0.016 0.375-0.070 0.739-0.158 1.091v0zM26.867 12.429l1.633 0.571-1.633 0.571-0.867 2.429-0.867-2.429-1.633-0.571 1.633-0.571 0.867-2.429 0.867 2.429z"></path>
-          </svg> {% endcomment %}
-          <small class="serif">Toggle Theme</small>
+          Toggle Theme
         </a>
       </li>
       
       <!-- Sign out -->
-      <li><hr class="dropdown-divider"></li>
+      <li><hr class="border-gray-200"></li>
       <li>
         <button
-          class="serif dropdown-item background-hover"
+          class="w-full text-left px-4 py-2 text-sm font-serif text-gray-700 hover:bg-gray-100"
           onClick="cannlytics.auth.signOut(false);"
         >
-          <small class="serif ">Sign Out</small>
+          Sign Out
         </button>
       </li>
 
     </ul>
   </li>
 </ul>
+
 </html>
