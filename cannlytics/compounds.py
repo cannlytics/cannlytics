@@ -104,6 +104,15 @@ pesticides = {
             "avermectin_b1b": {"name": "Avermectin B1b", "limit": 0.50, "cas": "65195-56-4"},
         }
     },
+    "total_abamectin": {
+        "name": "Abamectin (Sum of Isomers)",
+        "limit": 0.50,
+        "cas": "71751-41-2",
+        "isomers": {
+            "avermectin_b1a": {"name": "Avermectin B1a", "limit": 0.50, "cas": "65195-55-3"},
+            "avermectin_b1b": {"name": "Avermectin B1b", "limit": 0.50, "cas": "65195-56-4"},
+        }
+    },
     "acephate": {"name": "Acephate", "limit": 0.40, "cas": "30560-19-1"},
     "acequinocyl": {"name": "Acequinocyl", "limit": 2.0, "cas": "57960-19-7"},
     "acetamiprid": {"name": "Acetamiprid", "limit": 0.20, "cas": "135410-20-7"},
@@ -118,10 +127,13 @@ pesticides = {
     "chlorfenapyr": {"name": "Chlorfenapyr", "limit": 1.0, "cas": "122453-73-0"},
     "chlorpyrifos": {"name": "Chlorpyrifos", "limit": 0.20, "cas": "2921-88-2"},
     "clofentezine": {"name": "Clofentezine", "limit": 0.20, "cas": "74115-24-5"},
+    "clofentizine": {"name": "Clofentezine", "limit": 0.20, "cas": "74115-24-5"},
     "cyfluthrin": {"name": "Cyfluthrin", "limit": 1.0, "cas": "68359-37-5"},
     "cypermethrin": {"name": "Cypermethrin", "limit": 1.0, "cas": "52315-07-8"},
     "daminozide": {"name": "Daminozide", "limit": 1.0, "cas": "1596-84-5"},
+    "ddvp": {"name": "DDVP (Dichlorvos)", "limit": 0.10, "cas": "62-73-7"},
     "ddvp_dichlorvos": {"name": "DDVP (Dichlorvos)", "limit": 0.10, "cas": "62-73-7"},
+    "dichlorvos_ddvp": {"name": "DDVP (Dichlorvos)", "limit": 0.10, "cas": "62-73-7"},
     "diazinon": {"name": "Diazinon", "limit": 0.20, "cas": "333-41-5"},
     "dimethoate": {"name": "Dimethoate", "limit": 0.20, "cas": "60-51-5"},
     "ethoprophos": {"name": "Ethoprophos", "limit": 0.20, "cas": "13194-48-4"},
@@ -136,12 +148,14 @@ pesticides = {
     "imazalil": {"name": "Imazalil", "limit": 0.20, "cas": "35554-44-0"},
     "imidacloprid": {"name": "Imidacloprid", "limit": 0.40, "cas": "138261-41-3"},
     "kresoxim_methyl": {"name": "Kresoxim-methyl", "limit": 0.40, "cas": "143390-89-0"},
+    "kresoxin_methyl": {"name": "Kresoxim-methyl", "limit": 0.40, "cas": "143390-89-0"},
     "malathion": {"name": "Malathion", "limit": 0.20, "cas": "121-75-5"},
     "metalaxyl": {"name": "Metalaxyl", "limit": 0.20, "cas": "57837-19-1"},
     "methiocarb": {"name": "Methiocarb", "limit": 0.20, "cas": "2032-65-7"},
     "methomyl": {"name": "Methomyl", "limit": 0.40, "cas": "16752-77-5"},
     "methyl_parathion": {"name": "Methyl Parathion", "limit": 0.20, "cas": "298-00-0"},
     "mgk_264": {"name": "MGK-264", "limit": 0.20, "cas": "113-48-4"},
+    "total_mgk_264": {"name": "MGK-264", "limit": 0.20, "cas": "113-48-4"},
     "myclobutanil": {"name": "Myclobutanil", "limit": 0.20, "cas": "88671-89-0"},
     "naled": {"name": "Naled", "limit": 0.50, "cas": "300-76-5"},
     "oxamyl": {"name": "Oxamyl", "limit": 1.0, "cas": "23135-22-0"},
@@ -155,12 +169,31 @@ pesticides = {
             "trans_permethrin": {"name": "trans-Permethrin", "limit": 0.20, "cas": "51877-74-8"}
         }
     },
+    "total_permethrins": {
+        "name": "Permethrins (Sum of Isomers)", 
+        "limit": 0.20, 
+        "cas": "52645-53-1",
+        "isomers": {
+            "cis_permethrin": {"name": "cis-Permethrin", "limit": 0.20, "cas": "54774-45-7"},
+            "trans_permethrin": {"name": "trans-Permethrin", "limit": 0.20, "cas": "51877-74-8"}
+        }
+    },
     "phosmet": {"name": "Phosmet", "limit": 0.20, "cas": "732-11-6"},
+    "phosemet": {"name": "Phosmet", "limit": 0.20, "cas": "732-11-6"},
     "piperonyl_butoxide": {"name": "Piperonyl Butoxide", "limit": 2.0, "cas": "51-03-6"},
     "prallethrin": {"name": "Prallethrin", "limit": 0.20, "cas": "23031-36-9"},
     "propiconazole": {"name": "Propiconazole", "limit": 0.40, "cas": "60207-90-1"},
     "propoxur": {"name": "Propoxur", "limit": 0.20, "cas": "114-26-1"},
     "pyrethrins": {
+        "name": "Pyrethrins (Sum of Isomers)", 
+        "limit": 1.0, 
+        "cas": "8003-34-7",
+        "isomers": {
+            "pyrethrin_i": {"name": "Pyrethrin I", "limit": 1.0, "cas": "121-21-1"},
+            "pyrethrin_ii": {"name": "Pyrethrin II", "limit": 1.0, "cas": "121-29-9"}
+        }
+    },
+    "pyrethrin_i": {
         "name": "Pyrethrins (Sum of Isomers)", 
         "limit": 1.0, 
         "cas": "8003-34-7",

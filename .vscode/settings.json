@@ -975,7 +975,8 @@
     "zipcodes",
     "zoneinfo",
     "zorder",
-    "longtable"
+    "longtable",
+    "pdflatex"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
