@@ -47,16 +47,18 @@ def read_ccrs_data(
 
 def convert_timestamps(obj):
     """
-    Recursively convert Timestamp objects in a dictionary to strings.
+    Recursively convert Timestamp and NaTType objects in a dictionary to strings.
     """
     if isinstance(obj, dict):
         for key, value in obj.items():
             if isinstance(value, pd.Timestamp):
                 obj[key] = value.isoformat()
+            elif isinstance(value, pd._libs.tslibs.nattype.NaTType):
+                obj[key] = None
             elif isinstance(value, dict):
                 convert_timestamps(value)
             elif isinstance(value, list):
-                obj[key] = [convert_timestamps(item) if isinstance(item, pd.Timestamp) else item for item in value]
+                obj[key] = [convert_timestamps(item) if isinstance(item, (pd.Timestamp, pd._libs.tslibs.nattype.NaTType)) else item for item in value]
     return obj
 
 
@@ -79,7 +81,7 @@ matches = {}
 # Iterate over all releases to augment inventory, product, and strain data.
 base = 'D://data/washington/'
 releases = [
-    'CCRS PRR (8-4-23)', # Contains all prior releases.
+    # 'CCRS PRR (8-4-23)', # Contains all prior releases.
     'CCRS PRR (9-5-23)',
     'CCRS PRR (10-2-23)',
     'CCRS PRR (11-2-23)',
@@ -92,7 +94,7 @@ releases = [
     'CCRS PRR (6-2-24)',
     'CCRS PRR (7-2-24)',
 ]
-for release in reversed(releases):
+for release in releases:
     data_dir = os.path.join(base, release, release)
     print('Augmenting data:', data_dir)
 
