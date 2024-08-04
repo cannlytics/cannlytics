@@ -501,9 +501,12 @@ def calculate_and_save_stats(
 
     # Save the compiled statistics.
     # FIXME: This is causing a `KeyError: 'date'` error.
-    min_date = stats['date'].min()
-    max_date = stats['date'].max()
-    stats_file = f'{sales_stats_dir}/sales-by-licensee-{min_date}-to-{max_date}.xlsx'
+    try:
+        min_date = stats['date'].min()
+        max_date = stats['date'].max()
+        stats_file = f'{sales_stats_dir}/sales-by-licensee-{min_date}-to-{max_date}.xlsx'
+    except:
+        stats_file = f'{sales_stats_dir}/sales-by-licensee-latest.xlsx'
     stats.to_excel(stats_file, index=False)
 
     # Save the statistics by month.
@@ -526,55 +529,58 @@ if __name__ == '__main__':
     # Specify where your data lives.
     base = 'D://data/washington/'
     releases = [
-        # 'CCRS PRR (8-4-23)', # Contains all prior releases.
-        # 'CCRS PRR (9-5-23)',
-        # 'CCRS PRR (11-2-23)',
-        # 'CCRS PRR (12-2-23)',
-        # 'CCRS PRR (1-2-24)',
-        # 'CCRS PRR (2-2-24)',
-        # 'CCRS PRR (3-27-24)',
-        # 'CCRS PRR (4-2-24)',
-        # 'CCRS PRR (5-2-24)',
+        'CCRS PRR (8-4-23)', # Contains all prior releases.
+        'CCRS PRR (9-5-23)',
+        'CCRS PRR (11-2-23)',
+        'CCRS PRR (12-2-23)',
+        'CCRS PRR (1-2-24)',
+        'CCRS PRR (2-2-24)',
+        'CCRS PRR (3-27-24)',
+        'CCRS PRR (4-2-24)',
+        'CCRS PRR (5-2-24)',
         'CCRS PRR (6-2-24)',
         'CCRS PRR (7-2-24)',
     ]
-    # for release in reversed(releases):
-    for release in releases:
+    for release in reversed(releases):
+        try:
 
-        data_dir = f'{base}/{release}/{release}/'
-        stats_dir = f'{base}/stats/'
-        sales_dir = os.path.join(stats_dir, f'sales-{release}')
-        sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
+            data_dir = f'{base}/{release}/{release}/'
+            stats_dir = f'{base}/stats/'
+            sales_dir = os.path.join(stats_dir, f'sales-{release}')
+            sales_stats_dir = os.path.join(stats_dir, f'sales-stats-{release}')
 
-        # FIXME: Anonymize:
-        # - sale_created_by
-        # - sale_item_created_by
+            # FIXME: Anonymize:
+            # - sale_created_by
+            # - sale_item_created_by
 
-        # Curate CCRS sales.
-        # FIXME: The output data is not correct.
-        curate_ccrs_sales(
-            data_dir,
-            stats_dir,
-            reverse=reverse,
-            first_file=first_file,
-            last_file=last_file,
-            manager=manager,
-            release=release,
-            skip_existing=skip_existing,
-        )
+            # Curate CCRS sales.
+            # FIXME: The output data is not correct.
+            curate_ccrs_sales(
+                data_dir,
+                stats_dir,
+                reverse=reverse,
+                first_file=first_file,
+                last_file=last_file,
+                manager=manager,
+                release=release,
+                skip_existing=skip_existing,
+            )
 
-        # Aggregate monthly sales items.
-        # aggregate_monthly_sales(
-        #     data_dir=f'{base}/ccrs-stats/sales_stats',
-        #     start=pd.to_datetime('2023-01-01'),
-        #     end=pd.to_datetime('2023-08-01'),
-        # )
+            # Aggregate monthly sales items.
+            # aggregate_monthly_sales(
+            #     data_dir=f'{base}/ccrs-stats/sales_stats',
+            #     start=pd.to_datetime('2023-01-01'),
+            #     end=pd.to_datetime('2023-08-01'),
+            # )
 
-        # Calculate sales by licensee by day.
-        augmented_files = sorted_nicely(os.listdir(sales_dir))
-        augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
-        daily_licensee_sales = calculate_and_save_stats(
-            manager=manager,
-            file_paths=augmented_files,
-            sales_stats_dir=sales_stats_dir,
-        )
+            # Calculate sales by licensee by day.
+            augmented_files = sorted_nicely(os.listdir(sales_dir))
+            augmented_files = [os.path.join(sales_dir, f) for f in augmented_files if not f.startswith('~$')]
+            daily_licensee_sales = calculate_and_save_stats(
+                manager=manager,
+                file_paths=augmented_files,
+                sales_stats_dir=sales_stats_dir,
+            )
+
+        except:
+            pass
