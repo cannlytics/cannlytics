@@ -976,7 +976,9 @@
     "zoneinfo",
     "zorder",
     "longtable",
-    "pdflatex"
+    "pdflatex",
+    "twinx",
+    "labelcolor"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
