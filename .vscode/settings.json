@@ -978,7 +978,11 @@
     "longtable",
     "pdflatex",
     "twinx",
-    "labelcolor"
+    "labelcolor",
+    "tablefmt",
+    "showindex",
+    "Sankey",
+    "dodgerblue"
   ],
   "todo-tree.tree.showBadges": false,
   "CodeGPT.apiKey": "OpenAI",
