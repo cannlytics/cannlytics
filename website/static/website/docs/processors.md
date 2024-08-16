@@ -1,3 +1,0 @@
-# Processor Analytics
-
-As a processor or manufacturer, you have countless ways to optimize in addition to high-stake processes where impeccable quality is critical. Cannlytics has a state-of-the-art suite of quality control tools that you can use in tandem with our industry-best statistics. Cannlytics would be honored to be part of your manufacturing process and help you improve your products and quality control at a negligible cost. You can work with our team today to integrate solid, reliable, and industry-leading quality control and statistical analysis in the best way that you see fit, likely in a matter of hours.

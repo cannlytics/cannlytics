@@ -1,1 +1,0 @@
-# Certificate of Analysis API

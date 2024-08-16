@@ -1,11 +1,11 @@
 """
-Module Setup | Cannlytics Engine
-Copyright (c) 2021-2022 Cannlytics
+Module Setup | Cannlytics
+Copyright (c) 2021-2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
-Updated: 6/1/2023
+Updated: 8/15/2024
 License: MIT <https://opensource.org/licenses/MIT>
 """
 from setuptools import find_packages, setup
@@ -15,16 +15,16 @@ version = '0.0.18'
 
 # Get the project description.
 README = ''
-with open('./cannlytics/readme.md', 'r', encoding='utf-8') as readme_file:
+with open('./readme.md', 'r', encoding='utf-8') as readme_file:
     README = readme_file.read()
 
 # Specify requirements installed by `pip install cannlytics`.
 REQUIREMENTS = []
-with open('./cannlytics/requirements.txt', 'r') as f:
+with open('./requirements.txt', 'r') as f:
     REQUIREMENTS = [i[:-1] for i in f if i[0] != '#']
 
 # Specify requirements for development.
-dev_requirements = ['ocean-lib', 'xlwings']
+dev_requirements = []
 
 # Specify requirements for setup.
 setup_requirements = []
@@ -40,7 +40,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.11',
     ],
     description='🔥 Cannlytics is a suite of tools that you can use to wrangle, standardize, and analyze cannabis data', #pylint: disable=line-too-long
     extras_require={
