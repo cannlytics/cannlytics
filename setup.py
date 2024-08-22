@@ -6,7 +6,7 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Contact: <keegan@cannlytics.com>
 Created: 1/21/2021
 Updated: 8/15/2024
-License: MIT <https://opensource.org/licenses/MIT>
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from setuptools import find_packages, setup
 
