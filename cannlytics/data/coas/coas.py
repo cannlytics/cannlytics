@@ -1808,6 +1808,11 @@ class CoADoc:
         Returns:
             (str): Returns the data from the decoded QR code.
         """
+
+        # FIXME: Separate this logic out of the CoADoc class.
+
+        # FIXME: Re-write scanning with zxing?
+
         # Handle the filename.
         if isinstance(filename, str):
             image = cv2.imread(filename)

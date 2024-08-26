@@ -94,6 +94,11 @@ def initialize_selenium(
                 driver = webdriver.Edge(options=options, service=service)
             return driver
         except Exception as e:
+            # Note: This has been added to try to fix the memory leak.
+            try:
+                driver.quit()
+            except:
+                pass
             print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
     raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
 

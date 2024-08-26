@@ -863,6 +863,15 @@ def download_file_with_selenium(
         presence = EC.presence_of_element_located((By.ID, el_id))
         download_button = WebDriverWait(driver, wait).until(presence)
         download_button.click()
+    elif method == 'confident_cannabis':
+        try:
+            download_button = WebDriverWait(driver, wait).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'btn-primary') and contains(@ng-click, 'downloadFile')]"))
+            )
+            download_button.click()
+            sleep(pause)
+        except Exception as e:
+            print(f"Error downloading Confident Cannabis COA: {str(e)}")
     else:
         presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
         el = WebDriverWait(driver, 10).until(presence)
