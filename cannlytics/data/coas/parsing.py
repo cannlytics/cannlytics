@@ -12,11 +12,62 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 import ast
 import json
 import os
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 # External imports:
 from ..cache import Bogart
 from .coas import CoADoc
+
+
+def extract_lines(
+        lines: List[str],
+        start_value: Optional[Union[str, int]] = None,
+        end_value: Optional[Union[str, int]] = None,
+        include_start: bool = False,
+        include_end: bool = False,
+    ) -> List[str]:
+    """
+    Extract lines from a list starting from a specific value and optionally ending at another value.
+    
+    Args:
+        lines (List[str]): The list of lines to extract from.
+        start_value (Optional[Union[str, int]]): The line to start extraction from. If None, starts from the beginning.
+            If int, treated as a line number (0-indexed).
+        end_value (Optional[Union[str, int]]): The line to end extraction at. If None, extracts until the end of the list.
+            If int, treated as a line number (0-indexed).
+        include_start (bool): Whether to include the start line in the output. Default is False.
+        include_end (bool): Whether to include the end line in the output. Default is False.
+    
+    Returns:
+        List[str]: The extracted lines.
+    
+    Raises:
+        ValueError: If start_value or end_value is not found in the lines.
+    """
+    start_index, end_index = 0, len(lines)
+
+    if isinstance(start_value, int):
+        start_index = max(0, min(start_value, len(lines)))
+    elif start_value:
+        for i, line in enumerate(lines):
+            if line.startswith(start_value):
+                start_index = i if include_start else i + 1
+                break
+        else:
+            raise ValueError(f"Start value '{start_value}' not found in lines")
+
+    if isinstance(end_value, int):
+        end_index = max(start_index, min(end_value + 1, len(lines)))
+    elif end_value:
+        for i in range(start_index, len(lines)):
+            if lines[i].startswith(end_value):
+                end_index = i + 1 if include_end else i
+                break
+        else:
+            raise ValueError(f"End value '{end_value}' not found in lines after start index")
+
+    return lines[start_index:end_index]
+
 
 def get_coa_files(
         pdf_dir,
@@ -35,6 +86,7 @@ def get_coa_files(
                 if file_size >= min_file_size:
                     filenames.append(file_path)
     return filenames
+
 
 def parse_coa_pdfs(
         pdfs: List[str],

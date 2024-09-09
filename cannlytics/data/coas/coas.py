@@ -216,6 +216,7 @@ def get_result_value(
     except:
         return result
 
+
 def json_to_list(results):
     """Ensure results are in the correct format."""
     if isinstance(results, str):
@@ -227,6 +228,17 @@ def json_to_list(results):
             except:
                 return results
     return results
+
+
+def standardize_value(value):
+    """Standardize a value, converting to float if possible."""
+    if pd.isna(value):
+        return value
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
 
 def standardize_result(result, analyte, analytes = ANALYTES, key='key', value='value'):
     """Ensure results are in the correct format."""
@@ -240,11 +252,13 @@ def standardize_result(result, analyte, analytes = ANALYTES, key='key', value='v
     except:
         return None
 
+
 def standardize_results(
         df,
         compounds,
         results_key='results',
         key='key',
+        errors='skip',
     ) -> pd.DataFrame:
     """Standardize terpenes from results."""
     df[results_key] = df[results_key].apply(json_to_list)
@@ -254,7 +268,10 @@ def standardize_results(
             new_columns[c] = df[results_key].apply(
                 lambda x: standardize_result(x, c, key=key)
             )
-            new_columns[c] = pd.to_numeric(new_columns[c], errors='coerce')
+            if errors == 'skip':
+                new_columns[c] = new_columns[c].apply(standardize_value)
+            else:
+                new_columns[c] = pd.to_numeric(new_columns[c], errors='coerce')
         except KeyError:
             print(f"{c} not found in results.")
     augmented_df = pd.DataFrame(new_columns)

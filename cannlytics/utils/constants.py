@@ -187,6 +187,7 @@ ANALYTES = {
     '3-Carene': 'delta_3_carene',
     '3_carene': 'delta_3_carene',
     '4_carene': 'delta_3_carene',
+    '1_s_3_carene': 'delta_3_carene',
     'Δ8': 'delta_8_thc',
     'D8THC': 'delta_8_thc',
     'd_8_thc': 'delta_8_thc',
@@ -280,7 +281,7 @@ ANALYTES = {
     'spinetoram_j': 'spinetoram',
     'spinetoram_l': 'spinetoram',
     'a_terpineol': 'alpha_terpineol',
-    'Terpinen-4-ol': 'terpineol',
+    # 'Terpinen-4-ol': 'terpineol',
     'gammaterpineol': 'gamma_terpineol',
     'Aflatoxins': 'total_aflatoxins',
     'Total CBD(Total CBD = (CBDA x 0.877) + CBD)': 'total_cbd',
@@ -436,6 +437,7 @@ ANALYTES = {
     'a_ocimene': 'alpha_ocimene',
     'a_thujone': 'alpha_thujone',
     'b_farnesene': 'trans_beta_farnesene',
+    'e_beta_farnesene': 'trans_beta_farnesene',
     'b_maaliene': 'beta_maaliene',
     'bisabolol': 'alpha_bisabolol',
     'foreign_matter_i_h_e': 'foreign_matter',
@@ -457,6 +459,7 @@ ANALYTES = {
     'loq_endo_fenchyl_alcohol': 'fenchol',
     'alpha_fenchyl_alcohol': 'fenchol',
     '1_r_endo_fenchyl_alcohol': 'fenchol',
+    'r_endo_fenchyl_alcohol': 'fenchol',
     'total_terpineol': 'terpineol',
     'trans_caryophyllene': 'beta_caryophyllene',
     'pathogenic_aspergillus_spp': 'aspergillus_spp',
@@ -487,6 +490,8 @@ ANALYTES = {
     '2_2_dimethyl_butane': '2_2_dimethylbutane',
     '3_methyl_pentane': '3_methylpentane',
     'n_n_dimethylformamide': 'n_n_dimethyl_formamide',
+    'd_valerolactam_2_piperidone': '2_piperidone',
+    'menthol_hexahydrothymol': 'menthol',
     # FIXME: Standardize `fm`, `sscd`, `cep` without messing everything up.
 }
 
