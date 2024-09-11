@@ -7,16 +7,18 @@ Created: 9/9/2024
 Updated: 9/9/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
+# TODO: License model
+# - Retailer model
+# - Producer model
+# - Lab model
+
+
 
 # TODO: Strain model
 
 
 
 # TODO: Product model
-
-
-
-# TODO: Label model
 
 
 
@@ -28,8 +30,6 @@ License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE
 
 
 
-# TODO: License model
+# TODO: Label model
 
 
-
-# TODO: Lab model
