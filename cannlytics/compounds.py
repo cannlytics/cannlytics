@@ -82,16 +82,16 @@ terpenes = {
 }
 
 # Define common heavy metals.
-heavy_metals = [
-    'arsenic',
-    'barium',
-    'cadmium',
-    'chromium',
-    'lead',
-    'mercury',
-    'selenium',
-    'silver',
-]
+heavy_metals = {
+    "arsenic": {"name": "Arsenic", "cas": "7440-38-2"},
+    "barium": {"name": "Barium", "cas": "7440-39-3"},
+    "cadmium": {"name": "Cadmium", "cas": "7440-43-9"},
+    "chromium": {"name": "Chromium", "cas": "7440-47-3"},
+    "lead": {"name": "Lead", "cas": "7439-92-1"},
+    "mercury": {"name": "Mercury", "cas": "7439-97-6"},
+    "selenium": {"name": "Selenium", "cas": "7782-49-2"},
+    "silver": {"name": "Silver", "cas": "7440-22-4"}
+}
 
 # Define common pesticides.
 pesticides = {
