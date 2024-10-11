@@ -25,8 +25,6 @@
 - [🔥 Firebase](#firebase)
 - [🛡️ Metrc](#metrc)
 <!-- TODO: Write documentation for:
-  - utils
-  - constants
   - compounds
 -->
 

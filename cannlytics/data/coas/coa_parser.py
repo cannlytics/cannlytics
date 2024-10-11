@@ -1,12 +1,12 @@
 """
-COA AI | CoADoc
-Copyright (c) 2021-2023 Cannlytics
+COA Parser
+Copyright (c) 2021-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 6/12/2023
-Updated: 9/16/2023
+Updated: 10/2/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -145,7 +145,7 @@ def parse_coa_with_ai(
         headers: Optional[dict] = DEFAULT_HEADERS,
         use_cached: Optional[bool] = False,
         openai_api_key: Optional[str] = None,
-        model: Optional[str] = 'gpt-4-0314',
+        model: Optional[str] = 'gpt-4o-mini',
         max_tokens: Optional[int] = 4_000,
         temperature: Optional[float] = 0.0,
         initial_cost: Optional[float] = 0.0,
@@ -162,7 +162,7 @@ def parse_coa_with_ai(
     # === DEV ===
     # from cannlytics.data.coas.coas import CoADoc
     # parser = CoADoc()
-    # model = 'gpt-4'
+    # model = 'gpt-4o-mini'
     # max_tokens = 4_000
     # temperature = 0.0
     # initial_cost = 0.0
@@ -503,7 +503,7 @@ if __name__ == '__main__':
         
 
     image_file = '../../../.datasets/products/product-photos-2023-part-1/PXL_20230328_222923908.jpg'
-    model = 'gpt-4-vision-preview'
+    model = 'gpt-4o-mini'
     detail = 'high'
     max_tokens = 250
     verbose = True
@@ -560,7 +560,7 @@ if __name__ == '__main__':
 
     def parse_results(
             doc,
-            model = 'gpt-4-1106-preview',
+            model = 'gpt-4o-mini',
             temperature = 0.0,
             user = 'cannlytics',
             max_tokens = 4_096,
@@ -640,7 +640,7 @@ if __name__ == '__main__':
     openai_api_key = config['OPENAI_API_KEY']
     
     # [✓] TEST: Parse a COA with AI.
-    # Note: Does not work with `gpt-4-0613`.
+    # Note: Does not work with `gpt-4o-mini`.
     doc = '../../../tests/assets/coas/gtl/Pineapple-XX-5-13-2129146.pdf'
     parser = CoADoc()
     data, prompts, cost = parse_coa_with_ai(

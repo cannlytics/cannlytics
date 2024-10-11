@@ -275,7 +275,7 @@ def get_collection( #pylint: disable=too-many-arguments
         filters: List[dict] = None,
         database=None,
         start_at: dict = None,
-) -> List[dict]:
+    ) -> List[dict]:
     """Get documents from a collection.
     Args:
         ref (str): A document reference.
@@ -300,6 +300,9 @@ def get_collection( #pylint: disable=too-many-arguments
     collection = create_reference(database, ref)
     if filters is not None:
         for query_filter in filters:
+            # FIXME: Use FilterField
+            # See: https://firebase.google.com/docs/firestore/query-data/queries#execute_a_query
+            # See: https://stackoverflow.com/questions/77369913/get-firestore-documents-of-a-collection-by-document-id-python
             collection = collection.where(
                 query_filter['key'], query_filter['operation'], query_filter['value']
             )
@@ -861,12 +864,6 @@ def get_file_url(
     blob = bucket.blob(ref)
     blob.make_public()
     return blob.public_url
-    # Deprecated (8/24/2023):
-    # return blob.generate_signed_url(
-    #     expiration,
-    #     credentials=credentials,
-    #     version=version,
-    # )
 
 
 def upload_file(
@@ -964,6 +961,7 @@ def create_log( #pylint: disable=too-many-arguments
         log_type: str,
         key: str,
         changes: Any = None,
+        database=None,
 ):
     """Create an activity log.
     Args:
@@ -989,4 +987,4 @@ def create_log( #pylint: disable=too-many-arguments
         'user_photo_url': claims.get('photo_url'),
         'changes': changes,
     }
-    update_document(f'{ref}/{log_id}', log_entry)
+    update_document(f'{ref}/{log_id}', log_entry, database=database)
