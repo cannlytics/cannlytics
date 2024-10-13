@@ -131,8 +131,8 @@ class Label(BaseModel):
     total_thc: float = Field(..., description="The total percentage of THC in the product.")
 
 
-class Result(BaseModel):
-    """A lab result analyte measurement."""
+class TestResult(BaseModel):
+    """A lab test result. Includes an analysis and an analyte measurement value."""
     analysis: str = Field(..., description="The analysis used to obtain the result.")
     key: str = Field(..., description="A standardized key for the result analyte.")
     name: str = Field(..., description="The lab's internal name for the result analyte.")
@@ -179,7 +179,7 @@ class LabResult(BaseModel):
     product_name: Optional[str] = Field(None, description="The name of the product.")
     product_size: Optional[float] = Field(None, description="The size of the product in milligrams.")
     product_type: Optional[str] = Field(None, description="The type of product.")
-    results: List[Result] = Field([], description="A list of results.")
+    results: List[TestResult] = Field([], description="A list of test results.")
     results_url: Optional[HttpUrl] = Field(None, description="A URL to the results displayed online (not necessarily a COA).")
     results_hash: Optional[str] = Field(None, description="An HMAC of the sample's results JSON signed with Cannlytics' public key.")
     sample_hash: Optional[str] = Field(None, description="An HMAC of the entire sample JSON signed with Cannlytics' public key.")

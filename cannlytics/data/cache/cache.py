@@ -114,7 +114,11 @@ class Bogart(object):
     def to_df(self):
         """Return the cache as a DataFrame."""
         values = list(self.cache.values())
-        values = [x[0] if isinstance(x, list) else x for x in values]
+        # Note: This may be better to handle as an option.
+        try:
+            values = [x[0] if isinstance(x, list) else x for x in values]
+        except TypeError:
+            pass
         return pd.DataFrame.from_records(values)
 
 # === Tests ===
