@@ -4,7 +4,7 @@ Copyright (c) 2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/9/2024
-Updated: 9/29/2024
+Updated: 10/13/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -49,34 +49,6 @@ class License(BaseModel):
     latitude: Optional[float] = Field(None, description="The latitude of the business.")
     longitude: Optional[float] = Field(None, description="The longitude of the business.")
     updated_at: Optional[str] = Field(None, description="An ISO-formatted time when the license data was updated.")
-
-
-class Strain(BaseModel):
-    """A cannabis strain."""
-    strain_id: str = Field(..., description="A unique identifier for the strain.")
-    strain_name: str = Field(..., description="The name of the strain.")
-    origin_state: Optional[str] = Field(None, description="The origin of the strain.")
-    first_date_tested: Optional[str] = Field(None, description="The first time the strain was tested, ISO-format.")
-    image_url: Optional[HttpUrl] = Field(None, description="URL to the main image of the strain.")
-    images: Optional[List[ProductImage]] = Field(None, description="A list of image URLs related to the strain.")
-    aliases: Optional[List[str]] = Field(None, description="Known aliases or other names for the strain.")
-    breeder: Optional[str] = Field(None, description="The breeder or creator of the strain.")
-    chemotype: Optional[str] = Field(None, description="The chemotype classification of the strain.")
-    female_parent: Optional[str] = Field(None, description="The female parent of the strain.")
-    male_parent: Optional[str] = Field(None, description="The male parent of the strain.")
-    children: Optional[List[str]] = Field(None, description="Strains that are children of the strain.")
-    indica_percentage: Optional[float] = Field(None, description="Estimated percentage of Indica genetics.")
-    sativa_percentage: Optional[float] = Field(None, description="Estimated percentage of Sativa genetics.")
-    description: Optional[str] = Field(None, description="Description of the strain.")
-    folklore: Optional[str] = Field(None, description="Folklore or stories associated with the strain.")
-    etymology: Optional[str] = Field(None, description="The etymology or origin of the strain's name.")
-    history: Optional[str] = Field(None, description="History of the strain.")
-    references: Optional[List[DataSource]] = Field(None, description="References or sources for information about the strain.")
-    avg_total_thc: Optional[float] = Field(None, description="Average total THC concentration observed.")
-    avg_total_cbd: Optional[float] = Field(None, description="Average total CBD concentration observed.")
-    avg_price_per_gram: Optional[float] = Field(None, description="Average price per gram.")
-    created_at: Optional[str] = Field(None, description="The creation date of the strain entry, ISO-format.")
-    updated_at: Optional[str] = Field(None, description="The last update date of the strain entry, ISO-format.")
 
 
 class Product(BaseModel):
@@ -276,3 +248,36 @@ class Review(BaseModel):
     reported_aromas: Optional[List[ReportedAroma]] = Field(None, description="A list of reported aromas from the review.")
     product_ids: Optional[List[str]] = Field(None, description="A list of product IDs associated with the review.")
     sample_ids: Optional[List[str]] = Field(None, description="A list of sample IDs associated with the review.")
+
+
+class Strain(BaseModel):
+    """A cannabis strain."""
+    strain_id: str = Field(..., description="A unique identifier for the strain.")
+    strain_name: str = Field(..., description="The name of the strain.")
+    origin_state: Optional[str] = Field(None, description="The origin of the strain.")
+    first_date_tested: Optional[str] = Field(None, description="The first time the strain was tested, ISO-format.")
+    image_url: Optional[HttpUrl] = Field(None, description="URL to the main image of the strain.")
+    images: Optional[List[ProductImage]] = Field(None, description="A list of image URLs related to the strain.")
+    aliases: Optional[List[str]] = Field(None, description="Known aliases or other names for the strain.")
+    breeder: Optional[str] = Field(None, description="The breeder or creator of the strain.")
+    chemotype: Optional[str] = Field(None, description="The chemotype classification of the strain.")
+    female_parent: Optional[str] = Field(None, description="The female parent of the strain.")
+    male_parent: Optional[str] = Field(None, description="The male parent of the strain.")
+    children: Optional[List[str]] = Field(None, description="Strains that are children of the strain.")
+    indica_percentage: Optional[float] = Field(None, description="Estimated percentage of Indica genetics.")
+    sativa_percentage: Optional[float] = Field(None, description="Estimated percentage of Sativa genetics.")
+    description: Optional[str] = Field(None, description="Description of the strain.")
+    folklore: Optional[str] = Field(None, description="Folklore or stories associated with the strain.")
+    etymology: Optional[str] = Field(None, description="The etymology or origin of the strain's name.")
+    history: Optional[str] = Field(None, description="History of the strain.")
+    references: Optional[List[DataSource]] = Field(None, description="References or sources for information about the strain.")
+    avg_total_thc: Optional[float] = Field(None, description="Average total THC concentration observed.")
+    avg_total_cbd: Optional[float] = Field(None, description="Average total CBD concentration observed.")
+    avg_price_per_gram: Optional[float] = Field(None, description="Average price per gram.")
+    created_at: Optional[str] = Field(None, description="The creation date of the strain entry, ISO-format.")
+    updated_at: Optional[str] = Field(None, description="The last update date of the strain entry, ISO-format.")
+
+
+class StrainNames(BaseModel):
+    """A list of cannabis strain names. An empty list if none."""
+    strain_names: list[str]
