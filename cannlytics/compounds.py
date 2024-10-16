@@ -4,7 +4,7 @@ Copyright (c) 2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/8/2024
-Updated: 6/5/2024
+Updated: 10/14/2024
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Define common cannabinoids.
