@@ -72,9 +72,9 @@ class Bogart(object):
             self.cache[key] = value
             self.append(key, value)
 
-    def get(self, key):
+    def get(self, key, default=None):
         """Get a value from the cache."""
-        return self.cache.get(key)
+        return self.cache.get(key, default)
 
     def expire(self, key):
         """Expire a key in the cache."""
