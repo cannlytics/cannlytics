@@ -123,7 +123,8 @@ def parse_coa_pdfs(
             if verbose:
                 print(f'Failed to parse PDF: {pdf}')
                 print(e)
-                cache.set(pdf_hash, {'coa_pdf': os.path.basename(pdf), 'error': str(e)})
+                error_data = {'coa_pdf': os.path.basename(pdf), 'error': str(e)}
+                cache.set(pdf_hash, error_data)
     return all_results
 
 
