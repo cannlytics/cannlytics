@@ -11,6 +11,7 @@ License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 # Standard imports:
 from datetime import datetime
 import json
+from pathlib import Path
 
 # External imports:
 from openai import OpenAI
@@ -138,23 +139,34 @@ def create_embedding_batch_file(
         results: pd.DataFrame,
         text_field: str,
         batch_file: str = 'batch.jsonl',
+        custom_id: str = 'slug',
+        model: str = 'text-embedding-3-small',
     ):
     """Create a batch file for embeddings."""
-    with open(batch_file, 'w+') as f:
+    batch_path = Path(batch_file)
+    inputs_file = batch_path.parent / f"{batch_path.stem}-inputs.json"
+    inputs_mapping = {}
+    with open(batch_file, 'w') as f:
         for _, row in results.iterrows():
             if pd.isna(row[text_field]):
                 continue
             prompt = {
-                'custom_id': row['sample_id'],
+                'custom_id': str(row[custom_id]),
                 'method': 'POST',
                 'url': '/v1/embeddings',
                 'body': {
-                    'model': 'text-embedding-3-small',
+                    'model': model,
                     'input': row[text_field],
                     'encoding_format': 'float'
                 }
             }
             f.write(json.dumps(prompt) + '\n')
+            inputs_mapping[str(row[custom_id])] = row[text_field]
+    
+    # Save the inputs mapping to a separate file
+    with open(inputs_file, 'w') as f:
+        json.dump(inputs_mapping, f, ensure_ascii=False, indent=2)
+    return inputs_file
 
 
 def run_batch_job(
@@ -187,15 +199,21 @@ def upload_batch_embeddings(
         model: str = 'text-embedding-3-small',
         db=None,
         col='public/ai/embeddings',
+        verbose=True,
     ):
     """Save embeddings to Firestore."""
     if db is None:
         db = initialize_firebase()
+    batch_path = Path(batch_results_file)
+    inputs_file = batch_path.parent / f"{Path(batch_results_file).stem.replace('-results', '')}-inputs.json"
+    with open(inputs_file, 'r') as f:
+        inputs_mapping = json.load(f)
     with open(batch_results_file, 'r') as f:
         batch_results = [json.loads(line) for line in f]
     for result in batch_results:
-        embedding = result['response']['data'][0]['embedding']
-        text = result['response']['data'][0]['input']
+        embedding = result['response']['body']['data'][0]['embedding']
+        custom_id = result['custom_id']
+        text = inputs_mapping[custom_id]
         text_hash = create_hash(text.strip().lower())
         text_ref = f'{col}/{text_hash}'
         values = {
@@ -205,3 +223,5 @@ def upload_batch_embeddings(
             'dimensions': len(embedding),
         }
         update_document(text_ref, values, database=db)
+        if verbose:
+            print(f'Saved embedding: {text}')

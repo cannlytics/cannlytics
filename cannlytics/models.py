@@ -31,8 +31,8 @@ class License(BaseModel):
     """A licensed cannabis company."""
     id: str = Field(..., description="A state-unique ID for the license.")
     license_number: str = Field(..., description="A unique license number.")
-    status: Optional[str] = Field(..., description="The status of the license. Only licenses that are active are included.")
-    type: Optional[str] = Field(..., description="The type of business license.")
+    license_type: Optional[str] = Field(..., description="The type of business license.")
+    license_status: Optional[str] = Field(..., description="The status of the license. Only licenses that are active are included.")
     issue_date: Optional[str] = Field(None, description="An ISO-formatted issue date for the license.")
     expiration_date: Optional[str] = Field(None, description="An ISO-formatted expiration date for the license.")
     legal_name: str = Field(..., description="The legal name of the business that owns the license.")
