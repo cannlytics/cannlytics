@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/8/2024
-Updated: 10/15/2024
+Updated: 10/21/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -18,12 +18,12 @@ from openai import OpenAI
 import pandas as pd
 
 # Internal imports:
+from cannlytics.data import create_hash
 from cannlytics.firebase import (
     initialize_firebase,
     get_document,
     update_document,
 )
-from cannlytics.data import create_hash
 from cannlytics.utils import convert_to_numeric
 
 
@@ -135,17 +135,25 @@ def get_results_embedding(
 # Embedding Batches
 #-----------------------------------------------------------------------
 
-def create_embedding_batch_file(
+def create_batch_embeddings(
         results: pd.DataFrame,
         text_field: str,
         batch_file: str = 'batch.jsonl',
         custom_id: str = 'slug',
         model: str = 'text-embedding-3-small',
-    ):
-    """Create a batch file for embeddings."""
-    batch_path = Path(batch_file)
-    inputs_file = batch_path.parent / f"{batch_path.stem}-inputs.json"
-    inputs_mapping = {}
+    ) -> str:
+    """Create a batch file for embeddings.
+    Args:
+        results (pd.DataFrame): The results DataFrame containing the text data.
+        text_field (str): The name of the text field in the results DataFrame.
+        batch_file (str): The path to the batch file to create.
+        custom_id (str): The name of the custom ID field in the results DataFrame.
+        model (str): The model used to generate the embeddings.
+    Returns:
+        str: The path to the inputs file.
+    """
+    # Save the batch file.
+    inputs = {}
     with open(batch_file, 'w') as f:
         for _, row in results.iterrows():
             if pd.isna(row[text_field]):
@@ -161,21 +169,33 @@ def create_embedding_batch_file(
                 }
             }
             f.write(json.dumps(prompt) + '\n')
-            inputs_mapping[str(row[custom_id])] = row[text_field]
-    
-    # Save the inputs mapping to a separate file
+            inputs[str(row[custom_id])] = row[text_field]
+
+    # Save the inputs file.
+    batch_path = Path(batch_file)
+    inputs_file = batch_path.parent / f'{batch_path.stem}-inputs.json'
     with open(inputs_file, 'w') as f:
-        json.dump(inputs_mapping, f, ensure_ascii=False, indent=2)
+        json.dump(inputs, f, ensure_ascii=False, indent=2)
+
+    # Return the path to the inputs file.
     return inputs_file
 
 
-def run_batch_job(
+def run_batch_embeddings(
         client: OpenAI,
         batch_file: str,
         endpoint='/v1/embeddings',
         verbose=True,
     ):
-    """Run a batch job for embeddings."""
+    """Run a batch job for embeddings.
+    Args:
+        client (OpenAI): The OpenAI API client.
+        batch_file (str): The path to the batch file.
+        endpoint (str): The API endpoint to use for the batch job.
+        verbose (bool): Whether to print out progress.
+    Returns:
+        Batch: The batch job object.
+    """
     batch_input_file = client.files.create(
         file=open(batch_file, 'rb'),
         purpose='batch'
@@ -201,19 +221,26 @@ def upload_batch_embeddings(
         col='public/ai/embeddings',
         verbose=True,
     ):
-    """Save embeddings to Firestore."""
+    """Save embeddings to Firestore.
+    Args:
+        batch_results_file (str): The path to the batch results file.
+        model (str): The model used to generate the embeddings.
+        db (Optional): The Firestore database client. If not provided, the Firestore database will be initialized.
+        col (str): The Firestore collection where the embeddings should be saved.
+        verbose (bool): Whether to print out progress
+    """
     if db is None:
         db = initialize_firebase()
     batch_path = Path(batch_results_file)
     inputs_file = batch_path.parent / f"{Path(batch_results_file).stem.replace('-results', '')}-inputs.json"
     with open(inputs_file, 'r') as f:
-        inputs_mapping = json.load(f)
+        inputs = json.load(f)
     with open(batch_results_file, 'r') as f:
         batch_results = [json.loads(line) for line in f]
     for result in batch_results:
         embedding = result['response']['body']['data'][0]['embedding']
         custom_id = result['custom_id']
-        text = inputs_mapping[custom_id]
+        text = inputs[custom_id]
         text_hash = create_hash(text.strip().lower())
         text_ref = f'{col}/{text_hash}'
         values = {
