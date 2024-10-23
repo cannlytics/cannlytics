@@ -26,12 +26,12 @@ def text_to_color_ai(
         db=None,
         model='gpt-4o-mini',
         default_color='#aaa',
-        verbose=True,
+        verbose=False,
         user_prompt=None,
         system_prompt=None,
         max_tokens=None,
         temperature=None,
-    ) -> str:
+    ) -> tuple[str, dict]:
     """Get a hexadecimal code representing given text."""
 
     # Try to get the color from Firestore first.
@@ -41,7 +41,9 @@ def text_to_color_ai(
     text_ref = f'public/ai/colors/{text_hash}'
     doc = get_document(text_ref, database=db)
     if doc:
-        return doc['color']
+        color = doc['color']
+        if isinstance(color, str):
+            return color, None
 
     # Format the prompt.
     if system_prompt is None:

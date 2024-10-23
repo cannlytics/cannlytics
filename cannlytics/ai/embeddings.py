@@ -61,6 +61,7 @@ def get_embedding(
         client=None,
         cache=None,
         use_db=True,
+        verbose=False,
     ) -> list[float]:
     """
     Retrieve an embedding from the local cache, Firestore, or
@@ -80,7 +81,11 @@ def get_embedding(
     if cache:
         values = cache.get(text_hash)
         if values is not None:
-            return values['embedding']
+            embedding = values['embedding']
+            if isinstance(embedding, list):
+                if verbose:
+                    print(f'Found embedding in cache: {text_hash}')
+                return embedding
 
     # Get the embedding from Firestore if it exists.
     if use_db:
@@ -89,11 +94,17 @@ def get_embedding(
         text_ref = f'public/ai/embeddings/{text_hash}'
         doc = get_document(text_ref, database=db)
         embedding = doc.get('embedding') if doc else None
-        if embedding is not None:
+        if isinstance(embedding, list):
+            if verbose:
+                print(f'Found embedding in Firestore: {text_ref}')
+            if cache:
+                cache.set(text_hash, doc)
             return embedding
 
-    # Generate a new embedding and save it to Firestore.
+    # Generate a new embedding.
     embedding = create_embedding(text, model=model, client=client)
+
+    # Save the embedding to Firestore.
     values = {
         'text': text,
         'embedding': embedding,
@@ -101,6 +112,8 @@ def get_embedding(
         'dimensions': len(embedding),
     }
     update_document(text_ref, values, database=db)
+    if verbose:
+        print(f'Saved embedding to Firestore: {text_ref}')
     if cache:
         cache.set(text_hash, values)
     return embedding
