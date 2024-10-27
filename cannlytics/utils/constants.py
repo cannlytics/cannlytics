@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and the Cannabis Data Science Team
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/8/2021
-Updated: 11/28/2022
+Updated: 10/26/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains useful constants. In particular, there
@@ -132,6 +132,40 @@ ANALYSES = {
     'Cannabinoid Profile': 'cannabinoids',
     'Microbiological Screen': 'microbes',
     'Mycotoxin Screen': 'mycotoxins',
+    'determination_of_cannabinoids_concentration': 'cannabinoids',
+    'terpenoid_testing': 'terpenes',
+    'moisture': 'moisture_content',
+    'microbiological_analysis': 'microbes',
+    'mycotoxin_testing': 'mycotoxins',
+    'pesticide_testing': 'pesticides',
+    'residual_pesticide_analysis': 'pesticides',
+    'heavy_metal_testing': 'heavy_metals',
+    'water_activity': 'water_activity',
+    'foreign_material_testing': 'foreign_matter',
+    'residual_solvents_analysis': 'residual_solvents',
+    'microbials': 'microbes',
+    'microbial_contaminants': 'microbes',
+    'foreign_material_inspection': 'foreign_matter',
+    'solvents': 'residual_solvents',
+    'bcl_27_microbiological_analysis': 'microbes',
+    'cannabinoid_potency': 'cannabinoids',
+    'foreign_matter': 'foreign_matter',
+    'microbiological_contaminants': 'microbes',
+    'foreign_material_visual_inspection': 'foreign_matter',
+    'moisture_analysis': 'moisture_content',
+    'potency_testing_with_hplc_uv': 'cannabinoids',
+    'terpenoid_testing_with_gc_fid': 'terpenes',
+    'moisture_content_analysis_with_halogen_moisture_analyzer': 'moisture_content',
+    'microbial_testing_with_pathogendx': 'microbes',
+    'mycotoxins_testing_with_lc_ms': 'mycotoxins',
+    'residual_pesticides_testing_with_gc_ms': 'pesticides',
+    'residual_pesticides_testing_with_lc_ms': 'pesticides',
+    'heavy_metals_testing_with_icp_ms': 'heavy_metals',
+    'water_activity_analysis_with_humidity_temperature_probe': 'water_activity',
+    'foreign_material_inspection_with_microscope': 'foreign_matter',
+    'residual_solvents_testing_with_gc_ms': 'residual_solvents',
+    'moisture_content': 'moisture_content',
+    'biomerieux_microbiological_analysis_by_qpcr': 'microbes'
 }
 
 # A map of encountered analytes to their standardized analyte,
@@ -467,6 +501,10 @@ ANALYTES = {
     'aspirgillus': 'aspergillus',
     'aspergillus_detected_fail': 'aspergillus',
     'abamectin': 'avermectin_b1b',
+    'abamectin': 'avermectin_b1b',
+    'abamectin_b_1_a': 'avermectin_b1b',
+    'abamectin_ba': 'avermectin_b1b',
+    'abamectin_bb': 'avermectin_b1b',
     '2_propanol_ipa': 'isopropyl_alcohol',
     '2_propanol_isopropyl_alcohol': 'isopropyl_alcohol',
     'total_a_atoxins': 'total_aflatoxins',
@@ -492,6 +530,7 @@ ANALYTES = {
     'n_n_dimethylformamide': 'n_n_dimethyl_formamide',
     'd_valerolactam_2_piperidone': '2_piperidone',
     'menthol_hexahydrothymol': 'menthol',
+    'dichloromethane_methylene_chloride': 'dichloromethane',
     # FIXME: Standardize `fm`, `sscd`, `cep` without messing everything up.
 }
 
@@ -958,17 +997,18 @@ state_time_zones = {
 }
 
 
-if __name__ == '__main__':
+# DEV: This is a helper script to sort and remove duplicate fields from the constants.
+# if __name__ == '__main__':
 
-    from cannlytics.utils.utils import snake_case
+#     from cannlytics.utils.utils import snake_case
 
-    # Sort a given dictionary and remove duplicate fields.
-    # Also Add snake_case key if not already present.
-    # This is useful when adding new fields to a constant in development.
-    x = {}
-    for k, v in STANDARD_FIELDS.items():
-        if k not in x.keys():
-            x[k] = v
-            x[snake_case(k)] = v
-    x = {k: v for k, v in sorted(x.items(), key=lambda item: item[1])}
-    print(x)
+#     # Sort a given dictionary and remove duplicate fields.
+#     # Also Add snake_case key if not already present.
+#     # This is useful when adding new fields to a constant in development.
+#     x = {}
+#     for k, v in STANDARD_FIELDS.items():
+#         if k not in x.keys():
+#             x[k] = v
+#             x[snake_case(k)] = v
+#     x = {k: v for k, v in sorted(x.items(), key=lambda item: item[1])}
+#     print(x)
