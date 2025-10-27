@@ -15,8 +15,10 @@ import os
 from typing import Any, List, Optional, Union
 
 # External imports:
-from ..cache import Bogart
-from .coas import CoADoc
+from cannlytics.data.cache import Bogart
+from cannlytics.data.coas import CoADoc
+from cannlytics.logs import initialize_logs
+import numpy as np
 
 
 def extract_lines(
@@ -93,36 +95,47 @@ def parse_coa_pdfs(
         parser: Optional[CoADoc] = None,
         cache: Optional[Bogart] = None,
         reverse: Optional[bool] = False,
-        verbose: Optional[bool] = True,
         key: Optional[str] = 'coa_pdf',
+        log_dir: Optional[str] = None,
+        log_name: Optional[str] = 'parse_coa_pdfs',
+        verbose: Optional[bool] = False,
     ) -> list:
     """Parse corresponding COAs from a DataFrame in a PDF directory."""
+    # FIXME: Use `LabResult` and `Result` models to standardize the parsed data.
+    logger = None
+    if log_dir:
+        logger = initialize_logs(
+            log_name,
+            prefix=log_name.split('.')[0].replace('_', '-'),
+            log_dir=log_dir,
+        )
     all_results = []
     if parser is None: parser = CoADoc()
-    if verbose: print(f'Parsing {len(pdfs)} PDFs...')
+    if logger: logger.info(f'Parsing {len(pdfs)} PDFs...')
     if reverse: pdfs = pdfs[::-1]
     for pdf in pdfs:
         if not os.path.exists(pdf):
-            if verbose: print(f'PDF not found: {pdf}')
+            if logger: logger.info(f'PDF not found: {pdf}')
             continue
         pdf_hash = cache.hash_file(pdf)
         if cache is not None:
             if cache.get(pdf_hash):
-                if verbose: print('Cached:', pdf)
+                if logger: logger.info(f'Cached: {pdf}')
                 all_results.append(cache.get(pdf_hash))
                 continue
         try:
+            if logger: logger.info(f'Parsing PDF: {pdf}')
             coa_data = parser.parse_pdf(pdf, verbose=verbose)
             if isinstance(coa_data, list): coa_data = coa_data[0]
             coa_data[key] = os.path.basename(pdf)
             all_results.append(coa_data)
             if cache is not None: cache.set(pdf_hash, coa_data)
-            if verbose: print(f'Parsed PDF: {pdf}')
+            if logger: logger.info(f'Parsed PDF: {pdf}')
         except Exception as e:
             parser.quit()
-            if verbose:
-                print(f'Failed to parse PDF: {pdf}')
-                print(e)
+            if logger:
+                logger.info(f'Failed to parse PDF: {pdf}')
+                logger.info(f'Error: {str(e)}')
                 error_data = {'coa_pdf': os.path.basename(pdf), 'error': str(e)}
                 cache.set(pdf_hash, error_data)
     return all_results
@@ -150,3 +163,29 @@ def find_unique_analytes(df, analyses = [], key='key'):
             else:
                 analytes.add(result[key])
     return analytes
+
+
+def parse_list_column(df, col):
+    """Convert stringified list in `df[col]` to an actual Python list."""
+    def safe_eval(x):
+        if isinstance(x, str):
+            try:
+                return ast.literal_eval(x)
+            except (SyntaxError, ValueError):
+                return []
+        elif isinstance(x, list):
+            return x
+        return []
+    df[col] = df[col].apply(safe_eval)
+    return df
+
+
+def process_less_than(x, delta = 0.01):
+    """Replace values with "<" symbol with 0.01 less than the specified value."""
+    if isinstance(x, str) and '<' in x:
+        try:
+            value = float(x.replace('<', ''))
+            return value - delta
+        except ValueError:
+            return np.nan
+    return x

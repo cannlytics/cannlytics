@@ -1,11 +1,11 @@
 """
 Parse Green Scientific Labs COAs
-Copyright (c) 2023 Cannlytics
+Copyright (c) 2023-2025 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/12/2023
-Updated: 11/20/2023
+Updated: 4/23/2025
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -89,7 +89,6 @@ from cannlytics.data.data import (
 from cannlytics.utils.constants import ANALYTES, STANDARD_UNITS
 from cannlytics.utils.utils import (
     convert_to_numeric,
-    download_file_from_url,
     snake_case,
     split_list,
     strip_whitespace,

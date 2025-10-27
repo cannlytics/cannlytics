@@ -81,7 +81,7 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.coa_ai import parse_coa_with_ai
+from cannlytics.data.coas.coa_parser import parse_coa_with_ai
 from cannlytics.data.coas.algorithms.acs import ACS_LABS
 from cannlytics.data.coas.algorithms.anresco import ANRESCO
 from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS

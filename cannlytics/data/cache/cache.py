@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/14/2024
-Updated: 6/6/2024
+Updated: 1/3/2025
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -22,7 +22,8 @@ References:
 import hashlib
 import json
 import os
-from typing import Optional
+from pathlib import Path
+from typing import Generator, Optional
 
 # External imports:
 import pandas as pd
@@ -92,12 +93,15 @@ class Bogart(object):
         """Hash a URL to use as a cache key."""
         return hashlib.sha256(url.encode('utf-8')).hexdigest()
 
-    def hash_file(self, file_path):
-        """Hash a file to use as a cache key."""
+    def hash_file(self, file_path, block_size=65536):
+        """Hash a file to use as a cache key by reading it in chunks."""
         hasher = hashlib.sha256()
         with open(file_path, 'rb') as file:
-            buf = file.read()
-            hasher.update(buf)
+            while True:
+                buf = file.read(block_size)
+                if not buf:
+                    break
+                hasher.update(buf)
         return hasher.hexdigest()
 
     def merge(self, cache_path):
@@ -121,9 +125,95 @@ class Bogart(object):
             pass
         return pd.DataFrame.from_records(values)
 
+
+def read_jsonl(
+        cache_path: str,
+        desired_fields: list[str],
+        chunk_size: int = 10_000,
+        method: str = 'records',
+    ) -> Generator[pd.DataFrame, None, None]:
+    """
+    Read a JSONL file in chunks and extract only specified fields.
+    Args:
+        cache_path (str): Path to the JSONL file
+        desired_fields (List[str]): List of field names to extract
+        chunk_size (int): Number of records to process at a time
+    Returns:
+        Generator[pd.DataFrame]: Chunks of data as pandas DataFrames
+    """
+    chunk_data = []
+    with open(cache_path, 'r', encoding='utf-8') as file:
+        for i, line in enumerate(file, 1):
+            try:
+                record = json.loads(line)
+                if method == 'records':
+                    _, obs = next(iter(record.items()))
+                else:
+                    obs = record
+                filtered_record = {
+                    field: obs.get(field) 
+                    for field in desired_fields
+                }
+                chunk_data.append(filtered_record)
+                if i % chunk_size == 0:
+                    yield pd.DataFrame(chunk_data)
+                    chunk_data = []
+            except json.JSONDecodeError as e:
+                print(f"Error parsing line {i}: {e}")
+                continue
+        if chunk_data:
+            yield pd.DataFrame(chunk_data)
+
+
+def read_cache(
+        cache_path: str,
+        desired_fields: list[str],
+        chunk_size: int = 10_000,
+        method: str = 'records',
+    ) -> pd.DataFrame:
+    """Read a JSONL cache file and return the data as a DataFrame."""
+    dfs = []
+    total_rows = 0
+    for chunk_df in read_jsonl(cache_path, desired_fields, chunk_size=chunk_size, method=method):
+        total_rows += len(chunk_df)
+        print(f"Processed {total_rows} rows...")
+        dfs.append(chunk_df)
+    return pd.concat(dfs, ignore_index=True)
+
+
+def organize_cache(
+        input_path: str,
+        output_path: Optional[str] = None,
+    ) -> None:
+    """
+    Reads a JSONL file, sorts by the first key of each JSON object,
+    removes duplicates, and writes the result to a new JSONL file.
+    """
+    # Convert paths to Path objects.
+    if output_path is None:
+        output_path = input_path
+    input_path, output_path = Path(input_path), Path(output_path)
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    # Read and parse JSONL, keeping only unique entries.
+    unique_entries: dict[str, dict] = {}
+    with input_path.open('r', encoding='utf-8') as f:
+        for line in f:
+            entry = json.loads(line.strip())
+            if isinstance(entry, dict) and entry:
+                key = list(entry.keys())[0]
+                unique_entries[key] = entry
+
+    # Save sorted and deduplicated entries.
+    with output_path.open('w', encoding='utf-8') as f:
+        for entry in sorted(unique_entries.values(), key=lambda x: list(x.keys())[0].lower()):
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+
+
 # === Tests ===
 # Tested: 2024-05-21 by Keegan Skeate <keegan@cannlytics.com>
-if __name__ == '__main__' and False:
+if __name__ == '__main__':
 
     from datetime import datetime
 

@@ -1,12 +1,12 @@
 """
 CoADoc | Parse Confidence Analytics COAs
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2025 Cannlytics
 
 Authors:
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/26/2022
-Updated: 9/29/2023
+Updated: 4/23/2025
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -59,12 +59,9 @@ import pdfplumber
 # Internal imports:
 from cannlytics import __version__
 from cannlytics.data.data import create_hash, create_sample_id
-from cannlytics.data.gis import search_for_address
-from cannlytics.utils import (
-    convert_to_numeric,
-    download_file_from_url,
-    snake_case,
-)
+from cannlytics.data.web import download_file_from_url
+# from cannlytics.data.gis import search_for_address
+from cannlytics.utils import convert_to_numeric, snake_case
 from cannlytics.utils.constants import DECARB
 
 

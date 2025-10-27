@@ -244,6 +244,45 @@ def merge_datasets(
     return augmented
 
 
+def read_ccrs_data(
+        datafile,
+        dtype=None,
+        usecols=None,
+        parse_dates=None,
+        on_bad_lines='skip',
+        sep='\t',
+        encoding='utf-16',
+        engine='python',
+        rename=None
+    ) -> pd.DataFrame:
+    """Generic CCRS data reader."""
+    try:
+        df = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding=encoding,
+            engine=engine,
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines
+        )
+    except:
+        df = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding='utf-16-le',
+            engine=engine,
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines
+        )
+    if rename:
+        df = df.rename(columns=rename)
+    return df
+
+
 def save_dataset(
         data: pd.DataFrame,
         data_dir: str,

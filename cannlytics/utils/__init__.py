@@ -1,10 +1,10 @@
 """
 Cannlytics Utilities Initialization | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2025 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 5/6/2024
+Updated: 4/23/2025
 """
 from .utils import (
     camelcase,
@@ -15,8 +15,6 @@ from .utils import (
     convert_to_numeric,
     convert_month_year_to_date,
     decode_pdf,
-    download_file_from_url,
-    download_file_with_selenium,
     dump_column,
     encode_pdf,
     end_of_month,
@@ -62,8 +60,6 @@ __all__ = [
     'convert_to_numeric',
     'convert_month_year_to_date',
     'decode_pdf',
-    'download_file_from_url',
-    'download_file_with_selenium',
     'dump_column',
     'encode_pdf',
     'end_of_month',

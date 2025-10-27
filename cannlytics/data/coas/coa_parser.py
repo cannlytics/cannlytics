@@ -658,3 +658,9 @@ if __name__ == '__main__':
     outfile = f'../../../tests/assets/coas/gtl/pineapple-xx-{timestamp}.json'
     with open(outfile, 'w') as f:
         json.dump(data, f, indent=4)
+
+
+
+# === DEV: Claude ===
+
+from anthropic import Anthropic

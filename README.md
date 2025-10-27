@@ -1,73 +1,32 @@
-<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
-  <img style="height:120px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics-space-logo.png?alt=media&token=87727d92-bfb1-43df-bb9e-e2308dfa9b08">
-  <div style="margin-top:0.5rem;">
-    <h3>Cannabis data and analytics</h3>
-  </div>
+# 🔥Cannlytics
 
-<https://cannlytics.com>
+[Cannlytics](https://cannlytics.com) is a set of tools to wrangle, augment, archive, and analyze cannabis data. From seed to sale to the effects, Cannlytics can help you access, organize, analyze, and generally benefit from available cannabis data. You are welcome to use any and all of the tools that you find useful.
 
-</div>
+## Installation <a name="installation"></a>
 
-🔥Cannlytics is a set of tools to wrangle, curate, augment, analyze, archive, and market cannabis data. The mission of Cannlytics is to help people access cannabis data and analytics. From seed to sale to smoke, Cannlytics can help you organize, analyze, and benefit from your cannabis data. The `cannlytics` package is extensive and you are welcome to use any and all of the components that you find useful.
-
-- [🚀 Installation](#installation)
-- [📡 Data](#data)
-  <!-- TODO: Write documentation for:
-    - cache
-    - ccrs
-    - gis
-    - opendata
-    - sales
-    - strains
-    - web
-  -->
-  - [📜 COAs](#coas)
-- [🔥 Firebase](#firebase)
-- [🛡️ Metrc](#metrc)
-<!-- TODO: Write documentation for:
-  - compounds
--->
-
-## 🚀 Installation <a name="installation"></a>
-
-You can install the Cannlytics engine from [PyPI](https://pypi.org/project/cannlytics/).
+You can install the `cannlytics` Python package from [PyPI](https://pypi.org/project/cannlytics/).
 
 ```shell
 pip install cannlytics
 ```
 
-You can also simply clone the repository to get your hands on the Cannlytics source code.
+You can clone the repository to get your hands on the Cannlytics source code.
 
 ```shell
 git clone https://github.com/cannlytics/cannlytics.git
 ```
 
-You can get the nightly development build by cloning the `app-dev` branch of the repository. The `app-dev` branch is not stable for production, but has the latest and greatest tools that we're working tirelessly to deliver to you shortly.
-
-```shell
-git clone -b app-dev https://github.com/cannlytics/cannlytics.git
-```
-
-## 🗝️ Authentication <a name="auth"></a>
-
-Cannlytics leverages [🔥Firebase](https://console.firebase.google.com/) for data storage, file storage, and authentication. Use of Firebase is entirely optional and you are welcome to use your favorite database and backend services. If you choose to use Firebase, then you will need to provide credentials for your application. This is typically done by setting a `GOOGLE_APPLICATION_CREDENTIALS` environment variable that points to your service account credentials. For more information on adding authentication to your app, see [the `cannlytics.firebase` documentation](./firebase/readme.md).
-
-## 📡 Data <a name="data"></a>
+## Data <a name="data"></a>
 
 The `cannlytics.data` module is a toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data. See [the `cannlytics.data` documentation](./data/readme.md) for nifty tools to get, standardize, and archive your cannabis data.
 
-### 📜 COAs <a name="coas"></a>
+### COAs <a name="coas"></a>
 
 Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](./data/coas/readme.md).
 
-## 🔥 Firebase <a name="firebase"></a>
+## Metrc <a name="metrc"></a>
 
-The `cannlytics.firebase` module is a wrapper of the [`firebase_admin`](https://pypi.org/project/firebase-admin/) package to make interacting with Firebase services, such as Firestore databases and Firebase Storage buckets, even easier. For more information, see [the `cannlytics.firebase` documentation](./firebase/readme.md).
-
-
-## 🔰 Metrc <a name="metrc"></a>
-
-Cannlytics integrates with [Metrc](https://metrc.com). You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
+You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
 
 ```py
 from cannlytics import metrc
@@ -132,3 +91,29 @@ sale.update()
 ```
 
 See [the `cannlytics.metrc` documentation](./cannlytics/metrc/readme.md) for more information and examples on how you can interface with the Metrc API.
+
+
+## License
+
+```
+Copyright (c) 2020-2025 Cannlytics
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```

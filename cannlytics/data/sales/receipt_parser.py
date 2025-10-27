@@ -14,7 +14,7 @@ import hashlib
 import json
 import gc
 import os
-from typing import List, Optional
+from typing import Optional
 
 # External imports:
 from cannlytics.models import Receipt

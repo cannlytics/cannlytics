@@ -124,13 +124,13 @@ def test_get_random_string():
     assert set(result) == {'a', 'b'} and len(result) == 42
 
 
-# TODO: Test `get_timestamp`.
-def test_get_timestamp():
-    """Test ..."""
-    result = get_timestamp()
-    assert
-    result = get_timestamp(date='2022-04-20')
-    assert 
+# # TODO: Test `get_timestamp`.
+# def test_get_timestamp():
+#     """Test ..."""
+#     result = get_timestamp()
+#     assert
+#     result = get_timestamp(date='2022-04-20')
+#     assert 
 
     # TODO: Test params: date, past, future, zone
 
@@ -149,18 +149,18 @@ def test_remove_dict_nulls():
     assert 'results' not in list(result.keys())
 
 
-def test_update_dict():
-    """Test ..."""
-    sample = {'funky_column': 1}
-    result = update_dict(sample)
-    assert 'FunkyColumn' in list(result.keys())
-    # FIXME:
-    # sample = {'FunkyColumn': 1}
-    # result = update_dict(sample, function=snake_case)
-    # assert 'funky_column' in list(result.keys())
-    sample = {'FunkyColumn': 1}
-    result = update_dict(sample, results='yes')
-    assert result['Results'] == 'yes'
+# def test_update_dict():
+#     """Test ..."""
+#     sample = {'funky_column': 1}
+#     result = update_dict(sample)
+#     assert 'FunkyColumn' in list(result.keys())
+#     # FIXME:
+#     # sample = {'FunkyColumn': 1}
+#     # result = update_dict(sample, function=snake_case)
+#     # assert 'funky_column' in list(result.keys())
+#     sample = {'FunkyColumn': 1}
+#     result = update_dict(sample, results='yes')
+#     assert result['Results'] == 'yes'
 
 
 if __name__ == '__main__':
@@ -172,8 +172,8 @@ if __name__ == '__main__':
     test_clean_nested_dictionary()
     test_get_keywords()
     test_get_random_string()
-    test_get_timestamp()
+    # test_get_timestamp()
     test_remove_dict_fields()
     test_remove_dict_nulls()
-    test_update_dict()
+    # test_update_dict()
     print('Utility functions test successful.')

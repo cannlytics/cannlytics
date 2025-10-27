@@ -1,6 +1,14 @@
-# Cannlytics Authentication
+# Authentication
 
-Authentication mechanisms for the Cannlytics API, including API key utility functions, request authentication and verification helpers, and the authentication endpoints.
+Cannlytics leverages [Firebase](https://console.firebase.google.com/) for data storage, file storage, and user authentication. Use of Firebase is entirely optional and you are welcome to use your favorite database and backend services.
+
+## Admin <a name="admin"></a>
+
+For administering your Firebase projects, you will need to provide credentials for your applications. This is typically done by setting a `GOOGLE_APPLICATION_CREDENTIALS` environment variable that points to your service account credentials.
+
+## Users <a name="users"></a>
+
+Firebase secure access tokens are used to authenticate users.
 
 | Function | Description |
 |----------|-------------|

@@ -4,7 +4,7 @@ Copyright (c) 2021-2024 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 8/10/2024
+Updated: 12/9/2024
 """
 # from .cannlytics import Cannlytics
 import cannlytics.auth as auth
@@ -16,7 +16,6 @@ import cannlytics.compounds as compounds
 
 
 __all__ = [
-    # Cannlytics,
     auth,
     data,
     firebase,

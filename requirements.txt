@@ -1,8 +1,9 @@
 # Python Requirements | Cannlytics
 # Created 3/14/2022
 # Updated: 1/22/2024
-
+anthropic
 beautifulsoup4
+datasets
 firebase-admin
 fredapi
 google-cloud-secret-manager
@@ -22,6 +23,7 @@ pytesseract
 python-dateutil
 python-dotenv
 pyzbar
+scikit-image
 scikit-learn
 selenium
 statsmodels

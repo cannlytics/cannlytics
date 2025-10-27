@@ -1,5 +1,5 @@
 # Ignore Admin Tokens
-.admin/*
+*.admin
 
 # Ignore datasets
 *.datasets

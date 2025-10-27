@@ -20,8 +20,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 
 # Internal imports.
-from cannlytics.utils import rmerge
-from cannlytics.utils.utils import snake_case
+from cannlytics.utils.utils import rmerge, snake_case
 
 
 # === Data collection tools. ===

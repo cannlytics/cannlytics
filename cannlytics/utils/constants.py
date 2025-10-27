@@ -165,7 +165,9 @@ ANALYSES = {
     'foreign_material_inspection_with_microscope': 'foreign_matter',
     'residual_solvents_testing_with_gc_ms': 'residual_solvents',
     'moisture_content': 'moisture_content',
-    'biomerieux_microbiological_analysis_by_qpcr': 'microbes'
+    'biomerieux_microbiological_analysis_by_qpcr': 'microbes',
+    'propiconazole_cis': 'propiconazole',
+    'propiconazole_trans': 'propiconazole',
 }
 
 # A map of encountered analytes to their standardized analyte,
@@ -300,8 +302,10 @@ ANALYTES = {
     'Oxamyl': 'oxamyl',
     'p-Cymene': 'p_cymene',
     'para_cymene': 'p_cymene',
-    'p-Mentha-1,5-diene': 'p_mentha_1_5_diene',
-    'p_mentha_15_diene': 'p_mentha_1_5_diene',
+    'p_isopropyltoluene': 'p_cymene',
+    'p-Mentha-1,5-diene': 'beta_myrcene',
+    'p_mentha_15_diene': 'beta_myrcene',
+    'p_mentha_1_5_diene': 'beta_myrcene',
     'Piperonylbuto-xide': 'piperonyl_butoxide',
     'r_pulegone': 'pulegone',
     'Salmonella spp.': 'salmonella',
@@ -416,9 +420,9 @@ ANALYTES = {
     'thiaclorprid': 'thiacloprid',
     '9_thc_per_serving': 'delta_9_thc_per_serving',
     'd_9_thc_per_serving': 'delta_9_thc_per_serving',
-    # 'n_pentane': 'pentane',
-    # 'n_heptane': 'heptane',
-    'pentanes_n_pentane': 'n_pentane',
+    'n_pentane': 'pentane',
+    'n_heptane': 'heptane',
+    'pentanes_n_pentane': 'pentane',
     'carbotfuran': 'carbofuran',
     'lsobomneol': 'isoborneol',
     'lsoborneol': 'isoborneol',
@@ -522,6 +526,7 @@ ANALYTES = {
     'aiphaterpinea': 'alpha_terpineol',
     '1_8_cineole': 'eucalyptol',
     'neral': 'citral',
+    'm_p_xylene': 'total_xylenes',
     'p_and_m_xylene': 'total_xylenes',
     'xylenes_total': 'total_xylenes',
     'diazanon': 'diazinon',
@@ -532,7 +537,10 @@ ANALYTES = {
     'n_n_dimethylformamide': 'n_n_dimethyl_formamide',
     'd_valerolactam_2_piperidone': '2_piperidone',
     'menthol_hexahydrothymol': 'menthol',
+    'hexahydrothymol': 'menthol',
     'dichloromethane_methylene_chloride': 'dichloromethane',
+    'methylene_chloride': 'dichloromethane',
+    'fenhexamid': 'fenhexamide',
     # FIXME: Standardize `fm`, `sscd`, `cep` without messing everything up.
 }
 
