@@ -121,7 +121,7 @@ def get_state_population(
     fred = Fred(api_key=fred_api_key)
     code = f'{state.upper()}POP{district.upper()}'
     series = fred.get_series(code, obs_start, obs_end)
-    for index, value in series.iteritems():
+    for index, value in series.items():
         real_pop = int(value * multiplier)
         pops.append({
             'population': real_pop,

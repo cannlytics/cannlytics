@@ -17,7 +17,7 @@ import logging
 from pathlib import Path
 import os
 import tempfile
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 from zipfile import ZipFile
 import numpy as np
 
@@ -244,20 +244,68 @@ def merge_datasets(
     return augmented
 
 
+def read_ccrs_data(
+        datafile,
+        dtype=None,
+        usecols=None,
+        parse_dates=None,
+        on_bad_lines='skip',
+        sep='\t',
+        encoding='utf-16',
+        engine='python',
+        rename=None
+    ) -> pd.DataFrame:
+    """Generic CCRS data reader."""
+    try:
+        df = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding=encoding,
+            engine=engine,
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines
+        )
+    except:
+        df = pd.read_csv(
+            datafile,
+            sep=sep,
+            encoding='utf-16-le',
+            engine=engine,
+            parse_dates=parse_dates,
+            dtype=dtype,
+            usecols=usecols,
+            on_bad_lines=on_bad_lines
+        )
+    if rename:
+        df = df.rename(columns=rename)
+    return df
+
+
 def save_dataset(
         data: pd.DataFrame,
         data_dir: str,
         name: str,
         ext: Optional[str] = 'xlsx',
         rows: Optional[int] = 1_000_000,
-    ) -> None:
+    ) -> Any:
     """Save a curated dataset, determining the number of datafiles
     (1 million per file) and saving each shard of the dataset."""
     # FIXME: There may be values that begin with an "=".
     if not os.path.exists(data_dir): os.makedirs(data_dir)
-    num_files = -(-len(data) // rows) # equivalent to math.ceil(len(data) / rows)
-    for i in range(num_files):
-        data.iloc[i*rows : (i+1)*rows].to_excel(os.path.join(data_dir, f'{name}_{i}.{ext}'), index=False)
+    num_files = -(-len(data) // rows)
+    if num_files > 1:
+        outfiles = []
+        for i in range(num_files):
+            outfile = os.path.join(data_dir, f'{name}_{i}.{ext}')
+            data.iloc[i*rows : (i+1)*rows].to_excel(outfile, index=False)
+            outfiles.append(outfile)
+        return outfiles
+    else:
+        outfile = os.path.join(data_dir, f'{name}.{ext}')
+        data.to_excel(outfile, index=False)
+        return outfile
 
 
 def standardize_dataset(

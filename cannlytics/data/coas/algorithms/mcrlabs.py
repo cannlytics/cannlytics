@@ -53,7 +53,6 @@ Data Sources:
 
 Future development:
 
-    - [ ] Implement a function to get all of a given client's lab results.
     - Optional: Create necessary data dirs automatically.
     - Optional: Function to download any pre-existing results.
 
@@ -84,7 +83,6 @@ from cannlytics.utils.constants import (
 )
 from cannlytics.utils.utils import (
     convert_to_numeric,
-    format_iso_date,
     snake_case,
     strip_whitespace,
 )
@@ -218,15 +216,18 @@ def get_mcr_labs_sample_details(
     # Get the sample image, if not already collected.
     if not obs.get('images'):
         attrs = {'class': 'report_image'}
-        image_url = soup.find('img', attrs=attrs)['src']
-        filename = image_url.split('/')[-1]
-        obs['images'] = [{'url': image_url, 'filename': filename}]
+        img = soup.find('img', attrs=attrs)
+        if img is not None:
+            image_url = img['src']
+            filename = image_url.split('/')[-1]
+            obs['images'] = [{'url': image_url, 'filename': filename}]
 
     # Get the date tested, if not already collected.
     if not obs.get('date_tested'):
         text = soup.find('div', attrs={'class': 'rd_date'}).text
         date = text.split('Tested ')[-1].split(' for')[0]
-        obs['date_tested'] = format_iso_date(date)
+        date_tested = pd.to_datetime(date)
+        obs['date_tested'] = date_tested.strftime('%Y-%m-%d')
 
     # Get the product name and producer, if not already collected.
     if not obs.get('product_name'):
@@ -285,10 +286,14 @@ def get_mcr_labs_sample_details(
     try:
         assert '%' in soup.find('div', attrs={'class': 'rd_can_table'}).text
         units = 'percent'
-    except AttributeError:
+    except (AttributeError, AssertionError):
         table = soup.find('table', attrs={'class': 'safetytable'})
-        thead = table.find('thead')
-        units = snake_case(thead.find_all('th', limit=2)[-1].text)
+        if table is not None:
+            thead = table.find('thead')
+            if thead is not None:
+                th = thead.find_all('th', limit=2)
+                if th:
+                    units = snake_case(th[-1].text)
 
     # Record the cannabinoids.
     for analyte in cannabinoids:
@@ -500,10 +505,10 @@ def get_mcr_labs_samples(
 
         # Get the date tested.
         try:
-            obs['date_tested'] = format_iso_date(details.find('div', \
-                attrs={'class': 'fth_date'}).text)
-        except ValueError:
-            print('Error parsing date:', obs)
+            div = details.find('div', attrs={'class': 'fth_date'})
+            date_tested = pd.to_datetime(div.text)
+            obs['date_tested'] = date_tested.strftime('%Y-%m-%d')
+        except:
             obs['date_tested'] = ''
 
         # Try to get the producer's URL.
@@ -575,19 +580,22 @@ def get_mcr_labs_test_results(
         print('Found %i samples.' % len(samples))
 
     # Get all of the sample details.
-    # Optional: Log errors?
+    # FIXME: Figure out why samples are failing to be collected.
     rows = []
     for i, sample in enumerate(samples):
         try:
             lab_id = sample['lab_results_url'].split('/')[-1]
+            if verbose:
+                print('Collecting sample:', lab_id)
             details = get_mcr_labs_sample_details(None, lab_id)
+            if details is None:
+                details = {}
             rows.append({**sample, **details})
             if i > 1:
                 sleep(pause)
-            if verbose:
-                print('Collected sample:', lab_id)
-        except:
+        except Exception as e:
             print('Failed to collect sample:', lab_id)
+            print(e)
             continue
 
     # Return all of the sample data.
@@ -963,9 +971,7 @@ def parse_mcrlabs_coa(
 
 
 # === Tests ===
-# Notes: Uncomment tests to perform them.
-# Checked tests have been successfully performed by Cannlytics.
-# Contact: <admin@cannlytics.com>.
+# [✓] Tested: 2024-03-25 by Keegan Skeate <keegan@cannlytics>
 if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
@@ -975,6 +981,10 @@ if __name__ == '__main__':
 
     # Specify where your test data lives.
     DATA_DIR = '../../../.datasets/lab_results'
+
+    # DEV:
+    # data = get_mcr_labs_sample_details(None, '60197')
+    # print(data)
 
     # [✓] TEST: Get the total number of samples.
     # page_count = get_mcr_labs_sample_count(per_page=30)

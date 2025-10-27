@@ -1,0 +1,191 @@
+"""
+COA Parsing Tools
+Copyright (c) 2024 Cannlytics
+
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
+Created: 6/14/2024
+Updated: 6/14/2024
+License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+"""
+# Standard imports:
+import ast
+import json
+import os
+from typing import Any, List, Optional, Union
+
+# External imports:
+from cannlytics.data.cache import Bogart
+from cannlytics.data.coas import CoADoc
+from cannlytics.logs import initialize_logs
+import numpy as np
+
+
+def extract_lines(
+        lines: List[str],
+        start_value: Optional[Union[str, int]] = None,
+        end_value: Optional[Union[str, int]] = None,
+        include_start: bool = False,
+        include_end: bool = False,
+    ) -> List[str]:
+    """
+    Extract lines from a list starting from a specific value and optionally ending at another value.
+    
+    Args:
+        lines (List[str]): The list of lines to extract from.
+        start_value (Optional[Union[str, int]]): The line to start extraction from. If None, starts from the beginning.
+            If int, treated as a line number (0-indexed).
+        end_value (Optional[Union[str, int]]): The line to end extraction at. If None, extracts until the end of the list.
+            If int, treated as a line number (0-indexed).
+        include_start (bool): Whether to include the start line in the output. Default is False.
+        include_end (bool): Whether to include the end line in the output. Default is False.
+    
+    Returns:
+        List[str]: The extracted lines.
+    
+    Raises:
+        ValueError: If start_value or end_value is not found in the lines.
+    """
+    start_index, end_index = 0, len(lines)
+
+    if isinstance(start_value, int):
+        start_index = max(0, min(start_value, len(lines)))
+    elif start_value:
+        for i, line in enumerate(lines):
+            if line.startswith(start_value):
+                start_index = i if include_start else i + 1
+                break
+        else:
+            raise ValueError(f"Start value '{start_value}' not found in lines")
+
+    if isinstance(end_value, int):
+        end_index = max(start_index, min(end_value + 1, len(lines)))
+    elif end_value:
+        for i in range(start_index, len(lines)):
+            if lines[i].startswith(end_value):
+                end_index = i + 1 if include_end else i
+                break
+        else:
+            raise ValueError(f"End value '{end_value}' not found in lines after start index")
+
+    return lines[start_index:end_index]
+
+
+def get_coa_files(
+        pdf_dir,
+        min_file_size: Optional[int] = 21_000,
+        ext: Optional[Any] = '.pdf',
+    ) -> list:
+    """Get all of the COAs in the nested directory."""
+    filenames = []
+    if isinstance(ext, str): ext = [ext]
+    for root, _, files in os.walk(pdf_dir):
+        for file in files:
+            extension = os.path.splitext(file)[1]
+            if extension in ext:
+                file_path = os.path.join(root, file)
+                file_size = os.path.getsize(file_path)
+                if file_size >= min_file_size:
+                    filenames.append(file_path)
+    return filenames
+
+
+def parse_coa_pdfs(
+        pdfs: List[str],
+        parser: Optional[CoADoc] = None,
+        cache: Optional[Bogart] = None,
+        reverse: Optional[bool] = False,
+        key: Optional[str] = 'coa_pdf',
+        log_dir: Optional[str] = None,
+        log_name: Optional[str] = 'parse_coa_pdfs',
+        verbose: Optional[bool] = False,
+    ) -> list:
+    """Parse corresponding COAs from a DataFrame in a PDF directory."""
+    # FIXME: Use `LabResult` and `Result` models to standardize the parsed data.
+    logger = None
+    if log_dir:
+        logger = initialize_logs(
+            log_name,
+            prefix=log_name.split('.')[0].replace('_', '-'),
+            log_dir=log_dir,
+        )
+    all_results = []
+    if parser is None: parser = CoADoc()
+    if logger: logger.info(f'Parsing {len(pdfs)} PDFs...')
+    if reverse: pdfs = pdfs[::-1]
+    for pdf in pdfs:
+        if not os.path.exists(pdf):
+            if logger: logger.info(f'PDF not found: {pdf}')
+            continue
+        pdf_hash = cache.hash_file(pdf)
+        if cache is not None:
+            if cache.get(pdf_hash):
+                if logger: logger.info(f'Cached: {pdf}')
+                all_results.append(cache.get(pdf_hash))
+                continue
+        try:
+            if logger: logger.info(f'Parsing PDF: {pdf}')
+            coa_data = parser.parse_pdf(pdf, verbose=verbose)
+            if isinstance(coa_data, list): coa_data = coa_data[0]
+            coa_data[key] = os.path.basename(pdf)
+            all_results.append(coa_data)
+            if cache is not None: cache.set(pdf_hash, coa_data)
+            if logger: logger.info(f'Parsed PDF: {pdf}')
+        except Exception as e:
+            parser.quit()
+            if logger:
+                logger.info(f'Failed to parse PDF: {pdf}')
+                logger.info(f'Error: {str(e)}')
+                error_data = {'coa_pdf': os.path.basename(pdf), 'error': str(e)}
+                cache.set(pdf_hash, error_data)
+    return all_results
+
+
+def find_unique_analytes(df, analyses = [], key='key'):
+    """Find unique analytes in a list of results."""
+    analytes = set()
+    for _, row in df.iterrows():
+        results = row['results']
+        if isinstance(results, str):
+            try:
+                results = json.loads(results)
+            except:
+                try:
+                    results = ast.literal_eval(results)
+                except:
+                    continue
+        elif isinstance(results, float):
+            continue
+        for result in results:
+            if analyses:
+                if result.get('analysis') in analyses:
+                    analytes.add(result[key])
+            else:
+                analytes.add(result[key])
+    return analytes
+
+
+def parse_list_column(df, col):
+    """Convert stringified list in `df[col]` to an actual Python list."""
+    def safe_eval(x):
+        if isinstance(x, str):
+            try:
+                return ast.literal_eval(x)
+            except (SyntaxError, ValueError):
+                return []
+        elif isinstance(x, list):
+            return x
+        return []
+    df[col] = df[col].apply(safe_eval)
+    return df
+
+
+def process_less_than(x, delta = 0.01):
+    """Replace values with "<" symbol with 0.01 less than the specified value."""
+    if isinstance(x, str) and '<' in x:
+        try:
+            value = float(x.replace('<', ''))
+            return value - delta
+        except ValueError:
+            return np.nan
+    return x

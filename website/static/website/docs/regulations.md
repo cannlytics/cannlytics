@@ -1,3 +1,0 @@
-# Regulation Data
-
-Regulations affect everyone in the cannabis industry and with Cannlytics it is easy to stay up-to-date and informed about all of the regulations that affect you. You can be assured that your competitors are doing their best to win regulators to their sides, so, gain an even playing field with publicly available tools that Cannlytics can lay in your lap. Don't let your competitors and regulators cut you out of the picture. If you're not at the table, then you're for lunch. Don't be another billionaire's morsel. Sign up for Cannlytics support and we will be at the table defending your share.

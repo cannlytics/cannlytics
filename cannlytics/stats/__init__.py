@@ -1,24 +1,19 @@
 """
-Cannlytics Statistics Initialization | Cannlytics
-Copyright (c) 2022 Cannlytics
+Cannlytics Stats Initialization | Cannlytics
+Copyright (c) 2025 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
-Created: 5/31/2022
-Updated: 5/31/2022
+Created: 4/20/2025
+Updated: 4/20/2025
 """
-
 from .stats import (
-    calculate_model_statistics,
-    estimate_discrete_model,
-    get_stats_model,
-    predict_stats_model,
-    upload_stats_model,
+    calc_diversity_index,
+    calculate_purpleness,
+    calculate_colourfulness,
 )
 
 __all__ = [
-    'calculate_model_statistics',
-    'estimate_discrete_model',
-    'get_stats_model',
-    'predict_stats_model',
-    'upload_stats_model',
+    'calc_diversity_index',
+    'calculate_purpleness',
+    'calculate_colourfulness',
 ]

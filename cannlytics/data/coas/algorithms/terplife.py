@@ -1,11 +1,11 @@
 """
 Parse TerpLife Labs COAs
-Copyright (c) 2023 Cannlytics
+Copyright (c) 2023-2025 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 5/20/2023
-Updated: 11/14/2023
+Updated: 4/23/2025
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -73,19 +73,15 @@ import pandas as pd
 import pdfplumber
 
 # Internal imports.
-from cannlytics import firebase
 from cannlytics import __version__
 from cannlytics.data.data import (
     create_hash,
     create_sample_id,
     find_first_value,
 )
+from cannlytics.data.web import download_file_from_url
 from cannlytics.utils.constants import ANALYTES
-from cannlytics.utils.utils import (
-    convert_to_numeric,
-    download_file_from_url,
-    snake_case,
-)
+from cannlytics.utils import convert_to_numeric, snake_case
 
 
 # It is assumed that the lab has the following details.

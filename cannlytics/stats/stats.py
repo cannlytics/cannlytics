@@ -1,212 +1,85 @@
 """
-Statistics Module
-Copyright (c) 2022 Cannlytics
+Stats | Cannlytics
+Copyright (c) 2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
-Created: 5/31/2022
-Updated: 6/1/2022
+Created: 10/20/2024
+Updated: 10/20/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Description: Cannabis-related statistical functions.
 """
-# Standard imports.
-from datetime import datetime
-import os
-import shutil
-from typing import Any, Optional
 
-# External imports.
+# External imports:
+import numpy as np
 import pandas as pd
-try:
-    from sklearn.metrics import confusion_matrix
-    import statsmodels.api as sm
-except:
-    pass
-
-# Internal imports.
-from cannlytics.firebase import (
-    download_file,
-    get_document,
-    update_documents,
-    upload_file,
-)
+from skimage import color
 
 
-def calculate_model_statistics(models, Y, X):
-    """Determine prediction thresholds for a given model.
-    Calculate a confusion matrix and returns prediction statistics.
+def calc_diversity_index(df: pd.DataFrame, compounds: list) -> list:
+    """Calculate the Shannon Diversity Index given results and a list of compounds.
     Args:
-        models (list): A list of simultaneous prediction models.
-        X (DataFrame): A DataFrame of explanatory variables.
-        Y (DataFrame): A DataFrame of outcome variables.
-    Returns:
-        (dict): Returns a dictionary of statistics for each model.
+        df (pd.DataFrame): The results DataFrame.
+        compounds (list): The list of compounds to include in the diversity calculation.
+    Returns (list): A list of Shannon Diversity Index values.
     """
-    X = X.loc[:, (X != 0).any(axis=0)]
-    x = sm.add_constant(X)
-    base, acc, fpr, fnr, tpr, tnr, info = {}, {}, {}, {}, {}, {}, {}
-    for key in Y.columns:
-        y = Y[key]
-        y_bar = y.mean()
-        model = models[key]
-        if model:
-            x_hat = x[list(model.params.keys())]
-            y_hat = model.predict(x_hat)
-            threshold = round(y_hat.quantile(1 - y_bar), 4)
-            base[key] = threshold
-            prediction = pd.Series(y_hat > threshold).astype(int)
-            cm = confusion_matrix(y, prediction)
-            tn, fp, fn, tp = cm.ravel()
-            pos = sum(y)
-            neg = len(y) - pos
-            fpr[key] = round(fp / neg, 4)
-            fnr[key] = round(fn / pos, 4)
-            tpr[key] = round(tp / pos, 4)
-            tnr[key] = round(tn / neg, 4)
-            acc[key] = round((tp + tn) / (pos + neg), 4)
-            info[key] = round((tp / pos) / (tn / neg), 4)
-    stats = pd.DataFrame({
-        'threshold': base,
-        'false_positive_rate': fpr,
-        'false_negative_rate': fnr,
-        'true_positive_rate': tpr,
-        'true_negative_rate': tnr,
-        'accuracy': acc,
-        'informedness': info,
-    })
-    stats = stats.fillna(0)
-    return stats
+    diversities = []
+    for _, row in df.iterrows():
+        proportions = [pd.to_numeric(row[compound], errors='coerce') for compound in compounds if pd.to_numeric(row[compound], errors='coerce') > 0]
+        proportions = np.array(proportions) / sum(proportions)
+        shannon_index = -np.sum(proportions * np.log2(proportions))
+        diversities.append(shannon_index)
+    return diversities
 
 
-def estimate_discrete_model(X, Y, method=None):
-    """Estimate a prediction model(s) for discrete outcomes.
-    The algorithm excludes all null columns, adds a constant,
-    then fits probit model(s) for each effect variable.
-    The user can specify their model, e.g. logit, probit, etc.
+def calculate_purpleness(rgb, how='scale', shade=510):
+    """Purple is dominant in red and blue channels, and low in green.
+    Note: Adjust the formula for other shades of purple.
     Args:
-        X (DataFrame): A DataFrame of explanatory variables.
-        Y (DataFrame): A DataFrame of outcome variables.
-        method (str, function): Specify 'probit', 'logit', or pass
-            a statistical model of your choice with a `fit` method.
-            A probit model is used by default (optional).
+        rgb (list): A list of RGB values.
+        how (str): How to calculate purpleness.
+            Options are 'scale' and 'normalized'.
+            Scale will return a value between 0 and 1.
+            Normalized will return a value between -1 and 1.
+        shade (int): The shade of purple to use.
     Returns:
-        (list): Returns a list of simultaneous prediction models.
+        float: The purpleness score.
     """
-    X = X.loc[:, (X != 0).any(axis=0)]
-    X = sm.add_constant(X)
-    models = {}
-    if method == 'logit':
-        method = sm.Logit
-    elif method is None or method == 'probit':
-        method = sm.Probit
-    for variable in Y.columns:
-        try:
-            y = Y[variable]
-            model = method(y, X).fit(disp=0)
-            models[variable] = model
-        except:
-            models[variable] = None # Error estimating!
-    return models
+    purpleness = (rgb[0] + rgb[2]) - 2 * rgb[1]
+    if how == 'scale':
+        return (purpleness + shade) / (shade * 2)
+    elif how == 'normalized':
+        return purpleness / shade
 
 
-def get_stats_model(
-        ref: str,
-        data_dir: Optional[str] = '/tmp',
-        name: Optional[str] = None,
-        bucket_name: Optional[str] = None,
-    ):
-    """Get a pre-built statistical model for use.
-    First, gets the model data from Firebase Firestore.
-    Second, downloads the pickle file and loads it into a model.
+def calculate_colourfulness(rgb, metric='M3') -> float:
+    """Calculate the colourfulness of an image.
     Args:
-        ref (str): The reference of the model data and file.
-        data_dir (str): A folder to save the model files.
+        rgb (np.array): An image as a numpy array.
+        metric (str): The metric to use. Options are 'M1', 'M2', and 'M3'.
     Returns:
-        (dict): Data about the model, including `model` and `model_stats`.
+        float: The colourfulness score.
     """
-    if name is None:
-        name = ref.replace('/', '-')
-    model_path = os.path.join(data_dir, name)
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
-    data = get_document(ref)
-    file_name = ref.split('/')[-1] + '.zip'
-    zipped_file = os.path.join(data_dir, file_name)
-    download_file(data['model_ref'], zipped_file, bucket_name)
-    shutil.unpack_archive(zipped_file, model_path)
-    models = {}
-    for item in os.listdir(model_path):
-        pickle_file = os.path.join(model_path, item)
-        key = item.replace('model_', '').replace('.pickle', '')
-        with open(pickle_file, 'rb') as f:
-            models[key] = sm.load(f)
-    data['model'] = models
-    return data
-
-
-def predict_stats_model(models, X, thresholds=None):
-    """Predict outcomes for a given model and its thresholds.
-    Add a constant column if necessary and only use model columns.
-    Args:
-        models (list): A list of simultaneous prediction models.
-        X (DataFrame): A DataFrame of explanatory variables.
-        thresholds (dict): A dictionary of thresholds to be used as
-            decision rules for binary outcomes.
-    Returns:
-        (DataFrame): Returns predictions for each outcome variable.
-    """
-    x = X.assign(const=1)
-    predictions = pd.DataFrame()
-    for key, model in models.items():
-        if not model:
-            predictions[key] = 0
-            continue
-        x_hat = x[list(model.params.keys())]
-        y_hat = model.predict(x_hat)
-        if thresholds:
-            threshold = thresholds[key]
-            prediction = pd.Series(y_hat > threshold).astype(int)
-            predictions[key] = prediction
-        else:
-            predictions[key] = y_hat
-    return predictions
-
-
-def upload_stats_model(
-        models: Any,
-        ref: str,
-        name: Optional[str] = None,
-        data_dir: Optional[str] = '/tmp',
-        stats: Optional[Any] = None
-    ):
-    """Upload an statistical model for future use.
-    Pickle each model, zip the model files, then upload the zipped file.
-    Finally, record the file's data in Firebase Firestore.
-    Args:
-        models (dict): The list of effects models.
-        ref (str): The reference for the model data and file.
-        name (str): A name to save the model as (optional).
-        data_dir (str): A directory to save the model files (optional).
-        stats (DataFrame): Model summary statistics (optional).
-    Returns:
-        (dict): Returns the model data.
-    """
-    if name is None:
-        name = ref.replace('/', '-')
-    model_path = os.path.join(data_dir, name)
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
-    if not isinstance(models, dict):
-        models = {'model': models}
-    for key, model in models.items():
-        model_file = os.path.join(model_path, f'model_{key}.pickle')
-        model.save(model_file)
-    zipped_file = os.path.join(data_dir, name)
-    shutil.make_archive(zipped_file, 'zip', model_path)
-    file_ref = ref + '.zip'
-    data = {
-        'model_ref': file_ref,
-        'model_stats': stats.to_dict(),
-        'updated_at': datetime.now().isoformat(),
-    }
-    upload_file(file_ref, zipped_file + '.zip')
-    update_documents([ref], [data])
-    return data
+    img = color.rgb2lab(rgb)
+    l, a, b = img[:, :, 0], img[:, :, 1], img[:, :, 2]
+    sigma_a, sigma_b = np.std(a), np.std(b)
+    mu_a, mu_b = np.mean(a), np.mean(b)
+    sigma_ab = np.sqrt(sigma_a**2 + sigma_b**2)
+    mu_ab = np.sqrt(mu_a**2 + mu_b**2)
+    Chroma = np.sqrt(a**2 + b**2)
+    _, mu_C = np.std(Chroma), np.mean(Chroma)
+    R, G, B = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+    rg = R - G
+    yb = 0.5 * (R + G) - B
+    sigma_rg, sigma_yb = np.std(rg), np.std(yb)
+    mu_rg, mu_yb = np.mean(rg), np.mean(yb)
+    sigma_rg_yb = np.sqrt(sigma_rg**2 + sigma_yb**2)
+    mu_rg_yb = np.sqrt(mu_rg**2 + mu_yb**2)
+    if metric == 'M1':
+        return sigma_ab + 0.37 * mu_ab
+    elif metric == 'M2':
+        return sigma_ab + 0.94 * mu_C
+    elif metric == 'M3':
+        return sigma_rg_yb + 0.3 * mu_rg_yb
+    else:
+        raise ValueError('Unknown metric: %s' % metric)

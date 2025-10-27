@@ -5,7 +5,7 @@ Copyright (c) 2022-2023 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 6/3/2023
+Updated: 6/24/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -40,11 +40,11 @@ Data Points:
     ✓ lab_longitude (augmented)
     ✓ producer
     - producer_address
-    - producer_street
-    - producer_city
-    - producer_state
-    - producer_zipcode
-    - producer_license_number
+    ✓ producer_street
+    ✓ producer_city
+    ✓ producer_state
+    ✓ producer_zipcode
+    ✓ producer_license_number
     ✓ distributor
     ✓ distributor_address
     ✓ distributor_street
@@ -79,35 +79,26 @@ Data Points:
         ✓ moisture
 """
 # Standard imports.
-from ast import literal_eval
-import base64
 from datetime import datetime
 import json
-import io
 import re
-import os
 import tempfile
 from typing import Any, Optional
 
 # External imports.
 import pandas as pd
 import pdfplumber
-from PIL import Image
 
 # Internal imports.
-from cannlytics import firebase
 from cannlytics import __version__
 from cannlytics.data.data import (
     create_hash,
     create_sample_id,
     find_first_value,
 )
-from cannlytics.utils.constants import ANALYTES
 from cannlytics.utils.utils import (
     convert_to_numeric,
     snake_case,
-    split_list,
-    strip_whitespace,
 )
 
 # It is assumed that the lab has the following details.
@@ -117,8 +108,8 @@ KAYCHA_LABS = {
     'lims': 'Kaycha Labs',
     'lab': 'Kaycha Labs',
     'lab_image_url': 'https://www.kaychalabs.com/wp-content/uploads/2020/06/newlogo-2.png',
-    'lab_address': '4101 SW 47th Ave, Suite 105, Davie, FL 33314',
-    'lab_street': '4101 SW 47th Ave, Suite 105',
+    'lab_address': '4131 SW 47th Ave, Suite 1408, Davie, FL 33314',
+    'lab_street': '4131 SW 47th Ave, Suite 1408',
     'lab_city': 'Davie',
     'lab_county': 'Broward',
     'lab_state': 'FL',
@@ -130,6 +121,8 @@ KAYCHA_LABS = {
     'lab_longitude': -80.210750,
     # FIXME: Make license number dynamic as Kaycha Labs operate in multiple states.
     'lab_license_number': 'CMTL-0002',
+    # FIXME: See if COA's can be identified with URL.
+    # E.g. yourcoa.com
 }
 KAYCHA_LABS_COA = {
     'fields': {
@@ -145,10 +138,12 @@ KAYCHA_LABS_COA = {
         'Batch Date': 'date_harvested', # FIXME: This date is not being parsed correctly.
         'Sample Size Received': 'sample_weight',
         'Total Batch Size': 'batch_size',
+        'Total Amount': 'batch_size',
         'Retail Product Size': 'product_size',
         'Ordered': 'date_received',
         'Sampled': 'date_collected',
         'Completed': 'date_tested',
+        'Revision Date': 'date_tested',
         # 'Sampling Method': 'method_sampling',
         # TODO: Also get `date_revised` if it exists.
         # TODO: Get `revision_reason` if it is revised.
@@ -180,17 +175,18 @@ def get_kaycha_terpenes(parser, page, obs, results):
         return obs, results
 
     # Split the page in half.
-    left = page.within_bbox((0, 0, page.width * 0.5, page.height)).extract_text()
-    right = page.within_bbox((page.width * 0.5, 0, page.width, page.height)).extract_text()
+    left_page = page.within_bbox((0, 0, page.width * 0.5, page.height)).extract_text()
+    right_page = page.within_bbox((page.width * 0.5, 0, page.width, page.height)).extract_text()
 
     # Get the relevant portions.
-    left = left.split('TOTAL TERPENES')[-1].split('This Kaycha Labs Certification shall not be reproduced')[0]
-    right = right.split('(%)')[-1].split('Analyzed by')[0]
+    # Old: .split('TOTAL TERPENES')[-1]
+    left = left_page.split('(%)')[-2].split('This Kaycha Labs Certification')[0]
+    right = right_page.split('(%)')[-1].split('Analyzed by')[0]
     left_lines = [x for x in left.split('\n') if x]
     right_lines = [x for x in right.split('\n') if x]
 
     # Get total terpenes.
-    total = left_lines[-1].split('(%)')[-1].strip()
+    total = left_page.split('(%)')[-1].split('\n')[0].strip()
     obs['total_terpenes'] = convert_to_numeric(total, strip=True)
 
     # Get individual terpenes.
@@ -199,7 +195,18 @@ def get_kaycha_terpenes(parser, page, obs, results):
         first_value = find_first_value(line)
         name = line[:first_value].strip()
         key = parser.analytes.get(snake_case(name), snake_case(name))
+        if key == 'total_terpenes':
+            continue
         values = line[first_value:].strip().split(' ')
+        # Note: Fix the `key` and `name` of the previous result for long analyte names.
+        if len(values) == 1:
+            name = f'{results[-1]["name"]}{name}'
+            key = parser.analytes.get(snake_case(name), snake_case(name))
+            results[-1]['name'] = name
+            results[-1]['key'] = key
+            continue
+        elif len(values) < 3:
+            continue
         results.append({
             'analysis': 'terpenes',
             'key': key,
@@ -214,7 +221,6 @@ def get_kaycha_terpenes(parser, page, obs, results):
     return obs, results
 
 
-# UNDER DEVELOPMENT:
 def parse_kaycha_coa(
         parser,
         doc: Any,
@@ -262,22 +268,54 @@ def parse_kaycha_coa(
         filename = coa_url.split('/')[-1].split('?')[0] + '.pdf'
         obs['coa_urls'] = json.dumps([{'url': coa_url, 'filename': filename}])
 
-    # Get lab details.
-    parts = lines[5].split(',')
-    city, state, zipcode = [x.strip() for x in parts[:3]]
-    obs['lab_street'] = lines[4].title()
-    obs['lab_city'] = city.title()
-    obs['lab_state'] = state
-    obs['lab_zipcode'] = zipcode
+    # Get lab details. Note: Falls back to constants at the end.
+    try:
+        try:
+            parts = lines[5].split(',')
+            city, state, zipcode = [x.strip() for x in parts[:3]]
+            obs['lab_street'] = lines[4].title()
+            obs['lab_city'] = city.title()
+            obs['lab_state'] = state
+            obs['lab_zipcode'] = zipcode
+        except:
+            obs['lab_street'] = lines[3].split('Matrix:')[0].strip()
+            parts = lines[4].split(',')
+            obs['lab_city'] = parts[0]
+            obs['lab_state'] = parts[1]
+            obs['lab_zipcode'] = parts[2]
+    except:
+        pass
+    # FIXME: Get lab license number.
+
+    # Try to get producer details.
+    try:
+        top_left = front_page.within_bbox((0, front_page.height * 0.25, front_page.width * 0.5, front_page.height * 0.5))
+        producer_lines = top_left.extract_text().split('\n')
+        obs['producer'] = producer_lines[0]
+        for i, line in enumerate(producer_lines[1:]):
+            if 'License #' in line:
+                obs['producer_license_number'] = line.split(':')[-1].strip()
+            if ', US' in line:
+                parts = line.split(',')
+                obs['producer_street'] = producer_lines[i]
+                obs['producer_city'] = parts[0].strip()
+                obs['producer_state'] = parts[1].strip()
+                obs['producer_zipcode'] = parts[2].strip()
+    except:
+        pass
 
     # Get sample details.
+    # Optional: Make this code more robust.
     obs['product_name'] = lines[1]
     obs['strain_name'] = lines[2]
-    obs['product_type'] = lines[3].split(':')[-1].strip()
-    obs['lab_id'] = lines[6].split(':')[-1].strip()
+
+    # Deprecated: This data can be collected with other sample details.
+    # obs['product_type'] = lines[3].split(':')[-1].strip()
+    # obs['lab_id'] = lines[6].split(':')[-1].strip()
 
     # Get additional sample details.
-    # FIXME: These are dry weight! People want wet weight.
+    # TODO: These are dry weight! People want wet weight.
+    # TODO: Get product_subtype
     results = []
     totals = ['total_thc', 'total_cbd', 'total_cannabinoids']
     for i, line in enumerate(lines):
@@ -287,7 +325,7 @@ def parse_kaycha_coa(
             field = key.lower()
             cell = line.lower()
             if f'{field}:' in cell or f'{field} :' in cell:
-                obs[value] = line.split(':')[-1].strip()
+                obs[value] = line.split(':', maxsplit=1)[-1].strip()
             elif f'{field}#' in cell:
                 obs[value] = line.split('#')[-1].strip()
 
@@ -298,14 +336,17 @@ def parse_kaycha_coa(
                 if k in line:
                     name = name.replace(k, '').strip()
                     obs['status'] = v
-            street = lines[i + 1]
-            city, state, zipcode, _ = [x.strip() for x in lines[i + 2].split(',')]
             obs['distributor'] = name
-            obs['distributor_address'] = f'{street}, {city}, {state} {zipcode}'
-            obs['distributor_street'] = street
-            obs['distributor_city'] = city
-            obs['distributor_state'] = state
-            obs['distributor_zipcode'] = zipcode
+            try:
+                street = lines[i + 1]
+                city, state, zipcode, _ = [x.strip() for x in lines[i + 2].split(',')]
+                obs['distributor_address'] = f'{street}, {city}, {state} {zipcode}'
+                obs['distributor_street'] = street
+                obs['distributor_city'] = city
+                obs['distributor_state'] = state
+                obs['distributor_zipcode'] = zipcode
+            except:
+                pass
         
         # Get totals.
         if 'Total THC' in line and obs.get('total_thc') is None:
@@ -324,28 +365,21 @@ def parse_kaycha_coa(
             if lines[i + 2].startswith('Analysis'):
                 lod = [convert_to_numeric(x) for x in lines[i + 3].lstrip('LOD ').split(' ') if x != '']
             else:
-                lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ') if x != '']
+                lod = [convert_to_numeric(x) for x in lines[i + 2].lstrip('LOD ').split(' ')]
             for k, key in enumerate(keys):
+                try:
+                    lod_value = lod[k]
+                except:
+                    lod_value = None
                 results.append({
                     'analysis': 'cannabinoids',
                     'key': key,
                     'name': analytes[k],
                     'value': values[k],
                     'unit': 'percent',
-                    'lod': lod[k],
+                    'lod': lod_value,
                 })
             break
-
-    # FIXME: Get lab license number.
-    # State License # CMTL-0002
-
-    # TODO: Try to get producer details from licenses data.
-    # - producer_address
-    # - producer_street
-    # - producer_city
-    # - producer_state
-    # - producer_zipcode
-    # - producer_license_number
 
     # Get analyses and status data.
     analyses = []
@@ -381,6 +415,8 @@ def parse_kaycha_coa(
                     name = line[:first_value].strip()
                     key = parser.analytes.get(snake_case(name), snake_case(name))
                     values = line[first_value:].strip().split(' ')
+                    if len(values) < 3:
+                        continue
                     results.append({
                         'analysis': 'residual_solvents',
                         'key': key,
@@ -391,11 +427,15 @@ def parse_kaycha_coa(
                         'status': values[-2],
                         'limit': convert_to_numeric(values[2]),
                     })
+                    if 'Analyzed by' in line:
+                        break
                 continue
 
             # Split the page in half.
-            left = page.within_bbox((0, 0, page.width * 0.49, page.height)).extract_text()
-            right = page.within_bbox((page.width * 0.49, 0, page.width, page.height)).extract_text()
+            # FIXME: This is splitting the text wrong.
+            midpoint = 0.48
+            left = page.within_bbox((0, 0, page.width * midpoint, page.height)).extract_text()
+            right = page.within_bbox((page.width * midpoint, 0, page.width, page.height)).extract_text()
 
             # Get the relevant portions.
             left = re.split(r'Page \d+ of \d+', left)[-1].split('This Kaycha Labs Certification shall not be reproduced')[0]
@@ -473,6 +513,8 @@ def parse_kaycha_coa(
             name = line[:first_value].strip()
             key = parser.analytes.get(snake_case(name), snake_case(name))
             values = line[first_value:].strip().split(' ')
+            if len(values) < 3:
+                continue
             results.append({
                 'analysis': 'pesticides',
                 'key': key,
@@ -505,22 +547,6 @@ def parse_kaycha_coa(
                     'status': values[-2]
                 })
                 break
-
-    # FIXME: Save the image data to Firebase Storage.
-    # image_index = 5
-    # try:
-    #     temp_dir = tempfile.gettempdir()
-    #     file_ref = f'data/lab_results/images/{lab_id}/image_data.png'
-    #     file_path = os.path.join(temp_dir, 'image_data.png')
-    #     image_data = parser.get_pdf_image_data(front_page, image_index=image_index)
-    #     parser.save_image_data(image_data, image_file=file_path)
-    #     bucket_name = config['FIREBASE_STORAGE_BUCKET']
-    #     firebase.upload_file(file_ref, file_path, bucket_name=bucket_name)
-    #     download_url = firebase.get_file_url(file_ref, bucket_name=bucket_name)
-    #     obs['images'] = [{'ref': file_ref, 'url': download_url, 'filename': 'image_data.png'}]
-    # except:
-    #     print('Failed to get image data.')
-    #     obs['images'] = []
 
     # Get all the lines with methods.
     method_lines = ''
@@ -569,21 +595,28 @@ if __name__ == '__main__':
 
     from cannlytics.data.coas import CoADoc
 
-    # [✓] TEST: Identify LIMS.
-    parser = CoADoc()
-    docs = [
-        '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf',
-    ]
-    for doc in docs:
-        lims = parser.identify_lims(doc, lims={'Kaycha Labs': KAYCHA_LABS})
-        assert lims == 'Kaycha Labs'
+    # # [✓] TEST: Identify LIMS.
+    # parser = CoADoc()
+    # docs = [
+    #     '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf',
+    # ]
+    # for doc in docs:
+    #     lims = parser.identify_lims(doc, lims={'Kaycha Labs': KAYCHA_LABS})
+    #     assert lims == 'Kaycha Labs'
 
-    # [✓] TEST: Parse a full panel COA PDF.
-    doc = '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf'
+    # # [✓] TEST: Parse a full panel COA PDF.
+    # doc = '../../../../tests/assets/coas/kaycha-labs/DA30318004-001-Original.pdf'
+    # temp_path = None
+    # coa_parameters = KAYCHA_LABS_COA
+    # data = parse_kaycha_coa(parser, doc)
+    # assert data is not None
+
+    # FIXME:
+    doc = r'D://data/florida/results/pdfs/MMTC-2015-0001/DA40104010-005.pdf'
     temp_path = None
     coa_parameters = KAYCHA_LABS_COA
+    parser = CoADoc()
     data = parse_kaycha_coa(parser, doc)
-    assert data is not None
 
 
     # [ ] TEST: Parse a cannabinoid and terpene only COA PDF.

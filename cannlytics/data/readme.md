@@ -1,8 +1,8 @@
 # Cannlytics Data Module
 
-<div style="margin-top:1rem; margin-bottom: 1rem;">
+<!-- <div style="margin-top:1rem; margin-bottom: 1rem;">
   <img height="100px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
-</div>
+</div> -->
 
 The `cannlytics.data` module is a digital toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
 

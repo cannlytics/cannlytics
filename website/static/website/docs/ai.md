@@ -1,3 +1,0 @@
-# About Cannlytics AI
-
-Artificial Intelligence (AI) has been with us for quite some time now in some capacity, therefore, it is high time that you began utilizing AI in your operations to unlock your company's full potential. The cool thing about AI is that you can automate all of the boring tasks that you don't want to do and free yourself to truly advance the core of your business. If you're a scientist, then your time is much better spent doing science than shuffling data around that Cannlytics AI can shuffle for you in nanoseconds. Do what you're best at and let the computer do what its best at. Cannlytics AI is here to be a friend of yours and making your life easier, simpler, and happier only makes Cannlytics AI happier.

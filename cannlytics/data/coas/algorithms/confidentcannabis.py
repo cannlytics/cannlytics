@@ -1,12 +1,12 @@
 """
 Parse Confident Cannabis CoA
-Copyright (c) 2022 Cannlytics
+Copyright (c) 2022-2024 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 12/31/2023
+Updated: 3/2/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,13 +17,13 @@ Description:
         - California Ag Labs
         - CB Labs Novato
         - Harrens Lab Inc
+        - Encore Labs (algorithmic)
 
 Data Points:
 
     ✓ analyses
     - {analysis}_method
     ✓ {analysis}_status
-    ✓ classification
     ✓ coa_urls
     ✓ date_tested
     - date_received
@@ -41,6 +41,7 @@ Data Points:
     - total_terpenes (calculated)
     ✓ sample_id (generated)
     ✓ strain_name
+    ✓ strain_type
     ✓ lab_id
     ✓ lab
     ✓ lab_image_url
@@ -74,7 +75,6 @@ from selenium.common.exceptions import (
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-
 # Internal imports.
 from cannlytics import __version__
 from cannlytics.data.data import create_hash, create_sample_id
@@ -84,14 +84,14 @@ from cannlytics.utils.utils import (
     snake_case,
     strip_whitespace,
 )
-
+from cannlytics.data.coas.algorithms.encore import parse_cc_custom_coa
 
 # It is assumed that the lab has the following details.
 CONFIDENT_CANNABIS = {
     'coa_algorithm': 'confidentcannabis.py',
     'coa_algorithm_entry_point': 'parse_cc_coa',
     'lims': 'Con\x00dent Cannabis',
-    'url': 'https://orders.confidentcannabis.com',
+    'url': 'confidentcannabis.com',
     'public': True,
 }
 
@@ -102,6 +102,9 @@ def parse_cc_url(
         headers: Optional[Any] = None,
         max_delay: Optional[float] = 60,
         persist: Optional[bool] = False,
+        headless: Optional[bool] = True,
+        pause: Optional[float] = 10,
+        verbose: Optional[bool] = False,
         **kwargs
     ) -> dict:
     """Parse a Confident Cannabis CoA URL.
@@ -119,18 +122,30 @@ def parse_cc_url(
     """
     # Initialize a web driver.
     if parser.driver is None:
-        parser.driver = initialize_selenium()
+        parser.driver = initialize_selenium(
+            headless=headless,
+        )
 
     # Get the URL.
     parser.driver.get(url)
 
+    # Handle shared URLs.
+    if 'share.confidentcannabis.com' in url:
+        iframe = WebDriverWait(parser.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe'))
+        )
+        url = iframe.get_attribute('src')
+        parser.driver.switch_to.frame(iframe)
+        sleep(pause)
+
     # Wait for the page to load by waiting to detect the image.
-    try:
-        el = (By.CLASS_NAME, 'product-box-cc')
-        detect = EC.presence_of_element_located(el)
-        WebDriverWait(parser.driver, max_delay).until(detect)
-    except TimeoutException:
-        print('Failed to load page within %i seconds.' % max_delay)
+    else:
+        try:
+            el = (By.CLASS_NAME, 'product-box-cc')
+            detect = EC.presence_of_element_located(el)
+            WebDriverWait(parser.driver, max_delay).until(detect)
+        except TimeoutException:
+            print('Failed to load page within %i seconds.' % max_delay)
 
     # Create a sample observation.
     analyses, results = [], []
@@ -142,7 +157,7 @@ def parse_cc_url(
     try:
         el = parser.driver.find_element(
             by=By.CLASS_NAME,
-            value='product-box-cc'
+            value='col-md-12'
         )
         img = el.find_element(by=By.TAG_NAME, value='img')
         image_url = img.get_attribute('src')
@@ -166,9 +181,9 @@ def parse_cc_url(
     except:
         obs['lab_id'] = None
     try:
-        obs['classification'] = block[2]
+        obs['strain_type'] = block[2]
     except:
-        obs['classification'] = None
+        obs['strain_type'] = None
     try:
         parts = block[3].split(', ')
         obs['strain_name'] = strip_whitespace(', '.join(parts[:-1]))
@@ -184,8 +199,7 @@ def parse_cc_url(
     span = el.find_element(by=By.TAG_NAME, value='span')
     tooltip = span.get_attribute('uib-tooltip')
     tested_at = tooltip.split(': ')[-1]
-    date_tested = pd.to_datetime(tested_at).isoformat()
-    obs['date_tested'] = date_tested
+    obs['date_tested'] = pd.to_datetime(tested_at).isoformat()
 
     # Get the CoA URL.
     button = el.find_element(by=By.TAG_NAME, value='button')
@@ -351,7 +365,11 @@ def parse_cc_url(
                         button.click()
                     except ElementNotInteractableException:
                         continue
-                    sleep(0.2) # Brief pause to give modal time to close.
+
+                    # sleep(0.33) # Brief pause to give modal time to close.
+                    WebDriverWait(parser.driver, 10).until(
+                        EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.uib-modal-window"))
+                    )
 
         # Try to get lab data.
         producer = ''
@@ -443,6 +461,40 @@ def parse_cc_url(
                 'producer': producer
             }
 
+    # Supplement data directly from the PDF.
+    # FIXME: Perhaps move this to the top?
+    if not results and obs.get('lab') == 'Encore Labs':
+        if verbose:
+            print('Parsing Encore Labs PDF...')
+        obs = {**CONFIDENT_CANNABIS, **obs}
+        obs['lab_results_url'] = url
+        parsed_coa = parse_cc_custom_coa(parser, url, **kwargs)
+        obs = {**parsed_coa, **obs}
+        if not persist:
+            parser.quit()
+        return obs
+
+    # Close the driver.
+    if not persist:
+        parser.quit()
+
+    # Rename moisture as moisture_content.
+    try:
+        obs['moisture_content'] = obs.pop('moisture')
+    except KeyError:
+        pass
+
+    # Calculate total terpenes.
+    terp_results = [x for x in results if 'terp' in x['analysis']]
+    if terp_results:
+        total_terpenes = 0
+        for result in terp_results:
+            try:
+                total_terpenes += float(result['value'])
+            except ValueError:
+                pass
+        obs['total_terpenes'] = round(total_terpenes, 5)
+
     # Return the sample with a freshly minted sample ID.
     obs = {**CONFIDENT_CANNABIS, **obs}
     obs['lab_results_url'] = url
@@ -457,8 +509,6 @@ def parse_cc_url(
         salt=producer,
     )
     obs['sample_hash'] = create_hash(obs)
-    if not persist:
-        parser.quit()
     return obs
 
 
@@ -482,6 +532,7 @@ def parse_cc_pdf(
 def parse_cc_coa(
         parser,
         doc: Any,
+        verbose: Optional[bool] = False,
         **kwargs,
     ) -> dict:
     """Parse a Confident Cannabis CoA PDF or URL.
@@ -504,20 +555,24 @@ def parse_cc_coa(
     elif isinstance(doc, PDF):
         data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
     
-    # FIXME: Supplement data from the PDF.
-    if data.get('results') == '[]' and data.get('lab') == 'Encore Labs':
-        print('Parsing Encore Labs PDF...')
+    # Try to supplement data from the PDF if results are not online.
+    if data.get('results') == '[]':
+        if verbose:
+            print('Parsing custom Confident Cannabis PDF:', doc)
+        coa_data = parse_cc_custom_coa(parser, doc, **kwargs)
+        data = {**coa_data, **data}
     
+    # Return the data.
     return data
 
 
 # === Tests ===
 # Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
 if __name__ == '__main__':
-    pass
+    # pass
 
     # Test Confident Cannabis CoAs parsing.
-    # from cannlytics.data.coas import CoADoc
+    from cannlytics.data.coas import CoADoc
 
     # # [✓] Test: Ensure that the web driver works.
     # parser = CoADoc()
@@ -528,9 +583,21 @@ if __name__ == '__main__':
 
     # # [✓] TEST: Parse a CoA URL.
     # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/4ee67b54-be74-44e4-bb94-4f44d8294062'
+    # cc_coa_url = 'https://share.confidentcannabis.com/samples/public/share/f86633f2-a49a-4bb0-aece-8aab8e0f3b39'
     # parser = CoADoc()
-    # data = parse_cc_url(parser, cc_coa_url)
+    # data = parse_cc_url(parser, cc_coa_url, headless=False)
     # assert data is not None
+
+    # FIXME: Parse a private URL.
+    url = 'https://orders.confidentcannabis.com/report/public/sample/520e1f7e-c9cf-4d86-a069-7f8780935123'
+    parser = CoADoc()
+    data = parse_cc_url(
+        parser,
+        url,
+        headless=True,
+        verbose=True,
+    )
+    assert data is not None
 
     # # [✓] TEST: Parse a CoA PDF.
     # cc_coa_pdf = f'{DATA_DIR}/Classic Jack.pdf'

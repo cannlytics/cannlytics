@@ -6,7 +6,7 @@ Authors:
     Keegan Skeate <https://github.com/keeganskeate>
     Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/15/2022
-Updated: 9/16/2023
+Updated: 6/8/2024
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -39,10 +39,6 @@ from typing import Any, List, Optional
 # External imports.
 import cv2
 import numpy as np
-# try:
-#     import openai
-# except ImportError:
-#     print('Unable to find `openai` package. This tool is used for parsing with AI.')
 import openpyxl
 import pandas as pd
 import requests
@@ -51,7 +47,7 @@ from PIL import Image
 from pypdf import PdfMerger
 try:
     from pyzbar import pyzbar
-    # from pyzbar.pyzbar import decode
+    from pyzbar.pyzbar import ZBarSymbol
 except:
     print('Unable to import `zbar` library. This tool is used for decoding QR codes.')
 try:
@@ -85,7 +81,7 @@ from cannlytics.utils.constants import (
 )
 
 # Lab and LIMS CoA parsing algorithms.
-from cannlytics.data.coas.coa_ai import parse_coa_with_ai
+from cannlytics.data.coas.coa_parser import parse_coa_with_ai
 from cannlytics.data.coas.algorithms.acs import ACS_LABS
 from cannlytics.data.coas.algorithms.anresco import ANRESCO
 from cannlytics.data.coas.algorithms.cannalysis import CANNALYSIS
@@ -179,6 +175,107 @@ def convert_pdf_to_images(
         if os.path.isfile(magick_path) and i.startswith('magick-'):
             os.remove(magick_path)
     return image_files
+
+
+def get_result_value(
+        results,
+        analyte: str,
+        key: Optional[str] = 'key',
+        value: Optional[str] = 'value',
+        standardize: Optional[bool] = True,
+        analytes: Optional[dict] = None,
+    ):
+    """Get the value for an analyte from a list of standardized results."""
+    # Ensure that the results are a list.
+    try:
+        result_list = json.loads(results)
+    except:
+        try:
+            result_list = ast.literal_eval(results)
+        except:
+            result_list = []
+    if not isinstance(result_list, list):
+        return None
+    
+    # Standardize the keys.
+    result_data = pd.DataFrame(result_list)
+    if standardize:
+        if analytes is None:
+            analytes = ANALYTES
+        result_data[key] = result_data[key].map(analytes).fillna(result_data[key])
+
+    # Get the value of interest from the list of results.
+    if result_data.empty:
+        return None
+    try:
+        result = result_data.loc[result_data[key] == analyte, value].iloc[0]
+    except:
+        return 0
+    try:
+        return convert_to_numeric(result, strip=True)
+    except:
+        return result
+
+
+def json_to_list(results):
+    """Ensure results are in the correct format."""
+    if isinstance(results, str):
+        try:
+            return json.loads(results)
+        except:
+            try:
+                return ast.literal_eval(results)
+            except:
+                return results
+    return results
+
+
+def standardize_value(value):
+    """Standardize a value, converting to float if possible."""
+    if pd.isna(value):
+        return value
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+
+def standardize_result(result, analyte, analytes = ANALYTES, key='key', value='value'):
+    """Ensure results are in the correct format."""
+    result_data = pd.DataFrame(result)
+    try:
+        result_data[key] = result_data[key].map(analytes).fillna(result_data[key])
+    except:
+        return None
+    try:
+        return result_data.loc[result_data[key] == analyte, value].iloc[0]
+    except:
+        return None
+
+
+def standardize_results(
+        df,
+        compounds,
+        results_key='results',
+        key='key',
+        errors='skip',
+    ) -> pd.DataFrame:
+    """Standardize terpenes from results."""
+    df[results_key] = df[results_key].apply(json_to_list)
+    new_columns = {}
+    for c in compounds:
+        try:
+            new_columns[c] = df[results_key].apply(
+                lambda x: standardize_result(x, c, key=key)
+            )
+            if errors == 'skip':
+                new_columns[c] = new_columns[c].apply(standardize_value)
+            else:
+                new_columns[c] = pd.to_numeric(new_columns[c], errors='coerce')
+        except KeyError:
+            print(f"{c} not found in results.")
+    augmented_df = pd.DataFrame(new_columns)
+    return pd.concat([df, augmented_df], axis=1)
 
 
 class CoADoc:
@@ -632,6 +729,7 @@ class CoADoc:
             resolution: Optional[int] = 300,
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
+            use_qr_code: Optional[bool] = True,
             verbose: Optional[bool] = False,
         ) -> list:
         """Parse all CoAs given a directory, a list of files,
@@ -707,6 +805,7 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    use_qr_code=use_qr_code,
                     verbose=verbose,
                 )
                 coas.append(coa_data)
@@ -752,6 +851,7 @@ class CoADoc:
                         resolution=resolution,
                         temp_path=temp_path,
                         use_cached=use_cached,
+                        use_qr_code=use_qr_code,
                         verbose=verbose,
                     )
                     coas.append(coa_data)
@@ -784,6 +884,7 @@ class CoADoc:
                     resolution=resolution,
                     temp_path=temp_path,
                     use_cached=use_cached,
+                    use_qr_code=use_qr_code,
                     verbose=verbose,
                 )
 
@@ -812,6 +913,7 @@ class CoADoc:
             temp_path: Optional[str] = '/tmp',
             use_cached: Optional[bool] = False,
             verbose: Optional[bool] = False,
+            use_qr_code: Optional[bool] = True,
         ) -> dict:
         """Parse a CoA PDF. Searches the best guess image, then all
         images, for a QR code URL to find results online.
@@ -892,21 +994,22 @@ class CoADoc:
 
         # Attempt to use an URL from any QR code on the PDF.
         url = None
-        try:
-            qr_code_index = self.lims[known_lims].get('qr_code_index')
-            url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
-            if url is None and qr_code_index is not None:
+        if use_qr_code:
+            try:
+                qr_code_index = self.lims[known_lims].get('qr_code_index')
+                url = self.find_pdf_qr_code_url(pdf_file, qr_code_index)
+                if url is None and qr_code_index is not None:
+                    url = self.find_pdf_qr_code_url(pdf_file)
+            except IndexError:
                 url = self.find_pdf_qr_code_url(pdf_file)
-        except IndexError:
-            url = self.find_pdf_qr_code_url(pdf_file)
-        # Experimental: Try to find QR codes on the second page.
-        try:
-            if not url and deep_search:
-                url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
-        except:
-            pass
-        if verbose:
-            print(f'Found URL on PDF: {url}')
+            # Experimental: Try to find QR codes on the second page.
+            try:
+                if not url and deep_search:
+                    url = self.find_pdf_qr_code_url(pdf_file, page_index=1)
+            except:
+                pass
+            if verbose:
+                print(f'Found URL on PDF: {url}')
 
         # Get the LIMS parsing routine.
         algorithm_name = LIMS[known_lims]['coa_algorithm_entry_point']
@@ -915,7 +1018,7 @@ class CoADoc:
             print(f'Using algorithm: {algorithm_name}')
 
         # Use the URL if found, then try the PDF if the URL fails or is missing.
-        if url:
+        if url and use_qr_code:
             try:
                 if verbose:
                     print(f'Parsing URL: {url}')
@@ -1607,7 +1710,7 @@ class CoADoc:
                     # Keep the values from each result.
                     for result in sample_results:
                         result = {k: v for k, v in result.items() if v == v}
-                        analyte = result.get('key', snake_case(result.get('name')))
+                        analyte = result.get('key', snake_case(result.get('name', '')))
                         analyte = standard_analytes.get(analyte, analyte)
                         value = result.get('value', result.get('percent', result.get('mg_g')))
                         std[analyte] = value
@@ -1711,7 +1814,9 @@ class CoADoc:
             self,
             filename: Any,
             width: Optional[int] = 1024,
-            temp_path: Optional[str] = '/tmp'
+            temp_path: Optional[str] = '/tmp',
+            median_blur: Optional[int] = 25,
+            qr_size: Optional[int] = 512,
         ) -> str:
         """Scan an image for a QR code or barcode and return any data.
         Args:
@@ -1720,6 +1825,11 @@ class CoADoc:
         Returns:
             (str): Returns the data from the decoded QR code.
         """
+
+        # FIXME: Separate this logic out of the CoADoc class.
+
+        # FIXME: Re-write scanning with zxing?
+
         # Handle the filename.
         if isinstance(filename, str):
             image = cv2.imread(filename)
@@ -1783,16 +1893,41 @@ class CoADoc:
             img.save(outfile)
 
         # Read the resized image again (important) and try to decode QR codes.
-        code = None
         image = Image.open(outfile)
         codes = pyzbar.decode(image)
         if codes:
-            code = codes[0].data.decode('utf-8')
-        return code
+            return codes[0].data.decode('utf-8')
+        
+        # Try to read a cleaner QR code.
+        image = cv2.imread(outfile, cv2.IMREAD_GRAYSCALE)
+        clean_im = cv2.medianBlur(image, median_blur)  # Apply median blur for reducing noise
+        small_clean_im = cv2.resize(clean_im, (qr_size, qr_size), interpolation=cv2.INTER_AREA)  # Downscale the image
+        codes = pyzbar.decode(small_clean_im, symbols=[ZBarSymbol.QRCODE])
+        if codes:
+            return codes[0].data.decode('utf-8')
+
+        # Return None if nothing can be found.
+        return None
+
+    def get_result_value(
+            self,
+            results,
+            analyte: str,
+            key: Optional[str] = 'key',
+            value: Optional[str] = 'value',
+        ) -> Any:
+        """Get a value from a list of standardized results."""
+        return get_result_value(
+            results,
+            analyte=analyte,
+            key=key,
+            value=value,
+        )
 
     def quit(self):
         """Close any driver, end any session, and reset the parameters."""
         try:
+            self.driver.close()
             self.driver.quit()
         except:
             pass

@@ -1,22 +1,25 @@
 """
 Utility Functions | Cannlytics
-Copyright (c) 2021-2023 Cannlytics
+Copyright (c) 2021-2025 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 2/5/2023
+Updated: 1/4/2025
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general Cannlytics utility functions.
 """
-# Standard imports.
+# Standard imports:
 from base64 import b64encode, decodebytes
 from datetime import datetime, timedelta
+import glob
+import hashlib
 import json
 import os
 from re import split, sub, findall
 import secrets
+from time import sleep
 from typing import Any, Callable, List, Optional, Tuple
 from zipfile import ZipFile
 try:
@@ -24,21 +27,16 @@ try:
 except ImportError:
     print('Operating with Python < 3.9 is not recommended.')
 
-# External imports.
+# External imports:
 from dateutil import parser, relativedelta
-from fredapi import Fred
 from pandas import ExcelWriter, merge, NaT, to_datetime
 from pandas.tseries.offsets import MonthEnd
-import requests
 
-# Internal imports.
-try:
-    from cannlytics.utils.constants import (
-        RANDOM_STRING_CHARS,
-        state_time_zones,
-    )
-except ImportError:
-    print('Failed to load constants.')
+# Internal imports:
+from cannlytics.utils.constants import (
+    RANDOM_STRING_CHARS,
+    state_time_zones,
+)
 
 
 #-----------------------------------------------------------------------
@@ -811,22 +809,54 @@ def get_number_of_lines(
         return count
 
 
-def download_file_from_url(url, destination='', ext='', file_name = None):
-    """Download a file from a URL to a given directory.
-    Author: H S Umer farooq <https://stackoverflow.com/a/53153505>
-    License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
+def find_latest_file(data_dir: str, slug='all', ext='.xlsx') -> str:
     """
-    get_response = requests.get(url, stream=True)
-    if file_name is None:
-        file_name = snake_case(url.split('/')[-1])
-    if not file_name.endswith(ext):
-        file_name = file_name + ext
-    file_path = os.path.join(destination, file_name)
-    with open(file_path, 'wb') as f:
-        for chunk in get_response.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-    return file_path
+    Find the most recently modified data file in a specified directory
+    that includes a given slug and extension in the title.
+    Args:
+        data_dir (str): The directory to search for the files.
+        slug (str): The slug to search for in the file name, 'all' by default.
+        ext (str): The file extension to search for, '.xlsx' by default.
+    Returns:
+        str: The path to the most recently modified file with 'all' in the title.
+    """
+    search_pattern = os.path.join(data_dir, f'*{slug}*-*-*-*-*{ext}')
+    files = glob.glob(search_pattern)
+    files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+    if files:
+        return files[0]
+    else:
+        return ''
+
+
+def hash_file(filepath, size=65536):
+    """Generate a SHA-1 hash for a file."""
+    hasher = hashlib.sha1()
+    with open(filepath, 'rb') as f:
+        buf = f.read(size)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(size)
+    return hasher.hexdigest()
+
+
+def remove_duplicate_files(
+        directory: str,
+        size=65536,
+        verbose: Optional[bool] = False,
+    ):
+    """Remove duplicate PDFs from a directory."""
+    hashes = {}
+    for filename in os.listdir(directory):
+        if filename.endswith('.pdf'):
+            filepath = os.path.join(directory, filename)
+            file_hash = hash_file(filepath, size=size)
+            if file_hash in hashes:
+                os.remove(filepath)
+                if verbose:
+                    print(f"Removed duplicate file: {filepath}")
+            else:
+                hashes[file_hash] = filepath
 
 
 def unzip_files(zip_dir, extension='.zip'):

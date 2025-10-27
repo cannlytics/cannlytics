@@ -21,6 +21,7 @@ TODO:
 # Standard imports:
 import os
 import re
+from time import sleep
 from typing import Any, Optional, Tuple
 
 # External imports:
@@ -30,6 +31,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 try:
     import chromedriver_binary  # Adds chromedriver binary to path.
 except ImportError:
@@ -38,14 +42,14 @@ except ImportError:
 
 # === Dynamic HTML Scraping Tools ===
 
+# FIXME: This may be causing a severe memory leak.
 def initialize_selenium(
         browser=None,
         headless=True,
-        download_dir=None
+        download_dir=None,
     ) -> Any:
     """
     Initialize a Selenium WebDriver with preference for Chrome, falling back to Edge.
-
     The function attempts to initialize Chrome first; if it fails, it tries Edge.
     Users can specify a browser if desired.
 
@@ -61,10 +65,10 @@ def initialize_selenium(
         RuntimeError: If it fails to initialize both Chrome and Edge drivers.
     """
     browsers = ['chrome', 'edge']
-    if browser: browsers = [browser]
+    if browser:
+        browsers = [browser]
     for browser in browsers:
         try:
-            # Default to Chrome, or Edge if specified, then Edge as a fallback.
             if browser.lower() == 'chrome':
                 service = Service()
                 options = ChromeOptions()
@@ -78,26 +82,28 @@ def initialize_selenium(
                 options = EdgeOptions()
                 if headless:
                     options.add_argument('--headless')
-
-            # Set download preferences if a download directory is provided.
             if download_dir:
                 default_directory = os.path.normpath(os.path.join(os.getcwd(), download_dir))
                 prefs = {
                     'download.default_directory': default_directory,
                     'download.prompt_for_download': False,
                     'download.directory_upgrade': True,
-                    'plugins.always_open_pdf_externally': True
+                    'plugins.always_open_pdf_externally': True,
+                    # "safebrowsing.enabled": True
                 }
                 options.add_experimental_option('prefs', prefs)
-
             if browser.lower() == 'chrome':
-                return webdriver.Chrome(options=options, service=service)
+                driver = webdriver.Chrome(options=options, service=service)
             else:
-                return webdriver.Edge(options=options, service=service)
-
+                driver = webdriver.Edge(options=options, service=service)
+            return driver
         except Exception as e:
+            # Note: This has been added to try to fix the memory leak.
+            try:
+                driver.quit()
+            except:
+                pass
             print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
-
     raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
 
 
@@ -300,6 +306,82 @@ def find_company_url(company_name: str):
     TODO: Find a company's website URL. (Google search for name?)
     """
     raise NotImplementedError
+
+
+# === Download Tools ===
+
+def download_file_from_url(url, destination='', ext='', file_name = None):
+    """Download a file from a URL to a given directory.
+    Author: H S Umer farooq <https://stackoverflow.com/a/53153505>
+    License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
+    """
+    get_response = requests.get(url, stream=True)
+    if file_name is None:
+        file_name = url.split('/')[-1]
+    if not file_name.endswith(ext):
+        file_name = file_name + ext
+    file_path = os.path.join(destination, file_name)
+    with open(file_path, 'wb') as f:
+        for chunk in get_response.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+    return file_path
+
+
+def download_file_with_selenium(
+        url,
+        driver=None,
+        persist=False,
+        pause=3.33,
+        wait=10,
+        el_id='download',
+        method='iframe',
+        tag_name='iframe',
+        filename=None,
+        download_dir=None,
+        headless=True,
+    ):
+    if driver is None:
+        driver = initialize_selenium(
+            headless=headless,
+            download_dir=download_dir,
+        )
+    driver.get(url)
+    if method == 'iframe':
+        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
+        el = WebDriverWait(driver, 10).until(presence)
+        driver.switch_to.frame(el)
+        presence = EC.presence_of_element_located((By.ID, el_id))
+        download_button = WebDriverWait(driver, wait).until(presence)
+        download_button.click()
+    elif method == 'button':
+        presence = EC.presence_of_element_located((By.ID, el_id))
+        download_button = WebDriverWait(driver, wait).until(presence)
+        download_button.click()
+    elif method == 'confident_cannabis':
+        try:
+            download_button = WebDriverWait(driver, wait).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'btn-primary') and contains(@ng-click, 'downloadFile')]"))
+            )
+            download_button.click()
+            sleep(pause)
+        except Exception as e:
+            print(f"Error downloading Confident Cannabis COA: {str(e)}")
+    else:
+        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
+        el = WebDriverWait(driver, 10).until(presence)
+        pdf_url = el.get_attribute('href')
+        response = requests.get(pdf_url)
+        if response.status_code == 200:
+            if filename is None:
+                filename = os.path.basename(pdf_url)
+            filepath = os.path.join(download_dir, filename)
+            with open(filepath, 'wb') as file:
+                file.write(response.content)
+    sleep(pause)
+    if not persist:
+        driver.close()
+        driver.quit()
 
 
 # === Google Drive Tools ===

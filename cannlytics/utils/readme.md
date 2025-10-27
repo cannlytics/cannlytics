@@ -100,5 +100,4 @@ There are a number of useful constants in the `cannlytics.utils.constants` submo
 | `encode_pdf(filename)` | Open a PDF file in binary mode. |
 | `get_directory_files(target_dir, file_type)` | Get all of the files of a specified type in a given directory. |
 | `get_number_of_lines(file_name, encoding='utf-16', errors='ignore')` | Read the number of lines in a large file. |
-| `download_file_from_url(url, destination='', ext='')` | Download a file from a URL to a given directory. |
 | `unzip_files(zip_dir, extension='.zip')` | Unzip all files in a specified folder. Alternatively, pass a .zip file to extract that file. |

@@ -15,22 +15,36 @@ from time import sleep
 from typing import List, Optional
 
 # External imports:
-from cannlytics.ai import INSTRUCTIONAL_PROMPT, initialize_openai
+# from cannlytics.ai import INSTRUCTIONAL_PROMPT, initialize_openai
 import pandas as pd
-import openai
+from openai import OpenAI
+
+
+# Define AI constants.
+# FIXME: Update the prompt to use models.
+INSTRUCTIONAL_PROMPT = 'Only return JSON and always return at least an empty object, {}, if no data can be found. Return a value of `null` for any field that cannot be found.'
+MAX_PROMPT_LENGTH = 128_000
 
 
 def generate_strain_art(
         name: str,
-        openai_api_key: Optional[str] = None,
-        art_style=' in the style of pixel art',
+        art_style=' in the style of a scientific drawing',
         n=1,
         size='1024x1024',
-        user: Optional[str] = 'cannlytics',
+        user: Optional[str] = None,
+        openai_api_key: Optional[str] = None,
+        model: Optional[str] = 'dall-e-3',
+        organization: Optional[str] = None,
+        project: Optional[str] = None,
     ) -> str:
     """Generate a strain art image URL given text."""
-    initialize_openai(openai_api_key)
-    response = openai.Image.create(
+    client = OpenAI(
+        organization=organization,
+        project=project,
+        api_key=openai_api_key,
+    )
+    response = client.images.generate(
+        model=model,
         prompt=name + art_style,
         n=n,
         size=size,
@@ -44,13 +58,14 @@ def generate_strain_description(
         name: str,
         stats: Optional[dict] = None,
         instructions: Optional[str] = None,
-        model='gpt-4',
+        model='gpt-4o-mini',
         openai_api_key: Optional[str] = None,
+        organization: Optional[str] = None,
+        project: Optional[str] = None,
         max_tokens: Optional[int] = 1_000,
         temperature: Optional[float] = 0.42,
         word_count=50,
         user: Optional[str] = 'cannlytics',
-        retry_pause: Optional[float] = 3.33,
         verbose: Optional[bool] = False,
     ) -> str:
     """Generate a description for a strain or product given text."""
@@ -80,26 +95,18 @@ def generate_strain_description(
         print('MESSAGES:', messages)
 
     # Make the request to OpenAI. 
-    try:
-        initialize_openai(openai_api_key)
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            user=user,
-        )
-    except:
-        if retry_pause:
-            sleep(retry_pause)
-            initialize_openai(openai_api_key)
-            response = openai.ChatCompletion.create(
-                model=model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                user=user,
-            )
+    client = OpenAI(
+        organization=organization,
+        project=project,
+        api_key=openai_api_key,
+    )
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        user=user,
+    )
 
     # Get the content of the response.
     if verbose:
@@ -111,13 +118,14 @@ def generate_strain_description(
 
 def identify_strains(
         text,
-        model='gpt-4',
+        model='gpt-4o-mini',
         openai_api_key: Optional[str] = None,
+        organization: Optional[str] = None,
+        project: Optional[str] = None,
         max_tokens: Optional[int] = 1_000,
         temperature: Optional[float] = 0.0,
         user: Optional[str] = 'cannlytics',
         verbose: Optional[bool] = False,
-        retry_pause: Optional[float] = 3.33,
         instructional_prompt: Optional[str] = None,
         identification_prompt: Optional[str] = None,
         json_key: Optional[str] = 'strains',
@@ -137,28 +145,20 @@ def identify_strains(
         {'role': 'user', 'content': f'Text: {text}\n\nStrains:'}
     ]
 
-    # Make the request to OpenAI. 
-    try:
-        initialize_openai(openai_api_key)
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            user=user,
-        )
-    except:
-        if retry_pause:
-            sleep(retry_pause)
-            initialize_openai(openai_api_key)
-            response = openai.ChatCompletion.create(
-                model=model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                user=user,
-            )
-    
+    # Make the request to OpenAI.
+    client = OpenAI(
+        organization=organization,
+        project=project,
+        api_key=openai_api_key,
+    )
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        user=user,
+    )
+
     # Get the content of the response.
     if verbose:
         print('RESPONSE:', json.dumps(response))
@@ -177,33 +177,6 @@ def identify_strains(
     # Return the extracted data.
     # TODO: Return the prompts and cost.
     return extracted_data
-
-
-def train_strain_name_identification_model():
-    """Train a model to identify strain names."""
-
-    # TODO: Get strain name vocabulary.
-    strain_vocab_file = 'strain-vocab.txt'
-    strain_data = pd.read_excel('ccrs-strain-statistics-2023-03-07.xlsx')
-    strain_data['strain_name'] = strain_data['strain_name'].apply(
-        lambda x: x.title()
-    )
-    strain_data.drop_duplicates(subset=['strain_name'], inplace=True)
-    strain_data.sort_values(by=['strain_name'], inplace=True)
-    strain_data.to_csv(
-        strain_vocab_file,
-        header=None,
-        index=None,
-        sep='\t',
-        mode='w',
-        columns=['strain_name'],
-        quoting=csv.QUOTE_NONE,
-        # escapechar=None
-    )
-
-    # TODO: Fine-tine a model to identify strain names.
-
-    raise NotImplementedError
 
 
 # === Tests ===

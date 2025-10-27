@@ -1,4 +1,0 @@
-# Function dependencies, for example:
-# package>=version
-cannlytics==0.0.14
-firebase_admin
