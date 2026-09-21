@@ -6,13 +6,13 @@
 
 Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
 
-In order to parse CoAs well, CoADoc takes into consideration:
+In order to parse CoAs well, `COAdoc` takes into consideration:
 
 * The lab or LIMS that generated the CoA;
 * PDF properties, such as the fonts used and the page dimensions;
 * All detected words, lines, columns, white-space, etc.
 
-The roadmap for CoADoc is to continue adding lab and LIMS CoA parsing algorithms until a general CoA parsing algorithm may be able to be created. As CoA parsing algorithms are still under development, if you want a specific lab or LIMS CoA parsed, then please contact The Cannlytics Team: <dev@cannlytics.com>
+The roadmap for `COAdoc` is to continue adding lab and LIMS CoA parsing algorithms until a general CoA parsing algorithm may be able to be created. As CoA parsing algorithms are still under development, if you want a specific lab or LIMS CoA parsed, then please contact The Cannlytics Team: <dev@cannlytics.com>
 
 ## Algorithms
 
@@ -58,13 +58,13 @@ Then make sure to install the following dependencies:
 
 ## Usage
 
-Initialize a `CoADoc` parsing client.
+Initialize a `COAdoc` parsing client.
 
 ```py
-from cannlytics.data.coas import CoADoc
+from cannlytics.data.coas import COAdoc
 
 # Initialize a COA parser.
-parser = CoADoc()
+parser = COAdoc()
 ```
 
 Parse a PDF.
@@ -100,7 +100,7 @@ parser.quit()
 
 ## Core Methods
 
-`CoADoc` comes ready to rumble, but to unleash `CoADoc`'s true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) (and that ChromeDriver is in your PATH) for parsing complex lab/LIMS webpages. Also, you can install [ImageMagick](https://imagemagick.org/script/download.php#windows) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) to use optical character recognition (OCR) to attempt to recognize the text of COAs stored as images.
+`COAdoc` comes ready to rumble, but to unleash `COAdoc`'s true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) (and that ChromeDriver is in your PATH) for parsing complex lab/LIMS webpages. Also, you can install [ImageMagick](https://imagemagick.org/script/download.php#windows) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) to use optical character recognition (OCR) to attempt to recognize the text of COAs stored as images.
 
 | Function | Description |
 |----------|-------------|
@@ -284,7 +284,7 @@ If you are developing a new parsing routine for a lab or LIMS, then you will nee
     }
     ```
 
-You can use `CoADoc`'s built-in helper functions in your parsing algorithms.
+You can use `COAdoc`'s built-in helper functions in your parsing algorithms.
 
 | Function | Description |
 |----------|-------------|

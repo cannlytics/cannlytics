@@ -1,10 +1,10 @@
 """
 Authentication Logic | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2026 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 8/24/2023
+Updated: 3/22/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Authentication mechanisms for the Cannlytics API,
@@ -39,15 +39,15 @@ def authenticate_request(request):
         if session_cookie is None:
             session_cookie = request.session.get('__session')
         claims = verify_session_cookie(session_cookie, check_revoked=True)
-    except:
+    except Exception:
         try:
             authorization = request.META['HTTP_AUTHORIZATION']
             key = authorization.split(' ').pop()
             try:
                 claims = get_user_from_api_key(key)
-            except:
+            except Exception:
                 claims = verify_token(key)
-        except:
+        except Exception:
             pass
     return claims
 

@@ -4,7 +4,7 @@ The `cannlytics.utils` module contains constants and general utility functions f
 
 ## Constants
 
-There are a number of useful constants in the `cannlytics.utils.constants` submodule that you can use for standardizing data.
+There are a number of useful constants in the `cannlytics.data.constants` submodule that you can use for standardizing data.
 
 | Constant | Description |
 |----------|-------------|

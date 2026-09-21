@@ -4,7 +4,7 @@ Copyright (c) 2024 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/20/2024
-Updated: 10/20/2024
+Updated: 6/12/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Cannabis-related statistical functions.
@@ -13,8 +13,13 @@ Description: Cannabis-related statistical functions.
 # External imports:
 import numpy as np
 import pandas as pd
-from skimage import color
-
+try:
+    from skimage import color
+except ImportError as _err:  # pragma: no cover
+    raise ImportError(
+        'cannlytics.stats requires the `science` extra. Install it with:'
+        '\n\n    pip install "cannlytics[science]"\n'
+    ) from _err
 
 def calc_diversity_index(df: pd.DataFrame, compounds: list) -> list:
     """Calculate the Shannon Diversity Index given results and a list of compounds.
@@ -30,7 +35,6 @@ def calc_diversity_index(df: pd.DataFrame, compounds: list) -> list:
         shannon_index = -np.sum(proportions * np.log2(proportions))
         diversities.append(shannon_index)
     return diversities
-
 
 def calculate_purpleness(rgb, how='scale', shade=510):
     """Purple is dominant in red and blue channels, and low in green.
@@ -50,7 +54,6 @@ def calculate_purpleness(rgb, how='scale', shade=510):
         return (purpleness + shade) / (shade * 2)
     elif how == 'normalized':
         return purpleness / shade
-
 
 def calculate_colourfulness(rgb, metric='M3') -> float:
     """Calculate the colourfulness of an image.

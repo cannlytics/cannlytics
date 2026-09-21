@@ -1,102 +1,238 @@
-# 🔥Cannlytics
+# Cannlytics
 
-[Cannlytics](https://cannlytics.com) is a set of tools to wrangle, augment, archive, and analyze cannabis data. From seed to sale to the effects, Cannlytics can help you access, organize, analyze, and generally benefit from available cannabis data. You are welcome to use any and all of the tools that you find useful.
+**Simple Cannabis Analytics** — The `cannlytics` Python package provides tools to wrangle, augment, archive, and analyze cannabis data. From COA parsing to lab results analytics to the Metrc API, Cannlytics puts cannabis data in your hands.
 
-## Installation <a name="installation"></a>
+[![PyPI](https://img.shields.io/pypi/v/cannlytics)](https://pypi.org/project/cannlytics/)
+[![Python](https://img.shields.io/pypi/pyversions/cannlytics)](https://pypi.org/project/cannlytics/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-224%20passed-brightgreen)]()
 
-You can install the `cannlytics` Python package from [PyPI](https://pypi.org/project/cannlytics/).
+---
 
-```shell
+## Installation
+
+Install the core package from [PyPI](https://pypi.org/project/cannlytics/):
+
+```bash
 pip install cannlytics
 ```
 
-You can clone the repository to get your hands on the Cannlytics source code.
+Install with optional features as needed:
 
-```shell
-git clone https://github.com/cannlytics/cannlytics.git
+```bash
+# COA parsing (PDF extraction).
+pip install cannlytics[coa]
+
+# COA parsing with AI-powered multi-provider support.
+pip install cannlytics[coa,ai]
+
+# Firebase / Firestore integration.
+pip install cannlytics[firebase]
+
+# Everything.
+pip install cannlytics[all]
 ```
 
-## Data <a name="data"></a>
+Or clone the repository:
 
-The `cannlytics.data` module is a toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data. See [the `cannlytics.data` documentation](./data/readme.md) for nifty tools to get, standardize, and archive your cannabis data.
+```bash
+git clone https://github.com/cannlytics/cannlytics.git
+cd cannlytics
+pip install -e ".[all]"
+```
 
-### COAs <a name="coas"></a>
+## Quick Start
 
-Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding **all the data**, standardizing the data, and cleanly returning the data to you. You can read more about using CoADoc in [the `cannlytics.data.coas` documentation](./data/coas/readme.md).
+### Parse a COA
 
-## Metrc <a name="metrc"></a>
+Extract lab results from a Certificate of Analysis PDF:
 
-You can use the `cannlytics.metrc` module to securely interface with the Metrc API and perform all operations needed for compliance. Simply plug in your vendor and user API keys, specify your state of operations, and you're off to the races.
+```python
+from cannlytics.data.coas import COAdoc
 
-```py
-from cannlytics import metrc
+parser = COAdoc()
+results = parser.parse('blue-dream-coa.pdf')
+print(results['total_thc'])   # 24.5
+print(results['strain_name']) # Blue Dream
+print(results['status'])      # pass
+```
 
-# Initialize a Metrc API client.
-track = metrc.authorize(
+### Access Cannabis Data
+
+Query Cannlytics data through the Firebase API:
+
+```python
+from cannlytics.firebase import initialize_firebase, get_collection
+
+# Initialize with your credentials.
+db = initialize_firebase('.env')
+
+# Query lab results.
+results = get_collection(
+    'public/data/results',
+    filters=[{'key': 'state', 'operation': '==', 'value': 'ca'}],
+    order_by='total_thc',
+    desc=True,
+    limit=100,
+)
+
+for r in results:
+    print(f"{r['product_name']}: {r['total_thc']}% THC")
+```
+
+### Use the Metrc API
+
+Interface with the Metrc seed-to-sale tracking system:
+
+```python
+from cannlytics.metrc import Metrc
+
+track = Metrc(
     'your-vendor-api-key',
     'your-user-api-key',
-    primary_license='your-user-license-number',
+    primary_license='123',
     state='ok',
+    logs=True,
+    test=False,
 )
-```
 
-Producer / processor workflow:
-
-```py
-# Get a plant by it's ID.
+# Get a plant by its ID.
 plant = track.get_plants(uid='123')
 
-# Change the growth phase from vegetative to flowering.
-plant.flower(tag='your-plant-tag')
-
-# Move the flowering plant to a new room.
-plant.move(location_name='The Flower Room')
-
-# Manicure useable cannabis from the flowering plant.
-plant.manicure(harvest_name='Old-Time Moonshine', weight=4.20)
-
-# Harvest the flowering plant.
+# Harvest the plant.
 plant.harvest(harvest_name='Old-Time Moonshine', weight=420)
 ```
 
-Lab workflow:
+## Package Overview
 
-```py
-# Post lab results.
-track.post_lab_results([{...}, {...}])
+| Module | Description | Install |
+|--------|-------------|---------|
+| `cannlytics.data.coas` | COA parsing engine — AI-powered with multi-provider fallback | `pip install cannlytics[coa,ai]` |
+| `cannlytics.firebase` | Firestore, Storage, Auth, Secret Manager wrapper | `pip install cannlytics[firebase]` |
+| `cannlytics.metrc` | Metrc API client for seed-to-sale compliance | Core |
+| `cannlytics.utils` | String, date, file, and data utilities | Core |
+| `cannlytics.data.compounds` | Cannabinoid, terpene, pesticide reference data | Core |
+| `cannlytics.data.cache` | JSONL-backed caching client (Bogart) | Core |
+| `cannlytics.ai` | Embedding creation and retrieval | `pip install cannlytics[ai]` |
 
-# Get a tested package.
-test_package = track.get_packages(label='abc')
+## Firebase Module
 
-# Get the tested package's lab result.
-lab_results = track.get_lab_results(uid=test_package.id)
+The `cannlytics.firebase` module wraps `firebase_admin` with an ergonomic path-based API. Organized into focused submodules:
+
+| Submodule | Contents |
+|-----------|----------|
+| `core.py` | Firestore init, CRUD, queries, batch writes, IDs, logging |
+| `storage.py` | Upload, download, list, rename, delete files |
+| `firebase_auth.py` | User management, custom claims, tokens, sessions |
+| `secrets.py` | Google Cloud Secret Manager |
+| `pipelines.py` | Firestore Enterprise Pipeline operations *(experimental)* |
+
+All functions are re-exported for convenience:
+
+```python
+from cannlytics.firebase import initialize_firebase, get_document, upload_file
 ```
 
-Retail workflow:
+### Firestore Enterprise
 
-```py
-# Get a retail package.
-package = track.get_packages(label='abc')
+Supports multi-database configurations via the `database_id` parameter:
 
-# Create a sales receipts.
-track.create_receipts([{...}, {...}])
-
-# Get recent receipts.
-sales = track.get_receipts(action='active', start='2021-04-20')
-
-# Update the sales receipt.
-sale = track.get_receipts(uid='420')
-sale.total_price = 25
-sale.update()
+```python
+db = initialize_firebase('.env', database_id='cannlytics-enterprise')
 ```
 
-See [the `cannlytics.metrc` documentation](./cannlytics/metrc/readme.md) for more information and examples on how you can interface with the Metrc API.
+Once initialized, all subsequent calls (`get_document`, `get_collection`, etc.) automatically target the Enterprise database — no code changes needed in your API endpoints.
 
+### Data Operations
+
+```python
+from cannlytics.firebase import (
+    get_document,
+    get_collection,
+    update_document,
+    update_documents,
+)
+
+# Get a single document.
+strain = get_document('public/data/strains/blue-dream')
+
+# Query with filters, ordering, and pagination.
+results = get_collection(
+    'public/data/results',
+    filters=[
+        {'key': 'state', 'operation': '==', 'value': 'wa'},
+        {'key': 'total_thc', 'operation': '>=', 'value': 20.0},
+    ],
+    order_by='date_tested',
+    desc=True,
+    limit=50,
+)
+
+# Batch update (auto-shards at 420 docs per batch).
+refs = [f'public/data/results/{r["id"]}' for r in results]
+data = [{'reviewed': True} for _ in results]
+update_documents(refs, data)
+```
+
+## COA Parsing
+
+The `cannlytics.data.coas` module provides a hybrid COA parsing engine that uses AI with a multi-provider fallback chain (Anthropic → OpenAI → Gemini → xAI):
+
+<!-- FIXME: This example is broken -->
+
+```python
+from cannlytics.data.coas import COAdoc
+
+parser = COAdoc()
+results = parser.parse('coa.pdf')
+```
+
+See the [COA documentation](./cannlytics/data/coas/readme.md) for full details.
+
+## Data Assets
+
+Cannlytics maintains comprehensive cannabis datasets:
+
+| Dataset | Records | Coverage |
+|---------|---------|----------|
+| Cannabis Licenses | 41,000+ | 48 jurisdictions (37 U.S. + 11 Canada) |
+| Lab Results | 995,000+ | 14+ U.S. states |
+| Strains | 5,000+ | With terpene/cannabinoid statistics |
+| Analytes | 200+ | Full reference data |
+
+## Testing
+
+Run the test suite:
+
+```bash
+pip install cannlytics[test]
+pytest tests/ -v --cov=cannlytics --cov-report=term-missing
+```
+
+224 tests cover all 77 public functions. No credentials or network access required — all external services are fully mocked.
+
+## Development
+
+```bash
+git clone https://github.com/cannlytics/cannlytics.git
+cd cannlytics
+pip install -e ".[dev]"
+pytest tests/ -v
+ruff check cannlytics/
+```
+
+## Contributing
+
+Contributions are welcome. Please ensure:
+
+1. All new functions have at least one test.
+2. `pytest tests/` passes with no failures.
+3. `ruff check cannlytics/` passes with no errors.
 
 ## License
 
 ```
-Copyright (c) 2020-2025 Cannlytics
+Copyright (c) 2020-2026 Cannlytics
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

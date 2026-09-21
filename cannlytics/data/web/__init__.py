@@ -4,8 +4,15 @@ Copyright (c) 2023-2025 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/2/2023
-Updated: 4/23/2025
+Updated: 6/12/2026
 """
+# Dependency guard.
+#
+# This block previously read `except ImportError: pass`, which swallowed
+# the failure entirely: the module imported successfully, exported
+# nothing, and the user hit `AttributeError: module has no attribute
+# ...` with no hint that a missing extra was the cause. Fail loudly and
+# name the extra instead.
 try:
     from .web import (
         format_params,
@@ -42,5 +49,8 @@ try:
         'download_file_from_url',
         'download_file_with_selenium',
     ]
-except ImportError:
-    pass
+except ImportError as _err:  # pragma: no cover
+    raise ImportError(
+        'cannlytics.data.web requires the `web` extra. Install it with:'
+        '\n\n    pip install "cannlytics[web]"\n'
+    ) from _err

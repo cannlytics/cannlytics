@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/10/2021
-Updated: 12/31/2023
+Updated: 6/12/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Resources:
@@ -19,6 +19,7 @@ TODO:
         r.html.search('Python is a {} language')[0]
 """
 # Standard imports:
+import logging
 import os
 import re
 from time import sleep
@@ -39,10 +40,12 @@ try:
 except ImportError:
     pass # Otherwise, ChromeDriver should be in your path.
 
-
 # === Dynamic HTML Scraping Tools ===
 
 # FIXME: This may be causing a severe memory leak.
+# Module logger. A library must not print to stdout.
+logger = logging.getLogger(__name__)
+
 def initialize_selenium(
         browser=None,
         headless=True,
@@ -103,9 +106,8 @@ def initialize_selenium(
                 driver.quit()
             except:
                 pass
-            print(f"Failed to initialize the {browser} driver. Trying the next one. Error: {e}")
+            logger.warning('Failed to initialize the %s driver, trying the next one: %s', browser, e)
     raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
-
 
 # === Static HTML Scraping Tools ===
 
@@ -120,7 +122,6 @@ def format_params(parameters, **kwargs):
             key = parameters[param]
             params[key] = kwargs[param]
     return params
-
 
 def get_page_metadata(url: str) -> Tuple:
     """Get the metadata of a web page.
@@ -152,7 +153,6 @@ def get_page_metadata(url: str) -> Tuple:
     }
     return response, html, metadata
 
-
 def get_page_description(html: str) -> str:
     """Get the description of a web page.
     Args:
@@ -176,7 +176,6 @@ def get_page_description(html: str) -> str:
             pass
     return description
 
-
 def get_page_image(html: str, index: Optional[int] = 0) -> str:
     """Get an image on a web page, the first image by default.
     Args:
@@ -195,7 +194,6 @@ def get_page_image(html: str, index: Optional[int] = 0) -> str:
         image = html.find_all('img')[index].get('src')
     return image
 
-
 def get_page_favicon(html: str, url: Optional[str] = '') -> str:
     """Get the favicon from a web page.
     Args:
@@ -212,7 +210,6 @@ def get_page_favicon(html: str, url: Optional[str] = '') -> str:
         favicon = f"{url.rstrip('/')}/favicon.ico"
     return favicon
 
-
 def get_page_theme_color(html: str) -> str:
     """Get the theme color of a web page.
     Args:
@@ -225,7 +222,6 @@ def get_page_theme_color(html: str) -> str:
         return color
     else:
         return None
-
 
 def get_page_phone_number(html: str, response: Any, index=0) -> str:
     """Get a phone number on a web page, the first found by default.
@@ -253,10 +249,9 @@ def get_page_phone_number(html: str, response: Any, index=0) -> str:
         )[-1]
         return phone
     except:
-        print('Phone number not found')
+        logger.debug('Phone number not found')
         phone = ''
         return phone
-
 
 def get_page_email(
         html: str,
@@ -280,10 +275,9 @@ def get_page_email(
     try:
         email = html.select('a[href*=mailto]')[index].text
     except:
-        print('Email not found')
+        logger.debug('Email not found')
         email = ''
         return email
-
 
 def find_company_address():
     """
@@ -293,20 +287,17 @@ def find_company_address():
     # street, city, state, zipcode = None, None, None, None
     # return street, city, state, zipcode
 
-
 def find_company_linkedin():
     """
     TODO: Tru to find a company's LinkedIn URL. (Try to find LinkedIn on homepage?)
     """
     raise NotImplementedError
 
-
 def find_company_url(company_name: str):
     """
     TODO: Find a company's website URL. (Google search for name?)
     """
     raise NotImplementedError
-
 
 # === Download Tools ===
 
@@ -326,7 +317,6 @@ def download_file_from_url(url, destination='', ext='', file_name = None):
             if chunk:
                 f.write(chunk)
     return file_path
-
 
 def download_file_with_selenium(
         url,
@@ -366,7 +356,7 @@ def download_file_with_selenium(
             download_button.click()
             sleep(pause)
         except Exception as e:
-            print(f"Error downloading Confident Cannabis COA: {str(e)}")
+            logger.error('Error downloading Confident Cannabis COA: %s', e)
     else:
         presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
         el = WebDriverWait(driver, 10).until(presence)
@@ -382,7 +372,6 @@ def download_file_with_selenium(
     if not persist:
         driver.close()
         driver.quit()
-
 
 # === Google Drive Tools ===
 
@@ -413,7 +402,6 @@ def download_google_drive_file(drive_file, destination):
         )
     download_google_drive_file_save_response(drive_response, destination)    
 
-
 def download_google_drive_file_confirm_token(drive_response):
     """
     Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
@@ -423,7 +411,6 @@ def download_google_drive_file_confirm_token(drive_response):
         if k.startswith('download_warning'):
             return v
     return None
-
 
 def download_google_drive_file_save_response(drive_response, destination):
     """

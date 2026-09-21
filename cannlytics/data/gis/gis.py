@@ -4,7 +4,7 @@ Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/3/2023
+Updated: 6/12/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -14,6 +14,7 @@ Description:
 """
 # Standard imports.
 from datetime import datetime
+import logging
 from time import sleep
 from typing import Any, List, Optional, Tuple
 
@@ -26,6 +27,8 @@ import zipcodes
 # Internal imports.
 from cannlytics.firebase import initialize_firebase, get_document
 
+# Module logger. A library must not print to stdout.
+logger = logging.getLogger(__name__)
 
 def get_google_maps_api_key() -> str:
     """Get Google Maps API key.
@@ -55,7 +58,7 @@ def get_google_maps_api_key() -> str:
         if google_maps_api_key:
             return google_maps_api_key
     except Exception as e:
-        print(f"Failed to get Google Maps API key from Secret Manager: {e}")
+        logger.warning('Failed to get Google Maps API key from Secret Manager: %s', e)
 
     # Try to get the key from Firestore.
     try:
@@ -64,11 +67,10 @@ def get_google_maps_api_key() -> str:
         if data and 'google_maps_api_key' in data:
             return data['google_maps_api_key']
     except Exception as e:
-        print(f"Failed to get Google Maps API key from Firestore: {e}")
+        logger.warning('Failed to get Google Maps API key from Firestore: %s', e)
 
     # Raise an exception if the key is not found.
     raise Exception("Failed to get Google Maps API key")
-
 
 def get_state_data(
         state: str,
@@ -95,7 +97,6 @@ def get_state_data(
     if len(series) == 1:
         return series[0]
     return series
-
 
 def get_state_population(
         state: str,
@@ -133,7 +134,6 @@ def get_state_population(
     if len(pops) == 1:
         return pops[0]
     return pops
-
 
 def geocode_addresses(
         data,
@@ -177,7 +177,6 @@ def geocode_addresses(
                 if key == 'administrative_area_level_2':
                     data.at[index, 'county'] = info['long_name']
     return data
-
 
 def search_for_address(
         query: str,
@@ -229,7 +228,6 @@ def search_for_address(
             candidate['county'] = ''
     return {**result, **candidate}
 
-
 def get_transfer_distance(
         api_key,
         start,
@@ -252,7 +250,6 @@ def get_transfer_distance(
     km = elements['distance']['value']
     duration = elements['duration']['value']
     return km, duration
-
 
 def get_transfer_route(
         api_key,
@@ -284,7 +281,6 @@ def get_transfer_route(
     min = driving_directions[0]['legs'][0]['duration']['value']
     polyline = driving_directions[0]['overview_polyline']['points']
     return m, min, polyline
-
 
 def initialize_googlemaps(env_file: Optional[str] = './.env') -> Any:
     """Initialize the Google Maps client.

@@ -1,0 +1,283 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║ Cannlytics — Simple Cannabis Analytics                           ║
+# ║ https://github.com/cannlytics/cannlytics                        ║
+# ╚══════════════════════════════════════════════════════════════════╝
+#
+# Install patterns:
+#   pip install cannlytics                    Core only (5 deps)
+#   pip install cannlytics[coa]               + COA parsing
+#   pip install cannlytics[coa,ai]            + AI-powered parsing
+#   pip install cannlytics[coa,ai,qr]         + QR code scanning
+#   pip install cannlytics[firebase]          + Firebase / Firestore
+#   pip install cannlytics[all]               Everything
+
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+# ═══════════════════════════════════════════════════════════════════
+# Project Metadata
+# ═══════════════════════════════════════════════════════════════════
+
+[project]
+name = "cannlytics"
+version = "1.0.2"
+description = "Simple cannabis analytics — COA parsing, data tools, and the Metrc API."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Cannlytics", email = "dev@cannlytics.com" },
+    { name = "Keegan Skeate", email = "keegan@cannlytics.com" },
+]
+keywords = [
+    "cannabis",
+    "cannlytics",
+    "coa",
+    "certificate-of-analysis",
+    "analytics",
+    "data",
+    "metrc",
+    "lab-results",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+# ── Core Dependencies ────────────────────────────────────────────
+# Intentionally minimal: only what the base package needs to import.
+# Everything else is in [project.optional-dependencies].
+dependencies = [
+    "numpy",
+    "pandas",
+    "python-dateutil",
+    "python-dotenv",
+    "requests",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# Optional Dependencies
+# ═══════════════════════════════════════════════════════════════════
+
+[project.optional-dependencies]
+
+# COA Parsing (COAdoc) — algorithmic PDF parsing.
+coa = [
+    "pdfplumber>=0.10.0",
+    "Pillow>=10.0",
+]
+
+# AI-powered COA parsing — multi-provider support.
+ai = [
+    "anthropic>=0.30",
+    "openai>=1.0",
+    "google-genai>=1.0",
+    # Required, not optional: without pydantic, schema.py leaves
+    # LabTestMetadata/LabAnalysis as None and ai_client.py silently
+    # falls back to free-text JSON extraction instead of constrained
+    # structured output. See cannlytics/data/coas/schema.py.
+    "pydantic>=2.0",
+]
+
+# QR code scanning — Python fallback decoder.
+# Note: The preferred decoder is qrustie (Rust binary, not pip-installed).
+qr = [
+    "pyzbar>=0.1.9",
+]
+
+# QR region-crop enhancement (OpenCV contour detection).
+qr-cv = [
+    "opencv-python>=4.0",
+]
+
+# Legacy COA parsing (deprecated CoADoc) — heavy deps.
+coa-legacy = [
+    "opencv-python>=4.0",
+    "pyzbar>=0.1.9",
+    "pytesseract>=0.3",
+    "Wand>=0.6",
+    "pypdf>=3.0",
+]
+
+# Firebase / Google Cloud services.
+firebase = [
+    "firebase-admin>=6.0",
+    "google-cloud-secret-manager>=2.0",
+    "google-cloud-firestore>=2.0",
+]
+
+# Data science & analysis.
+science = [
+    "matplotlib>=3.0",
+    "scikit-learn>=1.0",
+    "scikit-image>=0.20",
+    "statsmodels>=0.14",
+    "pyarrow>=10.0",
+]
+
+# Web scraping.
+web = [
+    "beautifulsoup4>=4.0",
+    "selenium>=4.0",
+]
+
+# Miscellaneous utilities.
+utils = [
+    "datasets>=2.0",
+    "fredapi>=0.5",
+    "googlemaps>=4.0",
+    "openpyxl>=3.0",
+    "xxhash>=3.0",
+    "zipcodes>=1.2",
+]
+
+# Testing.
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "reportlab>=4.0",
+]
+
+# Development.
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "reportlab>=4.0",
+    "pydantic>=2.0",
+    "ruff>=0.1",
+]
+
+# Everything — union of all optional groups.
+all = [
+    # coa
+    "pdfplumber>=0.10.0",
+    "Pillow>=10.0",
+    # ai
+    "anthropic>=0.30",
+    "openai>=1.0",
+    "google-genai>=1.0",
+    # qr
+    "pyzbar>=0.1.9",
+    # qr-cv + coa-legacy
+    "opencv-python>=4.0",
+    "pytesseract>=0.3",
+    "Wand>=0.6",
+    "pypdf>=3.0",
+    # firebase
+    "firebase-admin>=6.0",
+    "google-cloud-secret-manager>=2.0",
+    "google-cloud-firestore>=2.0",
+    # science
+    "matplotlib>=3.0",
+    "scikit-learn>=1.0",
+    "scikit-image>=0.20",
+    "statsmodels>=0.14",
+    "pyarrow>=10.0",
+    # web
+    "beautifulsoup4>=4.0",
+    "selenium>=4.0",
+    # utils
+    "datasets>=2.0",
+    "fredapi>=0.5",
+    "googlemaps>=4.0",
+    "openpyxl>=3.0",
+    "xxhash>=3.0",
+    "zipcodes>=1.2",
+    # dev/test
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "reportlab>=4.0",
+    "pydantic>=2.0",
+    "ruff>=0.1",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# URLs
+# ═══════════════════════════════════════════════════════════════════
+
+[project.urls]
+Homepage = "https://cannlytics.com"
+Documentation = "https://docs.cannlytics.com"
+Repository = "https://github.com/cannlytics/cannlytics"
+Issues = "https://github.com/cannlytics/cannlytics/issues"
+Changelog = "https://github.com/cannlytics/cannlytics/blob/main/CHANGELOG.md"
+
+# ═══════════════════════════════════════════════════════════════════
+# Setuptools Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.setuptools.packages.find]
+include = ["cannlytics", "cannlytics.*"]
+
+# ═══════════════════════════════════════════════════════════════════
+# Pytest Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short -ra"
+markers = [
+    "integration: marks tests as integration tests (require network)",
+    "slow: marks tests as slow running",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+minversion = "7.0"
+
+# ═══════════════════════════════════════════════════════════════════
+# Coverage Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.coverage.run]
+source = ["cannlytics"]
+omit = [
+    "tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# Ruff (Linter) Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "E741",   # ambiguous variable name
+]
