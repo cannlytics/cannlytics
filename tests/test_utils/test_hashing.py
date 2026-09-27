@@ -45,7 +45,7 @@ class TestCanonicalHashes:
         text = 'Δ9-THC 24.5 µg/g'
         assert hash_text(text) == hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-    def test_hash_text_does_not_normalise(self):
+    def test_hash_text_does_not_normalize(self):
         assert hash_text('Blue Dream') != hash_text('blue dream')
 
     def test_hash_file_is_whole_file_sha256(self, big_file):

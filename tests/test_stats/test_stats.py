@@ -143,7 +143,8 @@ class TestColourfulness:
 
     @pytest.mark.parametrize('metric', ['M1', 'M2'])
     def test_lab_metrics(self, image, metric):
-        pytest.importorskip('skimage')
+        # The distribution is `scikit-image`; it imports as `skimage`.
+        pytest.importorskip('skimage', reason='scikit-image not installed: pip install scikit-image (imports as skimage)')
         score = calc_colourfulness(image, metric=metric)
         assert score > calc_colourfulness(np.full((8, 8, 3), 128, dtype=np.uint8), metric=metric)
 
@@ -177,7 +178,37 @@ class TestNaming:
 
     def test_every_public_statistic_is_calc_prefixed(self):
         deprecated = {'calculate_purpleness', 'calculate_colourfulness'}
-        assert all(name.startswith('calc_') for name in set(stats.__all__) - deprecated)
+        functions = {name for name in set(stats.__all__) - deprecated if not name.isupper()}
+        assert all(name.startswith('calc_') for name in functions)
 
     def test_all_names_resolve(self):
         assert all(hasattr(stats, name) for name in stats.__all__)
+
+class TestChemotype:
+    """Known answers for the de Meijer three-type scheme at the default
+    cut-offs, and the missing-value cases the strains dataset's
+    `classify_chemotype` returned as 'Type II'."""
+
+    @pytest.mark.parametrize('thc, cbd, expected', [
+        (20.0, 0.5, 'Type I'), (20.0, 0.0, 'Type I'), (5.0, 5.0, 'Type II'), (10.0, 2.0, 'Type II'),
+        (1.0, 5.0, 'Type II'), (0.5, 15.0, 'Type III'), (0.0, 12.0, 'Type III'),
+        (10.01, 2.0, 'Type I'), (0.39, 2.0, 'Type III'),
+        ('21.3', '0.1', 'Type I'),
+    ])
+    def test_known_answers(self, thc, cbd, expected):
+        assert stats.calc_chemotype(thc, cbd) == expected
+
+    @pytest.mark.parametrize('thc, cbd', [
+        (float('nan'), 1.0), (20.0, float('nan')), (None, 1.0), (20.0, None), (0.0, 0.0),
+        (-1.0, 1.0), (1.0, -1.0), ('ND', 1.0), (float('inf'), 1.0),
+    ])
+    def test_missing_or_invalid_is_none_not_type_ii(self, thc, cbd):
+        assert stats.calc_chemotype(thc, cbd) is None
+
+    def test_cut_offs_are_parameters(self):
+        assert stats.calc_chemotype(3.0, 1.0) == 'Type II'
+        assert stats.calc_chemotype(3.0, 1.0, thc_threshold=2.0) == 'Type I'
+        assert stats.calc_chemotype(0.3, 1.0, cbd_threshold=0.5) == 'Type III'
+
+    def test_every_answer_is_a_named_chemotype(self):
+        assert set(stats.CHEMOTYPES) == {'Type I', 'Type II', 'Type III'}

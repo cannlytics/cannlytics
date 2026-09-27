@@ -5,12 +5,13 @@ Copyright (c) 2021-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 3/22/2026
+Updated: 9/26/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: This module contains general Cannlytics utility functions.
 """
 # Standard imports:
+import unicodedata
 from datetime import datetime, timedelta
 import glob
 import json
@@ -33,65 +34,11 @@ from dateutil import parser
 from pandas import ExcelWriter, merge
 
 # Internal imports:
+from cannlytics.constants import RANDOM_STRING_CHARS  # noqa: F401 (re-exported)
+from cannlytics.constants.states import TIME_ZONES as state_time_zones  # noqa: F401 (re-exported)
 from cannlytics.utils.hashing import hash_file  # noqa: F401 (re-exported)
 
-# Random characters to use in password generation.
-RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-
 # A map of state abbreviations to timezone.
-state_time_zones = {
-    'AL': 'America/Chicago',
-    'AK': 'America/Anchorage',
-    'AZ': 'America/Phoenix',
-    'AR': 'America/Chicago',
-    'CA': 'America/Los_Angeles',
-    'CO': 'America/Denver',
-    'CT': 'America/New_York',
-    'DC': 'America/New_York',
-    'DE': 'America/New_York',
-    'FL': 'America/New_York',
-    'GA': 'America/New_York',
-    'HI': 'Pacific/Honolulu',
-    'ID': 'America/Denver',
-    'IL': 'America/Chicago',
-    'IN': 'America/Indiana/Indianapolis',
-    'IA': 'America/Chicago',
-    'KS': 'America/Chicago',
-    'KY': 'America/New_York',
-    'LA': 'America/Chicago',
-    'ME': 'America/New_York',
-    'MD': 'America/New_York',
-    'MA': 'America/New_York',
-    'MI': 'America/New_York',
-    'MN': 'America/Chicago',
-    'MS': 'America/Chicago',
-    'MO': 'America/Chicago',
-    'MT': 'America/Denver',
-    'NE': 'America/Chicago',
-    'NV': 'America/Los_Angeles',
-    'NH': 'America/New_York',
-    'NJ': 'America/New_York',
-    'NM': 'America/Denver',
-    'NY': 'America/New_York',
-    'NC': 'America/New_York',
-    'ND': 'America/North_Dakota/Center',
-    'OH': 'America/New_York',
-    'OK': 'America/Chicago',
-    'OR': 'America/Los_Angeles',
-    'PA': 'America/New_York',
-    'RI': 'America/New_York',
-    'SC': 'America/New_York',
-    'SD': 'America/Chicago',
-    'TN': 'America/Chicago',
-    'TX': 'America/Chicago',
-    'UT': 'America/Denver',
-    'VT': 'America/New_York',
-    'VA': 'America/New_York',
-    'WA': 'America/Los_Angeles',
-    'WV': 'America/New_York',
-    'WI': 'America/Chicago',
-    'WY': 'America/Denver',
-}
 
 #-----------------------------------------------------------------------
 # String utilities.
@@ -113,18 +60,51 @@ def camel_to_snake(string: str) -> str:
     """Turn a camel-case string to a snake-case string."""
     return sub(r'(?<!^)(?=[A-Z])', '_', string).lower()
 
-def kebab_case(string: str) -> str:
-    """Turn a string into a kebab-case string."""
-    key = string.replace(' ', '-')
-    key = key.replace('&', 'and')
-    key = key.replace('%', 'percent')
-    key = key.replace('#', 'number')
-    key = key.replace('$', 'dollars')
-    key = key.replace('/', 'to')
-    key = key.replace(r'\\', '-').lower()
-    key = sub(r'[!@#$%^&*()\[\]{};:,./<>?\\|`~\-=+]', ' ', key)
-    keys = findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
-    return '-'.join(map(str.lower, keys))
+def kebab_case(string: str, max_length: Optional[int] = None) -> str:
+    """Turn a string into a kebab-case slug, for IDs and URLs.
+
+    One rule for strain IDs, analyte slugs, and license slugs, which had
+    three (``to_kebab_case`` in cannabis_strains, ``kebab_case`` in
+    cannabis_analytes, ``slugify`` in cannabis_licenses). Characters are
+    folded or spelled out rather than deleted, so that spellings of one
+    name share one slug:
+
+    - Accents fold (``Café Racer`` is ``cafe-racer``, not ``caf-racer``)
+      and Greek letters are spelled (``Δ9-THC`` is ``delta-9-thc``).
+    - ``&`` is ``and``: ``Cookies & Cream`` and ``Cookies and Cream``
+      share ``cookies-and-cream``.
+    - Apostrophes and abbreviation periods are dropped:
+      ``Charlotte's Web`` is ``charlottes-web``, ``GSC (f.k.a. Girl
+      Scout Cookies)`` is ``gsc-fka-girl-scout-cookies``.
+    - Every other run of punctuation or space is one hyphen: ``GG#4``,
+      ``GG 4``, and ``GG-4`` are all ``gg-4``.
+    - Trademark signs are dropped.
+
+    Args:
+        string: The text to slug.
+        max_length: Truncate to this many characters (never ending in
+            a hyphen).
+
+    Returns:
+        A lower-case ASCII slug, possibly empty.
+    """
+    text = str(string).replace('&', ' and ')
+    for symbol, spelled in GREEK_LETTERS.items():
+        text = text.replace(symbol, spelled)
+    for symbol in TRADEMARK_SYMBOLS:
+        text = text.replace(symbol, '')
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    text = text.replace("'", '')
+    text = sub(r'(?<=[A-Za-z])\.', '', text)          # f.k.a. -> fka; 1.0 keeps its point
+    slug = sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
+    # 'delta9-thc' (from 'Δ9-THC') reads better as 'delta-9-thc'.
+    slug = sub(r'(delta|alpha|beta|gamma)(\d)', r'\1-\2', slug)
+    if max_length is not None:
+        slug = slug[:max_length].rstrip('-')
+    return slug
+
+# `kebab_case` under the name most people look for.
+slugify = kebab_case
 
 def get_keywords(string: str) -> List[str]:
     """Get keywords for a given string."""
@@ -139,6 +119,15 @@ def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
     All rights reserved. BSD License.
     """
     return ''.join(secrets.choice(allowed_chars) for i in range(length))
+
+# Symbols that carry no meaning in a key or slug.
+TRADEMARK_SYMBOLS = ('\u2122', '\u00ae', '\u00a9', '\u2120')
+
+# Greek letters spelled out, so that keys and slugs are ASCII.
+GREEK_LETTERS = {
+    '\u03b1': 'alpha', '\u03b2': 'beta', '\u03b3': 'gamma',
+    '\u0394': 'delta', '\u03b4': 'delta', '\u00b5': 'u', '\u03bc': 'u',
+}
 
 REPLACEMENTS = [
     {'text': ' ', 'key': '_'},

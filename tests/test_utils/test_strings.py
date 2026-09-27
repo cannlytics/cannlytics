@@ -87,6 +87,37 @@ class TestKebabCase:
     def test_empty(self):
         assert kebab_case('') == ''
 
+    @pytest.mark.parametrize('name, slug', [
+        ('Blue Dream', 'blue-dream'), ('OG Kush (Indica)', 'og-kush-indica'),
+        ('Girl Scout Cookies #2', 'girl-scout-cookies-2'), ("Charlotte's Web", 'charlottes-web'),
+        ('Charlotte\u2019s Web', 'charlottes-web'), ('GSC (f.k.a. Girl Scout Cookies)', 'gsc-fka-girl-scout-cookies'),
+        ('B.C. Bud', 'bc-bud'), ('Mac 1.0', 'mac-1-0'), ('Café Racer', 'cafe-racer'),
+        ('Δ9-THC', 'delta-9-thc'), ('β-Myrcene', 'beta-myrcene'), ('delta_9_thc', 'delta-9-thc'),
+        ('Jack Herer™', 'jack-herer'), ('A/B Test', 'a-b-test'), ('Strawberry+Banana', 'strawberry-banana'),
+        ('Super  Lemon   Haze', 'super-lemon-haze'), ('Sour Diesel - Rerun', 'sour-diesel-rerun'),
+    ])
+    def test_known_answers(self, name, slug):
+        assert kebab_case(name) == slug
+
+    @pytest.mark.parametrize('spellings', [
+        ('GG#4', 'GG 4', 'GG-4', 'gg_4'),
+        ('Cookies & Cream', 'Cookies and Cream', 'cookies-and-cream'),
+        ('Café Racer', 'Cafe Racer'),
+        ('Strawberry+Banana', 'Strawberry Banana'),
+    ])
+    def test_spellings_of_one_name_share_one_slug(self, spellings):
+        # The strains dataset's to_kebab_case deleted these characters,
+        # giving gg4 / gg-4, cookies-cream / cookies-and-cream, caf-racer / cafe-racer.
+        assert len({kebab_case(s) for s in spellings}) == 1
+
+    def test_max_length(self):
+        assert kebab_case('The Green Solution Dispensary', max_length=14) == 'the-green-solu'
+        assert kebab_case('The Green Solution', max_length=10) == 'the-green'   # never ends in a hyphen
+
+    def test_slugify_is_kebab_case(self):
+        from cannlytics.utils import slugify
+        assert slugify is kebab_case
+
 class TestGetKeywords:
 
     def test_basic(self):

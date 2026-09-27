@@ -20,7 +20,9 @@ import cannlytics
 ROOT = pathlib.Path(cannlytics.__file__).parent
 CORE = ['cannlytics', 'cannlytics.utils', 'cannlytics.utils.hashing', 'cannlytics.metrc',
         'cannlytics.stats', 'cannlytics.ai', 'cannlytics.data.cache',
-        'cannlytics.data.constants', 'cannlytics.data.compounds']
+        'cannlytics.data.constants', 'cannlytics.data.compounds',
+        'cannlytics.constants', 'cannlytics.clean', 'cannlytics.licenses', 'cannlytics.datasets',
+        'cannlytics.schema', 'cannlytics.collect']
 
 def run_blocked(body):
     """Run code in a clean interpreter with every optional dependency blocked."""
@@ -82,7 +84,9 @@ class TestAllLists:
                 assert not bad, f'non-string __all__ entries: {bad}'
 
     @pytest.mark.parametrize('name', ['cannlytics.utils', 'cannlytics.metrc', 'cannlytics.stats',
-                                      'cannlytics.ai', 'cannlytics.data.cache', 'cannlytics.auth'])
+                                      'cannlytics.ai', 'cannlytics.data.cache', 'cannlytics.auth',
+                                      'cannlytics.constants', 'cannlytics.clean', 'cannlytics.licenses',
+                                      'cannlytics.datasets', 'cannlytics.schema', 'cannlytics.collect'])
     def test_every_name_in_all_resolves(self, name):
         module = importlib.import_module(name)
         assert [n for n in module.__all__ if not hasattr(module, n)] == []

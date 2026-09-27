@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/9/2026
-Updated: 3/9/2026
+Updated: 9/26/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -37,7 +37,6 @@ Description:
 """
 # Standard imports:
 from typing import Any, Dict
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COA Doc — Lab Registry & Algorithmic Routing                     ║
@@ -165,7 +164,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'algorithm': 'parse_kca_coa',
         'version': '0.1.0',
         'states': ['ky'],
-        'tier': 4,
+        'tier': 2,
         'lims': False,
     },
     'cannabusiness': {
@@ -176,7 +175,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'algorithm': 'parse_cannabusiness_coa',
         'version': '0.1.0',
         'states': ['ky'],
-        'tier': 4,
+        'tier': 2,
         'lims': False,
     },
     'acrelabs': {

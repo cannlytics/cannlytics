@@ -37,7 +37,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 __title__ = 'cannlytics'
-__version__ = '1.0.0'
+__version__ = '1.0.4'
 __author__ = 'Keegan Skeate <https://github.com/keeganskeate>'
 __license__ = 'MIT <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>'
 __copyright__ = 'Copyright (c) 2021-2026 Cannlytics'
@@ -47,9 +47,15 @@ __copyright__ = 'Copyright (c) 2021-2026 Cannlytics'
 _LAZY_SUBMODULES = {
     'ai': 'ai',
     'auth': 'firebase',
+    'clean': None,
+    'collect': None,
+    'constants': None,
     'data': None,
+    'datasets': None,
     'firebase': 'firebase',
+    'licenses': None,
     'metrc': None,
+    'schema': None,
     'stats': None,
     'utils': None,
 }
@@ -69,8 +75,14 @@ _LAZY_SUBMODULES = {
 # (`cannlytics.firebase`) via `_LAZY_SUBMODULES`; they are simply not
 # part of the star-import surface.
 __all__ = [
+    'clean',
+    'collect',
+    'constants',
     'data',
+    'datasets',
+    'licenses',
     'metrc',
+    'schema',
     'stats',
     'utils',
     '__version__',
@@ -86,9 +98,15 @@ if TYPE_CHECKING:  # pragma: no cover
     from cannlytics import (  # noqa: F401
         ai,
         auth,
+        clean,
+        collect,
+        constants,
         data,
+        datasets,
         firebase,
+        licenses,
         metrc,
+        schema,
         stats,
         utils,
     )

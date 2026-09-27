@@ -67,6 +67,35 @@ else:
         print(result['key'], result['value'], result['units'])
 ```
 
+### Work with the Published Results
+
+Load the Cannlytics results product (Parquet; `pip install cannlytics[datasets]`):
+
+```python
+from cannlytics.datasets import load_samples, load_results, flatten_results
+
+samples = load_samples('cannabis-results-2026-09-26', states=['ca', 'ky'], years=[2025])
+results = load_results('cannabis-results-2026-09-26', states=['ky'], analytes=['Δ9-THC', 'THCA'])
+wide = flatten_results(results)   # one row per sample (pdf_hash), one column per analyte
+```
+
+### Clean and Standardize
+
+The same rules every Cannlytics dataset uses:
+
+```python
+from cannlytics.constants import normalize_analyte_key, state_code
+from cannlytics.clean import parse_date, clean_zip_code
+from cannlytics.licenses import normalize_license_number, license_key
+
+normalize_analyte_key('Δ9-THC')           # 'delta_9_thc'
+state_code('New Jersey')                  # 'NJ'
+parse_date('1/5/24')                      # '2024-01-05'
+clean_zip_code(2134)                      # '02134'
+normalize_license_number(' c10-0000936-lic ')   # 'C10-0000936-LIC' (stored as issued)
+license_key('C10-0000936-LIC')            # 'C10-936' (for matching only)
+```
+
 ### Access Cannabis Data
 
 Query Cannlytics data through the Firebase API:
@@ -147,10 +176,15 @@ coordinates, explained = project_embeddings(stored_embeddings, n_components=2)
 | `cannlytics.firebase` | Firestore, Storage, Auth, Secret Manager wrapper | `pip install cannlytics[firebase]` |
 | `cannlytics.auth` | API-key and session authentication for the Cannlytics API | `pip install cannlytics[firebase]` |
 | `cannlytics.metrc` | Metrc API (v1) client for seed-to-sale compliance | Core |
-| `cannlytics.stats` | Diversity index, colourfulness, purpleness (`calc_*`) | Core |
-| `cannlytics.utils` | String, date, file, and data utilities | Core |
+| `cannlytics.constants` | States, analytes, analyses, product types, license taxonomy, units, compounds | Core |
+| `cannlytics.schema` | `LabResult` and its validation: the canonical result record | Core |
+| `cannlytics.clean` | Dates, ZIP codes, phone numbers, e-mails, URLs, names, numbers | Core |
+| `cannlytics.licenses` | License numbers (stored as issued; matching keys), types, statuses | Core |
+| `cannlytics.datasets` | Read the published results product | Core; `pip install cannlytics[datasets]` for Parquet |
+| `cannlytics.collect` | `COACollector` base class, `PoliteSession`, one retry policy | Core; `pip install cannlytics[web]` for a browser |
+| `cannlytics.stats` | Diversity index, colourfulness, purpleness, chemotype (`calc_*`) | Core |
+| `cannlytics.utils` | String, date, file, and data utilities; `kebab_case` / `slugify` | Core |
 | `cannlytics.utils.hashing` | SHA-256 for files, text, and JSON; HMAC; hash migration tools | Core |
-| `cannlytics.data.compounds` | Cannabinoid, terpene, pesticide reference data | Core |
 | `cannlytics.data.cache` | JSONL-backed caching client (Bogart) | Core |
 | `cannlytics.ai` | Text, image, and PDF embeddings (OpenAI, Gemini); vector search, PCA, outliers | Core to import; `pip install cannlytics[ai]` to call a provider |
 
@@ -164,7 +198,6 @@ The `cannlytics.firebase` module wraps `firebase_admin` with an ergonomic path-b
 | `storage.py` | Upload, download, list, rename, delete files |
 | `firebase_auth.py` | User management, custom claims, tokens, sessions |
 | `secrets.py` | Google Cloud Secret Manager |
-| `pipelines.py` | Firestore Enterprise Pipeline operations *(experimental)* |
 
 All functions are re-exported for convenience:
 

@@ -53,6 +53,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Typing :: Typed",
@@ -152,17 +153,22 @@ utils = [
     "zipcodes>=1.2",
 ]
 
+# Reading the published Parquet products (`cannlytics.datasets`).
+datasets = [
+    "pyarrow>=10.0",
+]
+
 # Every runtime extra. Self-referencing, so it can never drift from the
 # groups above. Excludes `coa-legacy` (system packages) and the test
 # and development tools, which no user of the library needs.
 all = [
-    "cannlytics[coa,ai,qr,qr-cv,firebase,science,web,utils]",
+    "cannlytics[coa,ai,qr,qr-cv,firebase,science,web,utils,datasets]",
 ]
 
 # Testing. Pulls in the extras the suite exercises, so that
 # `pip install -e ".[test]"` is the whole set-up.
 test = [
-    "cannlytics[coa,ai,firebase,science]",
+    "cannlytics[coa,ai,firebase,science,datasets]",
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "reportlab>=4.0",

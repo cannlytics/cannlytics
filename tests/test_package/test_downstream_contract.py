@@ -101,15 +101,15 @@ CONTRACT = [
 # Names consumers still import that the package no longer provides,
 # each with its replacement (None when there is none) and the reason.
 RETIRED = [
-    (('cannlytics.compounds', 'cannabinoids'), ('cannlytics.data.compounds', 'cannabinoids'), 'never a top-level module; the tables live under data'),
-    (('cannlytics.compounds', 'terpenes'), ('cannlytics.data.compounds', 'terpenes'), 'as above'),
+    (('cannlytics.compounds', 'cannabinoids'), ('cannlytics.constants.compounds', 'cannabinoids'), 'reference tables live in cannlytics.constants (1.0.4)'),
+    (('cannlytics.compounds', 'terpenes'), ('cannlytics.constants.compounds', 'terpenes'), 'as above'),
     (('cannlytics.data', 'create_hash'), ('cannlytics.utils.hashing', 'hash_text'), 'removed before 1.0.0; a plain SHA-256 of the joined values'),
     (('cannlytics.data', 'save_with_copyright'), (None, None), 'removed before 1.0.0; the static PRR processors that used it ran once'),
     (('cannlytics.data.coas', 'CoADoc'), ('cannlytics.data.coas', 'COAdoc'), 'legacy engine replaced by COAdoc in the 1.0.1 milestone'),
     (('cannlytics.data.coas', 'standardize_results'), ('cannlytics.data.coas', 'adapt_algorithm_output'), 'legacy engine; the closest current equivalent'),
     (('cannlytics.data.coas.algorithms.mcrlabs', 'get_mcr_labs_test_results'), (None, None), 'not one of the 14 registered lab algorithms'),
     (('cannlytics.data.coas.algorithms.utah', 'parse_utah_coa'), (None, None), 'not one of the 14 registered lab algorithms'),
-    (('cannlytics.data.collectors', 'COACollector'), (None, None), 'never shipped; the class lives in cannabis_results/results_base.py (proposed home: cannlytics.collect)'),
+    (('cannlytics.data.collectors', 'COACollector'), ('cannlytics.collect', 'COACollector'), 'never shipped; the base class moved from cannabis_results/results_base.py to cannlytics.collect (1.0.4)'),
     (('cannlytics.data.products.label_parser', 'LabelParser'), (None, None), 'never shipped in a release; website endpoint is dormant'),
     (('cannlytics.data.sales.receipt_parser', 'ReceiptsParser'), (None, None), 'never shipped in a release; website endpoint is dormant'),
     (('cannlytics.data.strains.strains_ai', 'identify_strains'), (None, None), 'never shipped in a release; website endpoint is dormant'),
@@ -122,8 +122,8 @@ RETIRED = [
     (('cannlytics.stats.stats', 'predict_stats_model'), (None, None), 'never shipped in a release; website endpoint is dormant'),
     (('cannlytics.utils', 'download_file_from_url'), (None, None), 'removed before 1.0.0; use requests directly'),
     (('cannlytics.utils', 'encode_pdf'), (None, None), 'removed in the 1.0.1 milestone; use base64 directly'),
-    (('cannlytics.utils.constants', 'ANALYTES'), ('cannlytics.data.constants', 'ANALYTES'), 'constants moved under data'),
-    (('cannlytics.utils.constants', 'DEFAULT_HEADERS'), ('cannlytics.data.constants', 'DEFAULT_HEADERS'), 'constants moved under data'),
+    (('cannlytics.utils.constants', 'ANALYTES'), ('cannlytics.constants', 'ANALYTE_ALIASES'), 'one alias table in cannlytics.constants (1.0.4)'),
+    (('cannlytics.utils.constants', 'DEFAULT_HEADERS'), ('cannlytics.constants', 'DEFAULT_HEADERS'), 'shared tables live in cannlytics.constants (1.0.4)'),
     (('cannlytics.utils.utils', 'remove_duplicate_files'), (None, None), 'removed in the 1.0.1 milestone as a one-time utility; cannabis_results still imports it'),
 ]
 

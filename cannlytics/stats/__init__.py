@@ -9,6 +9,8 @@ Updated: 9/21/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from .stats import (
+    CHEMOTYPES,
+    calc_chemotype,
     calc_colorfulness,
     calc_colourfulness,
     calc_diversity_index,
@@ -18,6 +20,8 @@ from .stats import (
 )
 
 __all__ = [
+    'CHEMOTYPES',
+    'calc_chemotype',
     'calc_colorfulness',
     'calc_colourfulness',
     'calc_diversity_index',

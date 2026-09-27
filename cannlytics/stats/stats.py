@@ -170,6 +170,60 @@ def calc_colourfulness(rgb: Any, metric: str = 'M3') -> float:
 calc_colorfulness = calc_colourfulness
 
 # ╔══════════════════════════════════════════════════════════════════╗
+# ║ Chemotype                                                        ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+CHEMOTYPES = ('Type I', 'Type II', 'Type III')
+
+def calc_chemotype(
+        thc: Any,
+        cbd: Any,
+        thc_threshold: float = 5.0,
+        cbd_threshold: float = 0.2,
+    ) -> str | None:
+    """Classify a sample or strain by its THC:CBD ratio.
+
+    The three chemotypes follow the scheme of de Meijer et al. (2003):
+    THC-dominant, intermediate, and CBD-dominant. The ratio cut-offs
+    are ad hoc: they are the working values of the strains dataset and
+    are not yet supported by data or literature. They are parameters so
+    that they can be revised when they are:
+
+        Type I    THC/CBD >  thc_threshold   (THC-dominant)
+        Type II   cbd_threshold <= THC/CBD <= thc_threshold
+        Type III  THC/CBD <  cbd_threshold   (CBD-dominant)
+
+    Args:
+        thc: Total THC (any consistent unit, e.g. percent).
+        cbd: Total CBD, in the same unit.
+        thc_threshold: The ratio above which a sample is Type I.
+        cbd_threshold: The ratio below which a sample is Type III.
+
+    Returns:
+        ``'Type I'``, ``'Type II'``, ``'Type III'``, or ``None`` when a
+        value is missing, not a number, negative, or both are zero. A
+        missing value never falls through to ``'Type II'``, as it did in
+        the strains dataset's ``classify_chemotype``, where ``NaN``
+        compares false to both cut-offs.
+    """
+    try:
+        thc, cbd = float(thc), float(cbd)
+    except (TypeError, ValueError):
+        return None
+    if not (np.isfinite(thc) and np.isfinite(cbd)) or thc < 0 or cbd < 0:
+        return None
+    if thc == 0 and cbd == 0:
+        return None
+    if cbd == 0:
+        return 'Type I'
+    ratio = thc / cbd
+    if ratio > thc_threshold:
+        return 'Type I'
+    if ratio < cbd_threshold:
+        return 'Type III'
+    return 'Type II'
+
+# ╔══════════════════════════════════════════════════════════════════╗
 # ║ Deprecated names                                                 ║
 # ╚══════════════════════════════════════════════════════════════════╝
 

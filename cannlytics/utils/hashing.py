@@ -56,7 +56,7 @@ LEGACY_PREFIX_BYTES = 65536
 # silently produced.
 EMPTY_SHA256 = hashlib.sha256(b'').hexdigest()
 
-# Hex length of each digest `identify_hash` can recognise.
+# Hex length of each digest `identify_hash` can recognize.
 _HEX_LENGTHS = {32: 'md5', 40: 'sha1', 64: 'sha256', 128: 'sha512'}
 
 PathLike = Union[str, 'os.PathLike[str]']
@@ -84,7 +84,7 @@ def hash_text(
     ) -> str:
     """Compute the hex digest of a string.
 
-    The text is hashed exactly as given. Normalise (strip, lowercase)
+    The text is hashed exactly as given. normalize (strip, lowercase)
     before calling if two spellings should share a digest.
 
     Args:

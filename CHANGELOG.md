@@ -5,19 +5,133 @@ All notable changes to the `cannlytics` Python package will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Versioning convention.** The third number moves quickly (up to 99) as
+> internal iterations land; whichever `1.0.x` is acceptable at the time is
+> the one published to PyPI. The second number moves with major releases
+> and the first only with a change of paradigm. PyPI's latest release is
+> still `0.0.17` (January 2024): nothing in the `1.0.x` series has been
+> published yet.
+
 ---
 
-## [1.0.0] — Unreleased
-
-> Set the date on the day the `v1.0.0` tag is pushed.
+## [1.0.4] — 2026-09-26
 
 ### Summary
 
-The first release to PyPI since `0.0.17` (January 2024), and the first
-with a stable public API. It includes everything in the three internal
-milestones below (the rebuilt Firebase module, the COAdoc parsing
-engine, `uuid4` document IDs) plus the release hardening listed here.
-Requires Python 3.11 or later.
+The ecosystem-consistency iteration. The four dataset repositories were
+reviewed against the package (STR-2026-0925-DATASETS-UPSTREAM-V1), and
+the contracts they had copied or reimplemented now have one definition
+here: the shared tables, the canonical result record, the cleaning
+primitives, the license-number rules, the collector infrastructure, and
+a reader for the published results product. Each function ships with
+the probe set that showed the downstream copies disagreeing, as
+known-answer tests.
+
+### Added
+
+- **`cannlytics.constants`** — a standard-library-only package holding
+  every table the ecosystem shares. `states`: codes, names, slugs,
+  territories, provinces, IANA time zones, and `state_code` /
+  `state_name` / `state_slug` resolvers that accept any of the three
+  (the four repositories used three conventions). `analytes`: 291
+  canonical ASCII keys by analysis, 751 aliases, `normalize_analyte_key`,
+  `analysis_for_analyte`, display names. `analyses`: the ten standard
+  analyses and `normalize_analysis_name`. `products`: the product-type
+  table and `normalize_product_type`. `licenses`: `LicenseCategory`
+  and the type and status tables. `units`: `DECARB`, `STANDARD_UNITS`,
+  `to_percent`. `compounds`: the reference tables (moved from
+  `cannlytics.data.compounds`, which remains as an alias, as does
+  `cannlytics.data.constants`).
+- **`cannlytics.schema`** — the canonical `LabResult` (111 fields),
+  `ResultDetail`, `VALIDATION_RULES`, and `validate_result`, moved from
+  the COA parser's schema. `cannlytics.data.coas.schema` re-exports the
+  same objects; IDs and hashes are byte-identical to before.
+- **`cannlytics.clean`** — one behaviour for each field cleaner the
+  state collectors had reimplemented (thirteen `clean_zip_code`, ten
+  `parse_date`, nine `clean_phone_number`): `parse_date`,
+  `parse_datetime`, `parse_timestamp`, `clean_zip_code`,
+  `clean_phone_number`, `clean_email`, `clean_url`, `clean_text`,
+  `smart_title_case`, `safe_float`, `is_placeholder`, `date_precision`.
+  A placeholder, an impossible date, and a bound such as `< 0.05` are
+  `None`, never a fabricated value; zero and `False` are values. A
+  partial date is kept at the precision it was given (`'March 2026'` is
+  `'2026-03'`, ISO 8601) unless the caller completes it:
+  `partial='end'` for expirations (a month-and-year expiration runs
+  through the month's last day, the pharmaceutical convention) and
+  `partial='start'` for issue dates. Nothing depends on today's date.
+- **`cannlytics.licenses`** — `normalize_license_number` (the stored
+  identifier: the regulator's own, upper-cased, whitespace collapsed:
+  `C10-0000936-LIC`), `license_key` (a derived key for matching only:
+  `C10-936`), `split_license_numbers`, `categorize_license_type`,
+  `standardize_license_status`, `is_active_status`. Merging is a cascade,
+  most faithful first: identifier, key, then compact key
+  (`license_key(..., compact=True)`: separators removed, zeros kept);
+  `license_match_level` names the level so a merge can be audited.
+- **`cannlytics.datasets`** — the reader for the published results
+  product: `load_samples`, `load_results` (filter by state, year,
+  analyte, analysis), `flatten_results`, `iter_partitions`,
+  `list_partitions`, `resolve_dataset_root` (also reads
+  `CANNLYTICS_RESULTS_DATASET`), `read_pointer`, `parse_results`,
+  `explode_results`. Parquet needs the new `datasets` extra.
+- **`cannlytics.collect`** — `COACollector`, the base class of the
+  laboratory-result collectors (moved from
+  `cannabis_results/results_base.py`), `PoliteSession` (moved from
+  `cannabis_licenses/algorithms/polite_session.py`), and
+  `retrying_session`, the one retry policy both use. Caches keyed by the
+  old MD5 or 12-character SHA-256 URL keys are still read, and
+  `migrate_legacy_keys` re-keys them.
+- **`cannlytics.stats.calc_chemotype`** — THC:CBD chemotype (Types
+  I--III), from the strains dataset's `classify_chemotype`. A missing
+  value is `None` (the original returned `Type II` for NaN). The
+  cut-offs (5.0 and 0.2) are ad hoc, pending support from data or
+  literature.
+- `cannlytics.utils.slugify`, an alias of `kebab_case`, which gains
+  `max_length`.
+- The `datasets` extra (`pyarrow`), included in `all` and `test`.
+- Python 3.14 classifier (the suite passes on 3.14.4).
+
+### Changed
+
+- `normalize_analyte_key` returns ASCII keys and maps onto one
+  canonical table: `Δ9-THC` is `delta_9_thc` (was `δ9_thc`),
+  `β-Myrcene` is `beta_myrcene` (was `β_myrcene`), `Isopropanol` is
+  `2_propanol` (the systematic name; was `isopropanol`), `Butane` is
+  `n_butane` (was `butane`). Mycotoxins are their own analysis in
+  `cannlytics.constants`; the parser's `MICROBIAL_KEYS` still groups
+  them with microbes for extraction.
+- `normalize_product_type` matches the form factor a label ends with and
+  plurals: `Live Resin Cartridge` is `vape`, `Gummies (10 pack)` is
+  `edible`, `Cartridges` is `vape` (all three were returned unmapped).
+  An unrecognized label is still returned as given.
+- `kebab_case` folds instead of deleting, so spellings of one name share
+  one slug: `Café Racer` is `cafe-racer` (was `caf-racer`), `Δ9-THC` is
+  `delta-9-thc` (was `9-thc`), `Charlotte's Web` is `charlottes-web`
+  (was `charlotte-s-web`), `Girl Scout Cookies #2` is
+  `girl-scout-cookies-2` (was `girl-scout-cookies-number-2`), `A/B Test`
+  is `a-b-test` (was `atob-test`). Strain IDs minted with it will
+  differ from the published ones for names with accents, Greek letters,
+  `&`, or inner punctuation; `tools/strain_id_census.py` counts them.
+- `kca` and `cannabusiness` are tier 2 in `LAB_REGISTRY` (were tier 4).
+- `cannlytics.utils.state_time_zones` and `RANDOM_STRING_CHARS` are the
+  tables in `cannlytics.constants` (they were second copies).
+
+### Fixed
+
+- `tests/test_coas/test_qr_security.py` created POSIX-only fake binaries,
+  so four tests failed on Windows, where a bare `qrustie` is not
+  executable. The fixtures now create `qrustie.exe` there. The library
+  was already correct.
+- The scikit-image skip now names the distribution to install
+  (`scikit-image`; it imports as `skimage`).
+
+## [1.0.3] — 2026-09-21
+
+### Summary
+
+The release-hardening iteration (STR-2026-0921-PYPKG-RELEASE-V1):
+one hash definition instead of three, Gemini and multimodal embeddings,
+`calc_*` statistics, a Metrc transport layer that reconnects and times
+out, honest packaging, 262 new tests. Requires Python 3.11 or later.
 
 ### Added
 
@@ -129,7 +243,7 @@ Requires Python 3.11 or later.
 
 ---
 
-## Internal milestone 1.0.2 — 2026-05-05 (never published; included in 1.0.0)
+## [1.0.2] — 2026-05-05
  
 ### Summary
  
@@ -194,7 +308,7 @@ IDs, which create write hotspots on the most-recent index shard at scale.
   entropy, format-stable, supported on every Python the package
   targets, and aligned with Firestore's own auto-ID strategy.
 
-## Internal milestone 1.0.1 — 2026-03-22 (never published; included in 1.0.0)
+## [1.0.1] — 2026-03-22
 
 ### Summary
 
@@ -354,7 +468,7 @@ history via the `v1.0.0` tag.
 
 ---
 
-## Internal milestone 1.0.0 — 2026-03-19 (never published; included in 1.0.0)
+## [1.0.0] — 2026-03-19
 
 ### Summary
 

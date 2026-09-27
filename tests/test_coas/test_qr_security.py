@@ -20,6 +20,17 @@ import pytest
 
 from cannlytics.data.coas.qr import find_qrustie
 
+# On Windows a bare `qrustie` is not executable: the shell resolves a
+# command name through PATHEXT, and the library does the same. The
+# fake binaries therefore need an `.exe` there and an execute bit on
+# POSIX, which is exactly what a real build produces on each platform.
+BINARY_NAME = 'qrustie.exe' if os.name == 'nt' else 'qrustie'
+
+def make_binary(path):
+    """Write a fake executable at ``path`` (a directory / file name)."""
+    path.write_text('#!/bin/sh\nexit 0\n')
+    path.chmod(0o755)
+    return path
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Fixtures                                                         ║
@@ -33,7 +44,6 @@ def clean_env(monkeypatch):
     # A PATH that exists but cannot contain qrustie.
     monkeypatch.setenv('PATH', os.path.join(os.sep, 'nonexistent-path-dir'))
 
-
 @pytest.fixture
 def payload(tmp_path, monkeypatch):
     """An executable named `qrustie` in the working directory.
@@ -41,24 +51,18 @@ def payload(tmp_path, monkeypatch):
     This is the attacker's file: a COA parsed from this directory must
     never cause it to run.
     """
-    binary = tmp_path / 'qrustie'
-    binary.write_text('#!/bin/sh\necho PWNED\n')
-    binary.chmod(0o755)
+    binary = make_binary(tmp_path / BINARY_NAME)
     monkeypatch.chdir(tmp_path)
     return binary
-
 
 @pytest.fixture
 def build_tree_payload(tmp_path, monkeypatch):
     """An executable at the `qrustie/target/release/qrustie` build path."""
     target = tmp_path / 'qrustie' / 'target' / 'release'
     target.mkdir(parents=True)
-    binary = target / 'qrustie'
-    binary.write_text('#!/bin/sh\necho PWNED\n')
-    binary.chmod(0o755)
+    binary = make_binary(target / BINARY_NAME)
     monkeypatch.chdir(tmp_path)
     return binary
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ The working directory is not searched by default                 ║
@@ -76,7 +80,6 @@ class TestCwdNotSearchedByDefault:
 
     def test_allow_cwd_false_is_explicit(self, clean_env, build_tree_payload):
         assert find_qrustie(allow_cwd=False) is None
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ PATH entries that resolve to the working directory               ║
@@ -110,16 +113,13 @@ class TestPathEntrySanitization:
 
     def test_absolute_path_entry_still_works(self, monkeypatch, tmp_path):
         """The legitimate case must keep working."""
-        binary = tmp_path / 'qrustie'
-        binary.write_text('#!/bin/sh\nexit 0\n')
-        binary.chmod(0o755)
+        binary = make_binary(tmp_path / BINARY_NAME)
         monkeypatch.delenv('QRUSTIE_PATH', raising=False)
         monkeypatch.setenv('PATH', str(tmp_path))
         found = find_qrustie()
         assert found is not None
         assert os.path.isabs(found)
         assert os.path.samefile(found, binary)
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Candidate validation                                             ║
@@ -147,14 +147,11 @@ class TestCandidateValidation:
     def test_returned_path_is_always_absolute(self, monkeypatch, tmp_path):
         """Nothing downstream should be able to re-resolve the path
         against a different working directory."""
-        binary = tmp_path / 'qrustie'
-        binary.write_text('#!/bin/sh\nexit 0\n')
-        binary.chmod(0o755)
+        binary = make_binary(tmp_path / BINARY_NAME)
         monkeypatch.setenv('PATH', str(tmp_path))
         monkeypatch.delenv('QRUSTIE_PATH', raising=False)
         found = find_qrustie()
         assert found and os.path.isabs(found)
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ The opt-in still works                                           ║
@@ -191,7 +188,6 @@ class TestOptIn:
         already covers every legitimate installed-binary case.
         """
         assert find_qrustie(allow_cwd=True) is None
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Caller-named paths take precedence                               ║
@@ -239,7 +235,6 @@ class TestCallerNamedPaths:
         d = tmp_path / 'somedir'
         d.mkdir()
         assert find_qrustie(str(d)) is None
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ The module no longer shells out to which/where                   ║
