@@ -6,6 +6,20 @@ Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
 Updated: 4/23/2025
 """
+from .hashing import (
+    build_hash_crosswalk,
+    crosswalk_key_map,
+    hash_bytes,
+    hash_file,
+    hash_file_multi,
+    hash_json,
+    hash_text,
+    hmac_sha256,
+    identify_hash,
+    legacy_file_hashes,
+    sha256_hmac,
+    short_hash,
+)
 from .utils import (
     camelcase,
     camel_to_snake,
@@ -35,6 +49,18 @@ from .utils import (
 )
 
 __all__ = [
+    'build_hash_crosswalk',
+    'crosswalk_key_map',
+    'hash_bytes',
+    'hash_file',
+    'hash_file_multi',
+    'hash_json',
+    'hash_text',
+    'hmac_sha256',
+    'identify_hash',
+    'legacy_file_hashes',
+    'sha256_hmac',
+    'short_hash',
     'camelcase',
     'camel_to_snake',
     'clean_column_strings',

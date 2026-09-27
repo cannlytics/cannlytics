@@ -5,7 +5,6 @@
 [![PyPI](https://img.shields.io/pypi/v/cannlytics)](https://pypi.org/project/cannlytics/)
 [![Python](https://img.shields.io/pypi/pyversions/cannlytics)](https://pypi.org/project/cannlytics/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-224%20passed-brightgreen)]()
 
 ---
 
@@ -17,21 +16,24 @@ Install the core package from [PyPI](https://pypi.org/project/cannlytics/):
 pip install cannlytics
 ```
 
-Install with optional features as needed:
+Requires Python 3.11 or later. Install with optional features as needed:
 
 ```bash
 # COA parsing (PDF extraction).
-pip install cannlytics[coa]
+pip install "cannlytics[coa]"
 
-# COA parsing with AI-powered multi-provider support.
-pip install cannlytics[coa,ai]
+# COA parsing with AI-powered multi-provider support, and embeddings.
+pip install "cannlytics[coa,ai]"
 
 # Firebase / Firestore integration.
-pip install cannlytics[firebase]
+pip install "cannlytics[firebase]"
 
-# Everything.
-pip install cannlytics[all]
+# Every runtime extra.
+pip install "cannlytics[all]"
 ```
+
+Every API key is optional and read from the environment. Copy
+[`.env.example`](./.env.example) to `.env` to see what each one switches on.
 
 Or clone the repository:
 
@@ -51,10 +53,18 @@ Extract lab results from a Certificate of Analysis PDF:
 from cannlytics.data.coas import COAdoc
 
 parser = COAdoc()
-results = parser.parse('blue-dream-coa.pdf')
-print(results['total_thc'])   # 24.5
-print(results['strain_name']) # Blue Dream
-print(results['status'])      # pass
+coa = parser.parse('blue-dream-coa.pdf')
+
+if 'error' in coa:
+    print(coa['error'])
+else:
+    # Sample details.
+    metadata = coa['metadata']
+    print(metadata['product_name'], metadata['lab'], metadata['total_thc'])
+
+    # Results, grouped by analysis.
+    for result in coa['analyses']['cannabinoids']['results']:
+        print(result['key'], result['value'], result['units'])
 ```
 
 ### Access Cannabis Data
@@ -87,20 +97,46 @@ Interface with the Metrc seed-to-sale tracking system:
 ```python
 from cannlytics.metrc import Metrc
 
-track = Metrc(
+with Metrc(
     'your-vendor-api-key',
     'your-user-api-key',
     primary_license='123',
     state='ok',
-    logs=True,
-    test=False,
-)
+    test=True,
+) as track:
 
-# Get a plant by its ID.
-plant = track.get_plants(uid='123')
+    # Get a plant by its ID.
+    plant = track.get_plants(uid='123')
 
-# Harvest the plant.
-plant.harvest(harvest_name='Old-Time Moonshine', weight=420)
+    # Harvest the plant.
+    plant.harvest(harvest_name='Old-Time Moonshine', weight=420)
+```
+
+> **Metrc API version.** This client speaks version 1 of the Metrc API.
+> Metrc has been retiring v1 state by state since the end of 2024 in
+> favour of Metrc Connect (v2), so check your state before relying on
+> it. Version 2 support is the next milestone for this module.
+
+### Verify a file, embed a COA
+
+Every hash in Cannlytics is a whole-input SHA-256 that you can reproduce
+with `sha256sum` or `Get-FileHash`:
+
+```python
+from cannlytics.utils import hash_file
+
+pdf_hash = hash_file('blue-dream-coa.pdf')
+```
+
+Embed text, images, and whole PDFs in one vector space, then search,
+cluster, or look for outliers:
+
+```python
+from cannlytics.ai import create_pdf_embedding, find_similar, project_embeddings
+
+coa = create_pdf_embedding('blue-dream-coa.pdf')   # keyed by pdf_hash
+matches = find_similar(coa['embedding'], stored_embeddings, k=5)
+coordinates, explained = project_embeddings(stored_embeddings, n_components=2)
 ```
 
 ## Package Overview
@@ -109,11 +145,14 @@ plant.harvest(harvest_name='Old-Time Moonshine', weight=420)
 |--------|-------------|---------|
 | `cannlytics.data.coas` | COA parsing engine — AI-powered with multi-provider fallback | `pip install cannlytics[coa,ai]` |
 | `cannlytics.firebase` | Firestore, Storage, Auth, Secret Manager wrapper | `pip install cannlytics[firebase]` |
-| `cannlytics.metrc` | Metrc API client for seed-to-sale compliance | Core |
+| `cannlytics.auth` | API-key and session authentication for the Cannlytics API | `pip install cannlytics[firebase]` |
+| `cannlytics.metrc` | Metrc API (v1) client for seed-to-sale compliance | Core |
+| `cannlytics.stats` | Diversity index, colourfulness, purpleness (`calc_*`) | Core |
 | `cannlytics.utils` | String, date, file, and data utilities | Core |
+| `cannlytics.utils.hashing` | SHA-256 for files, text, and JSON; HMAC; hash migration tools | Core |
 | `cannlytics.data.compounds` | Cannabinoid, terpene, pesticide reference data | Core |
 | `cannlytics.data.cache` | JSONL-backed caching client (Bogart) | Core |
-| `cannlytics.ai` | Embedding creation and retrieval | `pip install cannlytics[ai]` |
+| `cannlytics.ai` | Text, image, and PDF embeddings (OpenAI, Gemini); vector search, PCA, outliers | Core to import; `pip install cannlytics[ai]` to call a provider |
 
 ## Firebase Module
 
@@ -176,16 +215,17 @@ update_documents(refs, data)
 
 ## COA Parsing
 
-The `cannlytics.data.coas` module provides a hybrid COA parsing engine that uses AI with a multi-provider fallback chain (Anthropic → OpenAI → Gemini → xAI):
-
-<!-- FIXME: This example is broken -->
+The `cannlytics.data.coas` module provides a hybrid COA parsing engine: lab-specific algorithms first, then AI with a multi-provider fallback chain (Anthropic → OpenAI → Gemini → xAI):
 
 ```python
 from cannlytics.data.coas import COAdoc
 
 parser = COAdoc()
-results = parser.parse('coa.pdf')
+coa = parser.parse('coa.pdf')          # a path, a URL, or a list of either
+metadata, analyses = coa['metadata'], coa['analyses']
 ```
+
+Each COA is identified by its `pdf_hash`, the SHA-256 of the whole file.
 
 See the [COA documentation](./cannlytics/data/coas/readme.md) for full details.
 
@@ -205,11 +245,11 @@ Cannlytics maintains comprehensive cannabis datasets:
 Run the test suite:
 
 ```bash
-pip install cannlytics[test]
-pytest tests/ -v --cov=cannlytics --cov-report=term-missing
+pip install -e ".[test]"
+pytest tests/ --cov=cannlytics --cov-report=term-missing
 ```
 
-224 tests cover all 77 public functions. No credentials or network access required — all external services are fully mocked.
+No credentials or network access are required: every external service is mocked. Tests that need real COA PDFs (marked `fixtures`) skip when the local-only fixture folders are absent, and live-sandbox tests are marked `integration`.
 
 ## Development
 

@@ -5,15 +5,18 @@
 # guess has included build artifacts and local data in the past.
 
 include LICENSE
-include readme.md
+include README.md
 include CHANGELOG.md
 include pyproject.toml
+recursive-include cannlytics py.typed
 recursive-include cannlytics *.md
 recursive-include tests *.py
 
 # ── Never ship these ─────────────────────────────────────────────
 exclude .env
 exclude .env.*
+# Later rules win, so the template is re-included after the exclusion.
+include .env.example
 global-exclude *.py[cod]
 global-exclude __pycache__
 global-exclude *.so

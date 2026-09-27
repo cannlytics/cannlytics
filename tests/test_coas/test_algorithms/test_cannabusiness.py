@@ -21,10 +21,19 @@ import json
 import os
 import sys
 
-import cannabusiness as cb
+import pytest
+
+from cannlytics.data.coas.algorithms import cannabusiness as cb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CB = os.path.join(HERE, 'cb')
+
+# The fixtures are real Kentucky COA PDFs, kept out of the repository
+# and every distribution (see MANIFEST.in). Without them, skip.
+pytestmark = [
+    pytest.mark.fixtures,
+    pytest.mark.skipif(not os.path.isdir(CB), reason='local COA fixtures (cb/) not present'),
+]
 
 # Full-panel (Buds) COAs -- Emerald Fire, Goeing Blue.
 BUDS_0029 = os.path.join(CB, 'KY-2025-11-26_21-45-57-1A4220100000001000000029_1.pdf')
@@ -37,23 +46,19 @@ BIO_0026 = os.path.join(CB, 'KY-2025-11-25_17-15-53-1A4220100000001000000026_1.p
 
 _cache = {}
 
-
 def parse(fp):
     if fp not in _cache:
         _cache[fp] = cb.parse_cannabusiness_coa(None, fp)
     return _cache[fp]
 
-
 def results(fp):
     return json.loads(parse(fp)['results'])
-
 
 def by_key(fp, analysis, key):
     for r in results(fp):
         if r['analysis'] == analysis and r['key'] == key:
             return r
     return None
-
 
 # ── Lab identity ───────────────────────────────────────────────────
 
@@ -66,16 +71,13 @@ def test_lab_identity():
     assert cb.is_cannabusiness(BUDS_0029)
     assert cb.is_cannabusiness(BIO_0018)
 
-
 # ── Layout detection ───────────────────────────────────────────────
 
 def test_full_panel_layout_detected():
     assert parse(BUDS_0029)['coa_layout'] == 'full'
 
-
 def test_biomass_layout_detected():
     assert parse(BIO_0018)['coa_layout'] == 'biomass'
-
 
 # ── Strain resolution (non-Metrc-tag field) ────────────────────────
 
@@ -84,19 +86,16 @@ def test_strain_from_external_sample_id():
     assert parse(BUDS_0029)['strain_name'] == 'Emerald Fire 11.02.25 MB Auto'
     assert parse(BUDS_0030)['strain_name'] == 'Emerald Fire 11.3.25 HB Auto'
 
-
 def test_strain_null_for_tag_only_biomass():
     # Biomass: both name fields are Metrc tags -> strain must be None,
     # never a guessed value.
     assert parse(BIO_0018)['strain_name'] is None
     assert parse(BIO_0026)['strain_name'] is None
 
-
 def test_sample_name_is_metrc_tag():
     d = parse(BUDS_0029)
     assert d['sample_name'].startswith('1A4')
     assert d['metrc_id'] == d['sample_name']
-
 
 # ── Metadata (producer / dates / ids) ──────────────────────────────
 
@@ -107,7 +106,6 @@ def test_producer_extracted_not_lab():
         assert d['producer_license_number'] == 'CULT0001034'
         assert d['producer_city'] == 'Lexington'
 
-
 def test_ids_and_dates():
     d = parse(BUDS_0029)
     assert d['sample_id'] == '251119021'
@@ -116,12 +114,10 @@ def test_ids_and_dates():
     assert d['date_received'] == '11/19/2025'
     assert d['date_tested'] == '11/26/2025'
 
-
 def test_sample_type_and_product_type():
     assert parse(BIO_0018)['sample_type'] == 'Biomass'
     assert parse(BIO_0018)['product_type'] == 'biomass'
     assert parse(BUDS_0029)['sample_type'] == 'Buds'
-
 
 # ── Panel scope driven by sample type ──────────────────────────────
 
@@ -135,13 +131,11 @@ def test_biomass_limited_panel():
     assert 'water_activity' not in got
     assert by_key(BIO_0018, 'water_activity', 'water_activity') is None
 
-
 def test_full_panel_all_analyses():
     got = set(json.loads(parse(BUDS_0029)['analyses']))
     expected = {'cannabinoids', 'terpenes', 'heavy_metals', 'pesticides',
                 'mycotoxins', 'microbials', 'moisture', 'water_activity'}
     assert expected <= got, expected - got
-
 
 def test_moisture_emitted_as_result_row():
     # Moisture must be a RESULT ROW (key 'moisture_content'), not only a
@@ -153,7 +147,6 @@ def test_moisture_emitted_as_result_row():
         assert isinstance(row['value'], (int, float))
         assert row['units'] == 'percent'
 
-
 def test_water_activity_emitted_on_full_panel():
     # Water Activity row must be captured on full-panel COAs (the header
     # and the data row share the text 'Water Activity' -- the data row
@@ -162,7 +155,6 @@ def test_water_activity_emitted_on_full_panel():
     assert wa is not None, 'water_activity row missing on full-panel COA'
     assert 0.0 < wa['value'] < 1.0
     assert wa['status'] == 'Pass'
-
 
 def test_moisture_water_promote_downstream():
     # Simulate agg_results.extract_moisture_water_activity: it scans result
@@ -184,7 +176,6 @@ def test_moisture_water_promote_downstream():
     mb, wb = promote(BIO_0018)
     assert mb is not None and wb is None  # biomass: moisture only
 
-
 # ── Dual %/mg-g collapse ───────────────────────────────────────────
 
 def test_dual_unit_collapse_cannabinoids():
@@ -197,12 +188,10 @@ def test_dual_unit_collapse_cannabinoids():
     keys = [r['key'] for r in cann]
     assert len(keys) == len(set(keys)), 'duplicate cannabinoid records'
 
-
 def test_dual_unit_collapse_terpenes():
     lin = by_key(BUDS_0029, 'terpenes', 'linalool')
     assert lin['value'] == 0.114
     assert lin['value_mg_g'] == 1.137
-
 
 # ── NULL vs ZERO doctrine ──────────────────────────────────────────
 
@@ -212,12 +201,10 @@ def test_nd_serializes_null_both_units():
     assert cbc['value_mg_g'] is None
     assert cbc['result_raw'] == 'ND'
 
-
 def test_below_loq_serializes_null_flagged():
     bis = by_key(BUDS_0029, 'terpenes', 'alpha_bisabolol')
     assert bis['value'] is None
     assert bis['result_raw'] == '<LOQ'
-
 
 def test_nt_pesticide_serializes_null():
     # Captan / Chlordane are NT on the APCI panel.
@@ -226,7 +213,6 @@ def test_nt_pesticide_serializes_null():
     assert captan['value'] is None
     assert captan['result_raw'] == 'NT'
 
-
 def test_no_zero_leak_from_nondetects():
     # No cannabinoid / terpene / pesticide non-detect may leak as 0.0.
     for r in results(BUDS_0029):
@@ -234,14 +220,12 @@ def test_no_zero_leak_from_nondetects():
             if r['result_raw'] in ('ND', '<LOQ', '>ULOL', 'NT'):
                 assert r['value'] is None, r
 
-
 def test_measured_zero_preserved():
     # E.coli by Plating is a genuine measured 0 (0 CFUs, Pass) -- this is
     # a legitimate zero and MUST be preserved, not nulled.
     ecoli = by_key(BUDS_0029, 'microbials', 'total_ecoli')
     assert ecoli['value'] == 0.0
     assert ecoli['status'] == 'Pass'
-
 
 # ── Pesticides: APCI + ESI merged ──────────────────────────────────
 
@@ -259,7 +243,6 @@ def test_pesticides_both_panels_merged():
     keys = [r['key'] for r in pest]
     assert len(keys) == len(set(keys)), 'duplicate pesticide records'
 
-
 # ── Totals & decarboxylation ───────────────────────────────────────
 
 def test_full_panel_prints_total_thc():
@@ -268,7 +251,6 @@ def test_full_panel_prints_total_thc():
     assert parse(BUDS_0029)['total_cbd'] == 0.064
     assert parse(BUDS_0029)['total_cbg'] == 1.399
     assert parse(BUDS_0029)['total_cannabinoids'] == 31.49
-
 
 def test_biomass_total_thc_decarb_fallback():
     # Biomass prints NO Total Potential THC -> compute 0.877*THCa + d9.
@@ -280,13 +262,11 @@ def test_biomass_total_thc_decarb_fallback():
     assert abs(d['total_thc'] - (0.877 * thca + d9)) <= 0.001
     assert abs(d['total_thc'] - 21.395) <= 0.01
 
-
 def test_decarb_helper_matches_printed_full_panel():
     # For a full-panel COA the decarb helper must reproduce the printed
     # cover total (0029: 0.877*29.61 + 0.231 = 26.20).
     computed = cb._compute_total_thc(results(BUDS_0029))
     assert abs(computed - 26.20) <= 0.02, computed
-
 
 def test_biomass_total_cbg_decarb():
     # Total Potential CBG = 0.877*CBGa + CBG on biomass (no printed value).
@@ -297,7 +277,6 @@ def test_biomass_total_cbg_decarb():
     assert cbga == 0.616 and cbg == 0.155
     assert abs(d['total_cbg'] - (0.877 * cbga + cbg)) <= 0.001
     assert abs(d['total_cbg'] - 0.6952) <= 0.001
-
 
 # ── Microbials (qualitative + quantitative) ────────────────────────
 
@@ -314,7 +293,6 @@ def test_microbials_qualitative_and_quantitative():
     stec = by_key(BUDS_0029, 'microbials', 'stec')
     assert stec['qualitative'] == 'Not Detected'
 
-
 # ── Overall status ─────────────────────────────────────────────────
 
 def test_microbials_qualitative_status_derived():
@@ -329,12 +307,10 @@ def test_microbials_qualitative_status_derived():
     assert listeria['qualitative'] == 'Not Detected'
     assert listeria['status'] == 'Pass'
 
-
 def test_overall_status_pass():
     # All sample COAs in this batch pass.
     assert parse(BUDS_0029)['status'] == 'pass'
     assert parse(BIO_0018)['status'] == 'pass'
-
 
 # ── Serialization contract ─────────────────────────────────────────
 
@@ -347,7 +323,6 @@ def test_serialization_contract():
     assert isinstance(json.loads(d['results']), list)
     assert d['coa_algorithm_entry_point'] == 'parse_cannabusiness_coa'
     assert d['lab_id'] == d['sample_id']
-
 
 # ── Runner ─────────────────────────────────────────────────────────
 
@@ -369,7 +344,6 @@ def _run():
     print(f'\n{passed}/{passed + failed} tests passed'
           + (f', {failed} FAILED' if failed else ''))
     return failed == 0
-
 
 if __name__ == '__main__':
     sys.exit(0 if _run() else 1)

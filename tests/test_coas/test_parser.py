@@ -20,7 +20,6 @@ from cannlytics.data.coas.parser import (
 )
 from cannlytics.data.coas.registry import LAB_REGISTRY
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Hash Utilities                                                   ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -40,16 +39,23 @@ class TestHashing:
         assert h1 == h2
 
     def test_hash_nonexistent_file(self):
-        h = _hash_file('/nonexistent/file.pdf')
-        # Should return a hash of empty bytes (no crash).
-        assert isinstance(h, str)
-        assert len(h) == 64
+        # An unreadable file has no hash. Before 1.0.0 this returned the
+        # digest of zero bytes, so every unreadable file collided.
+        with pytest.raises(OSError):
+            _hash_file('/nonexistent/file.pdf')
+
+    def test_hash_file_covers_whole_file(self, tmp_path):
+        # Two files that share their first 64 KB must not share a hash.
+        head = b'%PDF-1.4 ' + b'L' * 70_000
+        a, b = tmp_path / 'a.pdf', tmp_path / 'b.pdf'
+        a.write_bytes(head + b'Sample A')
+        b.write_bytes(head + b'Sample B')
+        assert _hash_file(str(a)) != _hash_file(str(b))
 
     def test_hash_bytes(self):
         h = _hash_bytes(b'hello world')
         assert isinstance(h, str)
         assert len(h) == 64
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ adapt_algorithm_output                                           ║
@@ -111,7 +117,6 @@ class TestAdaptAlgorithmOutput:
         assert 'terpenes' in adapted['analyses']
         assert 'heavy_metals' in adapted['analyses']
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc Initialization                                            ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -148,7 +153,6 @@ class TestCOAdocInit:
         assert parser.costs is not None
         assert parser.costs.total_cost == 0.0
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc.parse() — Error Paths                                    ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -180,7 +184,6 @@ class TestCOAdocParseErrors:
             # AI client should be marked exhausted (no key).
             result = parser.parse(unrecognized_pdf)
             assert 'error' in result
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc.parse() — Algorithm Path                                  ║
@@ -233,7 +236,6 @@ class TestCOAdocAlgorithmPath:
         result = parser.parse(pdf_path)
         # Should fall through to AI, which is unavailable.
         assert 'error' in result
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc.parse() — AI Path (Mocked)                               ║
@@ -311,7 +313,6 @@ class TestCOAdocAIPath:
         assert 'error' not in result
         assert result['metadata']['product_name'] == 'Blue Dream'
         assert 'cannabinoids' in result['analyses']
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc.parse() — QR Scanning Integration                        ║
@@ -398,7 +399,6 @@ class TestCOAdocQRIntegration:
         # Note: coa_url is not in the metadata_keys set in
         # adapt_algorithm_output, so this tests the QR path.
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc.parse() — Input Types                                    ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -442,7 +442,6 @@ class TestCOAdocInputTypes:
             mock_dl.return_value = '/tmp/nonexistent_download.pdf'
             result = parser.parse('https://example.com/coa.pdf')
             mock_dl.assert_called_once()
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Pipeline Mode                                                   ║

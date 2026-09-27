@@ -43,7 +43,6 @@ Description:
 # Standard imports:
 from typing import Any, Dict
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ AI Provider Configuration                                        ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -111,6 +110,10 @@ AI_PROVIDERS: Dict[str, Dict[str, Any]] = {
                 'supports_structured_output': True,
                 'max_output_tokens': 16_384,
                 'image_cost': 0.001275,
+                # Quarantined from production: 0% non-detect fidelity on
+                # every panel tested (it returns 0.0 where the COA says
+                # ND). Selectable by name for experiments; never a default.
+                'quarantined': True,
             },
             'gpt-5': {
                 'input': 1.25, 'output': 10.00,
@@ -120,7 +123,7 @@ AI_PROVIDERS: Dict[str, Dict[str, Any]] = {
                 'image_cost': 0.003825,
             },
         },
-        'default_model': 'gpt-5-nano',
+        'default_model': 'gpt-5-mini',
         'env_key': 'OPENAI_API_KEY',
         'priority': 2,
         'free_tier': False,
@@ -171,7 +174,6 @@ AI_PROVIDERS: Dict[str, Dict[str, Any]] = {
     },
 }
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ OpenAI Flex Processing Configuration                             ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -186,7 +188,6 @@ FLEX_COST_MULTIPLIER: float = 0.5
 
 FLEX_TIMEOUT: float = 900.0
 """Timeout in seconds for flex requests (15 minutes, per OpenAI docs)."""
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Analysis Skip Rules                                              ║
@@ -208,7 +209,6 @@ ANALYSIS_SKIP_RULES: Dict[str, list] = {
     'terpenes': ['edible'],
 }
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Data Quality Thresholds                                          ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -219,7 +219,6 @@ DATA_QUALITY: Dict[str, float] = {
     'max_duplicate_rate': 0.001,     # 0.1% max duplicate rate
     'max_data_age_days': 30,         # Maximum 30 days since last update
 }
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Helper Functions                                                 ║
@@ -240,7 +239,6 @@ def get_provider_priority() -> list:
         AI_PROVIDERS.keys(),
         key=lambda k: AI_PROVIDERS[k]['priority'],
     )
-
 
 def get_model_cost(
         provider: str,
@@ -276,7 +274,6 @@ def get_model_cost(
         cost *= FLEX_COST_MULTIPLIER
     return cost
 
-
 def get_env_key(provider: str) -> str:
     """Get the environment variable name for a provider's API key.
 
@@ -290,7 +287,6 @@ def get_env_key(provider: str) -> str:
         KeyError: If provider is not found in AI_PROVIDERS.
     """
     return AI_PROVIDERS[provider]['env_key']
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Module Self-Test                                                 ║

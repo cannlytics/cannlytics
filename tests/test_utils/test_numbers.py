@@ -6,7 +6,6 @@ Covers: convert_to_numeric.
 import pytest
 from cannlytics.utils.utils import convert_to_numeric
 
-
 class TestConvertToNumeric:
 
     def test_integer_string(self):

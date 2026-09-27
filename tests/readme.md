@@ -38,8 +38,18 @@ tests/
 │   ├── test_secrets.py            # Secret Manager (mocked)
 │   └── test_pipelines.py          # Enterprise Pipeline operations (mocked)
 ├── test_auth/
-│   └── test_request_auth.py       # API request authentication middleware
+│   ├── test_request_auth.py       # API request authentication middleware
+│   └── test_api_keys.py           # API-key HMAC lookup, precedence, failure handling
+├── test_metrc/
+│   └── test_metrc_client.py       # Transport: auth, timeouts, reconnect, errors, logs, models
+├── test_stats/
+│   └── test_stats.py              # calc_* known answers, 8-bit overflow, deprecated names
+├── test_package/
+│   └── test_imports.py            # Core install imports nothing optional; __all__; version
+├── test_coas/                     # COAdoc parser, AI client, config, schema, QR, registry
+│   └── test_algorithms/           # Lab algorithms; need local PDF fixtures (marker: fixtures)
 ├── test_utils/
+│   ├── test_hashing.py            # SHA-256 everywhere; HMAC; legacy hash crosswalk
 │   ├── test_strings.py            # snake_case, camelcase, kebab_case, etc.
 │   ├── test_numbers.py            # convert_to_numeric
 │   ├── test_dates.py              # format_iso_date, get_date_range, get_timestamp
@@ -51,7 +61,8 @@ tests/
 │   ├── test_compounds.py          # Cannabinoid/terpene/pesticide data integrity
 │   └── test_constants.py          # ANALYSES, ANALYTES, state codes validation
 └── test_ai/
-    └── test_embeddings.py         # Embedding creation/retrieval (mocked)
+    ├── test_embeddings.py         # Embedding creation/retrieval (mocked)
+    └── test_embeddings_providers.py  # OpenAI + Gemini routing, files/PDFs, keys, vectors
 ```
 
 ## Coverage Targets by Module

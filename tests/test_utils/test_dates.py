@@ -6,7 +6,6 @@ Covers: format_iso_date, get_date_range, get_timestamp.
 import pytest
 from cannlytics.utils.utils import format_iso_date, get_date_range, get_timestamp
 
-
 class TestFormatIsoDate:
 
     def test_basic(self):
@@ -20,7 +19,6 @@ class TestFormatIsoDate:
 
     def test_custom_separator(self):
         assert format_iso_date('03-22-2026', sep='-') == '2026-03-22'
-
 
 class TestGetDateRange:
 
@@ -38,7 +36,6 @@ class TestGetDateRange:
         assert result[0] == ('2026-03-20', '2026-03-21')
         assert result[1] == ('2026-03-21', '2026-03-22')
         assert result[2] == ('2026-03-22', '2026-03-23')
-
 
 class TestGetTimestamp:
 

@@ -17,26 +17,32 @@ import json
 import os
 import sys
 
+import pytest
+
 from cannlytics.data.coas.algorithms import kca
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KY = os.path.join(HERE, 'ky')
+
+# The fixtures are real Kentucky COA PDFs, kept out of the repository
+# and every distribution (see MANIFEST.in). Without them, skip.
+pytestmark = [
+    pytest.mark.fixtures,
+    pytest.mark.skipif(not os.path.isdir(KY), reason='local COA fixtures (ky/) not present'),
+]
 
 CLEAN = os.path.join(KY, 'KY-2025-12-05_17-42-30-1A4220100000259000000084_1.pdf')
 SCRAMBLED = os.path.join(KY, 'KY-2025-11-26_18-30-03-1A4220100000259000000081_1.pdf')
 
 _cache = {}
 
-
 def parse(fp):
     if fp not in _cache:
         _cache[fp] = kca.parse_kca_coa(None, fp)
     return _cache[fp]
 
-
 def results(fp):
     return json.loads(parse(fp)['results'])
-
 
 def by_key(fp, analysis, key):
     for r in results(fp):
@@ -44,14 +50,12 @@ def by_key(fp, analysis, key):
             return r
     return None
 
-
 def full_sha256(fp):
     h = hashlib.sha256()
     with open(fp, 'rb') as f:
         for chunk in iter(lambda: f.read(65536), b''):
             h.update(chunk)
     return h.hexdigest()
-
 
 # ── Metadata & identity ────────────────────────────────────────────
 
@@ -61,13 +65,11 @@ def test_lab_identity():
     assert d['lab_license_number'] == 'P_0058'
     assert d['lab_state'] == 'KY'
 
-
 def test_product_and_strain():
     d = parse(CLEAN)
     assert d['product_name'] == 'Stella Blue-2025-09-09'
     assert d['strain_name'] == 'Stella Blue'          # date stripped
     assert d['product_type'] == 'flower'              # from "Plant - Flower"
-
 
 def test_producer_and_metrc():
     d = parse(CLEAN)
@@ -77,13 +79,11 @@ def test_producer_and_metrc():
     assert d['sample_id'] == 'SA-251119-72867'
     assert d['date_tested'] == '11/26/2025'
 
-
 # ── Cannabinoid totals & decarb arithmetic ─────────────────────────
 
 def test_total_thc_printed():
     # Printed Total THC on the summary strip is 16.46%.
     assert parse(CLEAN)['total_thc'] == 16.46
-
 
 def test_decarb_arithmetic():
     # Guide fixture: 0.877 * 12.14 (THCa) + 5.81 (d9) == 16.46 (Total THC).
@@ -94,7 +94,6 @@ def test_decarb_arithmetic():
     # And the parser's own fallback matches within rounding.
     assert abs(kca._compute_total_thc(results(CLEAN)) - 16.46) <= 0.02
 
-
 def test_total_thc_fallback_when_not_printed():
     # Simulate a COA with no printed total (biomass-style): the decarb
     # fallback must reconstruct it from the acid + neutral forms.
@@ -103,7 +102,6 @@ def test_total_thc_fallback_when_not_printed():
         {'analysis': 'cannabinoids', 'key': 'delta_9_thc', 'value': 0.195},
     ]
     assert kca._compute_total_thc(fake) == round(0.877 * 29.77 + 0.195, 4)
-
 
 # ── NULL vs ZERO doctrine ──────────────────────────────────────────
 
@@ -115,20 +113,17 @@ def test_total_cbd_is_null_not_zero():
     d2 = parse(SCRAMBLED)
     assert d2['total_cbd'] is None
 
-
 def test_nd_analytes_serialize_null():
     # Delta-8-THC is ND on the cannabinoid table.
     d8 = by_key(CLEAN, 'cannabinoids', 'delta_8_thc')
     assert d8['value'] is None
     assert d8['result_raw'] == 'ND'
 
-
 def test_below_loq_serializes_null_but_flagged():
     # CBD is ND, CBDA is <LOQ, CBG is <LOQ -> all None, raw preserved.
     cbda = by_key(CLEAN, 'cannabinoids', 'cbda')
     assert cbda['value'] is None
     assert cbda['result_raw'] == '<LOQ'
-
 
 def test_no_zero_values_leak_from_nondetects():
     # No cannabinoid/terpene/pesticide result should be exactly 0.0
@@ -137,7 +132,6 @@ def test_no_zero_values_leak_from_nondetects():
     for r in results(CLEAN):
         if r['analysis'] in ('cannabinoids', 'terpenes', 'pesticides'):
             assert r['value'] != 0.0, r
-
 
 # ── Failing results preserved ──────────────────────────────────────
 
@@ -152,11 +146,9 @@ def test_microbial_fails_preserved():
     assert ym['status'] == 'Fail'
     assert ym['value'] == 11000.0            # quantitative fail preserved
 
-
 def test_overall_status_is_fail():
     # Any failing analysis -> overall fail. COA is NOT filtered out.
     assert parse(CLEAN)['status'] == 'fail'
-
 
 # ── Sample-ID reuse deduped by hash, not sample_id ─────────────────
 
@@ -170,7 +162,6 @@ def test_sample_id_reuse_distinct_by_hash():
     # ...and the canonical dedup key (full-file SHA-256) differs.
     assert full_sha256(CLEAN) != full_sha256(SCRAMBLED)
 
-
 # ── Scramble resilience ────────────────────────────────────────────
 
 def test_scramble_resilient_cannabinoids():
@@ -179,7 +170,6 @@ def test_scramble_resilient_cannabinoids():
     for fp in (CLEAN, SCRAMBLED):
         assert by_key(fp, 'cannabinoids', 'delta_9_thc')['value'] == 5.81
         assert parse(fp)['total_thc'] == 16.46
-
 
 # ── Analysis coverage ──────────────────────────────────────────────
 
@@ -190,7 +180,6 @@ def test_all_analyses_present():
                 'moisture', 'water_activity'}
     assert expected <= got, expected - got
 
-
 def test_pesticide_two_column_fully_captured():
     # KCA pesticide panel is 57 analytes across two columns.
     pest = [r for r in results(CLEAN) if r['analysis'] == 'pesticides']
@@ -198,11 +187,9 @@ def test_pesticide_two_column_fully_captured():
     # Right-column analyte must be present (proves both columns parsed).
     assert by_key(CLEAN, 'pesticides', 'trifloxystrobin') is not None
 
-
 def test_heavy_metals_values():
     assert by_key(CLEAN, 'heavy_metals', 'arsenic')['value'] == 0.023
     assert by_key(CLEAN, 'heavy_metals', 'mercury')['value'] is None  # ND
-
 
 # ── Runner ─────────────────────────────────────────────────────────
 
@@ -224,7 +211,6 @@ def _run():
     print(f'\n{passed}/{passed + failed} tests passed'
           + (f', {failed} FAILED' if failed else ''))
     return failed == 0
-
 
 if __name__ == '__main__':
     sys.exit(0 if _run() else 1)

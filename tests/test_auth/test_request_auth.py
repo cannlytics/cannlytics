@@ -14,7 +14,6 @@ from cannlytics.auth.auth import (
     sha256_hmac,
 )
 
-
 class TestSha256Hmac:
 
     def test_produces_hex_string(self):
@@ -36,7 +35,6 @@ class TestSha256Hmac:
         a = sha256_hmac('key', 'msg1')
         b = sha256_hmac('key', 'msg2')
         assert a != b
-
 
 class TestAuthenticateRequest:
 
@@ -87,7 +85,6 @@ class TestAuthenticateRequest:
             mock_verify.return_value = {'uid': 'sess_user'}
             claims = authenticate_request(mock_request)
             assert claims['uid'] == 'sess_user'
-
 
 class TestGetUserFromApiKey:
 

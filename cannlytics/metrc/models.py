@@ -29,7 +29,15 @@ from ..utils.utils import (
     update_dict,
 )
 
-class Model(object):
+class MissingAttributeError(AttributeError, KeyError):
+    """A model has no such property.
+
+    An ``AttributeError`` so that ``hasattr``, ``getattr`` with a
+    default, ``copy``, and ``pickle`` behave; also a ``KeyError``, which
+    is what this lookup raised before 1.0.0, so existing handlers hold.
+    """
+
+class Model:
     """Base class for all Metrc models."""
 
     def __init__(
@@ -47,7 +55,12 @@ class Model(object):
             self.__dict__[key] = properties[key]
 
     def __getattr__(self, key):
-        return self.__dict__[key]
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise MissingAttributeError(
+                f'{type(self).__name__!r} object has no attribute {key!r}'
+            ) from None
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value

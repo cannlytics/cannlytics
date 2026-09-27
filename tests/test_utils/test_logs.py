@@ -10,7 +10,6 @@ import pytest
 
 from cannlytics.utils.logs import initialize_logs
 
-
 class TestInitializeLogs:
 
     def test_returns_logger(self):

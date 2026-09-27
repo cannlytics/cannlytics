@@ -8,7 +8,6 @@ import time
 import pytest
 from cannlytics.utils.utils import get_directory_files, find_latest_file, hash_file
 
-
 class TestGetDirectoryFiles:
 
     def test_finds_pdfs(self, tmp_path):
@@ -35,7 +34,6 @@ class TestGetDirectoryFiles:
         result = get_directory_files(str(tmp_path), 'pdf')
         assert len(result) == 1
 
-
 class TestFindLatestFile:
 
     def test_finds_latest(self, tmp_path):
@@ -57,7 +55,6 @@ class TestFindLatestFile:
         result = find_latest_file(str(tmp_path), slug='licenses', ext='.csv')
         assert 'licenses' in result
 
-
 class TestHashFile:
 
     def test_produces_hex_string(self, tmp_path):
@@ -65,7 +62,14 @@ class TestHashFile:
         f.write_text('hello world')
         h = hash_file(str(f))
         assert isinstance(h, str)
-        assert len(h) == 40  # SHA-1 hex.
+        # SHA-256 hex since 1.0.0 (was SHA-1, 40 characters, before).
+        assert len(h) == 64
+        assert h == 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
+
+    def test_legacy_sha1_still_reachable(self, tmp_path):
+        f = tmp_path / 'test.txt'
+        f.write_text('hello world')
+        assert hash_file(str(f), algorithm='sha1') == '2aae6c35c94fcfb415dbe95f408b9ce91ee846ed'
 
     def test_deterministic(self, tmp_path):
         f = tmp_path / 'test.txt'

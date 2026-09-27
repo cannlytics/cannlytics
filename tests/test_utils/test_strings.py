@@ -16,7 +16,6 @@ from cannlytics.utils.utils import (
     strip_whitespace,
 )
 
-
 class TestSnakeCase:
 
     def test_basic(self):
@@ -51,7 +50,6 @@ class TestSnakeCase:
         result = snake_case('mg/g')
         assert 'to' in result
 
-
 class TestCamelcase:
 
     def test_basic(self):
@@ -62,7 +60,6 @@ class TestCamelcase:
 
     def test_empty(self):
         assert camelcase('') == ''
-
 
 class TestCamelToSnake:
 
@@ -78,7 +75,6 @@ class TestCamelToSnake:
     def test_consecutive_caps(self):
         assert camel_to_snake('HTMLParser') == 'h_t_m_l_parser'
 
-
 class TestKebabCase:
 
     def test_basic(self):
@@ -90,7 +86,6 @@ class TestKebabCase:
 
     def test_empty(self):
         assert kebab_case('') == ''
-
 
 class TestGetKeywords:
 
@@ -113,7 +108,6 @@ class TestGetKeywords:
         result = get_keywords('UPPER Case')
         assert all(k == k.lower() for k in result)
 
-
 class TestGetRandomString:
 
     def test_length(self):
@@ -130,7 +124,6 @@ class TestGetRandomString:
 
     def test_zero_length(self):
         assert get_random_string(0) == ''
-
 
 class TestStripWhitespace:
 

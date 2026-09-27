@@ -60,7 +60,6 @@ Description:
         best-effort and can be disabled via ``qrustie_path=False``.
 """
 # Standard imports:
-import hashlib
 import importlib
 import importlib.util
 import json
@@ -95,6 +94,7 @@ from cannlytics.data.coas.pdf_utils import (
     WIN_MAX_PATH,
 )
 from cannlytics.data.coas.registry import LAB_REGISTRY
+from cannlytics.utils.hashing import hash_bytes, hash_file, hash_file_multi
 from cannlytics.data.coas.schema import (
     ANALYSIS_CONFIGS,
     normalize_product_type,
@@ -103,7 +103,6 @@ from cannlytics.data.coas.qr import scan_qr
 
 # Suppress pdfminer noise.
 logging.getLogger('pdfminer').setLevel(logging.ERROR)
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Lab Identification & Algorithm Loading                           ║
@@ -216,7 +215,6 @@ def identify_lab(
 
     return None
 
-
 def load_algorithm(
         lab_key: str,
         lab_registry: Optional[Dict] = None,
@@ -299,7 +297,6 @@ def load_algorithm(
 
     _log.warning(f'load_algorithm: Could not load algorithm for "{lab_key}"')
     return None
-
 
 def adapt_algorithm_output(
         raw_output: Dict,
@@ -422,26 +419,26 @@ def adapt_algorithm_output(
         'analyses': analysis_entries,
     }
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ File Hashing                                                     ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
 def _hash_file(path: str, size: int = 65536) -> str:
-    """Compute a SHA-256 hash of a file's first ``size`` bytes."""
-    h = hashlib.sha256()
-    try:
-        with open(long_path(path), 'rb') as f:
-            h.update(f.read(size))
-    except (OSError, FileNotFoundError):
-        pass
-    return h.hexdigest()
+    """Compute the SHA-256 of a whole file, the canonical ``pdf_hash``.
 
+    Before 1.0.0 this hashed only the first ``size`` bytes, so two
+    different COAs that opened with the same 64 KB (a shared lab logo)
+    received the same ``pdf_hash``, and an unreadable file silently
+    received the digest of zero bytes. ``size`` is now a chunk size.
+
+    Raises:
+        OSError: If the file cannot be read.
+    """
+    return hash_file(long_path(path), size=size)
 
 def _hash_bytes(data: bytes) -> str:
     """Compute a SHA-256 hash of raw bytes."""
-    return hashlib.sha256(data).hexdigest()
-
+    return hash_bytes(data)
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc — The Main Parser Class                                   ║
@@ -1021,6 +1018,7 @@ class COAdoc:
             source: str = '',
             sample_size: Optional[int] = None,
             analyses: Optional[List[str]] = None,
+            legacy_keys: bool = True,
         ) -> Dict:
         """Batch-parse all COAs for a state. Pipeline mode only.
 
@@ -1029,14 +1027,21 @@ class COAdoc:
 
         This method uses JSONL caching (via Bogart) to skip previously
         parsed COAs and track progress across runs. Import dependencies
-        (``pandas``, ``cannlytics.data.cache.Bogart``,
-        ``cannlytics.utils.utils.hash_file``) are loaded lazily and
-        only required for pipeline mode.
+        (``pandas``, ``cannlytics.data.cache.Bogart``) are loaded lazily
+        and only required for pipeline mode.
+
+        Cache keys are the whole-file SHA-256 (``pdf_hash``). Caches
+        written before 1.0.0 were keyed by SHA-1; with ``legacy_keys``
+        a COA already cached under its SHA-1 still counts as parsed, so
+        upgrading never re-parses (or re-bills) an existing archive.
 
         Args:
             source: Optional source filter (e.g., ``'prr'``, ``'flowery'``).
             sample_size: If set, randomly sample this many PDFs.
             analyses: List of analyses to parse. ``None`` = all detected.
+            legacy_keys: Also look up each COA under its pre-1.0.0
+                SHA-1 key. Turn off once caches are re-keyed with
+                ``cannlytics.data.cache.rekey_cache``.
 
         Returns:
             Summary statistics dict.
@@ -1053,15 +1058,8 @@ class COAdoc:
         # Lazy imports for pipeline dependencies.
         import pandas as pd
         from cannlytics.data.cache import Bogart
-        from cannlytics.utils.utils import hash_file
 
         # Resolve directories.
-        # Pipeline-specific: STATE_NAMES imported only here.
-        try:
-            from cannlytics.data.coas.config import AI_PROVIDERS
-        except ImportError:
-            pass
-
         state_name = self.state
         data_dir = self.data_dir or Path(os.environ.get('CANNLYTICS_DATA_DIR', '.datasets'))
         cache_dir = self.cache_dir or Path('.cache')
@@ -1088,10 +1086,21 @@ class COAdoc:
             self.logger.info('No PDFs found.')
             return {'parsed': 0, 'skipped': 0, 'errors': 0}
 
-        df = pd.DataFrame({'file_path': pdf_files})
-        df['pdf_hash'] = df['file_path'].apply(
-            lambda x: hash_file(long_path(x), size=65536)
-        )
+        # One read per file yields the canonical key and the legacy key.
+        algorithms = ('sha256', 'sha1') if legacy_keys else ('sha256',)
+        records = []
+        for fp in pdf_files:
+            try:
+                digests = hash_file_multi(long_path(fp), algorithms)
+            except OSError as e:
+                self.logger.warning('Skipping unreadable PDF %s: %s', fp, e)
+                continue
+            records.append({
+                'file_path': fp,
+                'pdf_hash': digests['sha256'],
+                'legacy_hash': digests.get('sha1'),
+            })
+        df = pd.DataFrame(records, columns=['file_path', 'pdf_hash', 'legacy_hash'])
         df.drop_duplicates(subset=['pdf_hash'], inplace=True)
 
         if sample_size and sample_size < len(df):
@@ -1134,9 +1143,10 @@ class COAdoc:
 
             pdf_hash = row['pdf_hash']
             file_path = row['file_path']
+            keys = [k for k in (pdf_hash, row['legacy_hash']) if k]
 
             # Skip invalid PDFs.
-            if pdf_hash in invalid_cache:
+            if any(k in invalid_cache for k in keys):
                 skipped_count += 1
                 continue
 
@@ -1146,8 +1156,8 @@ class COAdoc:
                 skipped_count += 1
                 continue
 
-            # Skip if already cached.
-            if metadata_cache.get(pdf_hash) or algo_cache.get(pdf_hash):
+            # Skip if already cached, under the canonical or legacy key.
+            if any(metadata_cache.get(k) or algo_cache.get(k) for k in keys):
                 skipped_count += 1
                 continue
 

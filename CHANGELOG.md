@@ -7,7 +7,129 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.2] — 2026-05-05
+## [1.0.0] — Unreleased
+
+> Set the date on the day the `v1.0.0` tag is pushed.
+
+### Summary
+
+The first release to PyPI since `0.0.17` (January 2024), and the first
+with a stable public API. It includes everything in the three internal
+milestones below (the rebuilt Firebase module, the COAdoc parsing
+engine, `uuid4` document IDs) plus the release hardening listed here.
+Requires Python 3.11 or later.
+
+### Added
+
+- **`cannlytics.utils.hashing`** — one definition of every hash in the
+  ecosystem: `hash_file`, `hash_text`, `hash_bytes`, `hash_json`,
+  `short_hash`, `hmac_sha256`, and `identify_hash`. SHA-256 over the
+  whole input, reproducible with `sha256sum` / `Get-FileHash`.
+  Standard library only. Re-exported from `cannlytics.utils`.
+- **Hash migration tools** — `legacy_file_hashes`,
+  `build_hash_crosswalk`, `crosswalk_key_map`, and
+  `cannlytics.data.cache.rekey_cache`, to move caches and datasets to
+  the canonical `pdf_hash` without re-parsing a single COA.
+- **Gemini embeddings** — `gemini-embedding-001` and the multimodal
+  `gemini-embedding-2`, selected by model name, with task hints
+  (`task='clustering'`, `'search_query'`, ...). OpenAI models are
+  unchanged.
+- **File and document embeddings** — `create_file_embedding` (images,
+  PDFs, audio, video) and `create_pdf_embedding`, which embeds a PDF of
+  any length page by page in memory and returns one document vector
+  keyed by `pdf_hash`, so embeddings join to lab results.
+- **Vector helpers** — `create_embeddings` (batched), `find_similar`,
+  `cosine_similarity`, `aggregate_embeddings`, `normalize_embedding`,
+  `project_embeddings` (PCA to 2-D/3-D), and `score_outliers` (robust
+  per-group outlier scores). NumPy only.
+- **`calc_diversity_index(base=...)`**, and the `calc_colorfulness`
+  spelling alias.
+- **Metrc client**: `timeout` (60 s default, per client and per call),
+  `close()`, context-manager support, and `log_file`.
+- **`.env.example`** documenting every environment variable, and a
+  `py.typed` marker.
+- **Tests**: new suites for hashing, stats, Metrc, auth, embeddings
+  providers, and package contracts (a core install imports nothing
+  optional; every `__all__` resolves; one version number).
+
+### Changed
+
+- **`cannlytics.utils.hash_file` now returns SHA-256 (64 hex
+  characters), not SHA-1 (40).** Pass `algorithm='sha1'` for the old
+  digest. `size` remains the chunk size.
+- **`pdf_hash` is one thing: the SHA-256 of the whole file.**
+  Previously `COAdoc.parse()` hashed only the first 64 KB (two
+  different COAs sharing a lab-logo prefix received the same
+  `pdf_hash`), `COAdoc.parse_all()` used SHA-1, and the algorithms used
+  whole-file SHA-256. `parse_all(legacy_keys=True)` still honours
+  caches keyed by SHA-1, so upgrading never re-parses an archive.
+- **Embedding cache keys are plain SHA-256** (`embedding_key`). Entries
+  stored under the previous HMAC-derived key still hit
+  (`legacy_keys=True`); new entries use the new key.
+- **`sha256_hmac` moved to `cannlytics.utils.hashing`.** It is still
+  importable from `cannlytics.auth`, and its output is byte-identical,
+  so issued API keys keep working. `cannlytics.ai` no longer imports
+  Firebase, and `cannlytics.ai` and `cannlytics.stats` are now core
+  modules: they import with no extras installed.
+- **`calc_diversity_index` returns `nan`, not `0.0`, for a sample with
+  no detected compound.** Zero is the real score of a single-compound
+  sample; "nothing detected" is a missing measurement. The function is
+  vectorized and otherwise identical to 1e-15.
+- **Metrc request logging is off by default** (`logs=False`). When on,
+  it writes to an owner-only file and configures only the `metrc`
+  logger; it no longer calls `logging.basicConfig`.
+- **OpenAI's default COA model is `gpt-5-mini`.** `gpt-5-nano` is
+  marked `quarantined` (it reports non-detects as `0.0`) and remains
+  selectable by name.
+- **Bogart caches** are read and written as UTF-8 on every platform,
+  rewritten atomically, tolerate corrupt lines on merge, and accept a
+  bare filename as the cache path.
+- **`pip install "cannlytics[all]"`** no longer installs the test and
+  lint tools or the `coa-legacy` system-dependent packages.
+  `tzdata` is a core dependency and `pypdf` joins the `ai` extra.
+
+### Deprecated
+
+- `calculate_purpleness` and `calculate_colourfulness` — renamed
+  `calc_purpleness` and `calc_colourfulness`. The old names warn and
+  will be removed in 2.0.
+
+### Removed
+
+- The unused `xxhash` dependency.
+
+### Fixed
+
+- `COAdoc` no longer assigns every unreadable PDF the same `pdf_hash`
+  (the SHA-256 of zero bytes); an unreadable file now raises `OSError`
+  from `_hash_file`, reported by `parse()` as an `error`, and is
+  skipped with a warning by `parse_all()`.
+- `calc_colourfulness(metric='M3')` was silently wrong on 8-bit images
+  (`R - G` wrapped around), and `calc_purpleness` raised
+  `OverflowError` on an 8-bit pixel under NumPy 2. An unknown `how` or
+  `metric` now raises `ValueError` instead of returning `None`.
+- The Metrc client's reconnect never ran: it caught the built-in
+  `ConnectionError`, which is unrelated to the one `requests` raises.
+- Metrc models raised `KeyError` for a missing attribute, which broke
+  `hasattr`, `getattr(..., default)`, and `copy.copy`.
+- `from cannlytics.metrc import *` and
+  `from cannlytics.data.cache import *` raised `TypeError`
+  (`__all__` held objects, not strings).
+- A shared mutable default in `Metrc.create_locations`.
+- `poll_batch_job` could poll forever; it now has a `timeout`.
+
+### Migration
+
+1. Rename `calculate_purpleness` / `calculate_colourfulness` calls.
+2. If you stored `pdf_hash` values or Bogart caches before 1.0.0, run
+   `build_hash_crosswalk` over the source PDFs once, then
+   `rekey_cache(cache_path, crosswalk_key_map(rows))`. A 40-character
+   `pdf_hash` is a legacy SHA-1 (`identify_hash` tells you).
+3. If you relied on Metrc request logs, pass `logs=True`.
+
+---
+
+## Internal milestone 1.0.2 — 2026-05-05 (never published; included in 1.0.0)
  
 ### Summary
  
@@ -72,7 +194,7 @@ IDs, which create write hotspots on the most-recent index shard at scale.
   entropy, format-stable, supported on every Python the package
   targets, and aligned with Firestore's own auto-ID strategy.
 
-## [1.0.1] — 2026-03-22
+## Internal milestone 1.0.1 — 2026-03-22 (never published; included in 1.0.0)
 
 ### Summary
 
@@ -232,7 +354,7 @@ history via the `v1.0.0` tag.
 
 ---
 
-## [1.0.0] — 2026-03-19
+## Internal milestone 1.0.0 — 2026-03-19 (never published; included in 1.0.0)
 
 ### Summary
 

@@ -13,7 +13,6 @@ Description: This module contains general Cannlytics utility functions.
 # Standard imports:
 from datetime import datetime, timedelta
 import glob
-import hashlib
 import json
 import os
 from re import split, sub, findall
@@ -32,6 +31,9 @@ except ImportError as _zoneinfo_error:  # pragma: no cover
 # External imports:
 from dateutil import parser
 from pandas import ExcelWriter, merge
+
+# Internal imports:
+from cannlytics.utils.hashing import hash_file  # noqa: F401 (re-exported)
 
 # Random characters to use in password generation.
 RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -271,7 +273,7 @@ def clean_column_strings(data: Any, column: str) -> Any:
     data[column] = data[column].str.replace('[/,]', '_', regex=True)
     data[column] = data[column].str.replace('[.,(,)]', '', regex=True)
     data[column] = data[column].str.replace("\'", '', regex=True)
-    data[column] = data[column].str.replace("[[]", '_', regex=True)
+    data[column] = data[column].str.replace('[', '_', regex=False)
     data[column] = data[column].str.replace(r"[]]", '', regex=True)
     data[column] = data[column].str.replace('\u03b2', 'beta', regex=True)
     data[column] = data[column].str.replace('\u0394', 'delta', regex=True)
@@ -293,7 +295,7 @@ def nonzero_columns(data):
     return data.columns[nonzero].to_list()
 
 def nonzero_rows(data):
-    """Return the non-zero row keys of a DataFrame."""
+    """Return the index labels of the non-zero values of a Series."""
     nonzero = (data != 0)
     return nonzero.index[nonzero].to_list()
 
@@ -326,10 +328,19 @@ def to_excel_with_style(
         sheet_name: Optional[str] = 'Sheet1',
         style: Optional[dict] = None,
     ):
-    """Save a DataFrame to Excel with styled headers."""
+    """Save a DataFrame to Excel with styled headers.
+
+    Requires ``XlsxWriter`` from the `utils` extra.
+    """
     if style is None:
         style = {'bottom': 1, 'bg_color': '#EBF1DE'}
-    writer = ExcelWriter(file_name, engine='xlsxwriter')
+    try:
+        writer = ExcelWriter(file_name, engine='xlsxwriter')
+    except ImportError as error:
+        raise ImportError(
+            '`to_excel_with_style` requires the `utils` extra. Install it '
+            'with:\n\n    pip install "cannlytics[utils]"\n'
+        ) from error
     df.to_excel(writer, index=index, sheet_name=sheet_name, startrow=1, header=False)
     worksheet = writer.sheets[sheet_name]
     workbook = writer.book
@@ -418,13 +429,3 @@ def find_latest_file(data_dir: str, slug='all', ext='.xlsx') -> str:
         return files[0]
     else:
         return ''
-
-def hash_file(filepath, size=65536):
-    """Generate a SHA-1 hash for a file."""
-    hasher = hashlib.sha1()
-    with open(filepath, 'rb') as f:
-        buf = f.read(size)
-        while len(buf) > 0:
-            hasher.update(buf)
-            buf = f.read(size)
-    return hasher.hexdigest()

@@ -18,7 +18,6 @@ from cannlytics.utils.utils import (
     dump_column,
 )
 
-
 class TestCleanDictionary:
 
     def test_snake_cases_keys(self):
@@ -29,7 +28,6 @@ class TestCleanDictionary:
     def test_custom_function(self):
         result = clean_dictionary({'a': 1, 'b': 2}, function=str.upper)
         assert 'A' in result and 'B' in result
-
 
 class TestCleanNestedDictionary:
 
@@ -50,7 +48,6 @@ class TestCleanNestedDictionary:
         result = clean_nested_dictionary(data)
         assert result['tags'] == ['a', 'b', 'c']
 
-
 class TestRemoveDictFields:
 
     def test_removes_specified_keys(self):
@@ -62,7 +59,6 @@ class TestRemoveDictFields:
         data = {'a': 1}
         result = remove_dict_fields(data, ['nonexistent'])
         assert result == {'a': 1}
-
 
 class TestRemoveDictNulls:
 
@@ -80,14 +76,12 @@ class TestRemoveDictNulls:
         assert 'a' in result and 'b' in result and 'c' in result
         assert 'd' not in result
 
-
 class TestUpdateDict:
 
     def test_merges_kwargs(self):
         result = update_dict({'existing': 'val'}, name='Keegan')
         assert 'name' in result
         assert 'existing' in result
-
 
 class TestSortedNicely:
 
@@ -99,7 +93,6 @@ class TestSortedNicely:
     def test_alphabetical(self):
         result = sorted_nicely(['banana', 'apple', 'cherry'])
         assert result == ['apple', 'banana', 'cherry']
-
 
 class TestSplitList:
 
@@ -116,7 +109,6 @@ class TestSplitList:
     def test_empty_list(self):
         first, second = split_list([])
         assert first == [] and second == []
-
 
 class TestDumpColumn:
 

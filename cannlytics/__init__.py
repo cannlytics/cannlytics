@@ -4,7 +4,7 @@ Copyright (c) 2021-2026 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 9/12/2026
+Updated: 9/21/2026
 License: MIT <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -17,7 +17,7 @@ Description:
         ``[firebase]`` extra.
       - ``cannlytics.auth`` imports ``cannlytics.firebase``.
       - ``cannlytics.data.coas`` requires ``pdfplumber`` from ``[coa]``.
-      - ``cannlytics.stats`` requires ``scikit-image`` from ``[science]``.
+      - ``cannlytics.ai`` requires a provider SDK from ``[ai]``.
 
     Importing those eagerly here would mean that a core install --
     ``pip install cannlytics`` -- could not even run ``import
@@ -37,7 +37,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 __title__ = 'cannlytics'
-__version__ = '1.0.2'
+__version__ = '1.0.0'
 __author__ = 'Keegan Skeate <https://github.com/keeganskeate>'
 __license__ = 'MIT <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>'
 __copyright__ = 'Copyright (c) 2021-2026 Cannlytics'
@@ -50,7 +50,7 @@ _LAZY_SUBMODULES = {
     'data': None,
     'firebase': 'firebase',
     'metrc': None,
-    'stats': 'science',
+    'stats': None,
     'utils': None,
 }
 
@@ -71,6 +71,7 @@ _LAZY_SUBMODULES = {
 __all__ = [
     'data',
     'metrc',
+    'stats',
     'utils',
     '__version__',
     '__title__',
@@ -91,7 +92,6 @@ if TYPE_CHECKING:  # pragma: no cover
         stats,
         utils,
     )
-
 
 def __getattr__(name: str):
     """Import a subpackage on first attribute access (PEP 562).
@@ -121,7 +121,6 @@ def __getattr__(name: str):
         raise
     globals()[name] = module
     return module
-
 
 def __dir__():
     """Advertise every submodule for tab-completion.
