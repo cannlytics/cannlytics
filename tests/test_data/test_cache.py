@@ -137,7 +137,7 @@ class TestOrganizeCache:
 import hashlib
 import json as _json
 
-from cannlytics.data.cache import organize_cache, rekey_cache
+from cannlytics.data.cache import rekey_cache
 
 def _read(path):
     with open(path, encoding='utf-8') as file:

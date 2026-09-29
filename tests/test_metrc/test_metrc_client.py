@@ -228,9 +228,9 @@ class TestModels:
         assert not hasattr(plant, 'harvested_date')
         assert getattr(plant, 'harvested_date', 'n/a') == 'n/a'
         with pytest.raises(AttributeError, match='harvested_date'):
-            plant.harvested_date
+            plant.harvested_date  # noqa: B018 (the access is the test)
         with pytest.raises(KeyError):      # what it raised before 1.0.0
-            plant.harvested_date
+            plant.harvested_date  # noqa: B018
 
     def test_models_can_be_copied(self):
         import copy

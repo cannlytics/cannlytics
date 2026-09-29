@@ -3,7 +3,7 @@ Tests for cannlytics.licenses
 =============================
 The identifier is stored as issued; the key is for matching. Known
 answers are the probes on which the results-side and licenses-side
-normalizers disagreed (STR-2026-0925-DATASETS-UPSTREAM-V1, U1).
+normalisers disagreed (STR-2026-0925-DATASETS-UPSTREAM-V1, U1).
 """
 import pytest
 
@@ -60,8 +60,10 @@ class TestKey:
         ('OCM-MICR-21-000058-P1', 'ny', 'OCM-MICR-21-58'),
         # Labels and suffixes.
         ('LIC# 00000034DCOD00007550', 'ma', '34DCOD00007550'), ('License No. MR281236', 'ma', 'MR281236'),
-        ('MR281236', 'ma', 'MR281236'), ('  LIC-000123  ', 'ma', '123'), ('LIC-000000-000123', 'ny', '0-123'),
-        ('412345', 'wa', '412345'), (412345.0, 'wa', '412345'), ('050-1005678', 'or', '50-1005678'), ('#123', 'or', '123'),
+        ('MR281236', 'ma', 'MR281236'), ('  LIC-000123  ', 'ma', None), ('LIC-000000-000123', 'ny', None),
+        ('412345', 'wa', '412345'), (412345.0, 'wa', '412345'), ('050-1005678', 'or', '50-1005678'), ('#123', 'or', None),
+        # Too weak to match on: the census joined '1' to '00001'.
+        ('1', None, None), ('00001', None, None), ('A-1', None, None), ('7002', None, '7002'), ('CCB-0001', 'nv', 'CCB-1'),
         # A label must end where a word ends; these are numbers, not labels.
         ('DEAL-0042', 'ca', 'DEAL-42'), ('NORTH-0001', 'ca', 'NORTH-1'), ('REGAL-7', 'ca', 'REGAL-7'),
         ('PUBLIC-0001', 'ca', 'PUBLIC-1'), ('No. 0012345', 'ca', '12345'), ('C10-0000936LIC', 'ca', 'C10-936'),
@@ -128,6 +130,7 @@ class TestMergeCascade:
         ('Lic# C10 0000936', 'C10-0000936', 'ca', 'key'),
         ('MMTC-2015-0001', 'MMTC20150001', 'fl', 'compact'),
         ('C10-0000936-LIC', 'C11-0000936-LIC', 'ca', None),
+        ('1', '00001', None, None), ('00001', '00001', None, 'identifier'),
         (None, 'C10-936', 'ca', None), ('N/A', 'N/A', 'ca', None),
     ])
     def test_match_level(self, left, right, state, level):

@@ -5,7 +5,6 @@ Covers: analyte key lists, ANALYSIS_CONFIGS, normalization helpers,
 LabResult dataclass, ResultDetail, validation rules, and Pydantic
 models (when available).
 """
-import json
 from datetime import datetime
 
 import pytest
@@ -22,7 +21,6 @@ from cannlytics.data.coas.schema import (
     FOREIGN_MATTER_KEYS,
     ANALYSIS_CONFIGS,
     # Normalization.
-    ANALYTE_KEYS,
     normalize_analyte_key,
     normalize_status,
     normalize_product_type,
@@ -37,7 +35,6 @@ from cannlytics.data.coas.schema import (
     LabTestResult,
     LabAnalysis,
 )
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Analyte Key Lists                                                ║
@@ -87,7 +84,6 @@ class TestAnalyteKeys:
             assert 'keywords' in config, f'{name} missing keywords'
             assert len(config['keywords']) > 0, f'{name} has empty keywords'
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Normalization: Analyte Keys                                      ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -130,7 +126,6 @@ class TestNormalizeAnalyteKey:
 
     def test_whitespace_handling(self):
         assert normalize_analyte_key('  THC  ') == 'delta_9_thc'
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Normalization: Status                                            ║
@@ -181,7 +176,6 @@ class TestNormalizeStatus:
     def test_unknown_passthrough(self):
         assert normalize_status('pending') == 'pending'
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Normalization: Product Type                                      ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -218,7 +212,6 @@ class TestNormalizeProductType:
         # Unknown types are returned as-is (not lowered by default).
         result = normalize_product_type('Suppository')
         assert result == 'Suppository'
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ LabResult Dataclass                                              ║
@@ -327,7 +320,6 @@ class TestLabResult:
         assert r2.product_name == r.product_name
         assert r2.total_thc == r.total_thc
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ ResultDetail Dataclass                                           ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -347,7 +339,6 @@ class TestResultDetail:
         assert d['analysis'] == 'cannabinoids'
         assert d['key'] == 'delta_9_thc'
         assert d['value'] == 2.10
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Validation                                                       ║
@@ -409,7 +400,6 @@ class TestValidation:
         assert not is_valid
         assert any('total_terpenes' in e for e in errors)
 
-
 class TestValidationRules:
     """Verify VALIDATION_RULES structure covers key analyte fields."""
 
@@ -443,7 +433,6 @@ class TestValidationRules:
         assert VALIDATION_RULES['moisture_content']['max'] == 20
         assert 'water_activity' in VALIDATION_RULES
         assert VALIDATION_RULES['water_activity']['max'] == 1
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Pydantic Models (conditional)                                    ║

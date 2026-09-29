@@ -6,7 +6,6 @@ Covers: initialize_logs with various configurations.
 import logging
 import os
 
-import pytest
 
 from cannlytics.utils.logs import initialize_logs
 
@@ -44,7 +43,7 @@ class TestInitializeLogs:
 
     def test_custom_prefix(self, tmp_path):
         log_dir = str(tmp_path / 'logs')
-        logger = initialize_logs('prefix_test', log_dir=log_dir, prefix='myapp')
+        initialize_logs('prefix_test', log_dir=log_dir, prefix='myapp')
         log_files = os.listdir(log_dir)
         assert any('myapp' in f for f in log_files)
 

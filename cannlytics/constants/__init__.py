@@ -46,7 +46,16 @@ from .analytes import (
     normalize_analyte_key,
     snake_case_analyte,
 )
-from .compounds import cannabinoids, heavy_metals, pesticides, terpenes
+from .compounds import (
+    CAS_SOURCES,
+    COMPOUNDS,
+    cannabinoids,
+    get_compound,
+    heavy_metals,
+    is_valid_cas,
+    pesticides,
+    terpenes,
+)
 from .licenses import (
     ACTIVE_STATUSES,
     LICENSE_CATEGORIES,
@@ -105,7 +114,7 @@ DEFAULT_HEADERS = {
 RANDOM_STRING_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
 __all__ = [
-    'ACTIVE_STATUSES', 'ALL_ANALYTE_KEYS', 'ANALYSIS_ALIASES', 'ANALYTE_ALIASES',
+    'ACTIVE_STATUSES', 'ALL_ANALYTE_KEYS', 'CAS_SOURCES', 'COMPOUNDS', 'get_compound', 'is_valid_cas', 'ANALYSIS_ALIASES', 'ANALYTE_ALIASES',
     'ANALYTE_FAMILIES', 'ANALYTE_KEYS', 'ANALYTE_NAMES', 'ANALYTE_TO_ANALYSIS',
     'CANADIAN_PROVINCES', 'CANNABINOIDS', 'CODINGS', 'DECARB', 'DEFAULT_HEADERS',
     'FLOWER_PRODUCT_TYPES', 'FOREIGN_MATTER', 'HEAVY_METALS', 'JURISDICTIONS',

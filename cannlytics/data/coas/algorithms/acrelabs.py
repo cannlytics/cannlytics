@@ -4,7 +4,6 @@ Copyright (c) 2024-2026 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
-    Cannlytics AI Executive Team (Dr. Jack Doobie, CSO)
 Created: 7/15/2026
 Updated: 7/15/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>

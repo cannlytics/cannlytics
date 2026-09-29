@@ -138,6 +138,11 @@ _REJECT = [
     re.compile(r'\b(?:cultivation|retail|dispensary|manufactur|process|distribut|transport|testing|laboratory|microbusiness|vertically|adult[- ]use|medical|license type)\w*', re.IGNORECASE),
 ]
 
+# A key with fewer significant characters (zero-padding aside) cannot
+# identify a license: without it, '1' and '00001' meet (the 1.0.4 census
+# found five such joins). Exact identifiers still match.
+MIN_KEY_CHARACTERS = 4
+
 # Florida identifiers that appear in license fields but are not
 # licenses. Applied to Florida only: rejecting a real license elsewhere
 # loses a join, while keeping one of these costs nothing (it matches no
@@ -164,8 +169,9 @@ def license_key(value: Any, state: Optional[str] = None, compact: bool = False) 
             hyphens and spaces.
 
     Returns:
-        The key, or ``None`` when the value is a placeholder or is
-        recognizably not a license number.
+        The key, or ``None`` when the value is a placeholder, is
+        recognizably not a license number, or has fewer than
+        ``MIN_KEY_CHARACTERS`` significant characters to match on.
     """
     number = normalize_license_number(value)
     if number is None:
@@ -184,7 +190,7 @@ def license_key(value: Any, state: Optional[str] = None, compact: bool = False) 
     # Alphanumeric groups only, separators collapsed to one hyphen, and
     # leading zeros dropped from each group ('C10-0000936' is 'C10-936').
     groups = [group for group in re.split(r'[^A-Z0-9]+', text.upper()) if group]
-    if not groups:
+    if len(''.join(group.lstrip('0') for group in groups)) < MIN_KEY_CHARACTERS:
         return None
     if compact:
         return ''.join(groups)

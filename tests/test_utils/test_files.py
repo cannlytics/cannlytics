@@ -3,9 +3,7 @@ Tests for file utilities in cannlytics.utils.utils
 ====================================================
 Covers: get_directory_files, find_latest_file, hash_file.
 """
-import os
 import time
-import pytest
 from cannlytics.utils.utils import get_directory_files, find_latest_file, hash_file
 
 class TestGetDirectoryFiles:

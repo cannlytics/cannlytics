@@ -1,424 +1,391 @@
 """
 Web Data Tools | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2026 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/10/2021
-Updated: 6/12/2026
+Updated: 9/28/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Resources:
-    https://stackoverflow.com/questions/54416896/how-to-scrape-email-and-phone-numbers-from-a-list-of-websites
-    https://hackersandslackers.com/scraping-urls-with-beautifulsoup/
-
-TODO:
-    Improve with requests-html - https://github.com/psf/requests-html
-    - Get #about
-    - Get absolute URLs
-    - Search for text (prices/analyses)
-        r.html.search('Python is a {} language')[0]
+Description:
+    Tools for reading web pages and downloading files: page metadata
+    (description, image, favicon, theme color, phone, e-mail), file
+    downloads, public Google Drive files, and a Selenium browser for
+    pages that need one. Requires ``pip install "cannlytics[web]"``;
+    Selenium is imported only when a browser is started.
 """
 # Standard imports:
 import logging
 import os
 import re
+import tempfile
 from time import sleep
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+from urllib.parse import urljoin, urlparse
 
 # External imports:
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-try:
-    import chromedriver_binary  # Adds chromedriver binary to path.
-except ImportError:
-    pass # Otherwise, ChromeDriver should be in your path.
 
-# === Dynamic HTML Scraping Tools ===
+# Internal imports:
+from cannlytics.constants import DEFAULT_HEADERS
 
-# FIXME: This may be causing a severe memory leak.
 # Module logger. A library must not print to stdout.
 logger = logging.getLogger(__name__)
 
+# Seconds to wait for a server before giving up: (connect, read).
+TIMEOUT = (10, 60)
+
+# === Browser (Selenium) ===
+
+def _selenium():
+    """Import Selenium, or say which extra provides it."""
+    try:
+        from selenium import webdriver
+    except ImportError as error:
+        raise ImportError(
+            'A browser needs Selenium: pip install "cannlytics[web]"'
+        ) from error
+    return webdriver
+
 def initialize_selenium(
-        browser=None,
-        headless=True,
-        download_dir=None,
+        browser: Optional[str] = None,
+        headless: bool = True,
+        download_dir: Optional[str] = None,
+        arguments: Iterable[str] = (),
     ) -> Any:
-    """
-    Initialize a Selenium WebDriver with preference for Chrome, falling back to Edge.
-    The function attempts to initialize Chrome first; if it fails, it tries Edge.
-    Users can specify a browser if desired.
+    """Start a Selenium WebDriver: Chrome, falling back to Edge.
+
+    Selenium (4.6 and later) finds or downloads a matching driver by
+    itself; nothing needs to be on your ``PATH``.
 
     Args:
-        browser (str, optional): The preferred browser to use ('chrome' or 'edge'). If None, tries Chrome first, then Edge.
-        headless (bool): Whether to run the browser in headless mode. Defaults to True.
-        download_dir (str, optional): Path to the directory for automatic file downloads. Defaults to None.
+        browser: ``'chrome'`` or ``'edge'``; by default Chrome is tried
+            first, then Edge.
+        headless: Run without a window (default ``True``).
+        download_dir: Save downloads here, without prompting.
+        arguments: Extra command-line arguments for the browser.
 
     Returns:
-        webdriver: An instance of a Selenium WebDriver.
+        A WebDriver. Call ``driver.quit()`` when done.
 
     Raises:
-        RuntimeError: If it fails to initialize both Chrome and Edge drivers.
+        ImportError: If Selenium is not installed.
+        RuntimeError: If no browser could be started; the message
+            includes each browser's error.
     """
-    browsers = ['chrome', 'edge']
-    if browser:
-        browsers = [browser]
-    for browser in browsers:
+    webdriver = _selenium()
+    errors = []
+    for name in [browser] if browser else ['chrome', 'edge']:
+        name = name.lower()
+        if name not in ('chrome', 'edge'):
+            raise ValueError(f"browser must be 'chrome' or 'edge', not {name!r}")
+        driver = None
         try:
-            if browser.lower() == 'chrome':
-                service = Service()
-                options = ChromeOptions()
-                options.add_argument('--window-size=1920,1200')
-                options.add_argument('--disable-gpu')
-                options.add_argument('--no-sandbox')
-                if headless:
-                    options.add_argument('--headless')
+            if name == 'chrome':
+                from selenium.webdriver.chrome.options import Options
+                from selenium.webdriver.chrome.service import Service
             else:
-                service = Service()
-                options = EdgeOptions()
-                if headless:
-                    options.add_argument('--headless')
+                from selenium.webdriver.edge.options import Options
+                from selenium.webdriver.edge.service import Service
+            options = Options()
+            for argument in ('--window-size=1920,1200', '--disable-gpu', '--no-sandbox', *arguments):
+                options.add_argument(argument)
+            if headless:
+                options.add_argument('--headless=new')
             if download_dir:
-                default_directory = os.path.normpath(os.path.join(os.getcwd(), download_dir))
-                prefs = {
-                    'download.default_directory': default_directory,
+                options.add_experimental_option('prefs', {
+                    'download.default_directory': os.path.abspath(download_dir),
                     'download.prompt_for_download': False,
                     'download.directory_upgrade': True,
                     'plugins.always_open_pdf_externally': True,
-                    # "safebrowsing.enabled": True
-                }
-                options.add_experimental_option('prefs', prefs)
-            if browser.lower() == 'chrome':
-                driver = webdriver.Chrome(options=options, service=service)
-            else:
-                driver = webdriver.Edge(options=options, service=service)
+                })
+            browser_class = webdriver.Chrome if name == 'chrome' else webdriver.Edge
+            driver = browser_class(options=options, service=Service())
             return driver
-        except Exception as e:
-            # Note: This has been added to try to fix the memory leak.
-            try:
-                driver.quit()
-            except:
-                pass
-            logger.warning('Failed to initialize the %s driver, trying the next one: %s', browser, e)
-    raise RuntimeError("Failed to initialize both Chrome and Edge drivers.")
+        except Exception as error:
+            if driver is not None:
+                try:
+                    driver.quit()
+                except Exception:
+                    pass
+            errors.append(f'{name}: {error}')
+            logger.warning('Could not start %s: %s', name, error)
+    raise RuntimeError('Could not start a browser. ' + ' | '.join(errors))
 
-# === Static HTML Scraping Tools ===
+def download_file_with_selenium(
+        url: str,
+        driver: Any = None,
+        persist: bool = False,
+        pause: float = 3.33,
+        wait: float = 10,
+        el_id: str = 'download',
+        method: str = 'iframe',
+        tag_name: str = 'iframe',
+        filename: Optional[str] = None,
+        download_dir: Optional[str] = None,
+        headless: bool = True,
+    ) -> Optional[str]:
+    """Download a file from a page that needs a browser.
 
-def format_params(parameters, **kwargs):
-    """Format given keyword arguments HTTP request parameters.
-    Returns:
-        (dict): Returns the parameters as a dictionary.
-    """
-    params = {}
-    for param in kwargs:
-        if kwargs[param]:
-            key = parameters[param]
-            params[key] = kwargs[param]
-    return params
-
-def get_page_metadata(url: str) -> Tuple:
-    """Get the metadata of a web page.
     Args:
-        url (str): The URL to scrape.
+        url: The page.
+        driver: A WebDriver to use; by default one is started (and quit
+            afterwards, even if the download fails).
+        persist: Keep the driver open.
+        pause: Seconds to wait for the browser to finish a download.
+        wait: Seconds to wait for the download element.
+        el_id: The id of the download button (``'iframe'`` and
+            ``'button'`` methods).
+        method: ``'iframe'`` (a button inside an iframe), ``'button'``,
+            ``'confident_cannabis'``, or ``'link'`` (an element whose
+            ``href`` is the file, fetched directly).
+        tag_name: The iframe or link tag.
+        filename: For ``'link'``: the file name (default: from the URL).
+        download_dir: Where files are saved (default: the working
+            directory).
+        headless: Run a started browser without a window.
+
     Returns:
-        (HTTPResponse): The HTTP response.
-        (str): The HTML text.
-        (dict): A dictionary of metadata, including: `description`, `image_url`,
-            `favicon`, and `brand_color`.
+        For ``'link'``, the path of the saved file; otherwise ``None``
+        (the browser saves the file to ``download_dir``).
     """
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Max-Age': '3600',
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0',
-    }
-    # Handle URLs without http beginning
-    if not url.startswith('http'):
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.support.ui import WebDriverWait
+    owned = driver is None
+    if owned:
+        driver = initialize_selenium(headless=headless, download_dir=download_dir)
+    saved = None
+    try:
+        driver.get(url)
+        if method == 'iframe':
+            frame = WebDriverWait(driver, wait).until(EC.presence_of_element_located((By.TAG_NAME, tag_name)))
+            driver.switch_to.frame(frame)
+            WebDriverWait(driver, wait).until(EC.presence_of_element_located((By.ID, el_id))).click()
+        elif method == 'button':
+            WebDriverWait(driver, wait).until(EC.presence_of_element_located((By.ID, el_id))).click()
+        elif method == 'confident_cannabis':
+            button = (By.XPATH, "//button[contains(@class, 'btn-primary') and contains(@ng-click, 'downloadFile')]")
+            WebDriverWait(driver, wait).until(EC.element_to_be_clickable(button)).click()
+        else:
+            element = WebDriverWait(driver, wait).until(EC.presence_of_element_located((By.TAG_NAME, tag_name)))
+            file_url = element.get_attribute('href')
+            name = filename or os.path.basename(urlparse(file_url).path)
+            saved = download_file_from_url(file_url, destination=download_dir or '', file_name=name)
+        sleep(pause)
+    finally:
+        if owned and not persist:
+            driver.quit()
+    return saved
+
+# === Page metadata ===
+
+def format_params(parameters: Dict[str, str], **kwargs) -> Dict[str, Any]:
+    """Map keyword arguments to an API's parameter names, dropping empty ones.
+
+    Example::
+
+        format_params({'limit': '$limit'}, limit=10, order=None)   # {'$limit': 10}
+    """
+    return {parameters[key]: value for key, value in kwargs.items() if value}
+
+def get_page_metadata(url: str, timeout: Any = TIMEOUT) -> Tuple[requests.Response, BeautifulSoup, Dict[str, Any]]:
+    """Fetch a page and read its metadata.
+
+    Args:
+        url: The page (``http://`` is assumed if no scheme is given).
+        timeout: Seconds to wait for the server.
+
+    Returns:
+        The response, the parsed HTML, and a dictionary with
+        ``description``, ``image_url``, ``favicon``, and ``brand_color``
+        (image and favicon as absolute URLs).
+    """
+    if not urlparse(url).scheme:
         url = 'http://' + url
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=DEFAULT_HEADERS, timeout=timeout)
     html = BeautifulSoup(response.content, 'html.parser')
     metadata = {
         'description': get_page_description(html),
-        'image_url': get_page_image(html),  # FIXME: Append URL if relative path.
-        'favicon': get_page_favicon(html, url),
+        'image_url': get_page_image(html, url=response.url),
+        'favicon': get_page_favicon(html, response.url),
         'brand_color': get_page_theme_color(html),
     }
     return response, html, metadata
 
-def get_page_description(html: str) -> str:
-    """Get the description of a web page.
-    Args:
-        html (str): A body of HTML text.
-    Returns:
-        (str): A description excerpt from the page.
-    """
-    description = None
-    if html.find('meta', property='description'):
-        description = html.find('meta', property='description').get('content')
-    elif html.find('meta', property='og:description'):
-        description = html.find('meta', property='og:description').get('content')
-    elif html.find('meta', property='twitter:description'):
-        description = html.find('meta', property='twitter:description').get('content')
-    elif html.find('p'):
-        description = html.find('p').contents
-    if isinstance(description, list):
-        try:
-            description = description[0]
-        except IndexError:
-            pass
-    return description
-
-def get_page_image(html: str, index: Optional[int] = 0) -> str:
-    """Get an image on a web page, the first image by default.
-    Args:
-        html (str): A body of HTML text.
-    Returns:
-        (str): Returns the first image URL if found.
-    """
-    image = None
-    if html.find('meta', property='image'):
-        image = html.find('meta', property='image').get('content')
-    elif html.find('meta', property='og:image'):
-        image = html.find('meta', property='og:image').get('content')
-    elif html.find('meta', property='twitter:image'):
-        image = html.find('meta', property='twitter:image').get('content')
-    elif html.find('img', src=True):
-        image = html.find_all('img')[index].get('src')
-    return image
-
-def get_page_favicon(html: str, url: Optional[str] = '') -> str:
-    """Get the favicon from a web page.
-    Args:
-        html (str): A body of HTML text.
-        url (str): The URL of the page.
-    Returns:
-        (str): The URL of any potential favicon.
-    """
-    if html.find('link', attrs={'rel': 'icon'}):
-        favicon = html.find('link', attrs={'rel': 'icon'}).get('href')
-    elif html.find('link', attrs={'rel': 'shortcut icon'}):
-        favicon = html.find('link', attrs={'rel': 'shortcut icon'}).get('href')
-    else:
-        favicon = f"{url.rstrip('/')}/favicon.ico"
-    return favicon
-
-def get_page_theme_color(html: str) -> str:
-    """Get the theme color of a web page.
-    Args:
-        html (str): A body of HTML text.
-    Returns:
-        (str): An hex color code if found.
-    """
-    if html.find('meta', property='theme-color'):
-        color = html.find('meta', property='theme-color').get('content')
-        return color
-    else:
-        return None
-
-def get_page_phone_number(html: str, response: Any, index=0) -> str:
-    """Get a phone number on a web page, the first found by default.
-    Args:
-        html (str): A body of HTML text.
-        response (HTTPResponse): An HTTP response.
-    Returns:
-        (str): Returns the first phone number found.
-    """
-    try:
-        phone = html.select('a[href*=callto]')[index].text
-        return phone
-    except:
-        pass
-    try:
-        phone = re.findall(
-            r'\(?\b[2-9][0-9]{2}\)?[-][2-9][0-9]{2}[-][0-9]{4}\b', response.text
-        )[0]
-        return phone
-    except:
-        pass
-    try:
-        phone = re.findall(
-            r'\(?\b[2-9][0-9]{2}\)?[-. ]?[2-9][0-9]{2}[-. ]?[0-9]{4}\b', response.text
-        )[-1]
-        return phone
-    except:
-        logger.debug('Phone number not found')
-        phone = ''
-        return phone
-
-def get_page_email(
-        html: str,
-        response: Any,
-        index: Optional[int] = -1,
-    ) -> str:
-    """Get an email on a web page, the last email by default.
-    Args:
-        html (str): A body of HTML text.
-        response (HTTPResponse): An HTTP response.
-    Returns:
-        (str): Returns the first email found on the page.
-    """
-    try:
-        email = re.findall(
-            r'([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)', response.text
-        )[-1]
-        return email
-    except:
-        pass
-    try:
-        email = html.select('a[href*=mailto]')[index].text
-    except:
-        logger.debug('Email not found')
-        email = ''
-        return email
-
-def find_company_address():
-    """
-    TODO: Try to find a company's address from their website, then Google Maps.
-    """
-    raise NotImplementedError
-    # street, city, state, zipcode = None, None, None, None
-    # return street, city, state, zipcode
-
-def find_company_linkedin():
-    """
-    TODO: Tru to find a company's LinkedIn URL. (Try to find LinkedIn on homepage?)
-    """
-    raise NotImplementedError
-
-def find_company_url(company_name: str):
-    """
-    TODO: Find a company's website URL. (Google search for name?)
-    """
-    raise NotImplementedError
-
-# === Download Tools ===
-
-def download_file_from_url(url, destination='', ext='', file_name = None):
-    """Download a file from a URL to a given directory.
-    Author: H S Umer farooq <https://stackoverflow.com/a/53153505>
-    License: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0/
-    """
-    get_response = requests.get(url, stream=True)
-    if file_name is None:
-        file_name = url.split('/')[-1]
-    if not file_name.endswith(ext):
-        file_name = file_name + ext
-    file_path = os.path.join(destination, file_name)
-    with open(file_path, 'wb') as f:
-        for chunk in get_response.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-    return file_path
-
-def download_file_with_selenium(
-        url,
-        driver=None,
-        persist=False,
-        pause=3.33,
-        wait=10,
-        el_id='download',
-        method='iframe',
-        tag_name='iframe',
-        filename=None,
-        download_dir=None,
-        headless=True,
-    ):
-    if driver is None:
-        driver = initialize_selenium(
-            headless=headless,
-            download_dir=download_dir,
-        )
-    driver.get(url)
-    if method == 'iframe':
-        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
-        el = WebDriverWait(driver, 10).until(presence)
-        driver.switch_to.frame(el)
-        presence = EC.presence_of_element_located((By.ID, el_id))
-        download_button = WebDriverWait(driver, wait).until(presence)
-        download_button.click()
-    elif method == 'button':
-        presence = EC.presence_of_element_located((By.ID, el_id))
-        download_button = WebDriverWait(driver, wait).until(presence)
-        download_button.click()
-    elif method == 'confident_cannabis':
-        try:
-            download_button = WebDriverWait(driver, wait).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'btn-primary') and contains(@ng-click, 'downloadFile')]"))
-            )
-            download_button.click()
-            sleep(pause)
-        except Exception as e:
-            logger.error('Error downloading Confident Cannabis COA: %s', e)
-    else:
-        presence = EC.presence_of_element_located((By.TAG_NAME, tag_name))
-        el = WebDriverWait(driver, 10).until(presence)
-        pdf_url = el.get_attribute('href')
-        response = requests.get(pdf_url)
-        if response.status_code == 200:
-            if filename is None:
-                filename = os.path.basename(pdf_url)
-            filepath = os.path.join(download_dir, filename)
-            with open(filepath, 'wb') as file:
-                file.write(response.content)
-    sleep(pause)
-    if not persist:
-        driver.close()
-        driver.quit()
-
-# === Google Drive Tools ===
-
-def download_google_drive_file(drive_file, destination):
-    """Download a public Google Drive file given its ID and a destination.
-    Args:
-        drive_file (str): A Google Drive ID or URL for a file.
-        destination (str): The local file path and name.
-    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
-    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
-    """
-    drive_id = drive_file
-    if drive_id.startswith('https://drive.google'):
-        drive_id = drive_id.split('/d/')[-1].split('/')[0]
-    drive_base = 'https://docs.google.com/uc?export=download'
-    drive_session = requests.Session()
-    drive_response = drive_session.get(
-        drive_base,
-        params={'id': drive_id},
-        stream=True,
-    )
-    drive_token = download_google_drive_file_confirm_token(drive_response)
-    if drive_token:
-        drive_response = drive_session.get(
-            drive_base,
-            params={'id': drive_id, 'confirm': drive_token},
-            stream = True
-        )
-    download_google_drive_file_save_response(drive_response, destination)    
-
-def download_google_drive_file_confirm_token(drive_response):
-    """
-    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
-    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
-    """
-    for k, v in drive_response.cookies.items():
-        if k.startswith('download_warning'):
-            return v
+def _meta(html: BeautifulSoup, *names: str) -> Optional[str]:
+    """The content of the first ``<meta>`` found by name or property."""
+    for name in names:
+        for attribute in ('name', 'property', 'itemprop'):
+            tag = html.find('meta', attrs={attribute: name})
+            if tag and tag.get('content'):
+                return tag['content'].strip()
     return None
 
-def download_google_drive_file_save_response(drive_response, destination):
+def get_page_description(html: BeautifulSoup) -> Optional[str]:
+    """A page's description: its description meta tags, else its first paragraph."""
+    description = _meta(html, 'description', 'og:description', 'twitter:description')
+    if description:
+        return description
+    paragraph = html.find('p')
+    text = paragraph.get_text(' ', strip=True) if paragraph else ''
+    return text or None
+
+def get_page_image(html: BeautifulSoup, index: int = 0, url: str = '') -> Optional[str]:
+    """A page's image: its sharing image, else its ``index``-th ``<img>``.
+
+    Relative addresses are resolved against ``url`` when it is given.
     """
-    Credit: turdus-merula <https://stackoverflow.com/a/39225272/5021266>
-    License: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+    image = _meta(html, 'og:image', 'twitter:image', 'image')
+    if not image:
+        images = [tag['src'] for tag in html.find_all('img', src=True)]
+        image = images[index] if -len(images) <= index < len(images) else None
+    return urljoin(url, image) if image and url else image
+
+def get_page_favicon(html: BeautifulSoup, url: str = '') -> Optional[str]:
+    """A page's favicon, absolute when ``url`` is given; else the site's ``/favicon.ico``."""
+    link = html.find('link', rel=lambda rel: rel and 'icon' in [r.lower() for r in (rel if isinstance(rel, list) else rel.split())])
+    if link and link.get('href'):
+        return urljoin(url, link['href']) if url else link['href']
+    if not url:
+        return None
+    parts = urlparse(url)
+    return f'{parts.scheme}://{parts.netloc}/favicon.ico'
+
+def get_page_theme_color(html: BeautifulSoup) -> Optional[str]:
+    """A page's theme color (``<meta name="theme-color">``)."""
+    return _meta(html, 'theme-color')
+
+_PHONE = re.compile(r'\(?\b[2-9]\d{2}\)?[-. ]?[2-9]\d{2}[-. ]?\d{4}\b')
+_EMAIL = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b')
+_NOT_EMAIL = re.compile(r'\.(png|jpe?g|gif|svg|webp|ico|css|js)$', re.IGNORECASE)
+
+def get_page_phone_number(html: BeautifulSoup, response: Any = None, index: int = 0) -> str:
+    """A phone number on a page: from ``tel:`` or ``callto:`` links, else the page text.
+
+    Returns:
+        The ``index``-th number found by link, else the first in the
+        text, else ``''``.
     """
-    CHUNK_SIZE = 32768
-    with open(destination, 'wb') as f:
-        for chunk in drive_response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
+    links = html.select('a[href^="tel:"], a[href^="callto:"]')
+    numbers = [link.get_text(strip=True) or link['href'].split(':', 1)[1] for link in links]
+    if -len(numbers) <= index < len(numbers):
+        return numbers[index]
+    text = response.text if response is not None else html.get_text(' ')
+    match = _PHONE.search(text)
+    return match.group(0) if match else ''
+
+def get_page_email(html: BeautifulSoup, response: Any = None, index: int = -1) -> str:
+    """An e-mail address on a page: from ``mailto:`` links, else the page text.
+
+    File names such as ``logo@2x.png`` are not addresses.
+
+    Returns:
+        The ``index``-th address found (the last by default), else ``''``.
+    """
+    addresses = [link['href'][7:].split('?')[0] for link in html.select('a[href^="mailto:"]')]
+    if not addresses:
+        text = response.text if response is not None else html.get_text(' ')
+        addresses = [a for a in _EMAIL.findall(text) if not _NOT_EMAIL.search(a)]
+    addresses = [a for a in addresses if a]
+    return addresses[index] if -len(addresses) <= index < len(addresses) else ''
+
+# === Downloads ===
+
+def _save(response: requests.Response, path: str, chunk_size: int = 1 << 16) -> str:
+    """Stream a response to ``path`` atomically: a failure leaves no partial file."""
+    folder = os.path.dirname(os.path.abspath(path))
+    os.makedirs(folder, exist_ok=True)
+    handle, temporary = tempfile.mkstemp(dir=folder, suffix='.part')
+    try:
+        with os.fdopen(handle, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=chunk_size):
+                if chunk:
+                    file.write(chunk)
+        os.replace(temporary, path)
+    except BaseException:
+        if os.path.exists(temporary):
+            os.remove(temporary)
+        raise
+    return path
+
+def download_file_from_url(
+        url: str,
+        destination: str = '',
+        ext: str = '',
+        file_name: Optional[str] = None,
+        timeout: Any = TIMEOUT,
+    ) -> str:
+    """Download a file to a folder.
+
+    Args:
+        url: The file.
+        destination: The folder (created if missing).
+        ext: An extension to add to the file name if it lacks it.
+        file_name: The file name (default: the URL's last segment).
+        timeout: Seconds to wait for the server.
+
+    Returns:
+        The path of the saved file.
+
+    Raises:
+        requests.HTTPError: If the server answers with an error; nothing
+            is written.
+    """
+    response = requests.get(url, stream=True, headers=DEFAULT_HEADERS, timeout=timeout)
+    response.raise_for_status()
+    name = file_name or os.path.basename(urlparse(url).path) or 'download'
+    if ext and not name.endswith(ext):
+        name += ext
+    return _save(response, os.path.join(destination, name))
+
+# === Google Drive ===
+
+_DRIVE_ID = re.compile(r'(?:/d/|[?&]id=)([A-Za-z0-9_-]{10,})')
+
+def download_google_drive_file(drive_file: str, destination: str, timeout: Any = TIMEOUT) -> str:
+    """Download a public Google Drive file.
+
+    Large files are served behind a "can't scan for viruses" page; its
+    confirmation form is submitted (the older cookie token is also
+    honored). If Drive still answers with a page rather than the file,
+    nothing is saved.
+
+    Args:
+        drive_file: A Drive file ID or sharing URL.
+        destination: The local file path.
+        timeout: Seconds to wait for the server.
+
+    Returns:
+        ``destination``.
+
+    Raises:
+        ValueError: If Drive returns a web page instead of the file
+            (a private file, or an unrecognized confirmation page).
+    """
+    match = _DRIVE_ID.search(drive_file)
+    drive_id = match.group(1) if match else drive_file
+    session = requests.Session()
+    response = session.get('https://drive.google.com/uc', params={'id': drive_id, 'export': 'download'},
+                           stream=True, timeout=timeout)
+    response.raise_for_status()
+    token = next((value for key, value in response.cookies.items() if key.startswith('download_warning')), None)
+    if token:
+        response = session.get('https://drive.google.com/uc', params={'id': drive_id, 'export': 'download', 'confirm': token},
+                               stream=True, timeout=timeout)
+    elif 'text/html' in response.headers.get('Content-Type', ''):
+        form = BeautifulSoup(response.text, 'html.parser').find('form')
+        if form is not None and form.get('action'):
+            fields = {tag['name']: tag.get('value', '') for tag in form.find_all('input') if tag.get('name')}
+            response = session.get(urljoin(response.url, form['action']), params=fields, stream=True, timeout=timeout)
+    response.raise_for_status()
+    if 'text/html' in response.headers.get('Content-Type', ''):
+        raise ValueError(f'Google Drive returned a page, not the file {drive_id!r}: is it shared publicly?')
+    return _save(response, destination)
+
+__all__: List[str] = [
+    'TIMEOUT', 'download_file_from_url', 'download_file_with_selenium', 'download_google_drive_file',
+    'format_params', 'get_page_description', 'get_page_email', 'get_page_favicon', 'get_page_image',
+    'get_page_metadata', 'get_page_phone_number', 'get_page_theme_color', 'initialize_selenium',
+]

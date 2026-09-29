@@ -37,6 +37,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 # Internal imports (within cannlytics.data.coas):
 from cannlytics.data.coas.config import (
+    effective_prices,
     AI_PROVIDERS,
     FLEX_COST_MULTIPLIER,
     FLEX_TIMEOUT,
@@ -320,10 +321,14 @@ class AIClient:
             num_images: int = 0,
             used_flex: bool = False,
         ) -> float:
-        """Calculate the cost of a single API call in USD."""
-        in_rate = self.model_config['input'] / 1_000_000
-        out_rate = self.model_config['output'] / 1_000_000
-        token_cost = input_tokens * in_rate + output_tokens * out_rate
+        """Calculate the cost of a single API call in USD.
+
+        Token counts are the API's own, which already include image and
+        PDF input; ``num_images`` adds a surcharge only for a model that
+        declares ``image_cost`` (none of the registered models do).
+        """
+        input_price, output_price = effective_prices(self.model_config)
+        token_cost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000
         image_cost = num_images * self.model_config.get('image_cost', 0.0)
         cost = token_cost + image_cost
         if used_flex:
@@ -685,12 +690,17 @@ class AIClient:
             f'{json_schema}'
         )
 
-        response = self.client.messages.create(
+        # Streamed, then collected: the Anthropic SDK refuses a
+        # non-streaming request whose `max_tokens` could run past ten
+        # minutes (above about 21,000 tokens), so with the models' real
+        # output limits every non-streaming call failed before it was sent.
+        with self.client.messages.stream(
             model=self.model,
             max_tokens=self.model_config.get('max_output_tokens', 16_384),
             system=enhanced_system,
             messages=[{'role': 'user', 'content': content}],
-        )
+        ) as stream:
+            response = stream.get_final_message()
 
         text = ''.join(
             block.text for block in response.content
@@ -752,8 +762,10 @@ class AIClient:
             return None, 0.0, 0, 0
 
         usage = response.usage_metadata
-        in_tok = getattr(usage, 'prompt_token_count', 0)
-        out_tok = getattr(usage, 'candidates_token_count', 0)
+        in_tok = getattr(usage, 'prompt_token_count', 0) or 0
+        # Thinking tokens are billed as output ("including thinking
+        # tokens") but reported apart from the candidates.
+        out_tok = (getattr(usage, 'candidates_token_count', 0) or 0) + (getattr(usage, 'thoughts_token_count', 0) or 0)
         cost = self.calculate_cost(in_tok, out_tok)
 
         return parsed, cost, in_tok, out_tok

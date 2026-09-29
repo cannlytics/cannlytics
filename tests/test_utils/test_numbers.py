@@ -3,7 +3,6 @@ Tests for numeric utilities in cannlytics.utils.utils
 ======================================================
 Covers: convert_to_numeric.
 """
-import pytest
 from cannlytics.utils.utils import convert_to_numeric
 
 class TestConvertToNumeric:

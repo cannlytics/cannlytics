@@ -7,11 +7,8 @@ and sample data fixtures used across all test modules.
 Usage:
     pytest tests/ -v --cov=cannlytics --cov-report=term-missing
 """
-import json
 import os
 import sys
-import tempfile
-from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest

@@ -6,14 +6,12 @@ All OpenAI and Firebase calls are mocked.
 """
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cannlytics.ai.embeddings import (
     create_embedding,
     get_embedding,
     get_results_embedding,
 )
-
 
 class TestCreateEmbedding:
 
@@ -34,7 +32,6 @@ class TestCreateEmbedding:
         call_args = mock_client.embeddings.create.call_args
         text_arg = call_args[1]['input'][0]
         assert '\n' not in text_arg
-
 
 class TestGetEmbedding:
 
@@ -57,7 +54,6 @@ class TestGetEmbedding:
         result = get_embedding('cached text', cache=mock_cache, use_db=False)
         assert result == [0.5, 0.6, 0.7]
 
-
 class TestGetResultsEmbedding:
 
     def test_basic_embedding(self):
@@ -73,7 +69,6 @@ class TestGetResultsEmbedding:
         assert embedding == [20.0, 0.0, 0.0]
 
     def test_nan_values_become_zero(self):
-        import math
         results = {'thc': float('nan'), 'cbd': 1.0}
         analytes = ['thc', 'cbd']
         embedding = get_results_embedding(results, analytes)

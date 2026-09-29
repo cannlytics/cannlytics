@@ -6,7 +6,6 @@ get_user_from_api_key, sha256_hmac.
 """
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cannlytics.auth.auth import (
     authenticate_request,

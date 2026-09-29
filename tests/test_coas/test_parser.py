@@ -12,13 +12,10 @@ import pytest
 
 from cannlytics.data.coas.parser import (
     COAdoc,
-    identify_lab,
-    load_algorithm,
     adapt_algorithm_output,
     _hash_file,
     _hash_bytes,
 )
-from cannlytics.data.coas.registry import LAB_REGISTRY
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Hash Utilities                                                   ║
@@ -352,7 +349,7 @@ class TestCOAdocQRIntegration:
         parser._algorithm_cache['kaycha'] = mock_algorithm
 
         with patch('cannlytics.data.coas.parser.scan_qr') as mock_scan:
-            result = parser.parse(pdf_path)
+            parser.parse(pdf_path)
             mock_scan.assert_not_called()
 
     def test_qr_scan_failure_non_fatal(self, lab_pdf_factory):
@@ -390,8 +387,8 @@ class TestCOAdocQRIntegration:
         parser._algorithm_cache['kaycha'] = mock_algorithm
         parser._scan_qr_enabled = True
 
-        with patch('cannlytics.data.coas.parser.scan_qr') as mock_scan:
-            result = parser.parse(pdf_path)
+        with patch('cannlytics.data.coas.parser.scan_qr'):
+            parser.parse(pdf_path)
 
         # The metadata adapter puts coa_url into metadata_keys,
         # so it should be preserved from the algorithm output.
@@ -440,7 +437,7 @@ class TestCOAdocInputTypes:
         with patch('cannlytics.data.coas.parser.COAdoc._url_to_temp') as mock_dl:
             # Make it return a path that doesn't exist (triggers validation error).
             mock_dl.return_value = '/tmp/nonexistent_download.pdf'
-            result = parser.parse('https://example.com/coa.pdf')
+            parser.parse('https://example.com/coa.pdf')
             mock_dl.assert_called_once()
 
 # ╔══════════════════════════════════════════════════════════════════╗

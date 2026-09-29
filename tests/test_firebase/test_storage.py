@@ -6,7 +6,6 @@ Covers: upload, download, list, delete, rename files, and signed URL generation.
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cannlytics.firebase.storage import (
     upload_file,
@@ -18,7 +17,6 @@ from cannlytics.firebase.storage import (
     delete_file,
     rename_file,
 )
-
 
 class TestUploadFile:
 
@@ -33,7 +31,6 @@ class TestUploadFile:
         upload_file('remote/data.json', data_url='{"key": 1}', content_type='application/json')
         blob = mock_storage_bucket.blob('remote/data.json')
         assert blob._data == '{"key": 1}'
-
 
 class TestUploadFiles:
 
@@ -51,7 +48,6 @@ class TestUploadFiles:
         assert 'remote/file.txt' in mock_storage_bucket._blobs
         assert 'remote/subdir' not in mock_storage_bucket._blobs
 
-
 class TestDownloadFile:
 
     def test_download_creates_local_file(self, mock_storage_bucket, tmp_path):
@@ -63,7 +59,6 @@ class TestDownloadFile:
         with open(dest, 'rb') as f:
             assert f.read() == b'downloaded content'
 
-
 class TestDownloadFiles:
 
     def test_creates_local_folder(self, mock_storage_bucket, tmp_path):
@@ -73,7 +68,6 @@ class TestDownloadFiles:
         with patch('cannlytics.firebase.storage.list_files', return_value=['remote/file.txt']):
             download_files('remote', local)
         assert os.path.isdir(local)
-
 
 class TestGetFileUrl:
 
@@ -91,7 +85,6 @@ class TestGetFileUrl:
             get_file_url('test.jpg')
         blob.make_public.assert_not_called()
 
-
 class TestListFiles:
 
     def test_lists_files_with_extensions(self, mock_storage_bucket):
@@ -102,14 +95,12 @@ class TestListFiles:
         file_names = [f for f in files if '.' in f]
         assert len(file_names) >= 2
 
-
 class TestDeleteFile:
 
     def test_deletes_blob(self, mock_storage_bucket):
         mock_storage_bucket.blob('to_delete.pdf')
         delete_file('to_delete.pdf')
         assert 'to_delete.pdf' not in mock_storage_bucket._blobs
-
 
 class TestRenameFile:
 

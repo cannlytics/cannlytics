@@ -6,7 +6,6 @@ All google.cloud.secretmanager calls are mocked.
 """
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cannlytics.firebase.secrets import (
     create_secret,
@@ -15,7 +14,6 @@ from cannlytics.firebase.secrets import (
 )
 
 MOCK_SM = 'cannlytics.firebase.secrets.secretmanager.SecretManagerServiceClient'
-
 
 class TestCreateSecret:
 
@@ -29,7 +27,6 @@ class TestCreateSecret:
         assert result == 'projects/p/secrets/s'
         client.create_secret.assert_called_once()
 
-
 class TestAddSecretVersion:
 
     @patch(MOCK_SM)
@@ -42,7 +39,6 @@ class TestAddSecretVersion:
         assert 'versions/1' in result
         call_args = client.add_secret_version.call_args
         assert call_args[1]['payload']['data'] == b'super-secret-value'
-
 
 class TestAccessSecretVersion:
 

@@ -7,4 +7,14 @@ Description:
     This module keeps the old import path working.
 """
 from cannlytics.constants.compounds import *  # noqa: F401,F403
-from cannlytics.constants.compounds import cannabinoids, heavy_metals, pesticides, terpenes  # noqa: F401
+from cannlytics.constants.compounds import (  # noqa: F401
+    COMPOUNDS,
+    cannabinoids,
+    foreign_matter,
+    heavy_metals,
+    microbes,
+    mycotoxins,
+    pesticides,
+    residual_solvents,
+    terpenes,
+)

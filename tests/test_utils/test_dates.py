@@ -3,7 +3,6 @@ Tests for date/time utilities in cannlytics.utils.utils
 ========================================================
 Covers: format_iso_date, get_date_range, get_timestamp.
 """
-import pytest
 from cannlytics.utils.utils import format_iso_date, get_date_range, get_timestamp
 
 class TestFormatIsoDate:

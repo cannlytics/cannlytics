@@ -4,8 +4,6 @@ Tests for dictionary and list utilities in cannlytics.utils.utils
 Covers: clean_dictionary, clean_nested_dictionary, remove_dict_fields,
 remove_dict_nulls, update_dict, sorted_nicely, split_list, dump_column.
 """
-import json
-import pytest
 
 from cannlytics.utils.utils import (
     clean_dictionary,

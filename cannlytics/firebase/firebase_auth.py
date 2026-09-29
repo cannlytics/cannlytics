@@ -4,7 +4,7 @@ Copyright (c) 2021-2026 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/7/2021
-Updated: 3/22/2026
+Updated: 9/28/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description: Firebase Auth user management — create users, manage
@@ -13,11 +13,16 @@ authentication credentials.
 """
 # Standard imports:
 from __future__ import annotations
+import logging
 from datetime import timedelta
 from typing import Any
 
 # External imports:
 from firebase_admin import auth
+from firebase_admin.auth import EmailAlreadyExistsError
+
+# Module logger. Never log a user's e-mail address or password.
+logger = logging.getLogger(__name__)
 
 # Internal imports:
 from .core import create_id
@@ -29,17 +34,23 @@ from cannlytics.utils import get_random_string
 def create_user(name: str, email: str) -> tuple[Any | None, str | None]:
     """Create a Firebase Auth user with a generated password.
 
+    No profile photo is set: choosing one is the application's business.
+    (Before 1.0.5 this set ``https://robohash.org/<email>``, which put
+    the user's e-mail address in a third-party URL requested every time
+    the avatar was shown.)
+
     Args:
         name: Display name for the user.
         email: The user's email address.
 
     Returns:
-        A tuple of ``(UserRecord, password)`` on success,
-        or ``(None, None)`` if the email is already in use.
+        A tuple of ``(UserRecord, password)`` on success, or
+        ``(None, None)`` if the e-mail is already in use or the user
+        could not be created (that failure is logged, without the
+        address).
     """
     chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$-_'
     password = get_random_string(42, chars)
-    photo_url = f'https://robohash.org/{email}?set=set5'
     try:
         user = auth.create_user(
             uid=create_id(),
@@ -47,12 +58,14 @@ def create_user(name: str, email: str) -> tuple[Any | None, str | None]:
             email_verified=False,
             password=password,
             display_name=name,
-            photo_url=photo_url,
             disabled=False,
         )
-        return user, password
-    except Exception:
+    except EmailAlreadyExistsError:
         return None, None
+    except Exception as error:
+        logger.error('Could not create a Firebase Auth user: %s', type(error).__name__)
+        return None, None
+    return user, password
 
 
 def get_user(name: str) -> Any | None:

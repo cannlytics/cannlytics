@@ -14,7 +14,6 @@ Append these to tests/test_coas/test_qr.py, or keep as a separate
 module. No network, no real binaries, no credentials.
 """
 import os
-import stat
 
 import pytest
 
@@ -147,7 +146,7 @@ class TestCandidateValidation:
     def test_returned_path_is_always_absolute(self, monkeypatch, tmp_path):
         """Nothing downstream should be able to re-resolve the path
         against a different working directory."""
-        binary = make_binary(tmp_path / BINARY_NAME)
+        make_binary(tmp_path / BINARY_NAME)
         monkeypatch.setenv('PATH', str(tmp_path))
         monkeypatch.delenv('QRUSTIE_PATH', raising=False)
         found = find_qrustie()

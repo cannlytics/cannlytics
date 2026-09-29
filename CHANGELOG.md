@@ -9,8 +9,147 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > internal iterations land; whichever `1.0.x` is acceptable at the time is
 > the one published to PyPI. The second number moves with major releases
 > and the first only with a change of paradigm. PyPI's latest release is
-> still `0.0.17` (January 2024): nothing in the `1.0.x` series has been
+> still `0.0.17` (December 2023): nothing in the `1.0.x` series has been
 > published yet.
+
+---
+
+## [1.0.5] — 2026-09-29
+
+### Summary
+
+The first release to PyPI since 0.0.17, prepared in two passes: a
+census of the published datasets (below), then a review of every module
+that had not been reworked for 1.0, which found that AI parsing had
+been falling back past its first provider on every call.
+
+### Fixed: AI parsing
+
+- Every Anthropic request failed before it was sent: the SDK refuses a
+  non-streaming request whose `max_tokens` could run past ten minutes
+  (above about 21,333), and the configured output limits are 64,000 and
+  128,000. The client caught the error and fell back to the next
+  provider, so COAs meant for Claude went to OpenAI. Anthropic requests
+  now stream (tested against the SDK itself).
+- The xAI default, `grok-4-1-fast-non-reasoning`, and `grok-3-mini`
+  were retired by xAI in May 2026; they are replaced.
+- OpenAI images were counted twice: once as the input tokens the API
+  reports, and again as a per-image surcharge (`image_cost`). The
+  surcharge is gone.
+- Gemini thinking tokens, billed as output, were not counted.
+
+### Changed: AI models (prices verified 2026-09-28)
+
+- Anthropic: Claude Sonnet 5, Opus 5.5, and Fable 5.1 added; the
+  default stays Claude Haiku 4.5, the current Haiku.
+- OpenAI: GPT-6 Sol (the new default), Luna, and Astra added; GPT-5
+  models kept as `legacy`, gpt-5-nano still quarantined.
+- Gemini: 3.8 Flash (the new default), 3.5 Flash-Lite, and 3.1 Pro
+  Preview added; 2.5 models kept as `legacy`.
+- xAI: grok-4.7 (the new default) and grok-4.3.
+- Prices can be scheduled: `price_schedule`, `effective_prices`, and
+  `get_model_cost(..., on=date)`. Gemini 3.8 Flash's introductory
+  price doubles on 2027-01-01, and the cost tracker follows it.
+- `PRICES_VERIFIED` and a `pricing_url` per provider;
+  `tools/check_ai_providers.py` makes one live request per provider.
+
+### Fixed: compounds and analyte keys
+
+- Eight cannabinoid CAS numbers were wrong, five of them not valid CAS
+  numbers at all (CBCA, CBCV, CBDVA, CBL, CBLA, CBNA, CBT, THCVA);
+  pyrethrin I carried the pyrethrins mixture's number; the permethrin
+  isomers carried single-enantiomer numbers. All corrected, and every
+  number now passes its check digit and appears once (tested).
+- Residual solvents, microbes, mycotoxins, and foreign matter, empty
+  before, are filled: 284 entries, 243 with CAS numbers, keyed by
+  canonical analyte keys. New: `COMPOUNDS`, `get_compound`,
+  `is_valid_cas`, and `CAS_SOURCES` for numbers from primary sources.
+- The 1.0.4 alias table let canonical keys alias away from themselves,
+  including two cycles (spinosad and spinosyn A; abamectin and
+  avermectin B1b), and mapped p-mentha-1,5-diene (alpha-phellandrene)
+  to myrcene. Every canonical key now maps to itself (tested), mixtures
+  and their components stay apart, misspellings are aliases
+  (`fenhexamid`, `pyriproxyfen`), and duplicate keys are merged: 292
+  canonical keys, 760 aliases.
+
+### Fixed: privacy and web tools
+
+- `create_user` no longer sets a `robohash.org/<email>` photo URL,
+  which disclosed each user's e-mail address to a third party whenever
+  the avatar was shown; `tools/clear_robohash_photos.py` clears the
+  URLs already stored (a dry run unless `--apply`).
+- `cannlytics.data.web`: `get_page_email` never returned from its
+  fallback and took `logo@2x.png` for an address; the metadata getters
+  read `name` attributes as `property`; Edge started with Chrome's
+  service; a failed download left its browser running; no request had a
+  timeout; Google Drive's confirmation page could be saved as the file.
+  Downloads are atomic, and Selenium is imported only for a browser.
+- `cannlytics.data.gis` imports without any extra; it no longer loads
+  `.env` into the environment; `get_state_data` works under pandas 3;
+  `search_for_address` parses addresses with suites or without ZIP
+  codes (`parse_formatted_address`); its `__all__` listed objects, so a
+  star import failed.
+
+### Removed
+
+- `cannlytics.data.constants` is a deprecated alias of
+  `cannlytics.constants`; its unused label tables are retired, every
+  label they held resolving through the canonical normalizers.
+- The `coa-legacy` extra, whose code (the first COA parser) was
+  retired; `MAGICK_TMPDIR` goes with it.
+- `find_company_address`, `find_company_linkedin`, `find_company_url`:
+  stubs that only raised `NotImplementedError`.
+
+### Documentation
+
+- The readmes shipped in the package documented 48 functions that no
+  longer existed; the data and COA readmes are rewritten, with tables
+  generated from the code, and a test keeps them honest.
+- `.env.example` is complete both ways (tested). Before publishing, the three
+open questions of 1.0.4 were measured on the published datasets with
+`tools/ecosystem_census.py` (2.8 million date values, 2,646 strain
+names, 968 license numbers). The census confirmed the slug rule and the
+partial-date design, and found the gaps fixed here.
+
+### Fixed
+
+- `parse_date` and friends read JavaScript's `Date.toString()` form,
+  `Wed Apr 17 2024 04:00:00 GMT-0400 (Eastern Daylight Time)`: 4,008
+  license dates across eight columns were unreadable. The wall-clock
+  time is kept, and the `GMT` offset is set aside rather than applied,
+  since dateutil reads it with the sign inverted.
+- A date and time run together (`03/26/202104:10`, 22 values) and a
+  time wedged between year and month (`2023 2:06 p.m.-08-29`, 15
+  values) are read as the full dates they are.
+- A time that ISO 8601 does not allow (`2:06 p.m.`) after an ISO date is
+  read instead of silently becoming midnight, provided both readings
+  agree on the date.
+- A partial date in words must be a month name and a year (`March
+  2026`, `2026 March`). 1.0.4 let dateutil classify
+  `2023 2:06 p.m.-08-29` as the bare year 2023, so `parse_date` would
+  have kept `'2023'` and discarded a month and day that were there.
+- `license_key` returns `None` for a key with fewer than four
+  significant characters (`MIN_KEY_CHARACTERS`): the census joined
+  `1` to `00001`. Exact identifiers still match.
+
+### Changed
+
+- The README's two relative links are absolute, so they work on PyPI.
+
+### Census findings (for the dataset refactors)
+
+- Strains: 25 of 2,646 IDs change under the 1.0.4 slug rule; the four
+  merges are true duplicates (`Biskanté`/`Biskante`, `Cookies &
+  Cream`/`Cookies and Cream`, `Free World Chem #3`/`#3`,
+  `Piña Loca`/`Pina Loca`); no splits, no empty IDs.
+- Results: 411,268 rows carry a month rather than a test date (the
+  monthly-aggregate source); their `date_tested` should be stored at
+  month precision (`'2021-12'`) when `cannabis_results` is re-run.
+- Licenses: 801 of 968 numbers (83%) match by identifier, none
+  ambiguously; the 162 unmatched are formats the licenses dataset does
+  not hold (older California `CCL`/`CDPH` numbers, New York
+  `OCM-AUCP`, Florida `MMTC`), a coverage question for
+  `cannabis_licenses`.
 
 ---
 
@@ -102,7 +241,7 @@ known-answer tests.
 - `normalize_product_type` matches the form factor a label ends with and
   plurals: `Live Resin Cartridge` is `vape`, `Gummies (10 pack)` is
   `edible`, `Cartridges` is `vape` (all three were returned unmapped).
-  An unrecognized label is still returned as given.
+  An unrecognised label is still returned as given.
 - `kebab_case` folds instead of deleting, so spellings of one name share
   one slug: `Café Racer` is `cafe-racer` (was `caf-racer`), `Δ9-THC` is
   `delta-9-thc` (was `9-thc`), `Charlotte's Web` is `charlottes-web`

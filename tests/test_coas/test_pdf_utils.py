@@ -7,9 +7,7 @@ get_pdf_pages_as_images, extract_pdf_text.
 """
 import json
 import os
-import tempfile
 
-import pytest
 
 from cannlytics.data.coas.pdf_utils import (
     is_valid_pdf,
@@ -22,10 +20,7 @@ from cannlytics.data.coas.pdf_utils import (
     get_pdf_info,
     get_pdf_pages_as_images,
     extract_pdf_text,
-    long_path,
-    safe_file_size,
 )
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ PDF Validation                                                   ║
@@ -63,7 +58,6 @@ class TestIsValidPdf:
         valid, reason = is_valid_pdf(multipage_pdf)
         assert valid is True
 
-
 class TestInvalidPDFCache:
 
     def test_add_and_contains(self, tmp_dir):
@@ -99,7 +93,6 @@ class TestInvalidPDFCache:
         assert 'hash_456' in cache2
         assert len(cache2) == 2
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ JSON Extraction                                                  ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -128,7 +121,6 @@ class TestExtractJson:
         data = {'metadata': {'name': 'test'}, 'results': [1, 2, 3]}
         result = extract_json(json.dumps(data))
         assert result == data
-
 
 class TestMakeSchemaStrict:
 
@@ -169,7 +161,6 @@ class TestMakeSchemaStrict:
         make_schema_strict(schema)
         assert schema['$defs']['Item']['additionalProperties'] is False
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ JSON Hints                                                       ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -188,7 +179,6 @@ class TestJsonHints:
         assert 'analysis' in data
         assert 'results' in data
         assert isinstance(data['results'], list)
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ PDF Content Utilities                                            ║
@@ -211,7 +201,6 @@ class TestGetPdfInfo:
     def test_nonexistent_file(self):
         info = get_pdf_info('/nonexistent.pdf')
         assert info['num_pages'] == 0
-
 
 class TestGetPdfPagesAsImages:
 
@@ -238,7 +227,6 @@ class TestGetPdfPagesAsImages:
         # Should find page 3 (terpene content).
         assert len(images) >= 1
 
-
 class TestExtractPdfText:
 
     def test_basic_extraction(self, make_pdf):
@@ -252,7 +240,6 @@ class TestExtractPdfText:
 
     def test_nonexistent_file(self):
         assert extract_pdf_text('/nonexistent.pdf') == ''
-
 
 class TestEncodeImage:
 

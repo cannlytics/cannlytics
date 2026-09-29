@@ -1,174 +1,125 @@
 # Cannlytics Data Module
 
-<!-- <div style="margin-top:1rem; margin-bottom: 1rem;">
-  <img height="100px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Fbackgrounds%2Fmisc%2Fdata-pipeline.png?alt=media&token=7a8ec568-5acd-41ca-96c1-a499bf83deb5">
-</div> -->
+`cannlytics.data` holds the tools that gather and prepare cannabis data:
+the COA parser, a JSONL cache for long collection runs, geographic
+tools, and web tools. The building blocks those tools share live one
+level up, and are where most data work starts:
 
-The `cannlytics.data` module is a digital toolbox for accessing, collecting, cleaning, augmenting, standardizing, saving, and analyzing cannabis data.
+| Module | What it does |
+|--------|--------------|
+| `cannlytics.constants` | States, analytes and their aliases, analyses, product types, license categories, units, and the compound reference (names and CAS numbers). |
+| `cannlytics.clean` | Dates (keeping partial dates), ZIP codes, phone numbers, e-mail, URLs, names, and numbers. |
+| `cannlytics.licenses` | License numbers as issued, matching keys, and license categories and statuses. |
+| `cannlytics.schema` | `LabResult`, the standard record for one lab result, and its validation. |
+| `cannlytics.datasets` | Reading the published results product (Parquet). |
+| `cannlytics.collect` | `COACollector`, the base class for COA collectors, and a polite HTTP session. |
 
-## Data Management
+## COA parsing: `cannlytics.data.coas`
 
-The core data management tools found in `cannlytics.data.data` include:
-
-*Data Aggregation*
-
-| Function | Description |
-|----------|-------------|
-| `aggregate_datasets(directory, on='sample_id', how='left', replace='right', reverse=True, concat=False)` | Aggregate datasets. Leverages `rmerge` to combine each dataset in a given directory. |
-
-*Data Cleaning*
-
-| Function | Description |
-|----------|-------------|
-| `find_first_value(string, breakpoints=None)` | Find the first value of a string, be it a digit, a 'ND', '<', or other specified breakpoints.  |
-| `parse_data_block(div, tag='span')` | Parse an HTML data block into a dictionary. |
-
-*Data Augmentation*
-
-<!-- TODO: Better explain data hashing
-
-Reading:
-  https://www.quora.com/What-is-the-difference-between-a-HMAC-and-a-hash-of-data
-  https://security.stackexchange.com/questions/79577/whats-the-difference-between-hmac-sha256key-data-and-sha256key-data
-  https://security.stackexchange.com/questions/20129/how-and-when-do-i-use-hmac
-  https://security.stackexchange.com/questions/232321/is-hmac-sha256-more-secure-to-hide-information-than-sha256
-  https://security.stackexchange.com/questions/177437/hmac-sha256-for-jwt-token-signature
-  https://security.stackexchange.com/questions/29951/salted-hashes-vs-hmac
-  
-References:
-  https://www.ietf.org/rfc/rfc2104.txt
--->
-
-| Function | Description |
-|----------|-------------|
-| `create_hash(public_key, private_key = 'cannlytics.eth')` | Create a hash (HMAC-SHA256) that is unique to the provided data, the `public_key`. The `private_key` can be used to sign your data, with the default being Cannlytics' public key, `'cannlytics.eth'`. |
-| `create_sample_id(private_key, public_key, salt='')` | Create a hash to be used as a sample ID. The standard is to use: 1. `private_key = producer` 2. `public_key = product_name` 3. `salt = date_tested` |
-
-*Data Saving*
-
-| Function | Description |
-|----------|-------------|
-| `write_to_worksheet(ws, values)` | Write data to an Excel Worksheet. |
-
-<!-- TODO: Examples -->
-
-<!-- ## Figures
-
-| Function | Description |
-|----------|-------------|
-| `crispy_barchart(df, annotations=False, key=0, fig_size=(5, 3.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B', notes='', notes_offset=.15, palette=None, percentage=False, title='', save='', x_label=None, y_label=None, y_ticks=None, zero_bound=False,)` | Create a beautiful bar chart given data. |
-| `crispy_scatterplot(data, x, y, category_key, categories, colors, label_size=20, legend_loc='upper left', notes='', notes_offset=.15, note_size=14, percentage=False, save='', title='', title_size=24, font_size=18, fig_size=(15, 7.5), font_family='serif', font_style='Times New Roman', text_color='#333F4B',)` | Create a beautiful scatter plot given data. | -->
-
-<!-- TODO: Examples -->
-
-<!-- ## Flower Art
-
-You can programmatically create cannabis flower art using image data with the `cannlytics.data.flower_art` submodule.
+`COAdoc` reads a certificate of analysis (a PDF, a URL, or bytes) and
+returns its metadata and results: by a lab-specific algorithm when the
+lab is recognized, otherwise with an AI model. See the
+[COA documentation](https://github.com/cannlytics/cannlytics/blob/main/cannlytics/data/coas/readme.md).
 
 ```py
-# Import Flower Art
-from cannlytics.data.flower_art import FlowerArt
+from cannlytics.data.coas import COAdoc
 
-# Create an art AI client.
-art = FlowerArt(
-    line_size=7,
-    blur_value=7,
-    number_of_filters=10,
-    total_colors=50,
-    sigmaColor=50,
-    sigmaSpace=50,
-)
+parser = COAdoc()                      # Anthropic by default; reads ANTHROPIC_API_KEY
+result = parser.parse('coa.pdf')
+result['metadata'], result['analyses']
+```
 
-# Create a strain NFT.
-art.cartoonize_image('model.jpg', 'strain-nft.jpg')
-``` -->
+Requires `pip install "cannlytics[coa,ai]"`.
 
-## GIS Data
+## Caching long runs: `cannlytics.data.cache`
 
-There are a number of geographic information system (GIS) tools in `cannlytics.data.gis`. Certain tools leverage Google Maps or Fed FRED and expect either a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key) or a [Fed FRED API key](http://research.stlouisfed.org/fred2/).
-
-| Function | Description |
-|----------|-------------|
-| `get_state_population(state, fred_api_key, district='', obs_start=None, obs_end=None, multiplier=1000)` | Get a given state's population from the Fed Fred API. The `state` abbreviation can be upper or lower case. You can either pass your Fed FRED API key to `fred_api_key` or specify `fred_api_key=None` and set the environment variable 'FRED_API_KEY' to the value of your API key. You can specify `obs_start` and/or `obs_end` to get a timeseries of population. The latest population is retrieved by default. |
-| `geocode_addresses(data, api_key=None, pause=0.0, address_field='')` | Geocode addresses in a dataframe. Expects a Google Maps API key. |
-| `search_for_address(query, api_key=None, fields=None)` | Search for the address of a given name. Expects a Google Maps API key. |
-|
-
-<!-- TODO: Examples -->
-
-## Cannabis OpenData
-
-The `cannlytics.data.opendata` submodule contains an `OpenData` class. An instance of the `OpenData` class communicates with the [Cannabis Control Commission of the Commonwealth of Massachusetts' Open Data catalog](https://masscannabiscontrol.com/open-data/data-catalog/).
+`Bogart` is a JSONL cache keyed by hash (of a file or a URL), so that a
+collection or parsing run can stop and resume without repeating work.
 
 | Method | Description |
-|----------|-------------|
-| `get_agents(dataset='gender-stats')` | Get agent statistics. Datasets: `gender-stats`, `ethnicity-stats` |
-| `get_licensees(dataset='', limit=10_000, order_by='app_create_date', ascending=False)` | Get Massachusetts licensee data and statistics. Datasets: `approved`, `pending`, `demographics`, `under-review-stats`, `application-stats` |
-| `get_retail(dataset='sales-stats', limit=10_000, order_by='date', ascending=False)` | Get Massachusetts retail data and statistics. Datasets: `sales-stats`, `sales-weekly`, `price-per-ounce` |
-| `get_medical(dataset='stats')` | Get Massachusetts medical stats. |
-| `get_plants(limit=10_000, order_by='activitysummarydate', ascending=False)` | Get Massachusetts cultivation data and statistics. |
-| `get_sales(limit=10_000, order_by='activitysummarydate', ascending=False)` | Get Massachusetts sales data. |
+|--------|-------------|
+| `append(key, value)` | Append a single entry to the .jsonl file. |
+| `clear()` | Clear the cache. |
+| `expire(key)` | Expire a key in the cache. |
+| `get(key, default=None)` | Get a value from the cache. |
+| `hash_file(file_path, block_size=65536)` | Hash a whole file (SHA-256) to use as a cache key. |
+| `hash_url(url)` | Hash a URL (SHA-256) to use as a cache key. |
+| `load(cache_path)` | Load the cache from a .jsonl file. |
+| `merge(cache_path)` | Merge another .jsonl cache file into this cache, keeping unique hashes. |
+| `save()` | Save the entire cache to a .jsonl file, atomically. |
+| `set(key, value)` | Set a value in the cache. |
+| `to_df()` | Return the cache as a DataFrame. |
 
-*Examples*
+## Geographic data: `cannlytics.data.gis`
 
-```py
-from cannlytics.data.opendata import OpenData
-
-# Create an OpenData instance.
-ccc = OpenData()
-
-# Get data!
-licensees = ccc.get_licensees()
-retail = ccc.get_retail()
-plants = ccc.get_plants()
-sales = ccc.get_sales()
-```
-
-<!--
-- TODO: Create a data guide.
-- FIXME: SQL queries do not appear to work.
--->
-
-## Cannabis Patent Data
-
-With the `cannlytics.data.patents` submodule you can find and curate data for cannabis patents.
+State data and population from the Federal Reserve's FRED, geocoding
+and place search with Google Maps, and distances and routes. The module
+always imports; a function whose library is missing names the extra to
+install, `pip install "cannlytics[utils]"`.
 
 | Function | Description |
 |----------|-------------|
-| `search_patents(query, limit=50, details=False, pause=None, term='')` | Search for patents. |
-| `get_patent_details(data=None, patent_number=None, patent_url=None, user_agent=None, fields=None, search_field='patentNumber', search_fields='patentNumber', query='patentNumber',)` | Get details for a given patent, given it's patent number and URL. |
+| `get_state_data(state, code, fred_api_key=None, district='', obs_start=None, obs_end=None)` | A state's series from FRED, by series code. |
+| `get_state_population(state, fred_api_key=None, district='', obs_start=None, obs_end=None, multiplier=1000.0)` | A state's resident population from FRED (series ``<STATE>POP``). |
+| `get_google_maps_api_key(env_file='.env')` | Find a Google Maps API key. |
+| `initialize_googlemaps(env_file='./.env')` | A Google Maps client, keyed from ``env_file`` or ``get_google_maps_api_key``. |
+| `geocode_addresses(data, api_key=None, pause=0.0, address_field='')` | Geocode the addresses in a DataFrame, in place. |
+| `search_for_address(query, api_key=None, fields=None)` | Find the address of a place by name with Google Places. |
+| `parse_formatted_address(formatted_address)` | Split a Google formatted address into street, city, state, and ZIP code. |
+| `get_transfer_distance(api_key, start, end, mode='driving')` | The distance and travel time between two places. |
+| `get_transfer_route(api_key, start, end, departure_time=None, mode='driving')` | The route between two places. |
 
-*Example*
+Keys: FRED reads `FRED_API_KEY` when none is passed. Google Maps keys
+are found by `get_google_maps_api_key`: the environment, then `./.env`
+(read, not loaded), then Google Secret Manager, then Firestore
+(`admin/google`).
 
 ```py
-from cannlytics.data.patents import (
-  get_patent_details,
-  search_patents,
-)
+from cannlytics.data.gis import parse_formatted_address
 
-# Search for cannabis plant patents.
-patents = search_patents('cannabis cultivar', limit=1000, term='TTL%2F')
-
-# Get patent details.
-patent = get_patent_details(
-    patent_number='PP34051',
-    patent_url='https://patft.uspto.gov/netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=7&f=G&l=50&d=PTXT&p=1&S1=%22marijuana+plant%22&OS=%22marijuana+plant%22&RS=%22marijuana+plant%22',
-)
+parse_formatted_address('1 Main St, Suite 5, Lacey, WA 98503, USA')
+# {'state': 'WA', 'zipcode': '98503', 'city': 'Lacey', 'street': '1 Main St, Suite 5'}
 ```
 
-## Web Data
+## Web data: `cannlytics.data.web`
 
-There are a number of web data tools in `cannlytics.data.web`, including:
+Page metadata, contact details, and downloads. Requires
+`pip install "cannlytics[web]"`; Selenium is imported only when a
+browser is started, and finds or downloads a matching driver itself.
+Every request has a timeout (`TIMEOUT`), and downloads are written
+atomically: a failed download leaves no partial file.
 
 | Function | Description |
 |----------|-------------|
-| `format_params(parameters, **kwargs)` | Format given keyword arguments HTTP request parameters. |
-| `get_page_metadata(url)` | Get the metadata of a web page |
-| `get_page_description(html)` | Get the description of a web page. |
-| `get_page_image(html, index=0)` | Get an image on a web page, the first image by default. |
-| `get_page_favicon(html, url='')` | Get the favicon from a web page. |
-| `get_page_theme_color(html)` | Get the theme color of a web page. |
-| `get_page_phone_number(html, response, index=0)` | Get the first phone number on a web page. |
-| `get_page_email(html, response)` | Get an email on a web page, the last email by default. |
+| `get_page_metadata(url, timeout=(10, 60))` | Fetch a page and read its metadata. |
+| `get_page_description(html)` | A page's description: its description meta tags, else its first paragraph. |
+| `get_page_image(html, index=0, url='')` | A page's image: its sharing image, else its ``index``-th ``<img>``. |
+| `get_page_favicon(html, url='')` | A page's favicon, absolute when ``url`` is given; else the site's ``/favicon.ico``. |
+| `get_page_theme_color(html)` | A page's theme color (``<meta name="theme-color">``). |
+| `get_page_phone_number(html, response=None, index=0)` | A phone number on a page: from ``tel:`` or ``callto:`` links, else the page text. |
+| `get_page_email(html, response=None, index=-1)` | An e-mail address on a page: from ``mailto:`` links, else the page text. |
+| `format_params(parameters, **kwargs)` | Map keyword arguments to an API's parameter names, dropping empty ones. |
+| `download_file_from_url(url, destination='', ext='', file_name=None, timeout=(10, 60))` | Download a file to a folder. |
+| `download_google_drive_file(drive_file, destination, timeout=(10, 60))` | Download a public Google Drive file. |
+| `initialize_selenium(browser=None, headless=True, download_dir=None, arguments=())` | Start a Selenium WebDriver: Chrome, falling back to Edge. |
+| `download_file_with_selenium(url, driver=None, persist=False, pause=3.33, wait=10, el_id='download', method='iframe', tag_name='iframe', filename=None, download_dir=None, headless=True)` | Download a file from a page that needs a browser. |
 
-<!-- TODO: Examples -->
+```py
+from cannlytics.data.web import get_page_metadata
+
+response, html, metadata = get_page_metadata('cannlytics.com')
+metadata['description'], metadata['favicon']
+```
+
+## Moved: `cannlytics.data.constants` and `cannlytics.data.compounds`
+
+Both now live in `cannlytics.constants`. The old paths still import
+(`cannlytics.data.constants` with a `DeprecationWarning`) and will be
+removed in 2.0.
+
+```py
+from cannlytics.constants import get_compound, normalize_analyte_key
+
+normalize_analyte_key('Δ9-THC')        # 'delta_9_thc'
+get_compound('Aflatoxin B1')           # {'name': 'Aflatoxin B1', 'cas': '1162-65-8', ...}
+```

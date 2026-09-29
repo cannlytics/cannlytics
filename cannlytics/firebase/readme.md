@@ -71,8 +71,6 @@ docs = get_collection(
 | `remove_from_array(ref, field, value, database)` | Remove from an array field. |
 | `increment_value(ref, field, amount, database)` | Atomically increment a numeric field. |
 | `create_id()` | Generate a ULID (universally unique, lexicographically sortable). |
-| `create_id_from_datetime(timestamp)` | Create a ULID from a specific datetime. |
-| `get_id_timestamp(uid)` | Extract the datetime from a ULID. |
 
 ## Authentication
 

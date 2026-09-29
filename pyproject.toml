@@ -63,8 +63,10 @@ classifiers = [
 # Intentionally minimal: only what the base package needs to import.
 # Everything else is in [project.optional-dependencies].
 dependencies = [
-    "numpy",
-    "pandas",
+    # Lower bounds are the oldest versions the suite passes on (numpy 1.26
+    # with pandas 2.2; the website pins pandas 2.3, also tested).
+    "numpy>=1.26",
+    "pandas>=2.2",
     "python-dateutil",
     "python-dotenv",
     "requests",
@@ -110,16 +112,6 @@ qr-cv = [
     "opencv-python>=4.0",
 ]
 
-# Legacy COA parsing (deprecated CoADoc) — heavy deps that also need
-# system packages (Tesseract, ImageMagick). Never part of `all`.
-coa-legacy = [
-    "opencv-python>=4.0",
-    "pyzbar>=0.1.9",
-    "pytesseract>=0.3",
-    "Wand>=0.6",
-    "pypdf>=3.0",
-]
-
 # Firebase / Google Cloud services.
 firebase = [
     "firebase-admin>=6.0",
@@ -159,7 +151,7 @@ datasets = [
 ]
 
 # Every runtime extra. Self-referencing, so it can never drift from the
-# groups above. Excludes `coa-legacy` (system packages) and the test
+# groups above. Excludes the test
 # and development tools, which no user of the library needs.
 all = [
     "cannlytics[coa,ai,qr,qr-cv,firebase,science,web,utils,datasets]",
@@ -169,6 +161,9 @@ all = [
 # `pip install -e ".[test]"` is the whole set-up.
 test = [
     "cannlytics[coa,ai,firebase,science,datasets]",
+    "XlsxWriter>=3.0",
+    "beautifulsoup4>=4.0",
+    "openpyxl>=3.0",
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "reportlab>=4.0",
@@ -188,7 +183,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://cannlytics.com"
-Documentation = "https://docs.cannlytics.com"
+Documentation = "https://github.com/cannlytics/cannlytics#readme"
 Repository = "https://github.com/cannlytics/cannlytics"
 Issues = "https://github.com/cannlytics/cannlytics/issues"
 Changelog = "https://github.com/cannlytics/cannlytics/blob/main/CHANGELOG.md"

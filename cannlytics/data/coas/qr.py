@@ -155,7 +155,7 @@ def _executable_names() -> List[str]:
         ext = ext.strip()
         if ext:
             names.append(_QRUSTIE_BINARY_NAME + ext.lower())
-    # Bare name last, so an extensioned match is preferred.
+    # Bare name last, so a match with an extension is preferred.
     names.append(_QRUSTIE_BINARY_NAME)
     # Preserve order, drop duplicates.
     return list(dict.fromkeys(names))

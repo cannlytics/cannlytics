@@ -5,7 +5,7 @@ Copyright (c) 2021-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/26/2026
-Updated: 9/27/2026
+Updated: 9/26/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -250,6 +250,35 @@ _ISO_MONTH = re.compile(r'^(\d{4})[-/.](\d{1,2})$')
 _MONTH_YEAR = re.compile(r'^(\d{1,2})[-/.](\d{4})$')
 _YEAR = re.compile(r'^(\d{4})$')
 
+# A partial date in words is a month name and a year, nothing else:
+# 'March 2026', 'Mar. 2026', '2026 March'. Anything looser lets dateutil
+# read '2023 2:06 p.m.-08-29' as the bare year 2023, discarding a month
+# and day that are there.
+_MONTH_NAME_YEAR = re.compile(r'^(?:[A-Za-z]{3,9}\.?[\s,/-]+\d{4}|\d{4}[\s,/-]+[A-Za-z]{3,9}\.?)$')
+
+# Repairs for date text seen in real exports (the 1.0.4 census).
+# JavaScript's Date.toString(): 'Wed Apr 17 2024 04:00:00 GMT-0400 (Eastern
+# Daylight Time)'. The zone name defeats dateutil, and dateutil reads
+# 'GMT-0400' with its sign inverted (the POSIX convention), so both go:
+# the wall-clock time is kept, as everywhere in this module.
+_ZONE_NAME = re.compile(r"\s*\([A-Za-z][A-Za-z .'-]*\)\s*$")
+_GMT_OFFSET = re.compile(r'\s*\b(?:GMT|UTC)\s*[+-]\d{2}:?\d{2}\b', re.IGNORECASE)
+# A date and a time run together: '03/26/202104:10'.
+_RUN_TOGETHER = re.compile(r'^(\d{1,2}/\d{1,2}/\d{4})(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AaPp]\.?\s*[Mm]\.?)?)$')
+# A time wedged between the year and the month: '2023 2:06 p.m.-08-29'.
+_WEDGED_TIME = re.compile(r'^(\d{4})\s+(\d{1,2}:\d{2}(?::\d{2})?\s*[AaPp]\.?\s*[Mm]\.?)\s*-(\d{1,2})-(\d{1,2})$')
+
+def _repair(text: str) -> str:
+    """Put known malformed date text into a form the parsers read."""
+    text = _GMT_OFFSET.sub('', _ZONE_NAME.sub('', text))
+    match = _RUN_TOGETHER.match(text)
+    if match:
+        return f'{match.group(1)} {match.group(2)}'
+    match = _WEDGED_TIME.match(text)
+    if match:
+        return f'{match.group(1)}-{match.group(3)}-{match.group(4)} {match.group(2)}'
+    return text
+
 # What to do with a date that has no day (or no month and day):
 #   'keep'  return it at the precision given: '2024-01', '2024' (lossless)
 #   'start' complete it to the first day of the period: '2024-01-01'
@@ -281,7 +310,7 @@ def _read_date(value: Any, dayfirst: bool = False) -> Optional[Tuple[datetime, s
     if isinstance(value, (datetime, date, int, float)):
         moment = _read_complete(value)
         return (moment, 'day') if moment else None
-    text = normalize_whitespace(str(value))
+    text = _repair(normalize_whitespace(str(value)))
     for pattern, year_group, month_group in ((_ISO_MONTH, 1, 2), (_MONTH_YEAR, 2, 1)):
         match = pattern.match(text)
         if match:
@@ -296,17 +325,15 @@ def _read_date(value: Any, dayfirst: bool = False) -> Optional[Tuple[datetime, s
     moment = _read_complete(text, dayfirst)
     if moment is not None:
         return moment, 'day'
-    if not text or re.fullmatch(r'\d+(\.\d+)?', text):
-        return None
+    if not _MONTH_NAME_YEAR.match(text):
+        return None                          # not a date, or not one we can read faithfully
     try:
         first = _dateparser.parse(text, dayfirst=dayfirst, default=_DEFAULT_A)
         second = _dateparser.parse(text, dayfirst=dayfirst, default=_DEFAULT_B)
     except (ValueError, OverflowError, TypeError):
         return None
-    if first.year != second.year or not _MIN_YEAR <= first.year <= _MAX_YEAR:
-        return None                          # no (plausible) year: it cannot be placed
-    if first.month != second.month:
-        return datetime(first.year, 1, 1), 'year'
+    if (first.year, first.month) != (second.year, second.month) or not _MIN_YEAR <= first.year <= _MAX_YEAR:
+        return None
     return datetime(first.year, first.month, 1), 'month'
 
 def _complete(moment: datetime, precision: str, partial: Optional[str]) -> Optional[datetime]:
@@ -389,7 +416,14 @@ def _read_complete(value: Any, dayfirst: bool = False) -> Optional[datetime]:
                 moment = _dateparser.isoparse(text.replace(' ', 'T', 1))
                 moment = moment.replace(tzinfo=None) if moment.tzinfo else moment
             except ValueError:
-                pass
+                # A time ISO does not allow ('2:06 p.m.'): read it, but only
+                # if the reading agrees with the date already established.
+                try:
+                    timed = _dateparser.parse(text)
+                except (ValueError, OverflowError):
+                    timed = None
+                if timed and (timed.year, timed.month, timed.day) == (moment.year, moment.month, moment.day):
+                    moment = timed.replace(tzinfo=None) if timed.tzinfo else timed
         return _plausible(moment)
     if re.fullmatch(r'\d+(\.\d+)?', text):
         return _read_complete(float(text))

@@ -87,7 +87,7 @@ class TestNumbers:
 class TestDates:
 
     @pytest.mark.parametrize('value, expected', [
-        # The probes on which ten parse_date functions had nine behaviours.
+        # The probes on which ten parse_date functions had nine behaviors.
         ('01/15/2024', '2024-01-15'), ('2024-01-15', '2024-01-15'), ('January 15, 2024', '2024-01-15'),
         ('1/5/24', '2024-01-05'), ('20240115', '2024-01-15'), ('2024-01-15T10:30:00', '2024-01-15'),
         ('2024-01-15 10:30:00', '2024-01-15'), ('Jan 15 2024', '2024-01-15'), ('15 January 2024', '2024-01-15'),
@@ -99,6 +99,16 @@ class TestDates:
         ('January 15', None), ('Q1 2024', None), ('2024-13', None), ('13/2024', None),
         # Beyond 2100 (and past what Windows can convert) is not a date.
         (5e10, None), (9e12, None),
+        # Forms found by the 1.0.4 census of the published files.
+        ('Wed Apr 17 2024 04:00:00 GMT-0400 (Eastern Daylight Time)', '2024-04-17'),
+        ('Mon Dec 18 2023 03:00:00 GMT-0500 (Eastern Standard Time)', '2023-12-18'),
+        ('Sat Jun 01 2019 03:52:48 GMT-0400', '2019-06-01'),
+        ('03/26/202104:10', '2021-03-26'), ('2023 2:06 p.m.-08-29', '2023-08-29'),
+        ('Date Tested:', None), ('24', None), ('12/152022', None), ('Spring 2024', None),
+        ('Lot 2023-A', None), ('2023 batch 7', None),
+        # dateutil reads these as a month; they are ambiguous (the 8th, or
+        # August?) or not dates at all ('7 of 2023' is more likely a batch).
+        ('8 2023', None), ('2023 8', None), ('12 2023', None), ('2023, 8', None), ('7 of 2023', None),
         ('1970-01-01', '1970-01-01'), ('12/31/1899', None), ('2101-01-01', None),
         (date(2024, 1, 15), '2024-01-15'), (datetime(2024, 1, 15, 10, 30), '2024-01-15'),
         (pd.Timestamp('2024-01-15 10:30'), '2024-01-15'), (pd.NaT, None),
@@ -124,7 +134,7 @@ class TestDates:
 class TestContactFields:
 
     @pytest.mark.parametrize('value, expected', [
-        # The probes on which thirteen clean_zip_code functions had eight behaviours.
+        # The probes on which thirteen clean_zip_code functions had eight behaviors.
         ('12345', '12345'), ('12345-6789', '12345'), ('123456789', '12345'), ('1234', '01234'),
         (12345.0, '12345'), ('02134', '02134'), (2134, '02134'), (2134.0, '02134'), ('2134.0', '02134'),
         (' 98501 ', '98501'), (None, None), ('N/A', None), ('V6B 1A1', 'V6B 1A1'), ('v6b1a1', 'V6B 1A1'),
@@ -143,7 +153,7 @@ class TestContactFields:
         assert clean_zip_code('98501', plus4=True) == '98501'
 
     @pytest.mark.parametrize('value, expected', [
-        # The probes on which nine clean_phone_number functions had eight behaviours.
+        # The probes on which nine clean_phone_number functions had eight behaviors.
         ('(555) 123-4567', '(555) 123-4567'), ('555.123.4567', '(555) 123-4567'), ('5551234567', '(555) 123-4567'),
         ('+1 555 123 4567', '(555) 123-4567'), ('15551234567', '(555) 123-4567'), (5551234567.0, '(555) 123-4567'),
         ('555-123-4567 ext 12', '(555) 123-4567 ext. 12'), ('555-123-4567 x12', '(555) 123-4567 ext. 12'),
@@ -208,3 +218,11 @@ class TestPartialDates:
     def test_pandas_reads_mixed_precision(self):
         series = pd.Series([parse_date(v) for v in ('2024-01-15', 'January 2024', '2024')])
         assert list(pd.to_datetime(series, format='ISO8601').dt.day) == [15, 1, 1]
+
+    def test_census_forms_keep_their_time_and_precision(self):
+        # The wall-clock time is kept; dateutil's inverted GMT sign is never applied.
+        assert parse_timestamp('Wed Apr 17 2024 04:00:00 GMT-0400 (Eastern Daylight Time)') == '2024-04-17T04:00:00'
+        assert parse_timestamp('2023 2:06 p.m.-08-29') == '2023-08-29T14:06:00'
+        # A full date with a time in the wrong place is a day, not a bare year.
+        assert date_precision('2023 2:06 p.m.-08-29') == 'day'
+        assert date_precision('Mar. 2026') == 'month' and date_precision('2026 March') == 'month'

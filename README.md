@@ -33,7 +33,7 @@ pip install "cannlytics[all]"
 ```
 
 Every API key is optional and read from the environment. Copy
-[`.env.example`](./.env.example) to `.env` to see what each one switches on.
+[`.env.example`](https://github.com/cannlytics/cannlytics/blob/main/.env.example) to `.env` to see what each one switches on.
 
 Or clone the repository:
 
@@ -198,6 +198,7 @@ The `cannlytics.firebase` module wraps `firebase_admin` with an ergonomic path-b
 | `storage.py` | Upload, download, list, rename, delete files |
 | `firebase_auth.py` | User management, custom claims, tokens, sessions |
 | `secrets.py` | Google Cloud Secret Manager |
+| `pipelines.py` | Firestore Enterprise Pipeline operations *(experimental)* |
 
 All functions are re-exported for convenience:
 
@@ -260,7 +261,7 @@ metadata, analyses = coa['metadata'], coa['analyses']
 
 Each COA is identified by its `pdf_hash`, the SHA-256 of the whole file.
 
-See the [COA documentation](./cannlytics/data/coas/readme.md) for full details.
+See the [COA documentation](https://github.com/cannlytics/cannlytics/blob/main/cannlytics/data/coas/readme.md) for full details.
 
 ## Data Assets
 

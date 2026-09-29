@@ -196,7 +196,10 @@ class TestLicensesAndUnits:
 class TestLegacyPaths:
 
     def test_data_constants_is_the_same_object(self):
-        from cannlytics.data import constants as legacy
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)   # tested in test_data/test_constants.py
+            from cannlytics.data import constants as legacy
         assert legacy.DECARB is DECARB and legacy.states is US_STATES and legacy.state_time_zones is TIME_ZONES
 
     def test_data_compounds_is_the_same_object(self):
@@ -210,3 +213,27 @@ class TestLegacyPaths:
         assert schema.normalize_product_type is normalize_product_type
         assert schema.ANALYTE_KEYS is ANALYTE_ALIASES
         assert utils.state_time_zones is TIME_ZONES
+
+class TestAliasInvariants:
+    """The 1.0.4 merge of four alias tables let canonical keys alias away
+    from themselves (spinosad <-> spinosad_a was a cycle) and mapped
+    p-mentha-1,5-diene to myrcene. These pin the corrections."""
+
+    def test_every_canonical_key_maps_to_itself(self):
+        from cannlytics.constants import ANALYTE_ALIASES
+        assert [k for k in ALL_ANALYTE_KEYS if ANALYTE_ALIASES[k] != k] == []
+
+    @pytest.mark.parametrize('label, key', [
+        ('p-Mentha-1,5-diene', 'alpha_phellandrene'), ('Abamectin', 'abamectin'), ('Abamectin B1a', 'avermectin_b1a'),
+        ('Avermectin B1b', 'avermectin_b1b'), ('Spinosad', 'spinosad'), ('Spinosyn A', 'spinosad_a'),
+        ('Spinosad D', 'spinosad_d'), ('Fenhexamide', 'fenhexamid'), ('Pyriproxifen', 'pyriproxyfen'),
+        ('Permethrins', 'permethrin'), ('cis-Permethrin', 'cis_permethrin'), ('Delta-10-THC', 'delta_10_thc'),
+        ('R-Delta-10-THC', '9r_delta_10_thc'), ('Terpineol', 'terpineol'), ('alpha-Ocimene', 'alpha_ocimene'),
+        ('BTGN', 'btgn'), ('Aspergillus spp.', 'aspergillus'), ('Total Viable Aerobic Bacteria', 'total_aerobic_bacteria'),
+        ('Hair', 'hair'), ('Cannabivarin', 'cbv'), ('Pyrethrin I', 'pyrethrin_i'),
+    ])
+    def test_components_mixtures_and_isomers_stay_apart(self, label, key):
+        assert normalize_analyte_key(label) == key
+
+    def test_a_section_heading_is_not_an_analyte(self):
+        assert normalize_analyte_key('Mycotoxin') == 'mycotoxin'

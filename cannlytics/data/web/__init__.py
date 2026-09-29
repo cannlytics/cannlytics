@@ -4,7 +4,7 @@ Copyright (c) 2023-2025 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/2/2023
-Updated: 6/12/2026
+Updated: 9/28/2026
 """
 # Dependency guard.
 #
@@ -23,9 +23,6 @@ try:
         get_page_theme_color,
         get_page_phone_number,
         get_page_email,
-        find_company_address,
-        find_company_linkedin,
-        find_company_url,
         initialize_selenium,
         download_google_drive_file,
         download_file_from_url,
@@ -41,9 +38,6 @@ try:
         'get_page_theme_color',
         'get_page_phone_number',
         'get_page_email',
-        'find_company_address',
-        'find_company_linkedin',
-        'find_company_url',
         'initialize_selenium',
         'download_google_drive_file',
         'download_file_from_url',

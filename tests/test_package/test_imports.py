@@ -71,7 +71,7 @@ class TestCoreInstall:
     def test_lazy_attribute_access(self):
         assert cannlytics.metrc.Metrc and cannlytics.stats.calc_purpleness
         with pytest.raises(AttributeError):
-            cannlytics.not_a_module
+            cannlytics.not_a_module  # noqa: B018 (the access is the test)
 
 class TestAllLists:
 
@@ -102,8 +102,16 @@ class TestVersion:
         assert re.fullmatch(r'\d+\.\d+\.\d+([ab]|rc)?\d*', cannlytics.__version__)
 
     def test_changelog_has_an_entry_for_this_version(self):
+        # Between releases, main carries x.y.z.devN with an
+        # "## [x.y.z] — Unreleased" entry (see RELEASING.md).
+        import re
+        version = cannlytics.__version__
+        assert re.fullmatch(r'\d+\.\d+\.\d+(\.dev\d+)?', version), version
         changelog = (ROOT.parent / 'CHANGELOG.md').read_text(encoding='utf-8')
-        assert f'## [{cannlytics.__version__}]' in changelog
+        release = re.sub(r'\.dev\d+$', '', version)
+        assert f'## [{release}]' in changelog
+        if release != version:
+            assert f'## [{release}] — Unreleased' in changelog
 
 class TestHygiene:
 

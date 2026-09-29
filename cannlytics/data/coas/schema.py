@@ -93,14 +93,6 @@ MOISTURE_KEYS = list(MOISTURE)
 FOREIGN_MATTER_KEYS = list(FOREIGN_MATTER)
 ANALYTE_KEYS = ANALYTE_ALIASES
 
-
-
-
-
-
-
-
-
 # Master analysis configuration: maps analysis names to their keys,
 # search keywords (for locating relevant pages), and product-type filters.
 ANALYSIS_CONFIGS = {

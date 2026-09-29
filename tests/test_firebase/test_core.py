@@ -4,10 +4,8 @@ Tests for cannlytics.firebase.core
 Covers: initialization, create_reference path routing, CRUD operations,
 batch writes, collection queries with FieldFilter, ID generation, logging.
 """
-from datetime import datetime
 from unittest.mock import MagicMock, patch, call
 
-import pytest
 
 from cannlytics.firebase import core
 from cannlytics.firebase.core import (
@@ -20,7 +18,6 @@ from cannlytics.firebase.core import (
     update_document,
     update_documents,
     delete_document,
-    delete_collection,
     delete_field,
     add_to_array,
     remove_from_array,

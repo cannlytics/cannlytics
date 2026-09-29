@@ -20,7 +20,7 @@ from typing import Dict, List, Optional
 # neutral form: total THC = THC + 0.877 x THCA.
 DECARB: float = 0.877
 
-# The unit each analysis is reported in, when standardised.
+# The unit each analysis is reported in, when standardized.
 STANDARD_UNITS: Dict[str, str] = {
     'cannabinoids': 'percent',
     'foreign_matter': 'percent',

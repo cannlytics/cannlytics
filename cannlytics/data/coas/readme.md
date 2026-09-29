@@ -1,298 +1,136 @@
+# COA Parsing
 
-<div align="center" style="text-align:center; margin-top:1rem; margin-bottom: 1rem;">
-  <img width="150px" alt="" src="https://firebasestorage.googleapis.com/v0/b/cannlytics.appspot.com/o/public%2Fimages%2Flogos%2Fcannlytics_coa_doc.png?alt=media&token=1871dde9-82db-4342-a29d-d373671491b3">
-  <div style="font-style: italic;">COA Data Parser</div>
-</div>
-
-Certificates of analysis (COAs) are abundant for cultivators, processors, retailers, and consumers too, but the data is often locked away. Rich, valuable laboratory data so close, yet so far away! `CoADoc` puts these vital data points in your hands by parsing PDFs and URLs, finding all the data, standardizing the data, and cleanly returning the data to you.
-
-In order to parse CoAs well, `COAdoc` takes into consideration:
-
-* The lab or LIMS that generated the CoA;
-* PDF properties, such as the fonts used and the page dimensions;
-* All detected words, lines, columns, white-space, etc.
-
-The roadmap for `COAdoc` is to continue adding lab and LIMS CoA parsing algorithms until a general CoA parsing algorithm may be able to be created. As CoA parsing algorithms are still under development, if you want a specific lab or LIMS CoA parsed, then please contact The Cannlytics Team: <dev@cannlytics.com>
-
-## Algorithms
-
-You can methodically get data from COAs for various labs with the combination of a handful of tools plus a little human ingenuity. All COAs that are extracted through manually written routines are quite useful because these can then be used for training natural language processing (NLP) models to further extract data from COAs!
-
-| Status | | |
-|---|---|---|
-| 🟠 Development | 🟡 Operational | 🟢 Functional |
-
-| Lab / LIMS | Algorithm | Status |
-|------------|-----------|--------|
-| ACS Labs | `parse_acs_coa` | 🟡 |
-| Anresco Laboratories | `parse_anresco_coa` | 🟢 |
-| Cannalysis | `parse_cannalysis_coa` | 🟢 |
-| Confidence Analytics | `parse_confidence_coa` | 🟢 |
-| Confident Cannabis | `parse_cc_coa` | 🟢 |
-| Green Leaf Lab | `parse_green_leaf_lab_coa` | 🟢 |
-| Kaycha Labs | `parse_kaycha_coa` | 🟡 |
-| KCA Labs | `parse_kca_coa` | 🟠 |
-| MCR Labs | `parse_mcr_labs_coa` | 🟢 |
-| Modern Canna Science | `parse_moderncanna_coa` | 🟠 |
-| Method Testing Labs | `parse_mtl_coa` | 🟠 |
-| SC Labs | `parse_sc_labs_coa` | 🟢 |
-| Sonoma Lab Works | `parse_sonoma_coa` | 🟢 |
-| Steep Hill | `parse_steephill_coa` | 🟢 |
-| TagLeaf LIMS | `parse_tagleaf_coa` | 🟢 |
-| TerpLife Labs | `parse_terplife_coa` | 🟠 |
-| Veda Scientific | `parse_veda_coa` | 🟡 |
+`cannlytics.data.coas` reads certificates of analysis (COAs), the lab
+reports that accompany cannabis products, and returns their data in one
+standard form. `COAdoc` routes each COA to the best method: a
+lab-specific **algorithm** when the lab is recognized (free, fast,
+deterministic), otherwise an **AI model** (flexible, and billed per
+token).
 
 ## Installation
 
-First, make sure that you have installed `cannlytics`:
-
 ```
-pip install cannlytics
+pip install "cannlytics[coa]"        # algorithms only
+pip install "cannlytics[coa,ai]"     # algorithms, with AI for unrecognized labs
 ```
 
-Then make sure to install the following dependencies:
-
-1. Install `Tesseract` ([Windows](https://github.com/UB-Mannheim/tesseract/wiki) | [iOS](https://github.com/madmaze/pytesseract>)).
-2. Install `ImageMagick` ([Download](https://imagemagick.org/script/download.php#windows) | [Cloud](https://stackoverflow.com/questions/43036268/do-i-have-access-to-graphicsmagicks-or-imagemagicks-in-a-google-cloud-function)
-3. Install `zbar` ([Download](http://zbar.sourceforge.net/download.html)).
+AI parsing needs a key for at least one provider (see below). COA URLs
+are recovered from QR codes by the `qrustie` binary when it is found
+(`QRUSTIE_PATH`), else by the Python decoder of `pip install "cannlytics[qr]"`.
 
 ## Usage
-
-Initialize a `COAdoc` parsing client.
 
 ```py
 from cannlytics.data.coas import COAdoc
 
-# Initialize a COA parser.
-parser = COAdoc()
+parser = COAdoc()                                    # method='auto', provider='anthropic'
+result = parser.parse('coa.pdf')                     # a path, a URL, or bytes
+result = parser.parse('https://example.com/coa.pdf')
+result = parser.parse(pdf_bytes, filename='coa.pdf')
+
+result['metadata'].get('coa_url')                    # found by QR code, if present
 ```
 
-Parse a PDF.
+Useful options: `method='algorithm'` (never call an AI model) or
+`method='ai'`; `provider` and `model` (see below); `analyses=[...]`
+on `parse` to read only some analyses; `qrustie_path=False` to skip QR
+scanning.
+
+`parse` returns a dictionary with `metadata` and `analyses`; the
+metadata includes `coa_url` when a QR code gave one. On failure it
+returns `{'error': '...', 'metadata': {}}`.
+
+## Pipeline mode
+
+For collecting a state's COAs in bulk, give the parser a state and
+directories, and call `parse_all`:
 
 ```py
-# Parse a PDF.
-filename = 'Classic Jack.pdf'
-data = parser.parse_pdf(filename)
+from pathlib import Path
+from cannlytics.data.coas import COAdoc
+
+parser = COAdoc(state='ny', data_dir=Path('.datasets'), cache_dir=Path('.cache'), budget=25.0)
+summary = parser.parse_all(source='prr')
 ```
 
-Parse a URL.
+Each COA is cached by the SHA-256 of its file (`pdf_hash`), so a run can
+stop and resume without parsing, or paying for, anything twice.
+`budget` caps AI spend in USD and `max_parses` the number of COAs.
 
-```py
-# Parse a URL.
-url = 'https://lims.tagleaf.com/coa_/F6LHqs9rk9'
-data = parser.parse_url(url)
+## Algorithms
+
+Recognized labs, from the routing table `LAB_REGISTRY`. A lab is
+identified by the URLs and text on the first page of its COA (and, when
+enabled, by its QR code). Tiers: 1 production, 2 beta, 3 alpha,
+4 development.
+
+| Lab or LIMS | Key | Algorithm | Tier | States |
+|---|---|---|---|---|
+| CannaBusiness Laboratories | `cannabusiness` | `parse_cannabusiness_coa` | 2 (beta) | KY |
+| Encore Labs | `encore` | `parse_encore_coa` | 2 (beta) | CA, AZ |
+| KCA Laboratories | `kca` | `parse_kca_coa` | 2 (beta) | KY |
+| ACS Laboratory | `acs` | `parse_acs_coa` | 3 (alpha) | FL |
+| Confident Cannabis (LIMS) | `confidentcannabis` | `parse_cc_coa` | 3 (alpha) | AZ, CA, CO, LA, MO, NY, OR, WA |
+| Green Analytics | `green_analytics` | `parse_green_analytics_coa` | 3 (alpha) | NJ, MD, NY |
+| Kaycha Labs | `kaycha` | `parse_kaycha_coa` | 3 (alpha) | AZ, FL, NY, OH, NJ |
+| Phyto-Farma Labs | `phytofarma` | `parse_phyto_farma_coa` | 3 (alpha) | NY |
+| SC Labs | `sclabs` | `parse_sc_labs_coa` | 3 (alpha) | AZ, CA, OR, CO, MI |
+| Smithers CTS | `smithers` | `parse_smithers_coa` | 3 (alpha) | AZ, NY |
+| TagLeaf LIMS | `tagleaf` | `parse_tagleaf_coa` | 3 (alpha) | CA, MO, NY, OR |
+| TerpLife Labs | `terplife` | `parse_terplife_coa` | 3 (alpha) | FL |
+| AcreLabs | `acrelabs` | `parse_acrelabs_coa` | 4 (development) | LA |
+
+To add a lab: write `parse_<lab>_coa(parser=None, doc='', **kwargs)`
+returning a dictionary of the COA's data, add an entry to
+`LAB_REGISTRY` (its `urls`, `text_patterns`, `module`, and
+`algorithm`), and validate it on real COAs. The parser adapts the
+algorithm's dictionary to the standard form. To develop an algorithm
+outside the package, put its module in a folder and pass
+`local_algorithm_paths=[folder]`; local modules take priority.
+
+## AI providers
+
+When no algorithm applies, `COAdoc` uses one provider, falling back in
+priority order if a provider fails or runs out of quota:
+
+| Priority | Provider | Default model | Other models | Key |
+|---|---|---|---|---|
+| 1 | Anthropic Claude | `claude-haiku-4-5-20251001` | `claude-sonnet-5`, `claude-opus-5-5`, `claude-fable-5-1`, `claude-sonnet-4-5-20250929` | `ANTHROPIC_API_KEY` |
+| 2 | OpenAI | `gpt-6-sol` | `gpt-6-luna`, `gpt-6-astra`, `gpt-5-mini`, `gpt-5` | `OPENAI_API_KEY` |
+| 3 | Google Gemini | `gemini-3.8-flash` | `gemini-3.5-flash-lite`, `gemini-3.1-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-pro` | `GOOGLE_API_KEY` |
+| 4 | xAI Grok | `grok-4.7` | `grok-4.3` | `XAI_API_KEY` |
+
+Prices and capabilities are in `cannlytics.data.coas.config`
+(`AI_PROVIDERS`, checked against each provider's price page on
+2026-09-28; `get_model_cost` prices a call on any date, since
+some prices are scheduled to change). Models flagged `legacy` are
+superseded but selectable; `quarantined` models failed a fidelity check
+and are never a default. Before a large run, check every configured
+provider with one live request each:
+
+```
+python tools/check_ai_providers.py
 ```
 
-Parse a list or URLs or PDFs, a mix of both is okay.
-```py
-# Parse a list of COAs.
-data = parser.parse([filename, url])
-```
+## The results
 
-Close the client when you are finished to perform garbage cleaning.
+Each result is a `cannlytics.schema.LabResult` (111 fields).
+The fields most analyses start from:
 
-```py
-# Close the parser.
-parser.quit()
-```
+| Field | Meaning |
+|---|---|
+| `sample_id` | A stable ID for the sample. |
+| `product_name` | The product as named on the COA. |
+| `product_type` | Standardized product type. |
+| `strain_name` | The strain, as named. |
+| `batch_number` | The batch or lot. |
+| `lab` | The testing laboratory. |
+| `date_tested` | When the sample was tested (ISO date, at the precision given). |
+| `total_thc` | Total THC, percent. |
+| `total_cbd` | Total CBD, percent. |
+| `coa_url` | The COA's own URL, from its QR code. |
+| `results` | Every analyte reported: key, value, units, limits, status. |
 
-
-
-## Core Methods
-
-`COAdoc` comes ready to rumble, but to unleash `COAdoc`'s true power, ensure that you have installed [ChromeDriver](https://chromedriver.chromium.org/downloads) (and that ChromeDriver is in your PATH) for parsing complex lab/LIMS webpages. Also, you can install [ImageMagick](https://imagemagick.org/script/download.php#windows) and [Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) to use optical character recognition (OCR) to attempt to recognize the text of COAs stored as images.
-
-| Function | Description |
-|----------|-------------|
-| `identify_lims(doc, lims=None)` | Identify if a COA was created by a common LIMS. Search all of the text of the LIMS name or URL. If no LIMS is identified from the text, then the images are attempted to be decoded, searching for a QR code URL.|
-| `parse(data, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse all COAs given a directory, a list of files, or a list of URLs. |
-| `parse_pdf(pdf, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a COA PDF. The method searches PDF images, alternating from the first then the last to the middle, for a QR code that decodes to a URL. If a URL is found, then results are attempted to be collected from the web. If no QR code is found or results can't be found on the web, then data is extracted from the PDF. |
-| `parse_url(url, headers={}, kind='url', lims=None, max_delay=7, persist=True)` | Parse a COA URL using web data collection methods. |
-| `pdf_ocr(filename, outfile, temp_path='/tmp', resolution=300, cleanup=True)` | Pass a PDF through OCR to recognize its text. Outputs a new PDF. A temporary directory is used, because the algorithm is to: 1. Convert all PDF pages to images. 2. Convert each image to PDF with text. 3. Compile the PDFs with text to a single PDF. The rendered images and individual PDF files are removed by default. |
-| `save(data, outfile, codings=None, column_order=None, nuisance_columns=None, numeric_columns=None, standard_analyses=None, standard_analytes=None, standard_fields=None, google_maps_api_key=None)` | Save all COA data, elongating results and widening values. That is, a Workbook is created with a "Details" worksheet that has all of the raw data, a "Results" worksheet with long-form data where each row is a result for an analyte, and a "Values" worksheet with wide-form data where each row is an observation and each column is the `value` field for each of the `results`. |
-| `standardize(data, codings=None, column_order=None, nuisance_columns=None, numeric_columns=None, how='details', details_data=None, results_data=None, standard_analyses=None, standard_analytes=None, standard_fields=None, google_maps_api_key=None)` | Standardize (and normalize) given data. Pass A `google_maps_api_key` to supplement addresses with latitude and longitude. Specify `column_order` as a list of columns in desired order. Specify `nuisance_columns` as a list of column suffixes to remove. Specify `numeric_columns` as a list of columns to apply codings and convert to numeric values. Specify `how` for a simple clean of the data `details` by default. Alternatively specify `wide` for a wide-form DataFrame of values or `long` for a long-form DataFrame of results. Specify `standard_analyses`, `standard_analytes`, `standard_fields` to use custom standardization mappings.|
-| `quit()` | Close any driver, end any session, and reset the parameters. |
-
-## Common COA Data Points
-
-Below is a non-exhaustive list of fields, used to standardize the various data that are encountered, that you may expect to be returned from the parsing of a COA.
-
-| Field | Example| Description |
-|-------|-----|-------------|
-| `analyses` | ["cannabinoids"] | A list of analyses performed on a given sample. |
-| `{analysis}_status` | "pass" | The pass, fail, or N/A status for pass / fail analyses.   |
-| `methods` | [{"analysis: "cannabinoids", "method": "HPLC"}] | The methods used for each analysis. |
-| `coa_urls` | [{"url": "", "filename": ""}] | A list of certificate of analysis (COA) URLs. |
-| `date_collected` | 2022-04-20T04:20 | An ISO-formatted time when the sample was collected. |
-| `date_tested` | 2022-04-20T16:20 | An ISO-formatted time when the sample was tested. |
-| `date_received` | 2022-04-20T12:20 | An ISO-formatted time when the sample was received. |
-| `distributor` | "Your Favorite Dispo" | The name of the product distributor, if applicable. |
-| `distributor_address` | "Under the Bridge, SF, CA 55555" | The distributor address, if applicable. |
-| `distributor_street` | "Under the Bridge" | The distributor street, if applicable. |
-| `distributor_city` | "SF" | The distributor city, if applicable. |
-| `distributor_state` | "CA" | The distributor state, if applicable. |
-| `distributor_zipcode` | "55555" | The distributor zip code, if applicable. |
-| `distributor_license_number` | "L2Stat" | The distributor license number, if applicable. |
-| `images` | [{"url": "", "filename": ""}] | A list of image URLs for the sample. |
-| `lab_results_url` | "https://cannlytics.com/results" | A URL to the sample results online. |
-| `producer` | "Grow Tent" | The producer of the sampled product. |
-| `producer_address` | "3rd & Army, SF, CA 55555" | The producer's address. |
-| `producer_street` | "3rd & Army" | The producer's street. |
-| `producer_city` | "SF" | The producer's city. |
-| `producer_state` | "CA" | The producer's state. |
-| `producer_zipcode` | "55555" | The producer's zipcode. |
-| `producer_license_number` | "L2Calc" | The producer's license number. |
-| `product_name` | "Blue Rhino Pre-Roll" | The name of the product. |
-| `lab_id` | "Sample-0001" | A lab-specific ID for the sample. |
-| `product_type` | "flower" | The type of product. |
-| `batch_number` | "Order-0001" | A batch number for the sample or product. |
-| `metrc_ids` | ["1A4060300002199000003445"] | A list of relevant Metrc IDs. |
-| `metrc_lab_id` | "1A4060300002199000003445" | The Metrc ID associated with the lab sample. |
-| `metrc_source_id` | "1A4060300002199000003445" | The Metrc ID associated with the sampled product. |
-| `product_size` | 2000 | The size of the product in milligrams. |
-| `serving_size` | 1000 | An estimated serving size in milligrams. |
-| `servings_per_package` | 2 | The number of servings per package. |
-| `sample_weight` | 1 | The weight of the product sample in grams. |
-| `results` | [{...},...] | A list of results, see below for result-specific fields. |
-| `status` | "pass" | The overall pass / fail status for all contaminant screening analyses. |
-| `total_cannabinoids` | 14.20 | The analytical total of all cannabinoids measured. |
-| `total_thc` | 14.00 | The analytical total of THC and THCA. |
-| `total_cbd` | 0.20 | The analytical total of CBD and CBDA. |
-| `total_terpenes` | 0.42 | The sum of all terpenes measured. |
-| `sample_id` | "{sha256-hash}" | A generated ID to uniquely identify the `producer`, `product_name`, and `date_tested`. |
-| `strain_name` | "Blue Rhino" | A strain name, if specified. Otherwise, can be attempted to be parsed from the `product_name`. |
-
-Each result can contain the following fields.
-
-| Field | Example| Description |
-|-------|--------|-------------|
-| `analysis` | "pesticides" | The analysis used to obtain the result. |
-| `key` | "pyrethrins" | A standardized key for the result analyte. |
-| `name` | "Pyrethrins" | The lab's internal name for the result analyte |
-| `value` | 0.42 | The value of the result. |
-| `mg_g` | 0.00000042 | The value of the result in milligrams per gram. |
-| `units` | "ug/g" | The units for the result `value`, `limit`, `lod`, and `loq`. |
-| `limit` | 0.5 | A pass / fail threshold for contaminant screening analyses. |
-| `lod` | 0.01 | The limit of detection for the result analyte. Values below the `lod` are typically reported as `ND`. |
-| `loq` | 0.1 | The limit of quantification for the result analyte. Values above the `lod` but below the `loq` are typically reported as `<LOQ`. |
-| `status` | "pass" | The pass / fail status for contaminant screening analyses. |
-
-
-## Advanced Usage
-
-If you are developing a new parsing routine for a lab or LIMS, then you will need to follow these steps.
-1. Implement a `parse_{lab}_coa`, `parse_{lab}_pdf` and/or a `parse_{lab}_url` function to parse results from a given COA. If there is a QR code on the COA containing the sample's `lab_results_url`, then the PDF parsing routine can be as simple as follows. If not, then you can implement your own PDF parsing logic.
-    ```py
-    def parse_cc_pdf(
-            self,
-            doc: Any,
-            max_delay: Optional[float] = 7,
-            persist: Optional[bool] = False,
-        ) -> dict:
-        """Parse a Confident Cannabis COA PDF.
-        Args:
-            doc (str or PDF): A file path to a PDF or a pdfplumber PDF.
-            max_delay (float): The maximum number of seconds to wait
-                for the page to load.
-            persist (bool): Whether to persist the driver.
-                The default is `False`. If you do persist
-                the driver, then make sure to call `quit`
-                when you are finished.
-        Returns:
-            (dict): The sample data.
-        """
-        # TODO: Implement any custom PDF parsing here....
-
-        return self.parse_pdf(
-            self,
-            doc,
-            lims='Confident Cannabis',
-            max_delay=max_delay,
-            persist=persist,
-        )
-    ```
-    Your algorithm to parse from a lab or LIMS COA URL can be as simple or as complex as necessary. If the lab or LIMS has implemented an API, then the algorithm can simply be a function to make a request to the lab's API. Be sure to create a unique `sample_id` before returning the observation (`obs`) data.
-    ```py
-    from cannlytics.data.data import create_sample_id
-
-    def parse_cc_url(
-            self,
-            url: str,
-            headers: Optional[Any] = None,
-            max_delay: Optional[float] = 7,
-            persist: Optional[bool] = False,
-        ) -> dict:
-        """Parse a Confident Cannabis COA URL.
-        Args:
-            url (str): The COA URL.
-            headers (Any): Optional headers for standardization.
-            max_delay (float): The maximum number of seconds to wait
-                for the page to load.
-            persist (bool): Whether to persist the driver.
-                The default is `False`. If you do persist
-                the driver, then make sure to call `quit`
-                when you are finished.
-        Returns:
-            (dict): The sample data.
-        """
-        # TODO: Implement API request and parsing here....
-
-        # Return the sample with a freshly minted sample ID.
-        obs['sample_id'] = create_sample_id(
-            private_key=producer,
-            public_key=product_name,
-            salt=date_tested,
-        )
-        return obs
-    ```
-    Finally, you can create a `parse_{lab}_coa` function to parse either a PDF or a URL.
-    ```py
-    def parse_cc_coa(
-        parser,
-        doc: Any,
-        **kwargs,
-    ) -> dict:
-    """Parse a Confident Cannabis COA PDF or URL.
-    Args:
-        doc (str or PDF): A PDF file path or pdfplumber PDF.
-    Returns:
-        (dict): The sample data.
-    """
-    if isinstance(doc, str):
-        if doc.startswith('http'):
-            return parse_cc_url(parser, doc, **kwargs)
-        elif doc.endswith('.pdf'):
-            return parse_cc_pdf(parser, doc, **kwargs)
-        else:
-            return parse_cc_pdf(parser, doc, **kwargs)
-    else:
-        return parse_cc_pdf(parser, doc, **kwargs)
-    ```
-2. Import the details for your lab / LIMS in `coas.py`, where your lab or LIMS details contain the following fields:
-    ```py
-    YOUR_FAVORITE_LIMS = {
-        'coa_algorithm': 'favorite.py',
-        'coa_algorithm_entry_point': 'parse_favorite_coa',
-        'lims': 'Your Favorite LIMS',
-        'url': 'https://cannlytics.com',
-    }
-    ```
-3. Add the lab details to the `LIMS` dictionary with the preferred name of your lab / LIMS as the key. For Example:
-    ```py
-    LIMS = {
-      'Your Favorite LIMS': YOUR_FAVORITE_LIMS,
-    }
-    ```
-
-You can use `COAdoc`'s built-in helper functions in your parsing algorithms.
-
-| Function | Description |
-|----------|-------------|
-| `decode_pdf_qr_code(page, img, resolution=300)` | Decode a PDF QR Code from a given image. |
-| `find_pdf_qr_code_url(pdf, image_index=None)` | Find the QR code given a COA PDF or page. If no `image_index` is provided, then all images are tried to be decoded until a QR code is found. If no QR code is found, then a `IndexError` is raised. |
-| `find_metrc_id(pdf)` | *Under Development* |
-| `get_metrc_results` | *Under Development* |
-| `get_pdf_creation_date(pdf)` | Get the creation date of a PDF in ISO format. |
-| `identify_lims(doc)` | Identify if a COA was created by a common LIMS. |
-
-Once you have created a function or functions to parse COAs for a new lab or LIMS, then you can create a pull request to have your algorithm reviewed and included in the main Cannlytics repository upon approval. Once published, your algorithm and the knowledge that it generates can be used to help parse COAs all around the world. As more and more COAs are parsed, the knowledge base will grow and grow. Now you have rich COA data, cleverly unlocked, continuously being polished, and ripe for your plundering.
+Analyte keys follow `cannlytics.constants`: `normalize_analyte_key`
+maps any label a lab uses (`'Δ9-THC'`, `'d9-THC'`) to one key
+(`'delta_9_thc'`).

@@ -7,7 +7,6 @@ All firebase_admin.auth calls are mocked.
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cannlytics.firebase.firebase_auth import (
     create_user,
@@ -26,7 +25,6 @@ from cannlytics.firebase.firebase_auth import (
     verify_session_cookie,
 )
 
-
 class TestCreateUser:
 
     @patch('cannlytics.firebase.firebase_auth.auth')
@@ -41,12 +39,34 @@ class TestCreateUser:
 
     @patch('cannlytics.firebase.firebase_auth.auth')
     @patch('cannlytics.firebase.firebase_auth.create_id', return_value='ulid123')
+    def test_no_photo_url_and_the_email_goes_nowhere_else(self, mock_id, mock_auth):
+        mock_auth.create_user.return_value = MagicMock(uid='ulid123')
+        create_user('Test', 'private@example.com')
+        kwargs = mock_auth.create_user.call_args.kwargs
+        assert 'photo_url' not in kwargs
+        assert [key for key, value in kwargs.items() if 'private@example.com' in str(value)] == ['email']
+
+    @patch('cannlytics.firebase.firebase_auth.auth')
+    @patch('cannlytics.firebase.firebase_auth.create_id', return_value='ulid123')
+    def test_email_in_use_returns_none(self, mock_id, mock_auth):
+        from firebase_admin.auth import EmailAlreadyExistsError
+        mock_auth.create_user.side_effect = EmailAlreadyExistsError('in use', cause=None, http_response=None)
+        assert create_user('Test', 'dupe@example.com') == (None, None)
+
+    @patch('cannlytics.firebase.firebase_auth.auth')
+    @patch('cannlytics.firebase.firebase_auth.create_id', return_value='ulid123')
+    def test_other_failures_are_logged_without_the_address(self, mock_id, mock_auth, caplog):
+        mock_auth.create_user.side_effect = ConnectionError('network down')
+        assert create_user('Test', 'secret@example.com') == (None, None)
+        assert 'ConnectionError' in caplog.text and 'secret@example.com' not in caplog.text
+
+    @patch('cannlytics.firebase.firebase_auth.auth')
+    @patch('cannlytics.firebase.firebase_auth.create_id', return_value='ulid123')
     def test_duplicate_email_returns_none(self, mock_id, mock_auth):
         mock_auth.create_user.side_effect = Exception('Email already exists')
         user, password = create_user('Test', 'dupe@example.com')
         assert user is None
         assert password is None
-
 
 class TestGetUser:
 
@@ -78,7 +98,6 @@ class TestGetUser:
         mock_auth.get_user_by_phone_number.side_effect = Exception()
         assert get_user('nonexistent') is None
 
-
 class TestGetUsers:
 
     @patch('cannlytics.firebase.firebase_auth.auth')
@@ -89,15 +108,13 @@ class TestGetUsers:
         users = get_users()
         assert len(users) == 2
 
-
 class TestUpdateUser:
 
     def test_updates_fields(self, mock_user):
         with patch('cannlytics.firebase.firebase_auth.auth') as mock_auth:
             mock_auth.update_user.return_value = mock_user
-            result = update_user(mock_user, {'display_name': 'New Name'})
+            update_user(mock_user, {'display_name': 'New Name'})
             mock_auth.update_user.assert_called_once()
-
 
 class TestDeleteUser:
 
@@ -106,7 +123,6 @@ class TestDeleteUser:
         delete_user('uid123')
         mock_auth.delete_user.assert_called_once_with('uid123')
 
-
 class TestPasswordResetLink:
 
     @patch('cannlytics.firebase.firebase_auth.auth')
@@ -114,7 +130,6 @@ class TestPasswordResetLink:
         mock_auth.generate_password_reset_link.return_value = 'https://reset.link'
         link = generate_password_reset_link('test@example.com')
         assert link == 'https://reset.link'
-
 
 class TestCustomClaims:
 
@@ -140,7 +155,6 @@ class TestCustomClaims:
         mock_get_user.return_value = MagicMock(custom_claims={'admin': True})
         claims = get_custom_claims('uid')
         assert claims == {'admin': True}
-
 
 class TestTokensAndSessions:
 

@@ -32,12 +32,8 @@ There are a number of useful constants in the `cannlytics.data.constants` submod
 | `camelcase(string)` | Turn a given string to CamelCase. |
 | `camel_to_snake(string)` | Turn a camel-case string to a snake-case string. This function handles CamelCase better than `snake_case`. The function does not do well with all caps, e.g. "APP_ID".|
 | `kebab_case(string)` | Turn a string into a kebab-case string. |
-| `format_billions(value)` | Format a number in billions. |
-| `format_millions(value)` | Format a number in millions. |
-| `format_thousands(value)` | Format a number in thousands. |
 | `get_keywords(string)` | Get keywords for a given string. |
 | `get_random_string(length, allowed_chars=RANDOM_STRING_CHARS)` | Return a securely generated random string. |
-| `sentence_case(string)` | Format a string as a sentence. |
 | `snake_case(string)` | Turn a given string to snake case. Handles CamelCase, replaces known special characters with preferred namespaces, replaces spaces with underscores, and removes all other nuisance characters. |
 | `strip_whitespace(string)` | Strip whitespace from a string. |
 
@@ -51,7 +47,6 @@ There are a number of useful constants in the `cannlytics.data.constants` submod
 
 | Function | Description |
 |----------|-------------|
-| `sandwich_list(a)` | Create a range that cycles from start to the end to the middle. |
 | `sorted_nicely(a)` | Sort the given iterable in the way that humans expect. |
 | `split_list(a, at_index=None)` | Split a list in half or at a given index. |
 
@@ -70,34 +65,20 @@ There are a number of useful constants in the `cannlytics.data.constants` submod
 | Function | Description |
 |----------|-------------|
 | `clean_column_strings(data, columns)` | Clean the column names of a given DataFrame. |
-| `end_of_period_timeseries(data, period='M')` | Convert a DataFrame from beginning-of-the-period to end-of-the-period timeseries. |
 | `nonzero_columns(data)` | Return the non-zero column names of a DataFrame. |
 | `nonzero_rows(data)` | Return the non-zero row keys of a DataFrame. |
-| `combine_columns(data, new_key, old_key, drop=True)` | Combine two numeric columns of a DataFrame. |
-| `reorder_columns(data, columns)` | Re-order a DataFrame given a specific order of columns. Remaining columns will be appended to the end of the DataFrame. |
-| `reverse_dataframe(data)` | Reverse the ordering of a DataFrame. |
-| `sum_columns(data, new_key, columns, drop=True)` | Sum multiple numeric columns of a DataFrame. |
 | `rmerge(left, right, **kwargs)` | Perform a merge using pandas with optional removal of overlapping column names not associated with the join. |
-| `set_training_period(series, date_start, date_end)` | Helper function to restrict a series to the desired training time period. |
 | `to_excel_with_style(data, file_name, index=False, sheet_name='Sheet1', style=None)` | Save a DataFrame to Excel with no style. |
 
 *Time Utilities*
 
 | Function | Description |
 |----------|-------------|
-| `convert_month_year_to_date(x)` | Convert a month, year series to datetime. E.g. `'April 2022'`. |
-| `end_of_month(value)` | Format a datetime as an ISO formatted date at the end of the month. |
-| `end_of_year(value)` | Format a datetime as an ISO formatted date at the end of the year. |
 | `format_iso_date(date, sep='/')` | Format a human-written date into an ISO formatted date. |
 | `get_timestamp(date, past=0, future=0, zone='utc)` | Get an ISO formatted timestamp. |
-| `months_elapsed(start, end)` | Calculate the months elapsed between two times, returning 0 if a negative time span. |
 
 *File Utilities*
 
 | Function | Description |
 |----------|-------------|
-| `decode_pdf(data, destination)` | Save an base-64 encoded string as a PDF. |
-| `encode_pdf(filename)` | Open a PDF file in binary mode. |
 | `get_directory_files(target_dir, file_type)` | Get all of the files of a specified type in a given directory. |
-| `get_number_of_lines(file_name, encoding='utf-16', errors='ignore')` | Read the number of lines in a large file. |
-| `unzip_files(zip_dir, extension='.zip')` | Unzip all files in a specified folder. Alternatively, pass a .zip file to extract that file. |
