@@ -23,7 +23,7 @@ build-backend = "setuptools.build_meta"
 name = "cannlytics"
 # The version lives in ONE place: `cannlytics/__init__.py`.
 dynamic = ["version"]
-description = "Simple cannabis analytics — COA parsing, data tools, and the Metrc API."
+description = "Simple cannabis analytics — COA parsing, data tools, and Metrc API access."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

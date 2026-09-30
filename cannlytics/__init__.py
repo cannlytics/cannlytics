@@ -37,7 +37,7 @@ import importlib
 from typing import TYPE_CHECKING
 
 __title__ = 'cannlytics'
-__version__ = '1.0.5'
+__version__ = '1.0.6.dev0'
 __author__ = 'Keegan Skeate <https://github.com/keeganskeate>'
 __license__ = 'MIT <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>'
 __copyright__ = 'Copyright (c) 2021-2026 Cannlytics'
