@@ -13,7 +13,11 @@ This module contains common Metrc models.
 from typing import Any, Callable, Optional
 
 # Internal imports.
-from ..firebase import get_document, update_document
+# NOTE: `cannlytics.firebase` is imported lazily inside `from_fb()` and
+# `to_fb()` below, NOT at module scope. Importing it here made the whole
+# Metrc client -- which the readme documents as core -- depend on the
+# optional [firebase] extra, so `pip install cannlytics` could not
+# `from cannlytics.metrc import Metrc`.
 from ..utils.utils import (
     camelcase,
     camel_to_snake,
@@ -25,8 +29,15 @@ from ..utils.utils import (
     update_dict,
 )
 
+class MissingAttributeError(AttributeError, KeyError):
+    """A model has no such property.
 
-class Model(object):
+    An ``AttributeError`` so that ``hasattr``, ``getattr`` with a
+    default, ``copy``, and ``pickle`` behave; also a ``KeyError``, which
+    is what this lookup raised before 1.0.0, so existing handlers hold.
+    """
+
+class Model:
     """Base class for all Metrc models."""
 
     def __init__(
@@ -44,7 +55,12 @@ class Model(object):
             self.__dict__[key] = properties[key]
 
     def __getattr__(self, key):
-        return self.__dict__[key]
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise MissingAttributeError(
+                f'{type(self).__name__!r} object has no attribute {key!r}'
+            ) from None
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
@@ -69,6 +85,7 @@ class Model(object):
         Returns:
             (Model): A Metrc model.
         """
+        from ..firebase import get_document
         data = get_document(ref)
         obj = cls(client, data)
         return obj
@@ -87,11 +104,11 @@ class Model(object):
         """
         data = vars(self).copy()
         [data.pop(x, None) for x in ['_license', 'client']]
+        from ..firebase import update_document
         if col:
             update_document(f'{col}/{self.uid}', data)
         else:
             update_document(ref, data)
-
 
 class Delivery(Model):
     """A class that represents a cannabis home delivery. Sales are reported to
@@ -156,7 +173,6 @@ class Delivery(Model):
         """Delete the receipt."""
         self.client.delete_receipt(self.id, self._license)
 
-
 class Category(Model):
     """A class representing an item category.
     ```js
@@ -191,7 +207,6 @@ class Category(Model):
     """
     pass
 
-
 class Employee(Model):
     """An organization's employee or team member.
     ```js
@@ -202,7 +217,6 @@ class Employee(Model):
     ```
     """
     pass
-
 
 class Facility(Model):
     """A Facility represents a building licensed for the growing, processing,
@@ -313,7 +327,6 @@ class Facility(Model):
         )
         return response
 
-
 class Item(Model):
     """Items are used to track a licensee's inventory at a given facility.
     Metrc documentation states:
@@ -405,7 +418,6 @@ class Item(Model):
         """Delete the item."""
         self.client.delete_item(self.id, self._license)
 
-
 LOCATION_FIELDS = {
     'name': 'Name',
     'location_type': 'LocationTypeName',
@@ -464,7 +476,6 @@ class Location(Model):
     def delete(self):
         """Delete the location."""
         self.client.delete_location(self.id)
-
 
 class Harvest(Model):
     """A class that represents a cannabis harvest. Metrc documentation states:
@@ -631,7 +642,6 @@ class Harvest(Model):
             "ActualDate": get_timestamp(zone=self.client.state)
         }
         self.client.move_harvest([data], license_number=self._license)
-
 
 class Package(Model):
     """A class that represents a cannabis package. Metrc documentation states:
@@ -883,7 +893,6 @@ class Package(Model):
         }]
         self.client.update_package_notes(data)
 
-
     def change_location(self, location):
         """Change the package's location.
         Args:
@@ -895,7 +904,6 @@ class Package(Model):
             'MoveDate': get_timestamp(zone=self.client.state)
         }]
         self.client.change_package_locations(data)
-
 
     def update_items(self, name='', names=[]):
         """Update the package's item.
@@ -919,7 +927,6 @@ class Package(Model):
                     'Item': item_name,
                 })
         self.client.change_package_items(data)
-
 
 class Patient(Model):
     """A class that represents a cannabis patient.
@@ -955,7 +962,6 @@ class Patient(Model):
     def delete(self):
         """Delete the patient."""
         self.client.delete_patient(self.id, self._license)
-
 
 class Plant(Model):
     """A class that represents a cannabis plant. Metrc documentation states:
@@ -1197,7 +1203,6 @@ class Plant(Model):
         )
         # TODO: Implement return_obs
 
-
 class PlantBatch(Model):
     """A class that represents a cannabis plant batch.
     ```js
@@ -1421,7 +1426,6 @@ class PlantBatch(Model):
         self.client.manage_batches([data], 'split', self._license)
         # TODO: Implement return_obs
 
-
 class LabResult(Model):
     """A class that represents a cannabis lab result. Metrc documentation
     states:
@@ -1455,7 +1459,6 @@ class LabResult(Model):
         context = self.to_dict()
         result = clean_dictionary(data, camelcase)
         self.client.release_lab_results([{**context, **result}], self._license)
-
 
 class Receipt(Model):
     """A class that represents a cannabis sale receipt. Sales are reported to
@@ -1531,7 +1534,6 @@ class Receipt(Model):
         """Delete the receipt."""
         self.client.delete_receipt(self.id, self._license)
 
-
 class Strain(Model):
     """A class that represents a cannabis strain.
     ```js
@@ -1562,7 +1564,6 @@ class Strain(Model):
     def delete(self):
         """Delete the strain."""
         self.client.delete_strain(self.id, license_number=self._license)
-
 
 class Transfer(Model):
     """A class that represents a cannabis transfer. Metrc documentation states:
@@ -1640,7 +1641,6 @@ class Transfer(Model):
         """Delete the transfer."""
         self.client.delete_transfer(self.id, self._license)
 
-
 class TransferTemplate(Model):
     """A class that represents a cannabis transfer template. The template can
     be copied to create other templates. Transfer templates can be used for
@@ -1676,7 +1676,6 @@ class TransferTemplate(Model):
     def delete(self):
         """Delete the transfer template."""
         self.client.delete_transfer_template(self.id, self._license)
-
 
 class Transaction(Model):
     """A class that represents a cannabis sale transaction. When you get a
@@ -1753,9 +1752,7 @@ class Transaction(Model):
         data = remove_dict_nulls(data)
         self.client.update_transactions([data], self._license)
 
-
 # TODO: Create a Job or ProcessingJob class.
-
 
 class Waste(Model):
     """A class that represents cannabis waste. Metrc documentation states:

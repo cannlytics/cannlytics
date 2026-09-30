@@ -1,0 +1,270 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║ Cannlytics — Simple Cannabis Analytics                           ║
+# ║ https://github.com/cannlytics/cannlytics                         ║
+# ╚══════════════════════════════════════════════════════════════════╝
+#
+# Install patterns:
+#   pip install cannlytics                    Core: Metrc, stats, utils, hashing, cache
+#   pip install "cannlytics[coa]"             + COA parsing (algorithms)
+#   pip install "cannlytics[coa,ai]"          + AI parsing and embeddings
+#   pip install "cannlytics[coa,ai,qr]"       + QR code scanning
+#   pip install "cannlytics[firebase]"        + Firebase / Firestore / API auth
+#   pip install "cannlytics[all]"             Every runtime extra
+
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+# ═══════════════════════════════════════════════════════════════════
+# Project Metadata
+# ═══════════════════════════════════════════════════════════════════
+
+[project]
+name = "cannlytics"
+# The version lives in ONE place: `cannlytics/__init__.py`.
+dynamic = ["version"]
+description = "Simple cannabis analytics — COA parsing, data tools, and the Metrc API."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [
+    { name = "Cannlytics", email = "dev@cannlytics.com" },
+    { name = "Keegan Skeate", email = "keegan@cannlytics.com" },
+]
+keywords = [
+    "cannabis",
+    "cannlytics",
+    "coa",
+    "certificate-of-analysis",
+    "analytics",
+    "data",
+    "embeddings",
+    "metrc",
+    "lab-results",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Typing :: Typed",
+]
+
+# ── Core Dependencies ────────────────────────────────────────────
+# Intentionally minimal: only what the base package needs to import.
+# Everything else is in [project.optional-dependencies].
+dependencies = [
+    # Lower bounds are the oldest versions the suite passes on (numpy 1.26
+    # with pandas 2.2; the website pins pandas 2.3, also tested).
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "python-dateutil",
+    "python-dotenv",
+    "requests",
+    # `zoneinfo` has no time zone database on Windows or in slim
+    # containers; without this, `get_timestamp(zone=...)` raises there.
+    "tzdata",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# Optional Dependencies
+# ═══════════════════════════════════════════════════════════════════
+
+[project.optional-dependencies]
+
+# COA Parsing (COAdoc) — algorithmic PDF parsing.
+coa = [
+    "pdfplumber>=0.10.0",
+    "Pillow>=10.0",
+]
+
+# AI-powered COA parsing and embeddings — multi-provider support.
+ai = [
+    "anthropic>=0.30",
+    "openai>=1.0",
+    "google-genai>=1.0",
+    # Required, not optional: without pydantic, schema.py leaves
+    # LabTestMetadata/LabAnalysis as None and ai_client.py silently
+    # falls back to free-text JSON extraction instead of constrained
+    # structured output. See cannlytics/data/coas/schema.py.
+    "pydantic>=2.0",
+    # Splits a PDF into pages, in memory, for document embeddings.
+    "pypdf>=3.0",
+]
+
+# QR code scanning — Python fallback decoder.
+# Note: The preferred decoder is qrustie (Rust binary, not pip-installed).
+qr = [
+    "pyzbar>=0.1.9",
+]
+
+# QR region-crop enhancement (OpenCV contour detection).
+qr-cv = [
+    "opencv-python>=4.0",
+]
+
+# Firebase / Google Cloud services.
+firebase = [
+    "firebase-admin>=6.0",
+    "google-cloud-secret-manager>=2.0",
+    "google-cloud-firestore>=2.0",
+]
+
+# Data science & analysis.
+science = [
+    "matplotlib>=3.0",
+    "scikit-learn>=1.0",
+    "scikit-image>=0.20",
+    "statsmodels>=0.14",
+    "pyarrow>=10.0",
+]
+
+# Web scraping.
+web = [
+    "beautifulsoup4>=4.0",
+    "selenium>=4.0",
+]
+
+# Miscellaneous utilities.
+utils = [
+    "datasets>=2.0",
+    "fredapi>=0.5",
+    "googlemaps>=4.0",
+    "openpyxl>=3.0",
+    # The Excel engine `to_excel_with_style` asks pandas for.
+    "XlsxWriter>=3.0",
+    "zipcodes>=1.2",
+]
+
+# Reading the published Parquet products (`cannlytics.datasets`).
+datasets = [
+    "pyarrow>=10.0",
+]
+
+# Every runtime extra. Self-referencing, so it can never drift from the
+# groups above. Excludes the test
+# and development tools, which no user of the library needs.
+all = [
+    "cannlytics[coa,ai,qr,qr-cv,firebase,science,web,utils,datasets]",
+]
+
+# Testing. Pulls in the extras the suite exercises, so that
+# `pip install -e ".[test]"` is the whole set-up.
+test = [
+    "cannlytics[coa,ai,firebase,science,datasets]",
+    "XlsxWriter>=3.0",
+    "beautifulsoup4>=4.0",
+    "openpyxl>=3.0",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "reportlab>=4.0",
+]
+
+# Development.
+dev = [
+    "cannlytics[test]",
+    "ruff>=0.4",
+    "build>=1.0",
+    "twine>=5.0",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# URLs
+# ═══════════════════════════════════════════════════════════════════
+
+[project.urls]
+Homepage = "https://cannlytics.com"
+Documentation = "https://github.com/cannlytics/cannlytics#readme"
+Repository = "https://github.com/cannlytics/cannlytics"
+Issues = "https://github.com/cannlytics/cannlytics/issues"
+Changelog = "https://github.com/cannlytics/cannlytics/blob/main/CHANGELOG.md"
+
+# ═══════════════════════════════════════════════════════════════════
+# Setuptools Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.setuptools.dynamic]
+version = { attr = "cannlytics.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["cannlytics", "cannlytics.*"]
+
+[tool.setuptools.package-data]
+cannlytics = ["py.typed", "**/*.md"]
+
+# ═══════════════════════════════════════════════════════════════════
+# Pytest Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short -ra --strict-markers"
+markers = [
+    "integration: marks tests as integration tests (require network)",
+    "slow: marks tests as slow running",
+    "fixtures: needs local COA PDF fixtures that are never distributed",
+]
+filterwarnings = [
+    # Our own mistakes fail the build ...
+    "error::SyntaxWarning",
+    "error::DeprecationWarning:cannlytics",
+    "error::ResourceWarning",
+    # ... while a dependency's deprecations are shown, not fatal.
+    "default::DeprecationWarning",
+    "default::PendingDeprecationWarning",
+]
+minversion = "7.0"
+
+# ═══════════════════════════════════════════════════════════════════
+# Coverage Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.coverage.run]
+source = ["cannlytics"]
+omit = [
+    "tests/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+]
+
+# ═══════════════════════════════════════════════════════════════════
+# Ruff (Linter) Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear: mutable defaults, bare excepts, shadowed loops
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "E741",   # ambiguous variable name
+]

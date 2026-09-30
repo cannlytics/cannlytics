@@ -370,7 +370,7 @@ The `Metrc` class has the following methods for managing plant batches.
 | `get_batches(uid='', action='active', license_number='', start='', end='')` | Get plant batches(s). Actions: `active`, `inactive`, `types`. | `/plantbatches/v1/` |
 | `manage_batches(data, action, license_number='', from_mother=False, return_obs=False)` | Manage plant batch(es) by applying a given action. Actions: `createplantings`, `createpackages`, `split`, `/create/packages/frommotherplant`, `changegrowthphase`, `additives`, `destroy`. | `/plantbatches/v1/` |
 | `create_plant_package_from_batch(data, license_number='', return_obs=False)` | Create a plant package from a batch. | `/plantbatches/v1/create/packages/frommotherplant` |
-| `move_batch(data, license_number='', return_obs=False)` | Move plant batch(es). | `/plantbatches/v1/moveplantbatches` |
+| `move_batches(data, license_number='', return_obs=False)` | Move plant batch(es). | `/plantbatches/v1/moveplantbatches` |
 | `split_batch(data, license_number='', return_obs=False)` | Split a given batch. | `/plantbatches/v1/split` |
 | `split_batches(data, license_number='', return_obs=False)` | Split multiple batches. | `/plantbatches/v1/split` |
 
@@ -583,7 +583,6 @@ The `Metrc` class has the following methods for managing packages.
 | `get_packages(uid='', label='', action='active', license_number='', start='', end='')` | Get package(s). Action: `active`, `onhold`, `inactive`, `types`, `adjust/reasons`. | `/packages/v1/` |
 | `create_packages(data, license_number='', qa=False, plantings=False, return_obs=False)` | Create packages. | `/packages/v1/create` |
 | `update_packages(data, license_number='', return_obs=False)` | Update packages. | `/packages/v1/update` |
-| `delete_package(uid, license_number='')` | Delete a package. | `/packages/v1/` |
 | `change_package_items(data, license_number='', return_obs=False)` | Update package items. | `/packages/v1/change/item` |
 | `change_package_locations(data, license_number='', return_obs=False)` | Update package item location(s). | `/packages/v1/change/locations` |
 | `manage_packages(data, action='adjust', license_number='', return_obs=False)` | Adjust package(s). Actions: `adjust`, `finish`, `unfinish`, `remediate`. | `/packages/v1/` |

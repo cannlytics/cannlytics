@@ -1,1020 +1,1330 @@
 """
-Parse SC Labs COAs
-Copyright (c) 2022-2023 Cannlytics
+Parse SC Labs COA — COA Doc Hybrid Algorithm (Offline-First)
+Copyright (c) 2022-2026 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
-    Candace O'Sullivan-Sutherland <https://github.com/candy-o>
 Created: 7/8/2022
-Updated: 12/26/2023
+Updated: 3/6/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
 
-    Tools to extract SC Labs test result data from COA PDFs and URLs.
-    URL data is extracted from SC Labs client portal: <https://client.sclabs.com/>.
+    Parse SC Labs COA PDFs directly from the PDF text and tables — no
+    network access required. This is the modernized offline-first engine
+    that extracts all data from the PDF itself using pdfplumber text
+    extraction, table extraction, and regex-based field parsing.
+
+    SC Laboratories California LLC is the largest cannabis testing lab
+    in California by COA volume (~52.8% of the CA corpus). They operate
+    from Santa Cruz, CA and test flower, concentrates, edibles,
+    pre-rolls, topicals, and other cannabis product types.
+
+    Identification:
+        SC Labs COAs contain 'sclabs.com' in the footer of every page:
+            "SC Laboratories California LLC. | 100 Pioneer Street, ..."
+        Also identifiable by:
+            - "Regulatory Compliance Testing" header
+            - "SC Labs" or "SC Laboratories" text
+            - "sclabs.com" URL
+            - License number: C8-0000013-LIC
+
+    Format notes:
+        * Page 1: Summary page with metadata, cannabinoid/terpene
+          totals, and safety analysis summary (pass/fail per analysis)
+        * Pages 2+: Detailed results in two-column layout
+        * Tables are proper PDF tables (pdfplumber extract_tables works)
+        * LOD/LOQ format: "X / Y" (space-slash-space)
+        * Results: numeric values, ND, <LOQ, or None
+        * Status: PASS or FAIL per analyte
+        * Action limits: "≥ LOD" (Category 1 pesticides) or numeric
+        * Edibles: cannabinoid results in mg/unit, no terpenes
+        * Flower: includes moisture %, dry-weight calculation
+        * Concentrates: includes terpene profile (39 tested)
+        * Two COA format eras:
+          - 2021-2022: "sc labs™" branding, slightly different layout
+          - 2023-2026: "SC Labs®" branding, standardized layout
 
 Data Points:
 
-    ✓ analyses
-    ✓ {analysis}_method
-    ✓ {analysis}_status
-    ✓ coa_urls
-    ✓ date_collected
-    ✓ date_tested
-    ✓ date_received
-    ✓ distributor
-    ✓ distributor_address
-    ✓ distributor_street
-    - distributor_city
-    - distributor_state
-    ✓ distributor_zipcode
-    ✓ distributor_license_number
-    ✓ images
-    ✓ lab_results_url
-    ✓ producer
-    ✓ producer_address
-    ✓ producer_street
-    ✓ producer_city
-    ✓ producer_state
-    ✓ producer_zipcode
-    ✓ producer_license_number
-    ✓ product_name
-    ✓ lab_id
-    ✓ product_type
-    ✓ batch_number
-    ✓ metrc_ids
-    - metrc_lab_id
-    ✓ metrc_source_id
-    ✓ product_size
-    ✓ serving_size
-    - servings_per_package
-    - sample_weight
-    ✓ results
-    ✓ status
-    ✓ total_cannabinoids
-    ✓ total_thc
-    ✓ total_cbd
-    ✓ total_cbg
-    ✓ total_thcv
-    ✓ total_cbc
-    ✓ total_cbdv
-    ✓ total_terpenes
-    ✓ sample_id (generated)
-    - strain_name (augmented)
-    ✓ lab
-    ✓ lab_image_url
-    ✓ lab_license_number
-    ✓ lab_address
-    ✓ lab_street
-    ✓ lab_city
-    ✓ lab_state
-    ✓ lab_zipcode
-    ✓ lab_phone
-    ✓ lab_email
-    ✓ lab_website
-    ✓ lab_latitude (augmented)
-    ✓ lab_longitude (augmented)
-
+    ✓ product_name, product_type
+    ✓ date_tested, date_received, date_collected
+    ✓ batch_number, batch_size, sample_size, unit_mass, serving_size
+    ✓ lab, lab_license_number, lab_address, lab_city, lab_state,
+      lab_zipcode, lab_phone, lab_website
+    ✓ producer, producer_license_number, producer_address
+    ✓ distributor, distributor_license_number, distributor_address
+    ✓ sample_id (lab's CoA ID / Sample ID)
+    ✓ total_thc, total_cbd, total_cannabinoids, total_terpenes
+    ✓ sum_of_cannabinoids
+    ✓ status (overall batch pass/fail)
+    ✓ analyses (list of analysis types)
+    ✓ results (list of analyte result dicts)
+    ✓ metrc_ids (Source Metrc UID)
+    ✓ moisture_content
+    ✓ coa_id (CoA ID from footer)
 """
-# Standard imports.
-from ast import literal_eval
-from datetime import datetime
+# Standard imports:
+import hashlib
 import json
 import re
-from time import sleep
-from typing import Any
-from urllib.parse import urljoin
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
-# External imports.
-from bs4 import BeautifulSoup
-import pandas as pd
+# External imports:
 import pdfplumber
-import requests
-
-# Internal imports.
-from cannlytics import __version__
-from cannlytics.data.data import (
-    create_hash,
-    create_sample_id,
-    find_first_value,
-    parse_data_block,
-)
-from cannlytics.utils.constants import (
-    ANALYSES,
-    ANALYTES,
-    DEFAULT_HEADERS,
-    STANDARD_FIELDS,
-    STANDARD_UNITS,
-)
-from cannlytics.utils.utils import (
-    convert_to_numeric,
-    snake_case,
-    strip_whitespace,
-)
 
 
-# It is assumed that the lab has the following details.
+# ── SC Labs Constants ──────────────────────────────────────────────
+
 SC_LABS = {
     'coa_algorithm': 'sclabs.py',
     'coa_algorithm_entry_point': 'parse_sc_labs_coa',
     'lims': 'SC Labs',
-    'url': 'https://client.sclabs.com',
+    'url': 'https://sclabs.com',
     'lab': 'SC Labs',
-    'lab_image_url': 'https://www.sclabs.com/wp-content/uploads/2020/11/sc-labs-logo-white.png',
-    'lab_email': 'info@sclabs.com',
     'lab_website': 'https://sclabs.com',
+    'lab_phone': '(866) 435-0709',
+    'lab_email': 'info@sclabs.com',
+    'lab_address': '100 Pioneer Street, Suite E, Santa Cruz, CA 95060',
+    'lab_street': '100 Pioneer Street, Suite E',
+    'lab_city': 'Santa Cruz',
+    'lab_state': 'CA',
+    'lab_zipcode': '95060',
+    'lab_license_number': 'C8-0000013-LIC',
 }
 
-# It is assumed that the CoA has the following parameters.
-SC_LABS_COA = {
-    'coa_distributor_area': '(205, 150, 400, 230)',
-    'coa_producer_area': '(0, 150, 204.0, 230)',
-    'coa_page_area': [
-        '(0, 80, 305, 720)',
-        '(305, 80, 612, 720)',
-    ],
-    'coa_sample_details_area': [
-        '(0, 225, 200, 350)',
-        '(200, 225, 400, 350)',
-    ],
+# Standard analysis name mappings for SC Labs section headers.
+ANALYSIS_SECTION_MAP = {
+    'cannabinoid': 'cannabinoids',
+    'terpenoid': 'terpenes',
+    'terpene': 'terpenes',
+    'category 1 pesticide': 'pesticides',
+    'category 2 pesticide': 'pesticides',
+    'pesticide': 'pesticides',
+    'mycotoxin': 'mycotoxins',
+    'category 1 residual solvent': 'residual_solvents',
+    'category 2 residual solvent': 'residual_solvents',
+    'residual solvent': 'residual_solvents',
+    'heavy metal': 'heavy_metals',
+    'microbiology': 'microbials',
+    'microbial impurities': 'microbials',
+    'foreign material': 'foreign_matter',
+    'water activity': 'water_activity',
+    'moisture': 'moisture',
 }
 
+# Standard units per analysis type.
+STANDARD_UNITS = {
+    'cannabinoids': 'percent',
+    'terpenes': 'mg/g',
+    'pesticides': 'ug/g',
+    'heavy_metals': 'ug/g',
+    'microbials': 'cfu/g',
+    'mycotoxins': 'ug/kg',
+    'residual_solvents': 'ug/g',
+    'foreign_matter': '',
+    'water_activity': 'aw',
+    'moisture': 'percent',
+}
 
-def parse_sc_labs_coa(
-        parser,
-        doc: Any,
-        **kwargs,
-    ) -> dict:
-    """Parse a SC Labs COA URL or PDF.
-    Args:
-        doc (str or PDF): A URL or a PDF file path or a PDF object.
-    Returns:
-        (dict): The extracted data.
+# Analyte key standardization map (display name -> snake_case key).
+ANALYTE_KEY_MAP = {
+    # Cannabinoids
+    'Δ9-THC': 'delta_9_thc',
+    '∆9-THC': 'delta_9_thc',
+    'Δ8-THC': 'delta_8_thc',
+    '∆8-THC': 'delta_8_thc',
+    'Δ9THC': 'delta_9_thc',
+    'Δ8THC': 'delta_8_thc',
+    'THCa': 'thca',
+    'THCVa': 'thcva',
+    'THCV': 'thcv',
+    'CBDa': 'cbda',
+    'CBD': 'cbd',
+    'CBDVa': 'cbdva',
+    'CBDV': 'cbdv',
+    'CBGa': 'cbga',
+    'CBG': 'cbg',
+    'CBCa': 'cbca',
+    'CBC': 'cbc',
+    'CBN': 'cbn',
+    'CBL': 'cbl',
+
+    # Terpenes
+    'β-Caryophyllene': 'beta_caryophyllene',
+    'β Caryophyllene': 'beta_caryophyllene',
+    'β-Pinene': 'beta_pinene',
+    'β Pinene': 'beta_pinene',
+    'β-Ocimene': 'beta_ocimene',
+    'β Ocimene': 'beta_ocimene',
+    'α-Humulene': 'alpha_humulene',
+    'α Humulene': 'alpha_humulene',
+    'α-Pinene': 'alpha_pinene',
+    'α Pinene': 'alpha_pinene',
+    'α-Bisabolol': 'alpha_bisabolol',
+    'α Bisabolol': 'alpha_bisabolol',
+    'α-Terpinene': 'alpha_terpinene',
+    'α Terpinene': 'alpha_terpinene',
+    'α-Phellandrene': 'alpha_phellandrene',
+    'α Phellandrene': 'alpha_phellandrene',
+    'α-Cedrene': 'alpha_cedrene',
+    'α Cedrene': 'alpha_cedrene',
+    'γ-Terpinene': 'gamma_terpinene',
+    'γ -Terpinene': 'gamma_terpinene',
+    'γ Terpinene': 'gamma_terpinene',
+    'Δ3-Carene': 'delta_3_carene',
+    '∆3-Carene': 'delta_3_carene',
+    '3 Carene': 'delta_3_carene',
+    'trans-β-Farnesene': 'trans_beta_farnesene',
+    'trans-β- Farnesene': 'trans_beta_farnesene',
+    'Caryophyllene Oxide': 'caryophyllene_oxide',
+    'Sabinene Hydrate': 'sabinene_hydrate',
+    'Geranyl Acetate': 'geranyl_acetate',
+    'p-Cymene': 'p_cymene',
+    '(-)-Isopulegol': 'isopulegol',
+    'R-(+)-Pulegone': 'pulegone',
+    'Piperonyl Butoxide': 'piperonyl_butoxide',
+    'Piperonylbu- toxide': 'piperonyl_butoxide',
+    'Piperonylbutoxide': 'piperonyl_butoxide',
+
+    # Pesticides (common multi-word / hyphenated names)
+    'Dichlorvos (DDVP)': 'dichlorvos',
+    'DDVP (Dichlorvos)': 'dichlorvos',
+    'Dichloromethane (Methylene Chloride)': 'dichloromethane',
+    'Methylene chloride': 'dichloromethane',
+    'Pentachloronitrobenzene (Quintozene)*': 'pentachloronitrobenzene',
+    'Pentachloronitrobenzene*': 'pentachloronitrobenzene',
+    'Pentachloronitro- benzene*': 'pentachloronitrobenzene',
+    'Chlorantranilip- role': 'chlorantraniliprole',
+    'Chlorantraniliprole': 'chlorantraniliprole',
+    'Parathion-methyl': 'parathion_methyl',
+    'Methyl parathion': 'parathion_methyl',
+    'Kresoxim-methyl': 'kresoxim_methyl',
+    'Ethoprop(hos)': 'ethoprophos',
+    'Ethoprophos': 'ethoprophos',
+    'Piperonyl Butoxide': 'piperonyl_butoxide',
+
+    # Residual solvents
+    '2-Propanol (Isopropyl Alcohol)': 'isopropyl_alcohol',
+    'Isopropyl Alcohol': 'isopropyl_alcohol',
+    '1,2-Dichloroethane': 'dichloroethane_1_2',
+    'Ethyl Acetate': 'ethyl_acetate',
+    'Ethyl Ether': 'ethyl_ether',
+    'Ethylene Oxide': 'ethylene_oxide',
+    'Total Xylenes': 'total_xylenes',
+    'n-Butane': 'n_butane',
+    'Butane': 'n_butane',
+    'n-Heptane': 'n_heptane',
+    'Heptane': 'n_heptane',
+    'n-Hexane': 'n_hexane',
+    'Hexane': 'n_hexane',
+    'n-Pentane': 'n_pentane',
+    'Pentane': 'n_pentane',
+
+    # Mycotoxins
+    'Aflatoxin B1': 'aflatoxin_b1',
+    'Aflatoxin B2': 'aflatoxin_b2',
+    'Aflatoxin G1': 'aflatoxin_g1',
+    'Aflatoxin G2': 'aflatoxin_g2',
+    'Total Aflatoxin': 'total_aflatoxin',
+    'Ochratoxin A': 'ochratoxin_a',
+
+    # Heavy metals
+    'Arsenic': 'arsenic',
+    'Cadmium': 'cadmium',
+    'Lead': 'lead',
+    'Mercury': 'mercury',
+
+    # Microbiology
+    'Aspergillus flavus': 'aspergillus_flavus',
+    'Aspergillus fumigatus': 'aspergillus_fumigatus',
+    'Aspergillus niger': 'aspergillus_niger',
+    'Aspergillus terreus': 'aspergillus_terreus',
+    'Salmonella spp.': 'salmonella_spp',
+    'Shiga toxin-producing Escherichia coli': 'stec',
+
+    # Foreign material
+    'Hair Count': 'hair_count',
+    'Insect Fragment Count': 'insect_fragment_count',
+    'Mammalian Excreta Count': 'mammalian_excreta_count',
+    'Total Sample Area Covered by an Imbedded Foreign Material': 'imbedded_foreign_material',
+    'Total Sample Area Covered by Mold': 'mold_coverage',
+    'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'sand_soil_coverage',
+
+    # Water activity
+    'Water Activity': 'water_activity',
+}
+
+# Known non-analyte keywords to skip in table parsing.
+SKIP_PATTERNS = {
+    'SUM OF CANNABINOIDS', 'TOTAL CANNABINOIDS', 'TOTAL TERPENOIDS',
+    'TOTAL THC', 'TOTAL CBD', 'TOTAL CBG', 'TOTAL THCV', 'TOTAL CBC',
+    'TOTAL CBDV', 'TOTAL CBDV', 'UNIT MASS',
+    'Δ9-THC per Unit', '∆9-THC per Unit', 'Δ9THC per Unit',
+    'Total THC per Unit', 'Total CBD per Unit',
+    'CBD per Unit', 'Total THC per Serving',
+    'Total CBD per Serving', 'Δ9-THC per Serving',
+    '∆9-THC per Serving',
+    'Sum of Cannabinoids per Unit', 'Sum of Cannabinoids per Serving',
+    'Total Cannabinoids per Unit', 'Total Cannabinoids per Serving',
+    'CBD per Serving',
+    'COMPOUND', 'Continued on next page',
+}
+
+# Known analysis section header patterns in SC Labs results pages.
+SECTION_HEADER_RE = re.compile(
+    r'(CANNABINOID|TERPENOID|TERPENE|'
+    r'CATEGORY\s+\d\s+PESTICIDE|'
+    r'MYCOTOXIN|'
+    r'CATEGORY\s+\d\s+RESIDUAL\s+SOLVENT|'
+    r'HEAVY\s+METAL|'
+    r'MICROBIOLOGY|MICROBIAL\s+IMPURITIES|'
+    r'FOREIGN\s+MATERIAL|'
+    r'WATER\s+ACTIVITY|'
+    r'MOISTURE)\s+TEST\s+RESULT',
+    re.IGNORECASE,
+)
+
+
+# ── Utility Functions ──────────────────────────────────────────────
+
+def _snake_case(text: str) -> str:
+    """Convert analyte display name to snake_case key.
+
+    Uses ANALYTE_KEY_MAP for exact matches first, then falls back
+    to regex normalization for unknown analytes.
     """
+    stripped = text.strip()
+    # Exact match.
+    if stripped in ANALYTE_KEY_MAP:
+        return ANALYTE_KEY_MAP[stripped]
+    # Try with common cleanup.
+    cleaned = re.sub(r'\s+', ' ', stripped)
+    if cleaned in ANALYTE_KEY_MAP:
+        return ANALYTE_KEY_MAP[cleaned]
+    # Fallback: normalize to snake_case.
+    s = stripped.lower().strip()
+    # Greek letter normalization.
+    s = s.replace('α', 'alpha_').replace('β', 'beta_')
+    s = s.replace('γ', 'gamma_').replace('δ', 'delta_')
+    s = s.replace('∆', 'delta_')
+    # Remove asterisks, parenthetical notes.
+    s = re.sub(r'\*+$', '', s)
+    s = re.sub(r'\([^)]*\)', '', s)
+    # Replace non-alphanumeric with underscore.
+    s = re.sub(r'[^a-z0-9]+', '_', s)
+    s = re.sub(r'_+', '_', s)
+    s = s.strip('_')
+    return s
+
+
+def _parse_number(text: str) -> Optional[float]:
+    """Parse a numeric string. Returns None for ND/<LOQ/NT, float otherwise."""
+    if not text or not isinstance(text, str):
+        return None
+    text = text.strip()
+    upper = text.upper()
+    if upper in ('ND', 'N/A', 'NT', '', '-', 'NONE', 'N D', 'N/T'):
+        return None
+    if '<LOQ' in upper or '<LOD' in upper or '<' in upper:
+        return None
+    # Remove PASS/FAIL suffixes.
+    text = re.sub(r'\s*(PASS|FAIL)\s*$', '', text, flags=re.IGNORECASE).strip()
+    # Remove unit suffixes.
+    text = re.sub(
+        r'\s*(mg/g|mg/unit|mg/serving|%|µg/g|µg/kg|ug/g|ug/kg|ppm|ppb|cfu/g|aw|mg)\s*$',
+        '', text, flags=re.IGNORECASE,
+    ).strip()
+    # Remove commas.
+    text = text.replace(',', '')
+    # Handle ± (take only the main value before ±).
+    if '±' in text:
+        text = text.split('±')[0].strip()
     try:
-        data = parse_sc_labs_url(parser, doc, **kwargs)
-    except (AttributeError, ConnectionError):
-        data = parse_sc_labs_pdf(parser, doc, **kwargs)
-        data['public'] = False
-        if isinstance(doc, str):
-            data['coa_pdf'] = doc.replace('\\', '/').split('/')[-1]
-        elif isinstance(doc, pdfplumber.pdf.PDF):
-            data['coa_pdf'] = doc.stream.name.replace('\\', '/').split('/')[-1]
-    return data
+        return float(text)
+    except (ValueError, TypeError):
+        return None
 
 
-def parse_sc_labs_url(
-        parser,
-        doc='',
-        headers=None,
-        **kwargs,
-    ) -> dict:
-    """Parse a SC Labs COA URL.
+def _parse_date(text: str) -> str:
+    """Parse a date string to ISO format (YYYY-MM-DD)."""
+    if not text or not isinstance(text, str):
+        return ''
+    text = text.strip()
+    # Try common SC Labs date formats.
+    for fmt in ('%m/%d/%Y', '%m/%d/%y', '%Y-%m-%d', '%b %d, %Y', '%B %d, %Y'):
+        try:
+            return datetime.strptime(text, fmt).strftime('%Y-%m-%d')
+        except ValueError:
+            continue
+    return text
+
+
+def _parse_lod_loq(text: str) -> Tuple[Optional[float], Optional[float]]:
+    """Parse a LOD/LOQ string like '0.03 / 0.08' or '0.03/0.08'."""
+    if not text or '/' not in text:
+        return None, None
+    parts = text.strip().split('/')
+    try:
+        lod = float(parts[0].strip())
+        loq = float(parts[1].strip())
+        return lod, loq
+    except (ValueError, IndexError):
+        return None, None
+
+
+def _clean_text(text: str) -> str:
+    """Clean null bytes and normalize whitespace in extracted text."""
+    if not text:
+        return ''
+    # Remove null bytes (from ligature garbling).
+    text = text.replace('\x00', '')
+    # Normalize whitespace.
+    text = re.sub(r'[ \t]+', ' ', text)
+    return text.strip()
+
+
+def _is_skip_row(name: str) -> bool:
+    """Check if a table row name should be skipped (not an analyte)."""
+    if not name:
+        return True
+    cleaned = name.strip()
+    # Skip exact matches.
+    for pattern in SKIP_PATTERNS:
+        if pattern.lower() in cleaned.lower():
+            return True
+    # Skip rows starting with per-unit/per-serving patterns.
+    if re.match(r'(Δ|∆|Total|Sum|CBD|THC).*per\s+(Unit|Serving|package)', cleaned, re.IGNORECASE):
+        return True
+    # Skip if it's just a header row.
+    if cleaned.upper() == 'COMPOUND':
+        return True
+    return False
+
+
+# ── Metadata Parsing Functions ─────────────────────────────────────
+
+def _parse_front_page_metadata(text: str, page=None) -> Dict:
+    """Parse all metadata from the front page text.
+
     Args:
-        doc (str): A lab results URL or lab ID.
-        headers (dict): Headers for the HTTP request (optional).
-    Returns:
-        (dict): A dictionary of sample details.
+        text: Full extracted text from page 1.
+        page: Optional pdfplumber page object for bbox cropping
+              (needed for producer/distributor two-column extraction).
     """
-
-    # Get the sample page, using either the passed URL or sample ID.
-    base_url = SC_LABS['url']
-    if doc.startswith(base_url):
-        url = doc
-    else:
-        if headers is None:
-            headers = DEFAULT_HEADERS
-        url = urljoin(base_url, f'verify/{doc}/')
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Get the bulk of the details.
-    els = soup.find_all('p', attrs={'class': 'sdp-summary-data'})
-    obs = parse_data_block(els)
-
-    # Get the product name.
-    obs['product_name'] = soup.find('h2').text
-
-    # Get the lab details.
-    lab_details = soup.find('div', class_='sdp-sample-desc-legal')
-    if lab_details:
-        lab_text = lab_details.find_all('p')[-1].text.strip()
-        values = lab_text.split(' | ')
-        address = values[1].split(', ')
-        obs['lab_phone'] = values[2]
-        obs['lab_street'] = ', '.join(address[0:-2])
-        obs['lab_city'] = address[-2]
-        obs['lab_state'] = address[-1].split(' ')[0]
-        obs['lab_zipcode'] = address[-1].split(' ')[1]
-        obs['lab_address'] = ', '.join(address)
-        try:
-            obs['lab_license_number'] = values[4]
-        except IndexError:
-            obs['lab_license_number'] = ''
-
-    # Format the distributor address.
-    try:
-        address = obs.get('address', '').split('*')[-1].strip()
-        obs['distributor_address'] = address
-        obs['distributor_city'] = address.split(',')[0]
-        obs['distributor_zipcode'] = address.split(' ')[-1]
-    except TypeError:
-        obs['distributor_address'] = ''
-        obs['distributor_city'] = ''
-        obs['distributor_zipcode'] = ''
-
-    # Get the producer details.
-    try:
-        el = soup.find('div', attrs={'id': 'cultivator-details'})
-        producer_details = parse_data_block(el)
-        obs['producer'] = producer_details['business_name']
-        obs['producer_license_number'] = producer_details['license_number']
-    except:
-        producer_details = {'address': obs['address']}
-        obs['producer'] = obs.get('business_name')
-        obs['producer_license_number'] = obs.get('license_number')
-        obs.pop('business_name', None)
-        obs.pop('license_number', None)
-    
-    # Get the producer URL.
-    samples_button = soup.find('a', string='See all samples')
-    if samples_button:
-        href = samples_button['href']
-        producer_url = urljoin(base_url, href)
-        obs['producer_url'] = producer_url
-
-    # Try to get the producer if not found.
-    if not obs['producer'] and samples_button:
-        try:
-            response = requests.get(producer_url, headers=headers)
-            producer_soup = BeautifulSoup(response.content, 'html.parser')
-            obs['producer'] = producer_soup.find('h2').text
-        except:
-            pass
-
-    # If the producer is still not found, then delete that field.
-    if not obs['producer']:
-        del obs['producer']
-
-    # Format the producer address.
-    try:
-        address = producer_details['address'].split('*')[-1].strip()
-        obs['producer_address'] = address
-        obs['producer_city'] = address.split(',')[0]
-        obs['producer_zipcode'] = address.split(' ')[-1]
-    except TypeError:
-        obs['producer_address'] = ''
-        obs['producer_city'] = ''
-        obs['producer_zipcode'] = ''
-
-    # Remove the `address` field to avoid confusion.
-    try:
-        del obs['address']
-    except KeyError:
-        pass
-
-    # Get the producer image.
-    el = soup.find('div', attrs={'id': 'clientprofileimage'})
-    obs['producer_image_url'] = strip_whitespace(el.find('img')['src'])
-
-    # Get the producer URL.
-    links = soup.find_all('a', attrs={'class': 'greybutton'})
-    for link in links:
-        href = link['href']
-        if 'sample' in href:
-            sample_number = href.split('sample/')[-1].split('/')[0]
-            obs['sample_number'] = sample_number
-            obs['coa_urls'] = [{
-                'url': urljoin(url, href),
-                'filename': f'{sample_number}.pdf',
-            }]
-        elif 'client' in href:
-            obs['producer_url'] = urljoin(url, href)
-
-    # Get the Metrc IDs.
-    try:
-        metrc_ids = obs['source_metrc_uid'].split(',')
-        obs['metrc_ids'] = [x.strip() for x in metrc_ids]
-    except KeyError:
-        obs['metrc_ids'] = []
-
-    # Get the product type.
-    try:
-        attributes = {'class': 'sdp-producttype'}
-        obs['product_type'] = soup.find('p', attrs=attributes).text
-    except AttributeError:
-        obs['product_type'] = 'Unknown'
-
-    # Get the image.
-    try:
-        attributes = {'data-popup': 'fancybox'}
-        image_url = soup.find('a', attrs=attributes)['href']
-        obs['images'] = [{
-            'url': image_url,
-            'filename': image_url.split('/')[-1],
-        }]
-    except TypeError:
-        obs['images'] = []
-
-    # Get the date tested.
-    try:
-        el = soup.find('div', attrs={'class': 'sdp-masthead-data'})
-        mm, dd, yyyy = el.find('p').text.split('/')
-        obs['date_tested'] = '-'.join([yyyy, mm, dd])
-    except:
-        obs['date_tested'] = ''
-
-    # Get the overall status: Pass / Fail.
-    try:
-        status = soup.find('p', attrs={'class': 'sdp-result-pass'}).text
-        obs['status'] = status.replace('\n', '').strip()
-    except AttributeError:
-        try:
-            status = soup.find('p', attrs={'class': 'sdp-result-fail'}).text
-            obs['status'] = status.replace('\n', '').strip()
-        except AttributeError:
-            obs['status'] = ''
-
-    # Format the dates.
-    try:
-        mm, dd, yyyy = obs['date_collected'].split('/')
-        obs['date_collected'] = '-'.join([yyyy, mm, dd]) 
-    except:
-        obs['date_collected'] = ''
-    try:
-        mm, dd, yyyy = obs['date_received'].split('/')
-        obs['date_received'] = '-'.join([yyyy, mm, dd])
-    except:
-        obs['date_received'] = ''
-    
-    # Rename desired fields.
-    # Note: There may be a better way to do this.
-    rename = {}
-    for key, value in obs.items():
-        try:
-            standard_field = STANDARD_FIELDS[key]
-            rename[standard_field] = value
-        except KeyError:
-            rename[key] = value
-    obs = rename
-
-    # Get the CoA ID.
-    try:
-        attributes = {'class': 'coa-id'}
-        obs['coa_id'] = soup.find('p', attrs=attributes).text \
-            .split(':')[-1]
-    except AttributeError:
-        obs['coa_id'] = ''
-
-    # Remove any keys that begin with a digit.
-    for key in list(obs.keys()):
-        if not key or key[0].isdigit():
-            del obs[key]
-
-    # Optional: Try to get sample_weight.
-
-    # Get all of the analyses and results.
-    analyses = []
-    results = []
-    processing = False
-    notes = None
-    cards = soup.find_all('div', attrs={'class': 'analysis-container'})    
-    for card in cards:
-
-        # Get the analysis.
-        analysis = card.find('h4').text
-        if 'Notes' in analysis:
-            div = card.find('div', attrs={'class': 'section-inner'})
-            notes = div.find('p').text
-        if 'Analysis' not in analysis:
-            continue
-        analysis = snake_case(analysis.split(' Analysis')[0])
-        analysis = ANALYSES.get(analysis, analysis)
-        analyses.append(analysis)
-
-        # Skip analyses that are being processed.
-        if 'Processing' in card.text:
-            processing = True
-            continue
-
-        # Get the method for the analysis.
-        bold = card.find('b')
-        method = bold.parent.text.replace('Method: ', '')
-        key = '_'.join([analysis, 'method'])
-        obs[key] = method
-
-        # Get analysis result values: value, units, margin_of_error, lod, loq.
-        # Note: Skip cannabinoids edible table and get size fields for edibles.
-        if analysis == 'cannabinoids':
-            tables = [card.find('table')]
-            title = card.find('h5', string='Unit Mass:')
-            if title:
-                obs['product_size'] = title.find_next('p').text
-            title = card.find('h5', string='Serving Size:')
-            if title:
-                obs['serving_size'] = title.find_next('p').text
-        else:
-            tables = card.find_all('table')
-        for table in tables:
-            rows = table.find_all('tr')
-            for row in rows[1:]:
-                cells = row.find_all('td')
-                result = {}
-                for cell in cells:
-                    key = cell['class'][0].replace('table-', '')
-                    key = STANDARD_FIELDS.get(key, key)
-                    value = cell.text.replace('\n', '').strip()
-                    result[key] = value
-                result['analysis'] = analysis
-                results.append(result)
-
-    # Parse legacy results if no results collected at this stage.
-    if not results and not processing:
-
-        # Get details.
-        try:
-            el = soup.find('div', attrs={'id': 'detailQuickView'})
-            items = el.find_all('li')
-            mm, dd, yyyy = items[0].text.split(': ')[-1].split('-')
-            obs['date_tested'] = f'{yyyy}-{mm}-{dd}'
-            obs['product_type'] = items[-1].text.split(': ')[-1]
-        except:
-            pass
-
-        # Get analysis cards.
-        try:
-            cards = soup.find_all('div', attrs={'class': 'detail-row'})
-        except:
-            cards = []
-        for card in cards:
-            
-            # Get the analysis.
-            try:
-                title = card.find('h3').text.lower()
-            except:
-                continue
-            if 'not tested' in title:
-                continue
-            text = title.split('test')[0]
-            analysis = snake_case(strip_whitespace(text))
-            if analysis == 'label_claims':
-                continue
-            analysis = SC_LABS_COA['analyses'].get(analysis, analysis)
-
-            # Get the method for the analysis.
-            method = card.find('p').text
-            key = '_'.join([analysis, 'method'])
-            obs[key] = method
-
-            # Get analysis result values: value, units, margin_of_error, lod, loq.
-            table = card.find('table')
-            rows = table.find_all('tr')
-            if rows:
-                for row in rows[1:]:
-                    cells = row.find_all('td')
-                    result = {}
-                    for cell in cells:
-                        key = cell['class'][0].replace('table-', '')
-                        key = STANDARD_FIELDS.get(key, key)
-                        value = cell.text.replace('\n', '').strip()
-                        result[key] = value
-                    result['analysis'] = analysis
-                    results.append(result)
-
-    # Separate `lod` and `loq`.
-    lod_loq_values = [x['lodloq'].split(' / ') if x.get('lodloq') else None for x in results]
-    for i, values in enumerate(lod_loq_values):
-        if values is not None:
-            result = results[i]
-            result['lod'] = values[0]
-            result['loq'] = values[1]
-            del result['lodloq']
-            results[i] = result
-
-    # Clean results.
-    cleaned_results = []
-    for result in results:
-
-        # Assign a `key` for the analyte.
-        analyte = snake_case(result['name'])
-        result_key = parser.analytes.get(analyte, analyte)
-
-        # Skip the result if the key is 'sum_of_cannabinoids'.
-        if result_key == 'sum_of_cannabinoids' or result_key == 'total_thc':
-            continue
-
-        # Clean the margin of error.
-        try:
-            margin = result['margin_of_error'].replace('±', '')
-            result['margin_of_error'] = convert_to_numeric(margin)
-        except KeyError:
-            pass
-
-        # Parse `units` from `value`. E.g. '71.742%'.
-        value = result.get('value', '')
-        result['value'] = re.sub('[^\d\.]', '', value)
-        result['units'] = re.sub('[\d\.]', '', value)
-        result['units'] = result['units'].replace('%', 'percent')
-
-        # Try to ensure that the result values are numbers.
-        result['value'] = convert_to_numeric(result['value'])
-        result['mg_g'] = convert_to_numeric(result.get('mg_g'))
-        result['lod'] = convert_to_numeric(result.get('lod'))
-        result['loq'] = convert_to_numeric(result.get('loq'))
-        result['limit'] = convert_to_numeric(result.get('limit'))
-        result['key'] = result_key
-
-        # Update the result.
-        cleaned_results.append(result)
-
-    # Update the results.
-    results = cleaned_results
-    if not results:
-        results = []
-
-    # Clean `total_{analyte}`s and `sum_of_cannabinoids`.
-    columns = [x for x in obs.keys() if x.startswith('total_') or x.startswith('sum_')]
-    for key in columns:
-        obs[key] = convert_to_numeric(obs[key], strip=True)
-
-    # Lowercase `{analysis}_status`
-    columns = [x for x in obs.keys() if x.endswith('_status')]
-    for key in columns:
-        obs[key] = obs[key].lower()
-
-    # Try to separate `batch_units` from `batch_size`.
-    try:
-        obs['batch_size'], obs['batch_units'] = tuple(obs['batch_size'].split(' '))
-    except:
-        pass
-
-    # Turn dates to ISO format.
-    date_columns = [x for x in obs.keys() if x.startswith('date')]
-    for date_column in date_columns:
-        try:
-            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
-        except:
-            pass
-
-    # Return the sample details with a new or re-minted `sample_id`.
-    obs = { **SC_LABS, **obs}
-    obs['analyses'] = analyses
-    obs['coa_algorithm_version'] = __version__
-    obs['coa_parsed_at'] = datetime.now().isoformat()
-    # FIXME: The `lab_results_url` is nan.
-    obs['lab_results_url'] = url
-    obs['notes'] = notes
-    obs['results'] = results
-    obs['results_hash'] = create_hash(results)
-    obs['sample_id'] = create_sample_id(
-        private_key=json.dumps(results),
-        public_key=obs['product_name'],
-        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
-    )
-    obs['sample_hash'] = create_hash(obs)
-    return obs
-
-
-def parse_sc_labs_pdf(parser, doc: Any, **kwargs) -> dict:
-    """Parse a SC Labs CoA PDF.
-    Args:
-        doc (str or PDF): A PDF file path or pdfplumber PDF.
-    Returns:
-        (dict): The sample data.
-    """
-    # Read the PDF.
-    if isinstance(doc, str):
-        report = pdfplumber.open(doc)
-    else:
-        report = doc
-
-    # Get the lab-specific CoA page areas, standard analyses and analytes.
     obs = {}
-    coa_parameters = SC_LABS_COA
-    distributor_area = literal_eval(coa_parameters['coa_distributor_area'])
-    producer_area = literal_eval(coa_parameters['coa_producer_area'])
-    sample_details_area = coa_parameters['coa_sample_details_area']
+    lines = text.split('\n')
 
-    # Get producer details.
-    front_page = report.pages[0]
-    crop = front_page.within_bbox(producer_area)
-    details = crop.extract_text().replace('\n', '')
-    address = details.split('Address:')[-1].strip()
-    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
-    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
-    parts = address.split(',')
-    street = parts[0]
-    subparts = parts[-1].strip().split(' ')
-    city = ' '.join(subparts[:-2])
-    try:
-        state, zipcode = subparts[-2], subparts[-1]
-    except IndexError:
-        state, zipcode = '', ''
-    obs['producer'] = business
-    obs['producer_address'] = address
-    obs['producer_street'] = street
-    obs['producer_city'] = city
-    obs['producer_state'] = state
-    obs['producer_zipcode'] = zipcode
-    obs['producer_license_number'] = license_number
+    # ── Date Issued ──
+    date_match = re.search(r'DATE\s+ISSUED\s+(\d{1,2}/\d{1,2}/\d{4})', text)
+    if date_match:
+        obs['date_tested'] = _parse_date(date_match.group(1))
 
-    # Get distributor details.
-    crop = front_page.within_bbox(distributor_area)
-    details = crop.extract_text().replace('\n', ' ')
-    address = details.split('Address:')[-1].strip()
-    business = details.split('Business Name:')[-1].split('License Number:')[0].strip()
-    license_number = details.split('License Number:')[-1].split('Address:')[0].strip()
-    parts = address.split(',')
-    street = parts[0]
-    subparts = parts[-1].strip().split(' ')
-    city = ' '.join(subparts[:-2])
-    try:
-        state, zipcode = subparts[-2], subparts[-1]
-    except IndexError:
-        state, zipcode = '', ''
-    obs['distributor'] = business
-    obs['distributor_address'] = address
-    obs['distributor_street'] = street
-    obs['distributor_city'] = city
-    obs['distributor_state'] = state
-    obs['distributor_zipcode'] = zipcode
-    obs['distributor_license_number'] = license_number
+    # ── Overall Batch Result ──
+    if 'OVERALL BATCH RESULT:' in text.upper():
+        after = text.upper().split('OVERALL BATCH RESULT:')[1][:20]
+        if 'PASS' in after:
+            obs['status'] = 'pass'
+        elif 'FAIL' in after:
+            obs['status'] = 'fail'
 
-    # Get sample details.
-    # FIXME: May be mishandling `sum_of_cannabinoids` and `total_cannabinoids`.
-    if isinstance(sample_details_area, str):
-        sample_details_area = [sample_details_area]
-    for area in sample_details_area:
-        crop = front_page.within_bbox(literal_eval(area))
-        details = crop.extract_text().split('\n')
-        for d in details:
-            if ':' not in d:
-                continue
-            values = d.split(':')
-            key = snake_case(values[0])
-            key = STANDARD_FIELDS.get(key, key)
-            obs[key] = values[-1]
+    # ── Product Name and Type ──
+    name_match = re.search(r'SAMPLE\s+NAME:\s*(.+?)(?:\n|$)', text)
+    if name_match:
+        obs['product_name'] = name_match.group(1).strip()
 
-    # Get the date tested, product name, and sample type.
-    front_page_text = front_page.extract_text()
-    date_tested = front_page_text.split('DATE ISSUED')[-1].split('|')[0].strip()
-    lines = front_page_text.split('SAMPLE NAME:')[1].split('\n')
-    product_name = lines[0].strip()
-    obs['product_type'] = lines[1]
-
-    # Get the analyses.
-    analyses = []
+    # Product type is typically on the line after sample name.
     for i, line in enumerate(lines):
-        if 'ANALYSIS' in line:
-            analysis = line.split(' ANALYSIS')[0].lower()
-            analysis = ANALYSES.get(analysis, analysis)
-            if analysis == 'safety':
-                parts = ' '.join(lines[i+1:i+3]).split(':')
-                parts = [x.replace('PASS', '').replace('FAIL', '').strip() for x in parts]
-                parts = [ANALYSES.get(x, snake_case(x)) for x in parts if x]
-                analyses.extend(parts)
-            else:
-                analyses.append(analysis)
+        if 'SAMPLE NAME:' in line:
+            for j in range(i + 1, min(i + 3, len(lines))):
+                candidate = lines[j].strip()
+                if candidate and 'CULTIVATOR' not in candidate and 'SAMPLE DETAIL' not in candidate:
+                    type_patterns = [
+                        'Flower', 'Concentrate', 'Infused', 'Pre-Roll',
+                        'Edible', 'Topical', 'Tincture', 'Vape', 'Capsule',
+                        'Inhalable', 'Product',
+                    ]
+                    if any(tp.lower() in candidate.lower() for tp in type_patterns):
+                        obs['product_type'] = candidate
+                        break
+            break
 
-    # Get the cannabinoid and terpene totals.
+    # ── Cultivator / Manufacturer & Distributor ──
+    # SC Labs uses a two-column layout for these blocks.
+    # We MUST use bbox cropping to separate the columns correctly.
+    if page is not None:
+        obs.update(_parse_entity_columns(page))
+    else:
+        # Fallback: regex on interleaved text (less reliable).
+        producer_block = _extract_block(text, 'CULTIVATOR / MANUFACTURER', 'DISTRIBUTOR')
+        if not producer_block:
+            producer_block = _extract_block(text, 'CULTIVATOR/MANUFACTURER', 'DISTRIBUTOR')
+        if producer_block:
+            obs.update(_parse_entity_block(producer_block, 'producer'))
+        distributor_block = _extract_block(text, 'DISTRIBUTOR', 'SAMPLE DETAIL')
+        if distributor_block:
+            obs.update(_parse_entity_block(distributor_block, 'distributor'))
 
-    value = front_page_text.split('Sum of Cannabinoids:')[-1].split('%')[0]
-    obs['sum_of_cannabinoids'] = convert_to_numeric(value, strip=True)
+    # ── Sample Details ──
+    sample_block = _extract_block(text, 'SAMPLE DETAIL', 'CANNABINOID ANALYSIS')
+    if not sample_block:
+        sample_block = _extract_block(text, 'SAMPLE DETAIL', 'Sampling Method')
+    if sample_block:
+        obs.update(_parse_sample_details(sample_block))
 
-    value = front_page_text.split('Total Cannabinoids:')[-1].split('%')[0]
-    obs['total_cannabinoids'] = convert_to_numeric(value, strip=True)
+    # ── Cannabinoid Totals ──
+    for pattern, key in [
+        (r'Sum\s+of\s+Cannabinoids:\s*([\d.]+)\s*(%|mg/unit)', 'sum_of_cannabinoids'),
+        (r'Total\s+Cannabinoids:\s*([\d.]+)\s*(%|mg/unit)', 'total_cannabinoids'),
+        (r'Total\s+THC:\s*([\d.]+)\s*(%|mg/unit)', 'total_thc'),
+        (r'Total\s+CBD:\s*([\d.]+)', 'total_cbd'),
+        (r'Total\s+CBG:\s*([\d.]+)', 'total_cbg'),
+        (r'Total\s+THCV:\s*([\d.]+)', 'total_thcv'),
+        (r'Total\s+CBC:\s*([\d.]+)', 'total_cbc'),
+        (r'Total\s+CBDV:\s*([\d.]+)', 'total_cbdv'),
+        (r'Total\s+Terpenoids:\s*([\d.]+)\s*%', 'total_terpenes'),
+        (r'Moisture:\s*([\d.]+)\s*%', 'moisture_content'),
+    ]:
+        match = re.search(pattern, text)
+        if match:
+            val = _parse_number(match.group(1))
+            if val is not None:
+                obs[key] = val
 
-    value = front_page_text.split('Total THC:')[-1].split('%')[0]
-    obs['total_thc'] = convert_to_numeric(value, strip=True)
+    # Handle "ND" for Total CBD/Total CBD: ND.
+    if 'total_cbd' not in obs:
+        if re.search(r'Total\s+CBD:\s*ND', text):
+            obs['total_cbd'] = 0.0
 
-    value = front_page_text.split('Total CBD:')[-1].split('%')[0]
-    obs['total_cbd'] = convert_to_numeric(value, strip=True)
+    # ── Metrc IDs ──
+    metrc_match = re.search(r'Source\s+Metrc\s+UID:\s*([\s\S]*?)(?:Date\s+Collected|$)', text)
+    if metrc_match:
+        metrc_text = metrc_match.group(1).strip()
+        metrc_ids = re.findall(r'(1A\w{20,})', metrc_text)
+        if metrc_ids:
+            obs['metrc_ids'] = metrc_ids
 
-    value = front_page_text.split('Total Terpenoids:')[-1].split('%')[0]
-    obs['total_terpenes'] = convert_to_numeric(value, strip=True)
+    # ── Safety Analysis Summary (analysis statuses) ──
+    obs.update(_parse_safety_summary(text))
 
-    # Get the moisture content analysis if present.
-    try:
-        value = front_page_text.split('Moisture:')[-1].split('%')[0]
-        obs['moisture_content'] = convert_to_numeric(value, strip=True)
-        analyses.append('moisture')
-    except:
-        pass
+    # ── CoA ID from footer ──
+    coa_match = re.search(r'CoA\s+ID:\s*(\S+)', text)
+    if coa_match:
+        obs['coa_id'] = coa_match.group(1).strip()
 
-    # Get all page text, from the 2nd page on, column by column.
-    areas = coa_parameters['coa_page_area']
-    lines = []
-    for page in report.pages[1:]:
-        for area in areas:
-            crop = page.within_bbox(literal_eval(area))
-            lines += crop.extract_text().split('\n')
-
-    # Map all the analytes to analyses.
-    # TODO: Is it possible to either make these field dynamic or
-    # add these fields to the constants?
-    analyte_analysis_map = {
-        'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'foreign_matter',
-        'Caryophyllene Oxide': 'terpenes',
-        'Pentachloronitro- benzene*': 'pesticides',
-        'Piperonylbu- toxide': 'pesticides',
-        'DDVP (Dichlorvos)': 'pesticides',
-        'Methyl parathion': 'pesticides',
-        'Chlorantranilip- role': 'pesticides',
-        'Clofentezine': 'pesticides',
-        'Total Sample Area Covered by Sand, Soil, Cinders, or Dirt': 'foreign_matter',
-        'Total Sample Area Covered by Mold': 'foreign_matter',
-        'Total Sample Area Covered by an Imbedded Foreign Material': 'foreign_matter',
-        'Insect Fragment Count': 'foreign_matter',
-        'Hair Count': 'foreign_matter',
-        'Mammalian Excreta Count': 'foreign_matter',
-        'Shiga toxin-producing Escherichia coli': 'microbes',
-        'Salmonella spp.': 'microbes',
-        'Aspergillus fumigatus': 'microbes',
-        'Aspergillus flavus': 'microbes',
-        'Aspergillus niger': 'microbes',
-        'Aspergillus terreus': 'microbes',
-    }
-    for line in lines:
-        if 'TEST RESULT' in line:
-            analysis_name = line.split('TEST RESULT')[0].strip().title()
-            analysis = ANALYSES.get(analysis_name)
-        elif 'Method:' in line:
-            # FIXME: Imperfect method collect (missing text on next line).
-            obs[f'{analysis}_method'] = line.split('Method:')[-1].strip()
-        else:
-            first_value = find_first_value(line)
-            name = line[:first_value].replace('\n', ' ').strip()
-            analyte_analysis_map[name] = analysis
-
-    # Get the results.
-    results = []
-    for page in report.pages[1:]:
-
-        # Get the results from each result page.
-        tables = page.extract_tables()
-        for table in tables:
-            for i, row in enumerate(table):
-
-                # Determine the analysis, then the units.
-                analyte = row[0].replace('\n', ' ').strip()
-                analysis = analyte_analysis_map.get(analyte)
-                key = snake_case(analyte)
-                key = ANALYTES.get(key, key)
-                units = STANDARD_UNITS.get(analysis)
-
-                # Skip per unit values.
-                if 'per_unit' in key:
-                    continue
-
-                # Hot-fix: Skip (non-)analytes that begin with a digit.
-                # Note: It would be best to improve this logic.
-                if key[0].isdigit():
-                    continue
-
-                # Determine the values, handling screens differently.
-                parts = row[1].split(' / ')
-                subparts = parts[-1].strip().split(' ')
-                limit = None
-                status = None
-                if len(subparts) == 3:
-                    limit = subparts[1]
-                    value, status = tuple(row[-1].split(' '))
-                else:
-                    try:
-                        mg_g, value = tuple(row[-1].split(' '))
-                    except ValueError:
-                        value = row[-1]
-
-                # Record the result
-                results.append({
-                    'analysis': analysis,
-                    'key': key,
-                    'limit': limit,
-                    'lod': convert_to_numeric(parts[0].strip()),
-                    'loq': convert_to_numeric(subparts[0]),
-                    'margin_of_error': convert_to_numeric(subparts[-1].replace('±', '')),
-                    'mg_g': convert_to_numeric(mg_g),
-                    'name': analyte,
-                    'status': status,
-                    'units': units,
-                    'value': convert_to_numeric(value),
-                })
-
-    # Turn dates to ISO format.
-    date_columns = [x for x in obs.keys() if x.startswith('date')]
-    for date_column in date_columns:
-        try:
-            obs[date_column] = pd.to_datetime(obs[date_column]).isoformat()
-        except:
-            pass
-
-    # FIXME: `total` is being included as a terpene.
-
-    # FIXME: Results are not properly JSON-encoded and raise this error:
-    # json.loads(obs['results'])
-    # JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
-
-    # Finish data collection with a freshly minted sample ID.
-    obs = {**SC_LABS, **obs}
-    obs['analyses'] = json.dumps(analyses)
-    obs['coa_algorithm_version'] = __version__
-    obs['coa_parsed_at'] = datetime.now().isoformat()
-    obs['date_tested'] = date_tested
-    obs['product_name'] = product_name
-    obs['results'] = json.dumps(results)
-    obs['results_hash'] = create_hash(results)
-    obs['sample_id'] = create_sample_id(
-        private_key=json.dumps(results),
-        public_key=obs['product_name'],
-        salt=obs.get('producer', obs.get('date_tested', 'cannlytics.eth')),
-    )
-    obs['sample_hash'] = create_hash(obs)
     return obs
 
 
-def get_sc_labs_test_results(
-        producer_id,
-        reverse=True,
-        limit=100,
-        page_limit=100,
-        pause=0.2,
-        headers=None
-    ) -> list:
-    """Get all test results for a specific SC Labs client.
-    Args:
-        producer_id (str): A producer ID.
-        reverse (bool): Whether to collect in reverse order, True by default (optional).
-        limit (int): The number of samples per page to collect, 100 by default.
-        page_limit (int): The maximum number of pages to collect, 100 by default.
-        pause (float): A respectful pause to wait between requests.
-    Returns:
-        (list): A list of dictionaries of sample data.
+def _extract_block(text: str, start_marker: str, end_marker: str) -> str:
+    """Extract a text block between two markers."""
+    try:
+        start = text.index(start_marker) + len(start_marker)
+        end = text.index(end_marker, start)
+        return text[start:end].strip()
+    except ValueError:
+        return ''
+
+
+def _parse_entity_columns(page) -> Dict:
+    """Extract producer and distributor using bbox cropping.
+
+    SC Labs COAs use a two-column layout for CULTIVATOR/MANUFACTURER
+    (left) and DISTRIBUTOR (right). Standard text extraction interleaves
+    these columns, so we use pdfplumber's bbox cropping to separate them.
+
+    Strategy:
+        1. Find the Y-coordinate of "CULTIVATOR" text
+        2. Find the X-coordinate of "DISTRIBUTOR" text (column split point)
+        3. Find the Y-coordinate of "SAMPLE DETAIL" text (bottom boundary)
+        4. Crop left half for producer, right half for distributor
     """
+    obs = {}
+    words = page.extract_words()
+    if not words:
+        return obs
 
-    #  Iterate over pages, getting all the samples on each page,
-    # until the active page is repeated and the first sample is the same.
-    active_page = None
-    first_sample = None
-    samples = []
-    sample_pages = range(1, page_limit)
-    if headers is None:
-            headers = DEFAULT_HEADERS
-    for sample_page in sample_pages:
+    cult_y = None
+    dist_x = None
+    sample_detail_y = None
 
-        # Pause between requests to be respectful of the API server.
-        if sample_page > 1 and pause:
-            sleep(pause)
+    for w in words:
+        if w['text'] == 'CULTIVATOR' and cult_y is None:
+            cult_y = w['top']
+        if w['text'] == 'DISTRIBUTOR' and dist_x is None:
+            dist_x = w['x0']
 
-        # Get a client page with X amount of samples.
-        url = '/'.join([SC_LABS['url'], 'client', str(producer_id)])
-        params = {'limit': limit, 'page': sample_page}
-        response = requests.get(url, headers=headers, params=params)
-        soup = BeautifulSoup(response.content, 'html.parser')
+    # Find SAMPLE DETAIL y-coordinate (below CULTIVATOR).
+    if cult_y is not None:
+        for w in words:
+            if w['text'] == 'SAMPLE' and w['top'] > cult_y + 20:
+                nearby = [
+                    w2 for w2 in words
+                    if abs(w2['top'] - w['top']) < 5
+                    and w2['x0'] > w['x1']
+                    and w2['x0'] < w['x1'] + 40
+                ]
+                for nw in nearby:
+                    if nw['text'] == 'DETAIL':
+                        sample_detail_y = w['top']
+                        break
+                if sample_detail_y:
+                    break
 
-        # Check if the page is a 404.
-        top_spans = soup.find_all('span')
-        for span in top_spans:
-            if '404' in span.text:
-                print('Client not found: %s' % (producer_id))
+    if not all([cult_y, dist_x, sample_detail_y]):
+        return obs
+
+    try:
+        # Crop producer column (left of DISTRIBUTOR).
+        left_crop = page.within_bbox((0, cult_y, dist_x - 3, sample_detail_y))
+        left_text = left_crop.extract_text() or ''
+        obs.update(_parse_entity_text(left_text, 'producer'))
+
+        # Crop distributor column (right of DISTRIBUTOR start).
+        right_crop = page.within_bbox((dist_x - 3, cult_y, page.width, sample_detail_y))
+        right_text = right_crop.extract_text() or ''
+        obs.update(_parse_entity_text(right_text, 'distributor'))
+    except Exception:
+        pass
+
+    return obs
+
+
+def _parse_entity_text(text: str, prefix: str) -> Dict:
+    """Parse a single-column entity block (producer or distributor)."""
+    obs = {}
+    if not text:
+        return obs
+
+    # Business Name.
+    name_match = re.search(r'Business\s+Name:\s*(.+?)(?:\nLicense|\n(?=Address)|\Z)', text, re.DOTALL)
+    if name_match:
+        name = name_match.group(1).strip().replace('\n', ' ')
+        name = re.sub(r'\s+', ' ', name)
+        obs[prefix] = name
+
+    # License Number.
+    lic_match = re.search(r'License\s+Number:\s*(\S+)', text)
+    if lic_match:
+        obs[f'{prefix}_license_number'] = lic_match.group(1).strip()
+
+    # Address.
+    addr_match = re.search(r'Address:\s*(.+)', text, re.DOTALL)
+    if addr_match:
+        address = addr_match.group(1).strip().replace('\n', ' ')
+        address = re.sub(r'\s+', ' ', address)
+        obs[f'{prefix}_address'] = address
+
+        # Parse city, state, zipcode.
+        state_zip = re.search(r'([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$', address)
+        if state_zip:
+            obs[f'{prefix}_state'] = state_zip.group(1)
+            obs[f'{prefix}_zipcode'] = state_zip.group(2)
+            before = address[:state_zip.start()].rstrip(', ')
+            parts = before.rsplit(',', 1)
+            if len(parts) == 2:
+                obs[f'{prefix}_street'] = parts[0].strip()
+                obs[f'{prefix}_city'] = parts[1].strip()
+            else:
+                obs[f'{prefix}_street'] = before
+
+    return obs
+
+
+def _parse_entity_block(block: str, prefix: str) -> Dict:
+    """Parse a cultivator/distributor block into structured fields."""
+    obs = {}
+    # Business Name.
+    name_match = re.search(r'Business\s+Name:\s*(.+?)(?:\n|License)', block, re.DOTALL)
+    if name_match:
+        obs[prefix] = name_match.group(1).strip().replace('\n', ' ')
+
+    # License Number.
+    lic_match = re.search(r'License\s+Number:\s*(\S+)', block)
+    if lic_match:
+        obs[f'{prefix}_license_number'] = lic_match.group(1).strip()
+
+    # Address.
+    addr_match = re.search(r'Address:\s*(.+?)(?:\n(?:SAMPLE|DISTRIBUTOR|Business|$)|\Z)', block, re.DOTALL)
+    if addr_match:
+        address = addr_match.group(1).strip().replace('\n', ' ')
+        # Clean up multiple spaces.
+        address = re.sub(r'\s+', ' ', address)
+        obs[f'{prefix}_address'] = address
+
+        # Parse city, state, zipcode from address.
+        state_zip = re.search(r'([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$', address)
+        if state_zip:
+            obs[f'{prefix}_state'] = state_zip.group(1)
+            obs[f'{prefix}_zipcode'] = state_zip.group(2)
+            # Street is everything before "City STATE ZIP"
+            before_zip = address[:state_zip.start()].rstrip(', ')
+            # City is the last comma-separated part.
+            parts = before_zip.rsplit(',', 1)
+            if len(parts) == 2:
+                obs[f'{prefix}_street'] = parts[0].strip()
+                obs[f'{prefix}_city'] = parts[1].strip()
+            else:
+                obs[f'{prefix}_street'] = before_zip
+
+    return obs
+
+
+def _parse_sample_details(block: str) -> Dict:
+    """Parse the SAMPLE DETAIL block."""
+    obs = {}
+    patterns = {
+        'batch_number': r'Batch\s+Number:\s*(\S+)',
+        'sample_id': r'Sample\s+ID:\s*(\S+)',
+        'date_collected': r'Date\s+Collected:\s*(\d{1,2}/\d{1,2}/\d{4})',
+        'date_received': r'Date\s+Received:\s*(\d{1,2}/\d{1,2}/\d{4})',
+        'batch_size': r'Batch\s+Size:\s*(.+?)(?:\n|$)',
+        'sample_size': r'Sample\s+Size:\s*(.+?)(?:\n|$)',
+        'unit_mass': r'Unit\s+Mass(?:es)?:\s*(.+?)(?:\n|$)',
+        'serving_size': r'Serving\s+Size:\s*(.+?)(?:\n|$)',
+    }
+    for key, pattern in patterns.items():
+        match = re.search(pattern, block)
+        if match:
+            value = match.group(1).strip()
+            if key in ('date_collected', 'date_received'):
+                value = _parse_date(value)
+            obs[key] = value
+    return obs
+
+
+def _parse_safety_summary(text: str) -> Dict:
+    """Parse SAFETY ANALYSIS - SUMMARY for per-analysis pass/fail."""
+    obs = {}
+    # Find the safety summary block.
+    safety_match = re.search(
+        r'SAFETY\s+ANALYSIS\s*[-–—]\s*SUMMARY([\s\S]*?)(?:These\s+results|Sample\s+Certification|$)',
+        text,
+    )
+    if not safety_match:
+        return obs
+
+    safety_text = safety_match.group(1)
+
+    # Parse "Analysis: PASS" or "Analysis: FAIL" patterns.
+    # SC Labs format: "Pesticides: PASS" or "Pesticides: ✅PASS"
+    status_patterns = [
+        (r'Pesticides?:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'pesticides_status'),
+        (r'Mycotoxins?:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'mycotoxins_status'),
+        (r'Residual\s+Solvents?:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'residual_solvents_status'),
+        (r'Heavy\s+Metals?:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'heavy_metals_status'),
+        (r'Microbiology:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'microbials_status'),
+        (r'Microbial\s+Impurities:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'microbials_status'),
+        (r'Foreign\s+Material:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'foreign_matter_status'),
+        (r'Water\s+Activity:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'water_activity_status'),
+        (r'[Δ∆]9?.?THC\s+per\s+Unit:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'thc_per_unit_status'),
+        (r'[Δ∆]9?.?THC\s+per\s+Serving:?\s*(?:✅|☑)?\.?\s*(PASS|FAIL)', 'thc_per_serving_status'),
+    ]
+    for pattern, key in status_patterns:
+        match = re.search(pattern, safety_text, re.IGNORECASE)
+        if match:
+            obs[key] = match.group(1).lower()
+
+    return obs
+
+
+# ── Results Parsing Functions ──────────────────────────────────────
+
+def _identify_analysis_from_text(page_text: str) -> List[Tuple[str, str]]:
+    """Identify all analysis sections on a page from header text.
+
+    Returns list of (raw_header, standard_analysis_name) tuples.
+    """
+    sections = []
+    for match in SECTION_HEADER_RE.finditer(page_text):
+        raw = match.group(0)
+        header_key = match.group(1).strip().lower()
+
+        # Map to standard analysis name.
+        analysis = None
+        for prefix, std_name in ANALYSIS_SECTION_MAP.items():
+            if prefix in header_key:
+                analysis = std_name
+                break
+        if analysis:
+            sections.append((raw, analysis))
+
+    return sections
+
+
+def _parse_results_from_tables(pdf) -> Tuple[List[Dict], List[str]]:
+    """Extract all analyte results from PDF tables across all pages.
+
+    SC Labs COAs have well-structured tables that pdfplumber can
+    extract reliably. Each results page has one or two tables (for
+    the two-column layout).
+
+    Returns:
+        Tuple of (results_list, analyses_list).
+    """
+    all_results = []
+    analyses_seen = set()
+
+    for page_idx, page in enumerate(pdf.pages):
+        try:
+            page_text = _clean_text(page.extract_text() or '')
+        except Exception:
+            continue
+
+        # Skip page 1 (summary page) — but only if we detect it.
+        if page_idx == 0 and 'SAMPLE DETAILS' in page_text:
+            continue
+
+        # Identify which analysis sections are on this page.
+        page_sections = _identify_analysis_from_text(page_text)
+        if not page_sections:
+            continue
+
+        # Determine the current analysis type(s) for this page.
+        # If multiple sections, we need content-based classification.
+        current_analysis = page_sections[0][1] if page_sections else None
+
+        # Extract tables from the page.
+        try:
+            tables = page.extract_tables()
+        except Exception:
+            continue
+
+        if not tables:
+            continue
+
+        for table in tables:
+            if not table or len(table) < 2:
+                continue
+
+            # Determine analysis for this specific table using
+            # content-based classification.
+            table_analysis = _classify_table(table, page_sections)
+            if not table_analysis:
+                table_analysis = current_analysis
+            if not table_analysis:
+                continue
+
+            analyses_seen.add(table_analysis)
+            units = STANDARD_UNITS.get(table_analysis, '')
+
+            # Parse rows (skip header row).
+            header = table[0] if table[0] else []
+            for row in table[1:]:
+                if not row or not row[0]:
+                    continue
+
+                # Clean the analyte name.
+                name = _clean_text(row[0]).replace('\n', ' ').strip()
+
+                # Skip non-analyte rows.
+                if _is_skip_row(name):
+                    continue
+                if not name or len(name) < 2:
+                    continue
+
+                # Get the analyte key.
+                key = _snake_case(name)
+
+                # Skip keys starting with a digit (per-unit rows).
+                if key and key[0].isdigit():
+                    continue
+
+                # Parse the result based on column count and analysis type.
+                result = _parse_table_row(
+                    row, header, name, key, table_analysis, units,
+                )
+                if result:
+                    all_results.append(result)
+
+    analyses = sorted(analyses_seen)
+    return all_results, analyses
+
+
+def _classify_table(table: List, page_sections: List[Tuple]) -> Optional[str]:
+    """Classify a table's analysis type by examining its content.
+
+    Uses the content-based classification approach (primary method)
+    established in the TagLeaf algorithm. Falls back to page section
+    headers if content matching fails.
+    """
+    if not table or len(table) < 2:
+        return None
+
+    # Extract analyte names from the first 10 data rows.
+    sample_names = []
+    for row in table[1:11]:
+        if row and row[0]:
+            name = _clean_text(row[0]).replace('\n', ' ').strip()
+            if name and name.upper() != 'COMPOUND':
+                sample_names.append(name.lower())
+
+    if not sample_names:
+        return None
+
+    # Known analyte sets for content-based classification.
+    cannabinoid_markers = {
+        'thca', 'δ9-thc', '∆9-thc', 'Δ9-thc', 'cbd', 'cbda', 'cbg',
+        'cbga', 'cbn', 'cbc', 'cbca', 'cbdv', 'cbdva', 'thcv', 'thcva',
+        'δ8-thc', '∆8-thc', 'cbl',
+    }
+    terpene_markers = {
+        'myrcene', 'limonene', 'linalool', 'β-caryophyllene',
+        'β caryophyllene', 'α-humulene', 'α humulene', 'α-pinene',
+        'β-pinene', 'terpinolene', 'fenchol', 'terpineol', 'borneol',
+        'camphene', 'α-bisabolol', 'ocimene', 'β-ocimene',
+        'trans-β-farnesene', 'geraniol', 'fenchone', 'nerolidol',
+    }
+    pesticide_markers = {
+        'abamectin', 'acephate', 'aldicarb', 'bifenazate', 'carbofuran',
+        'chlorpyrifos', 'diazinon', 'imidacloprid', 'malathion',
+        'permethrin', 'spinosad', 'myclobutanil', 'pyrethrins',
+        'bifenthrin', 'fipronil', 'spiromesifen',
+    }
+    mycotoxin_markers = {
+        'aflatoxin b1', 'aflatoxin b2', 'aflatoxin g1', 'aflatoxin g2',
+        'total aflatoxin', 'ochratoxin a',
+    }
+    solvent_markers = {
+        'acetone', 'methanol', 'ethanol', 'n-butane', 'butane',
+        'n-hexane', 'hexane', 'toluene', 'propane', 'benzene',
+        'chloroform', '1,2-dichloroethane', 'isopropyl', '2-propanol',
+        'ethyl acetate', 'total xylenes', 'n-pentane',
+    }
+    metal_markers = {'arsenic', 'cadmium', 'lead', 'mercury'}
+    microbe_markers = {
+        'aspergillus flavus', 'aspergillus fumigatus',
+        'aspergillus niger', 'aspergillus terreus',
+        'salmonella spp.', 'salmonella', 'shiga toxin', 'e. coli',
+    }
+    foreign_markers = {
+        'hair count', 'insect fragment', 'mammalian excreta',
+        'total sample area', 'imbedded foreign',
+    }
+    water_markers = {'water activity'}
+
+    # Score each analysis type.
+    scores = {
+        'cannabinoids': 0, 'terpenes': 0, 'pesticides': 0,
+        'mycotoxins': 0, 'residual_solvents': 0, 'heavy_metals': 0,
+        'microbials': 0, 'foreign_matter': 0, 'water_activity': 0,
+    }
+    for name in sample_names:
+        name_lower = name.lower()
+        for marker in cannabinoid_markers:
+            if marker in name_lower:
+                scores['cannabinoids'] += 1
+                break
+        for marker in terpene_markers:
+            if marker in name_lower:
+                scores['terpenes'] += 1
+                break
+        for marker in pesticide_markers:
+            if marker in name_lower:
+                scores['pesticides'] += 1
+                break
+        for marker in mycotoxin_markers:
+            if marker in name_lower:
+                scores['mycotoxins'] += 1
+                break
+        for marker in solvent_markers:
+            if marker in name_lower:
+                scores['residual_solvents'] += 1
+                break
+        for marker in metal_markers:
+            if marker in name_lower:
+                scores['heavy_metals'] += 1
+                break
+        for marker in microbe_markers:
+            if marker in name_lower:
+                scores['microbials'] += 1
+                break
+        for marker in foreign_markers:
+            if marker in name_lower:
+                scores['foreign_matter'] += 1
+                break
+        for marker in water_markers:
+            if marker in name_lower:
+                scores['water_activity'] += 1
                 break
 
-        # Note: This may not be working as intended.
-        # Break the iteration if the page max is reached.
+    # Return the highest-scoring analysis type (minimum 1 match).
+    best = max(scores, key=scores.get)
+    if scores[best] >= 1:
+        return best
+
+    # Fallback to page section headers.
+    if page_sections:
+        return page_sections[0][1]
+
+    return None
+
+
+def _parse_table_row(
+        row: List,
+        header: List,
+        name: str,
+        key: str,
+        analysis: str,
+        units: str,
+    ) -> Optional[Dict]:
+    """Parse a single table row into a result dict.
+
+    SC Labs tables have varying column structures by analysis type:
+
+    Cannabinoids/Terpenes:
+        COMPOUND | LOD/LOQ (mg/g) | MEASUREMENT UNCERTAINTY | RESULT (mg/g) | RESULT (%)
+
+    Pesticides:
+        COMPOUND | LOD/LOQ (µg/g) | ACTION LIMIT (µg/g) | MEASUREMENT UNCERTAINTY | RESULT (µg/g) | RESULT
+
+    Mycotoxins:
+        COMPOUND | LOD/LOQ (µg/kg) | ACTION LIMIT (µg/kg) | MEASUREMENT UNCERTAINTY | RESULT (µg/kg) | RESULT
+
+    Heavy Metals:
+        COMPOUND | LOD/LOQ (µg/g) | ACTION LIMIT (µg/g) | MEASUREMENT UNCERTAINTY | RESULT (µg/g) | RESULT
+
+    Microbiology:
+        COMPOUND | ACTION LIMIT | RESULT | RESULT
+
+    Foreign Material:
+        COMPOUND | ACTION LIMIT | RESULT | RESULT
+
+    Water Activity:
+        COMPOUND | LOD/LOQ (Aw) | ACTION LIMIT (Aw) | MEASUREMENT UNCERTAINTY (Aw) | RESULT (Aw) | RESULT
+    """
+    result = {
+        'analysis': analysis,
+        'key': key,
+        'name': name,
+        'value': None,
+        'units': units,
+        'lod': None,
+        'loq': None,
+        'limit': None,
+        'status': '',
+    }
+
+    # Clean all cells.
+    cells = [_clean_text(c) if c else '' for c in row]
+    num_cells = len(cells)
+
+    if analysis in ('cannabinoids', 'terpenes'):
+        # Cannabinoids: COMPOUND | LOD/LOQ | UNCERTAINTY | RESULT(mg/g) | RESULT(%)
+        # Terpenes: same structure
+        if num_cells >= 5:
+            lod, loq = _parse_lod_loq(cells[1])
+            result['lod'] = lod
+            result['loq'] = loq
+            # For cannabinoids, we want the percentage value (last column).
+            pct_val = _parse_number(cells[4])
+            mg_val = _parse_number(cells[3])
+            if analysis == 'cannabinoids':
+                result['value'] = pct_val if pct_val is not None else 0.0
+                result['units'] = 'percent'
+            else:
+                # Terpenes: SC Labs reports in mg/g and %.
+                result['value'] = mg_val if mg_val is not None else 0.0
+                result['units'] = 'mg/g'
+        elif num_cells >= 3:
+            # Minimal table format.
+            lod, loq = _parse_lod_loq(cells[1])
+            result['lod'] = lod
+            result['loq'] = loq
+            result['value'] = _parse_number(cells[-1])
+            if result['value'] is None:
+                result['value'] = 0.0
+
+    elif analysis in ('pesticides', 'residual_solvents', 'heavy_metals', 'mycotoxins'):
+        # COMPOUND | LOD/LOQ | ACTION LIMIT | UNCERTAINTY | RESULT | RESULT(status)
+        if num_cells >= 6:
+            lod, loq = _parse_lod_loq(cells[1])
+            result['lod'] = lod
+            result['loq'] = loq
+            # Action limit.
+            limit_text = cells[2].strip()
+            if '≥' in limit_text or 'LOD' in limit_text.upper():
+                result['limit'] = None  # "≥ LOD" means detect/not-detect.
+            else:
+                result['limit'] = _parse_number(limit_text)
+            # Result value.
+            result['value'] = _parse_number(cells[4])
+            if result['value'] is None:
+                result['value'] = 0.0
+            # Status.
+            status_text = cells[5].strip().upper() if len(cells) > 5 else ''
+            if 'PASS' in status_text:
+                result['status'] = 'pass'
+            elif 'FAIL' in status_text:
+                result['status'] = 'fail'
+        elif num_cells >= 4:
+            lod, loq = _parse_lod_loq(cells[1])
+            result['lod'] = lod
+            result['loq'] = loq
+            result['value'] = _parse_number(cells[-2]) if num_cells > 2 else 0.0
+            if result['value'] is None:
+                result['value'] = 0.0
+            status_text = cells[-1].strip().upper()
+            if 'PASS' in status_text:
+                result['status'] = 'pass'
+            elif 'FAIL' in status_text:
+                result['status'] = 'fail'
+
+    elif analysis in ('microbials', 'foreign_matter'):
+        # COMPOUND | ACTION LIMIT | RESULT | RESULT(status)
+        if num_cells >= 4:
+            limit_text = cells[1].strip()
+            result['limit'] = None  # Usually text like "Not Detected in 1g"
+            # For foreign matter, limit might be "> 1 per 3 grams" or ">25%".
+            result['value'] = _parse_number(cells[2])
+            if result['value'] is None:
+                result['value'] = 0.0
+            status_text = cells[3].strip().upper() if len(cells) > 3 else ''
+            if 'PASS' in status_text:
+                result['status'] = 'pass'
+            elif 'FAIL' in status_text:
+                result['status'] = 'fail'
+        elif num_cells >= 3:
+            result['value'] = _parse_number(cells[-2]) if num_cells > 2 else 0.0
+            if result['value'] is None:
+                result['value'] = 0.0
+            status_text = cells[-1].strip().upper()
+            if 'PASS' in status_text:
+                result['status'] = 'pass'
+            elif 'FAIL' in status_text:
+                result['status'] = 'fail'
+
+    elif analysis == 'water_activity':
+        # COMPOUND | LOD/LOQ | ACTION LIMIT | UNCERTAINTY | RESULT | RESULT(status)
+        if num_cells >= 6:
+            lod, loq = _parse_lod_loq(cells[1])
+            result['lod'] = lod
+            result['loq'] = loq
+            result['limit'] = _parse_number(cells[2])
+            result['value'] = _parse_number(cells[4])
+            if result['value'] is None:
+                result['value'] = 0.0
+            result['units'] = 'aw'
+            status_text = cells[5].strip().upper() if len(cells) > 5 else ''
+            if 'PASS' in status_text:
+                result['status'] = 'pass'
+            elif 'FAIL' in status_text:
+                result['status'] = 'fail'
+
+    return result
+
+
+# ── Main Parsing Function ──────────────────────────────────────────
+
+def parse_sc_labs_pdf(
+        parser: Any = None,
+        doc: str = '',
+        **kwargs,
+    ) -> Dict:
+    """Parse an SC Labs COA PDF.
+
+    This is the core parsing function. Opens the PDF with pdfplumber,
+    extracts metadata from page 1 via text extraction, then extracts
+    all analyte results from tables on pages 2+.
+
+    Args:
+        parser: Optional CoADoc instance (backwards compatibility; ignored).
+        doc:    Path to the COA PDF file.
+
+    Returns:
+        Dict with all extracted COA data, including:
+            - Metadata fields (product_name, producer, dates, etc.)
+            - results: JSON string of list[dict] (analyte results)
+            - analyses: JSON string of list[str] (analysis types)
+    """
+    # Accept file path as either argument.
+    pdf_path = doc if isinstance(doc, str) and doc else ''
+    if isinstance(parser, str) and not pdf_path:
+        pdf_path = parser
+        parser = None
+
+    if not pdf_path:
+        raise ValueError('No PDF file path provided.')
+
+    obs = {}
+
+    with pdfplumber.open(pdf_path) as pdf:
+        if not pdf.pages:
+            raise ValueError(f'PDF has no pages: {pdf_path}')
+
+        # ── Phase 1: Extract metadata from page 1 ────────────
         try:
-            current_sample = soup.find('h3').text
-        except AttributeError:
-            current_sample = first_sample
-        attributes = {'class': 'pagination-active'}
-        current_page = soup.find('li', attrs=attributes)
-        if (current_page == active_page) and (current_sample == first_sample):
-            break
-        active_page = current_page
-        first_sample = current_sample
+            front_text = _clean_text(pdf.pages[0].extract_text() or '')
+        except Exception as e:
+            raise ValueError(f'Failed to extract text from page 1: {e}')
 
-        # Get producer.
-        details = soup.find('div', attrs={'id': 'detailQuickView'})
-        try:
-            producer = details.find('h2').text
-        except AttributeError:
-            try:
-                producer = soup.find('h2').text
-            except AttributeError:
-                producer = 'Anonymous'
+        obs = _parse_front_page_metadata(front_text, page=pdf.pages[0])
 
-        # Get producer image.
-        try:
-            producer_image_url = details.find('img')['src'] \
-                .replace('\n', '').strip()
-        except AttributeError:
-            producer_image_url = ''
+        # ── Phase 2: Extract results from tables (pages 2+) ──
+        results, analyses = _parse_results_from_tables(pdf)
 
-        # Get producer website.
-        try:
-            attributes = {'class': 'pp-social-web'}
-            el = details.find('span', attrs=attributes)
-            producer_url = el.find('a')['href']
-        except:
-            producer_url = ''
+        # ── Phase 3: Derive analyses from safety summary if needed ──
+        # Add analyses detected from safety summary statuses.
+        status_analyses = set()
+        for key in list(obs.keys()):
+            if key.endswith('_status'):
+                analysis_name = key.replace('_status', '')
+                if analysis_name in STANDARD_UNITS:
+                    status_analyses.add(analysis_name)
+        for a in status_analyses:
+            if a not in analyses:
+                analyses.append(a)
+        analyses = sorted(set(analyses))
 
-        # Get all of the sample cards.
-        cards = soup.find_all('div', attrs={'class': 'grid-item'})
-        if reverse:
-                cards.reverse()
-        for card in cards:
+        # ── Phase 4: Compute totals from results if missing ──
+        if results and not obs.get('total_terpenes'):
+            terp_sum = sum(
+                r['value'] for r in results
+                if r['analysis'] == 'terpenes'
+                and r['key'] not in ('total_terpenes',)
+                and r['value'] is not None
+                and r['value'] > 0
+            )
+            if terp_sum > 0:
+                obs['total_terpenes'] = round(terp_sum, 4)
 
-            # Get the lab's internal ID.
-            lab_id = card['id'].replace('div_', '')
+        # ── Phase 5: Build final output ──────────────────────
+        obs = {**SC_LABS, **obs}
+        obs['analyses'] = json.dumps(analyses)
+        obs['results'] = json.dumps(results)
+        obs['coa_parsed_at'] = datetime.now().isoformat()
 
-            # Get the product name.
-            product_name = card.find('h3').text
+        # Generate results hash.
+        hash_input = json.dumps(results, sort_keys=True)
+        obs['results_hash'] = hashlib.sha256(
+            hash_input.encode()).hexdigest()[:16]
 
-            # Get lab results URL.
-            base_url = SC_LABS['url']
-            href = card.find('a')['href']
-            lab_results_url = urljoin(base_url, href)
+        # Generate sample_id from results + product_name.
+        id_input = (
+            hash_input +
+            obs.get('product_name', '') +
+            obs.get('producer', '') +
+            obs.get('date_tested', '')
+        )
+        obs['sample_id'] = obs.get('sample_id', '') or hashlib.sha256(
+            id_input.encode()).hexdigest()[:16]
 
-            # Get the date tested.
-            mm, dd, yyyy = card.find('h6').text.split('-')
-            date = '-'.join([yyyy, mm, dd])
+        # Store lab's sample ID as lab_id.
+        obs['lab_id'] = obs.get('sample_id', '')
 
-            # Get totals.
-            totals = card.find('div', attrs={'class': 'sample-details'})
-            values = totals.find_all('div')
-            total_thc = values[0].text.split(':')[-1].replace('%', '')
-            total_cbd = values[1].text.split(':')[-1].replace('%', '')
-            total_terpenes = values[2].text.split(':')[-1].replace('%', '')
+        # PDF filename for reference.
+        obs['coa_pdf'] = pdf_path.replace('\\', '/').split('/')[-1]
 
-            # Aggregate sample data.
-            sample = {
-                'date_received': date,
-                'lab_id': lab_id,
-                'lab_results_url': lab_results_url,
-                'producer_id': producer_id,
-                'producer': producer,
-                'producer_image_url': producer_image_url,
-                'product_name': product_name,
-                'producer_url': producer_url,
-                'sample_id': None,
-                'total_cbd': total_cbd,
-                'total_thc': total_thc,
-                'total_terpenes': total_terpenes,
-            }
-            samples.append(sample)
-
-    # Return all of the samples for the client.
-    return samples
+    return obs
 
 
-# === Tests ===
-# Tested: 2023-12-31 by Keegan Skeate <keegan@cannlytics.com>
+# ── Entry Point (LAB_REGISTRY compatible) ──────────────────────────
+
+def parse_sc_labs_coa(
+        parser: Any = None,
+        doc: str = '',
+        **kwargs,
+    ) -> Dict:
+    """Parse an SC Labs COA PDF.
+
+    This is the main entry point registered in the LAB_REGISTRY.
+    For the hybrid engine, this always parses from the PDF directly.
+
+    Args:
+        parser: Optional CoADoc instance (backwards compatibility).
+        doc:    Path to the COA PDF file.
+
+    Returns:
+        Dict with all extracted COA data.
+    """
+    # Handle argument order flexibility.
+    if isinstance(parser, str) and not doc:
+        doc = parser
+        parser = None
+
+    # For URLs, we cannot parse offline.
+    if isinstance(doc, str) and doc.startswith('http'):
+        raise ValueError(
+            'URL parsing requires network access. '
+            'Use the AI parser for URL-based COAs, or provide the PDF.'
+        )
+
+    return parse_sc_labs_pdf(parser, doc, **kwargs)
+
+
+def is_sc_labs(pdf_path: str) -> bool:
+    """Quick check if a PDF is an SC Labs COA (without full parse).
+
+    Args:
+        pdf_path: Path to a PDF file.
+
+    Returns:
+        True if the PDF appears to be from SC Labs.
+    """
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            if not pdf.pages:
+                return False
+            text = (pdf.pages[0].extract_text() or '').lower()
+            return (
+                'sclabs.com' in text
+                or 'sc laboratories' in text
+                or 'sc labs' in text
+            )
+    except Exception:
+        return False
+
+
+# ── Tests ──────────────────────────────────────────────────────────
+
 if __name__ == '__main__':
-    pass
+    import sys
+    import os
 
-    # # Initialize tests.
-    # from cannlytics.data.coas import CoADoc
-    # parser = CoADoc()
+    # Test with provided PDF files.
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    test_files = [f for f in os.listdir(test_dir) if f.endswith('.pdf')]
 
-    # # [✓] TEST: Get all test results for a specific client.
-    # test_results = get_sc_labs_test_results(sample='2821')
-    # assert test_results is not None
+    if not test_files:
+        if len(sys.argv) > 1:
+            test_files = sys.argv[1:]
+        else:
+            print('Usage: python sclabs.py <pdf_file> [pdf_file2 ...]')
+            sys.exit(1)
 
-    # [✓] TEST: Get details for a specific lab ID.
-    # sample_details = parse_sc_labs_url(parser, '220525L001')
-    # assert sample_details is not None
+    success = 0
+    fail = 0
+    for pdf_file in test_files:
+        pdf_path = os.path.join(test_dir, pdf_file) \
+            if not os.path.isabs(pdf_file) else pdf_file
+        if not os.path.exists(pdf_path):
+            print(f'Not found: {pdf_path}')
+            continue
+        try:
+            data = parse_sc_labs_coa(None, pdf_path)
+            results = json.loads(data.get('results', '[]'))
+            analyses = json.loads(data.get('analyses', '[]'))
+            print(f'\n{"="*60}')
+            print(f'OK {pdf_file}')
+            print(f'  Product:  {data.get("product_name", "?")}')
+            print(f'  Type:     {data.get("product_type", "?")}')
+            print(f'  Producer: {data.get("producer", "?")}')
+            print(f'  Date:     {data.get("date_tested", "?")}')
+            print(f'  THC:      {data.get("total_thc", "?")}%')
+            print(f'  CBD:      {data.get("total_cbd", "?")}%')
+            print(f'  Terpenes: {data.get("total_terpenes", "?")}%')
+            print(f'  Status:   {data.get("status", "?")}')
+            print(f'  Analyses: {analyses}')
+            print(f'  Results:  {len(results)} analytes')
+            print(f'  CoA ID:   {data.get("coa_id", "?")}')
+            print(f'  Sample:   {data.get("sample_id", "?")}')
+            print(f'  Batch:    {data.get("batch_number", "?")}')
+            success += 1
+        except Exception as e:
+            print(f'\nFAIL {pdf_file}: {e}')
+            import traceback
+            traceback.print_exc()
+            fail += 1
 
-    # # [✓] TEST: Get details for a specific sample URL.
-    # doc = 'https://client.sclabs.com/verify/210727L001/'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(doc)
-    # assert lab == 'SC Labs'
-    # data = parse_sc_labs_coa(parser, doc)
-    # assert data is not None
-    # print('Parsed:', doc)
-
-    # # [✓] TEST: Test: Parse a failing COA.
-    # doc = 'https://client.sclabs.com/verify/231221R001/'
-    # parser = CoADoc()
-    # data = parse_sc_labs_coa(parser, doc)
-    # assert data is not None
-    # print('Parsed:', doc)
-
-    # # [✓] TEST: Parse a SC Labs CoA PDF (with cannabinoids and terpenes).
-    # directory = '../../../tests/assets/coas/sc-labs'
-    # doc = f'{directory}/Mattole Valley Jack H.pdf'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(doc)
-    # assert lab == 'SC Labs'
-    # data = parse_sc_labs_pdf(parser, doc)
-    # assert data is not None
-    # print('Parsed:', doc)
-
-    # # [✓] TEST: Parse a SC Labs CoA PDF (with safety screening).
-    # directory = '../../../tests/assets/coas/sc-labs'
-    # doc = f'{directory}/Cherry Punch.pdf'
-    # parser = CoADoc()
-    # lab = parser.identify_lims(doc)
-    # assert lab == 'SC Labs'
-    # data = parse_sc_labs_pdf(parser, doc)
-    # assert data is not None
-    # print('Parsed:', doc)
+    print(f'\n{"="*60}')
+    print(f'Results: {success} OK, {fail} FAIL out of {success + fail}')

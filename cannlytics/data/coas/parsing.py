@@ -5,7 +5,7 @@ Copyright (c) 2024 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/14/2024
-Updated: 6/14/2024
+Updated: 9/12/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 # Standard imports:
@@ -16,10 +16,9 @@ from typing import Any, List, Optional, Union
 
 # External imports:
 from cannlytics.data.cache import Bogart
-from cannlytics.data.coas import CoADoc
-from cannlytics.logs import initialize_logs
+from cannlytics.data.coas import COAdoc
+from cannlytics.utils.logs import initialize_logs
 import numpy as np
-
 
 def extract_lines(
         lines: List[str],
@@ -70,7 +69,6 @@ def extract_lines(
 
     return lines[start_index:end_index]
 
-
 def get_coa_files(
         pdf_dir,
         min_file_size: Optional[int] = 21_000,
@@ -89,10 +87,9 @@ def get_coa_files(
                     filenames.append(file_path)
     return filenames
 
-
 def parse_coa_pdfs(
         pdfs: List[str],
-        parser: Optional[CoADoc] = None,
+        parser: Optional[COAdoc] = None,
         cache: Optional[Bogart] = None,
         reverse: Optional[bool] = False,
         key: Optional[str] = 'coa_pdf',
@@ -110,7 +107,7 @@ def parse_coa_pdfs(
             log_dir=log_dir,
         )
     all_results = []
-    if parser is None: parser = CoADoc()
+    if parser is None: parser = COAdoc()
     if logger: logger.info(f'Parsing {len(pdfs)} PDFs...')
     if reverse: pdfs = pdfs[::-1]
     for pdf in pdfs:
@@ -140,7 +137,6 @@ def parse_coa_pdfs(
                 cache.set(pdf_hash, error_data)
     return all_results
 
-
 def find_unique_analytes(df, analyses = [], key='key'):
     """Find unique analytes in a list of results."""
     analytes = set()
@@ -164,7 +160,6 @@ def find_unique_analytes(df, analyses = [], key='key'):
                 analytes.add(result[key])
     return analytes
 
-
 def parse_list_column(df, col):
     """Convert stringified list in `df[col]` to an actual Python list."""
     def safe_eval(x):
@@ -178,7 +173,6 @@ def parse_list_column(df, col):
         return []
     df[col] = df[col].apply(safe_eval)
     return df
-
 
 def process_less_than(x, delta = 0.01):
     """Replace values with "<" symbol with 0.01 less than the specified value."""

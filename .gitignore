@@ -42,3 +42,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Test and coverage output
+.coverage
+.coverage.*
+htmlcov/
+
+# Editor and local tools
+.vscode/
+.tools/

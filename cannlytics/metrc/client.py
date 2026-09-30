@@ -1,15 +1,24 @@
 """
 Metrc Client | Cannlytics
-Copyright (c) 2021-2023 Cannlytics
+Copyright (c) 2021-2026 Cannlytics
 
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 1/26/2023
-License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+Updated: 9/21/2026
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-This module contains the `Metrc` class responsible for communicating
-with the Metrc API.
+Description:
+    The `Metrc` class, responsible for communicating with the Metrc API.
+
+    This client speaks version 1 of the Metrc API. Metrc has been
+    retiring v1 state by state since December 31, 2024, in favour of
+    Metrc Connect (v2); check your state before relying on it. Version 2
+    support is the next milestone for this module.
+
+    Logging is off by default. With ``logs=True`` every request and
+    response, INCLUDING REQUEST BODIES, is written at DEBUG to an
+    owner-only file; bodies can carry patient and licensee identifiers.
 
 TODO: Implement the remaining Metrc functionality:
 
@@ -29,12 +38,12 @@ import tempfile
 # External imports.
 from pandas import read_excel
 from requests import Session
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 # Internal imports.
 from .constants import parameters, DEFAULT_HISTORY
 from .exceptions import MetrcAPIError
 from .models import (
-    Delivery,
     Category,
     Employee,
     Facility,
@@ -51,7 +60,6 @@ from .models import (
     Transfer,
     TransferTemplate,
     Transaction,
-    Waste,
 )
 from .urls import (
     METRC_API_BASE_URL,
@@ -81,18 +89,28 @@ from ..utils.utils import (
     get_timestamp,
 )
 
+# Seconds to wait for Metrc before giving up on a request.
+DEFAULT_TIMEOUT = 60
 
-class Metrc(object):
-    """An instance of this class communicates with the Metrc API."""
+class Metrc:
+    """An instance of this class communicates with the Metrc API.
+
+    Usable as a context manager, which closes the HTTP session and any
+    log file on exit:
+
+        with Metrc(vendor_api_key, user_api_key, state='ok') as track:
+            facilities = track.get_facilities()
+    """
 
     def __init__(
             self,
             vendor_api_key,
             user_api_key,
-            logs=True,
+            logs=False,
             primary_license='',
             state='ma',
             test=True,
+            timeout=DEFAULT_TIMEOUT,
         ):
         """Initialize a Metrc API client.
         Args:
@@ -103,11 +121,16 @@ class Metrc(object):
             user_api_key (str): Required user secret obtained
                 from a licensee's Metrc user interface. The user's permissions
                 determine the level of access to the Metrc API.
-            logs (bool): Whether or not to log Metrc API requests, True by default.
+            logs (bool): Whether or not to log Metrc API requests and
+                responses, request bodies included, to an owner-only file
+                in the system temp directory. False by default.
             primary_license (str): A license to use if no license is provided
                 on individual requests.
             state (str): The state of the licensee, Oklahoma (ok) by default.
             test (bool): Whether or not to use the test sandbox, True by default.
+            timeout (float): Seconds to wait for a response before raising
+                `requests.exceptions.Timeout`, 60 by default. `None` waits
+                forever and is not recommended.
 
         Example:
 
@@ -121,6 +144,9 @@ class Metrc(object):
         ```
         """
         self.logs = logs
+        self.logger = None
+        self.log_file = None
+        self.timeout = timeout
         self.parameters = parameters
         self.primary_license = primary_license
         self.default_time_period = DEFAULT_HISTORY
@@ -137,22 +163,43 @@ class Metrc(object):
         if logs:
             self.initialize_logs()
 
-
     def request(
             self,
             method,
             endpoint,
             data=None,
             params=None,
+            timeout=None,
         ):
-        """Make a request to the Metrc API."""
+        """Make a request to the Metrc API.
+        Args:
+            method (str): The HTTP method: `get`, `post`, `put`, or `delete`.
+            endpoint (str): The path of the endpoint, appended to the base URL.
+            data (dict or list): An optional JSON body.
+            params (dict): Optional query parameters.
+            timeout (float): Seconds to wait, overriding the client's `timeout`.
+        Returns:
+            (dict, list, or str): The decoded JSON response, or its text.
+        Raises:
+            MetrcAPIError: If the response status is not 200.
+            requests.exceptions.Timeout: If Metrc does not answer in time.
+        """
         url = self.base + endpoint
+        options = {
+            'json': data,
+            'params': params,
+            'timeout': self.timeout if timeout is None else timeout,
+        }
         try:
-            response = getattr(self.session, method)(url, json=data, params=params)
-        except ConnectionError:
+            response = self.session.request(method.upper(), url, **options)
+        except RequestsConnectionError:
+            # A dropped keep-alive connection: rebuild the session once.
+            # (The builtin ConnectionError is a sibling of the `requests`
+            # exception, not its parent, and never caught this.)
+            self.session.close()
             self.session = Session()
             self.session.auth = (self.vendor_api_key, self.user_api_key)
-            response = getattr(self.session, method)(url, json=data, params=params)
+            response = self.session.request(method.upper(), url, **options)
         if self.logs:
             self.create_log(response)
         if response.status_code == 200:
@@ -176,44 +223,65 @@ class Metrc(object):
                 params[key] = kwargs[param]
         return params
 
-
     def create_log(self, response):
         """Create a log given an HTTP response.
         Args:
             response (HTTPResponse): An HTTP request response.
         """
+        if self.logger is None:
+            self.initialize_logs()
+        self.logger.debug('Request: %s %s', response.request.method, response.request.url)
+        self.logger.debug('Body: %s', response.request.body)
+        self.logger.debug('Status code: %s', response.status_code)
         try:
-            self.logger.debug(f'Request: {response.request.method} {response.request.url}')
-            self.logger.debug(f'Body: {response.request.body}')
-            self.logger.debug(f'Status code: {response.status_code}')
-            try:
-                log = dumps(response.json())
-                self.logger.debug(f'Response: {log}')
-            except ValueError:
-                self.logger.debug(f'Response: {response.text}')
-        except KeyError:
-            raise MetrcAPIError({'message': '`logs=True` but no logger initialized. Use `client.initialize_logs()`.'})
-
+            self.logger.debug('Response: %s', dumps(response.json()))
+        except ValueError:
+            self.logger.debug('Response: %s', response.text)
 
     def initialize_logs(self):
-        """Initialize Metrc logs."""
+        """Initialize Metrc logs.
+
+        Configures only the `metrc` logger, never the application's root
+        logger, and writes to a new file that only its owner can read,
+        because request bodies can carry patient and licensee identifiers.
+        The path is kept in `log_file`.
+        """
+        self.close_logs()
         timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        temp_dir = tempfile.gettempdir()
-        temp_file = os.path.join(temp_dir, f'cannlytics-{timestamp}.log')
-        logging.getLogger('metrc').handlers.clear()
-        logging.basicConfig(
-            filename=temp_file,
-            filemode='w+',
-            level=logging.DEBUG,
-            format='%(asctime)s %(message)s',
-            datefmt='%Y-%m-%dT%H:%M:%S',
+        handle, self.log_file = tempfile.mkstemp(
+            prefix=f'cannlytics-metrc-{timestamp}-', suffix='.log',
         )
-        handler = logging.StreamHandler()
+        os.close(handle)  # `mkstemp` created it with mode 0o600.
+        handler = logging.FileHandler(self.log_file, encoding='utf-8')
         handler.setLevel(logging.DEBUG)
+        handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(message)s', datefmt='%Y-%m-%dT%H:%M:%S',
+        ))
         self.logger = logging.getLogger('metrc')
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False
         self.logger.addHandler(handler)
+        self._log_handler = handler
         self.logger.debug('Metrc initialized.')
 
+    def close_logs(self):
+        """Detach and close this client's log handler, if it has one."""
+        handler = getattr(self, '_log_handler', None)
+        if handler is not None:
+            logging.getLogger('metrc').removeHandler(handler)
+            handler.close()
+            self._log_handler = None
+
+    def close(self):
+        """Close the HTTP session and the log file."""
+        self.session.close()
+        self.close_logs()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.close()
 
     #-------------------------------------------------------------------
     # Facilities and employees
@@ -224,7 +292,6 @@ class Metrc(object):
         url = METRC_FACILITIES_URL
         response = self.request('get', url)
         return [Facility(self, x) for x in response]
-
 
     def get_facility(self, license_number=''):
         """Get a given facility by its license number."""
@@ -249,7 +316,6 @@ class Metrc(object):
         response = self.request('get', url, params=params)
         return [Employee(self, x) for x in response]
 
-
     #-------------------------------------------------------------------
     # Deliveries
     #-------------------------------------------------------------------
@@ -264,7 +330,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Return created deliveries.
-
 
     def get_deliveries(
             self,
@@ -310,7 +375,6 @@ class Metrc(object):
         except AttributeError:
             return [Receipt(self, x, license_number) for x in response]
 
-
     def get_return_reasons(self, license_number=''):
         """Get the possible return reasons for home delivery items.
         Args:
@@ -322,7 +386,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def complete_deliveries(self, data, license_number='', return_obs=False):
         """Complete home delivery(ies).
         Args:
@@ -333,7 +396,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
 
-
     def delete_delivery(self, uid, license_number=''):
         """Delete a home delivery.
         Args:
@@ -343,7 +405,6 @@ class Metrc(object):
         url = METRC_SALES_URL % f'delivery/{uid}'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     def update_deliveries(self, data, license_number=''):
         """Update home delivery(ies).
@@ -361,7 +422,6 @@ class Metrc(object):
     # - POST /sales/v1/deliveries/retailer/restock
     # - POST /sales/v1/deliveries/retailer/sale
     # - POST /sales/v1/deliveries/retailer/end
-
 
     #-------------------------------------------------------------------
     # Harvests
@@ -400,7 +460,6 @@ class Metrc(object):
             except AttributeError:
                 return response
 
-
     def finish_harvests(self, data, license_number='', return_obs=False):
         """Finish harvests.
         Args:
@@ -410,7 +469,6 @@ class Metrc(object):
         url = METRC_HARVESTS_URL % 'finish'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
-
 
     def unfinish_harvests(self, data, license_number='', return_obs=False):
         """Unfinish harvests.
@@ -422,7 +480,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
 
-
     def remove_waste(self, data, license_number='', return_obs=False):
         """Remove's waste from a harvest.
         Args:
@@ -433,7 +490,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
 
-
     def move_harvests(self, data, license_number='', return_obs=False):
         """Move a harvests.
         Args:
@@ -443,7 +499,6 @@ class Metrc(object):
         url = METRC_HARVESTS_URL % 'move'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
-
 
     def create_harvest_packages(self, data, license_number='', return_obs=False):
         """Create packages from a harvest.
@@ -456,7 +511,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return packages created.
 
-
     def create_harvest_testing_packages(self, data, license_number='', return_obs=False):
         """Create packages from a harvest for testing.
         Args:
@@ -467,7 +521,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return packages created.
-
 
     #-------------------------------------------------------------------
     # Items
@@ -487,7 +540,6 @@ class Metrc(object):
             return [Category(self, x, license_number) for x in response]
         except AttributeError:
             return response
-
 
     def get_item(
             self,
@@ -509,7 +561,6 @@ class Metrc(object):
             return response[0]
         except AttributeError:
             return response
-
 
     def get_items(
             self,
@@ -540,7 +591,6 @@ class Metrc(object):
             except AttributeError:
                 return response
 
-
     def create_item(self, data, license_number='', return_obs=False):
         """Create an item.
         Args:
@@ -557,7 +607,6 @@ class Metrc(object):
                     return item
             return None
         return response
-
 
     def create_items(self, data, license_number='', return_obs=False):
         """Create items.
@@ -581,7 +630,6 @@ class Metrc(object):
                         return_items.append(item)
             return return_items
 
-
     def update_item(self, data, license_number='', return_obs=False):
         """Update an item.
         Args:
@@ -590,7 +638,6 @@ class Metrc(object):
         """
         return self.update_items(self, [data], license_number)
         # TODO: Optionally return updated item.
-
 
     def update_items(self, data, license_number='', return_obs=False):
         """Update items.
@@ -603,7 +650,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated item.
 
-
     def delete_item(self, uid, license_number=''):
         """Delete item.
         Args:
@@ -613,7 +659,6 @@ class Metrc(object):
         url = METRC_ITEMS_URL % uid
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     # TODO: Implement new item endpoints:
     # - GET /items/v1/brands
@@ -642,7 +687,6 @@ class Metrc(object):
         except AttributeError:
             return response
 
-
     def get_lab_results(
             self,
             uid='',
@@ -661,7 +705,6 @@ class Metrc(object):
         response = self.request('get', url, params=params)
         return [LabResult(self, x) for x in response]
 
-
     def get_test_types(self, license_number=''):
         """Get required quality assurance analyses.
         Args:
@@ -671,7 +714,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def get_test_statuses(self, license_number=''):
         """Get pre-defined lab statuses.
         Args:
@@ -680,7 +722,6 @@ class Metrc(object):
         url = METRC_LAB_RESULTS_URL % 'states'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
-
 
     def post_lab_results(self, data, license_number='', return_obs=False):
         """Post lab result(s).
@@ -697,7 +738,6 @@ class Metrc(object):
         #     license_number=lab.license_number
         # )
 
-
     def upload_coas(self, data, license_number='', return_obs=False):
         """Upload lab result CoA(s).
         Args:
@@ -707,7 +747,6 @@ class Metrc(object):
         url = METRC_LAB_RESULTS_URL % 'labtestdocument'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
-
 
     def release_lab_results(self, data, license_number='', return_obs=False):
         """Release lab result(s).
@@ -736,7 +775,6 @@ class Metrc(object):
         )
         return self.request('get', url, params=params)
 
-
     #-------------------------------------------------------------------
     # Locations
     #-------------------------------------------------------------------
@@ -749,7 +787,6 @@ class Metrc(object):
         url = METRC_LOCATIONS_URL % 'types'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
-
 
     def get_location(
             self,
@@ -768,7 +805,6 @@ class Metrc(object):
             return response[0]
         except AttributeError:
             return response
-
 
     def get_locations(
             self,
@@ -794,9 +830,8 @@ class Metrc(object):
         except AttributeError:
             try:
                 return [Location(self, x, license_number) for x in response]
-            except:
+            except (AttributeError, TypeError):
                 return response
-
 
     def create_location(
             self,
@@ -816,8 +851,7 @@ class Metrc(object):
         return self.create_locations([name], [location_type], license_number)
         # TODO: Optionally return the created location.
 
-
-    def create_locations(self, names, types=[], license_number='', return_obs=False):
+    def create_locations(self, names, types=None, license_number='', return_obs=False):
         """Create location(s).
         Args:
             names (list): A list of locations (dict) to create.
@@ -826,6 +860,7 @@ class Metrc(object):
                 `default` is assigned by default.
             license_number (str): Optional license number filter.
         """
+        types = types or []
         data = []
         for index, name in enumerate(names):
             try:
@@ -841,7 +876,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created locations.
 
-
     def update_locations(self, data, license_number='', return_obs=False):
         """Update location(s).
         Args:
@@ -853,7 +887,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the updated location.
 
-
     def delete_location(self, uid, license_number=''):
         """Delete location.
         Args:
@@ -863,7 +896,6 @@ class Metrc(object):
         url = METRC_LOCATIONS_URL % uid
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     #-------------------------------------------------------------------
     # Packages
@@ -880,7 +912,6 @@ class Metrc(object):
         except AttributeError:
             return objs
 
-
     def get_package_types(self, license_number=''):
         """Get all facilities.
         Args:
@@ -889,7 +920,6 @@ class Metrc(object):
         url = METRC_PACKAGES_URL % 'types'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
-
 
     def get_package(
             self,
@@ -913,7 +943,6 @@ class Metrc(object):
             return response[0]
         except AttributeError:
             return response
-
 
     def get_packages(
             self,
@@ -952,7 +981,6 @@ class Metrc(object):
                 return [Package(self, x, license_number) for x in response]
             except AttributeError:
                 return response
-
 
     def create_package(
             self,
@@ -996,11 +1024,9 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return created packages.
 
-
     def update_package(self, data, license_number='', return_obs=False):
         """Update a given package."""
         return self.update_packages([data], license_number=license_number, return_obs=return_obs)
-
 
     def update_packages(self, data, license_number='', return_obs=False):
         """Update packages.
@@ -1013,7 +1039,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
 
-
     def change_package_items(self, data, license_number='', return_obs=False):
         """Update package items.
         Args:
@@ -1025,7 +1050,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
 
-
     def change_package_locations(self, data, license_number='', return_obs=False):
         """Update package item location(s).
         Args:
@@ -1036,7 +1060,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
-
 
     def manage_packages(self, data, action='adjust', license_number='', return_obs=False):
         """Adjust package(s).
@@ -1051,7 +1074,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
 
-
     def update_package_notes(self, data, license_number='', return_obs=False):
         """Update package note(s).
         Args:
@@ -1062,7 +1084,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return updated packages.
-
 
     def create_plant_batches_from_packages(self, data, license_number='', return_obs=False):
         """Create plant batch(es) from given package(s).
@@ -1075,14 +1096,12 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated packages.
 
-
     #-------------------------------------------------------------------
     # Patients
     #-------------------------------------------------------------------
 
     def get_patient(self, uid, license_number=''):
         return self.get_patients(uid, license_number=license_number)
-
 
     def get_patients(self, uid='', action='active', license_number=''):
         """Get licensee member patients.
@@ -1106,11 +1125,9 @@ class Metrc(object):
             except AttributeError:
                 return response
 
-
     def create_patient(self, data, license_number='', return_obs=False):
         """Create a given patient."""
         return self.create_patients([data], license_number, return_obs)
-
 
     def create_patients(self, data, license_number='', return_obs=False):
         """Create patient(s).
@@ -1122,7 +1139,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return created patient.
 
-
     def update_patients(self, data, license_number='', return_obs=False):
         """Update strain(s).
         Args:
@@ -1132,7 +1148,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return updated patients.
-
 
     def delete_patient(self, uid, license_number=''):
         """Delete patient.
@@ -1148,7 +1163,6 @@ class Metrc(object):
         """Get patient registration locations."""
         url = METRC_SALES_URL % f'patientregistration/locations'
         return self.request('get', url)
-
 
     #-------------------------------------------------------------------
     # Plant Batches
@@ -1174,7 +1188,6 @@ class Metrc(object):
                     return obs
             return None
         return response
-
 
     def create_plant_batches(self, data, license_number='', return_obs=False):
         """Create plant batches.
@@ -1202,14 +1215,12 @@ class Metrc(object):
                         return_obs.append(obs)
             return return_obs
 
-
     def get_batch_types(self, license_number=''):
         """Get plant batch types.
         Args:
             license_number (str): A specific license number.
         """
         return self.get_batches(action='types', license_number=license_number)
-
 
     def get_batches(
             self,
@@ -1244,7 +1255,6 @@ class Metrc(object):
             except AttributeError:
                 return response
 
-
     def manage_batches(self, data, action, license_number='', from_mother=False, return_obs=False):
         """Manage plant batch(es) by applying a given action.
         Args:
@@ -1261,7 +1271,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated or created objects.
 
-
     def add_batch_additives(self, data, license_number='', return_obs=False):
         """Add additives to a given batch."""
         if isinstance(data, dict):
@@ -1269,7 +1278,6 @@ class Metrc(object):
         else:
             objs = data
         return self.manage_batches(objs, 'additives', license_number or self.primary_license)
-
 
     def change_batch_growth_phase(self, data, license_number='', return_obs=False):
         """Change the growth phase of given batch(es)."""
@@ -1279,7 +1287,6 @@ class Metrc(object):
             objs = data
         return self.manage_batches(objs, 'changegrowthphase', license_number or self.primary_license)
 
-
     def create_plantings(self, data, license_number='', return_obs=False):
         """Create plantings from given batch."""
         if isinstance(data, dict):
@@ -1287,7 +1294,6 @@ class Metrc(object):
         else:
             objs = data
         return self.manage_batches(objs, 'createplantings', license_number or self.primary_license)
-
 
     def create_plant_package_from_batch(self, data, license_number='', from_mother_plant=False, return_obs=False):
         """Create a plant package from a batch.
@@ -1310,7 +1316,6 @@ class Metrc(object):
             objs = data
         return self.manage_batches(objs, 'destroy', license_number or self.primary_license)
 
-
     def move_batches(self, data, license_number='', return_obs=False):
         """Move plant batch(es).
         Args:
@@ -1321,7 +1326,6 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return moved plant batch.
 
-
     def split_batch(self, data, license_number='', return_obs=False):
         """Split a given batch.
         Args:
@@ -1331,7 +1335,6 @@ class Metrc(object):
         return self.split_batches([data], license_number=license_number)
         # TODO: Optionally return new batch.
 
-
     def split_batches(self, data, license_number='', return_obs=False):
         """Split multiple batches.
         Args:
@@ -1340,7 +1343,6 @@ class Metrc(object):
         """
         return self.manage_batches(data, action='split', license_number=license_number)
         # TODO: Optionally return new batches.
-
 
     #-------------------------------------------------------------------
     # Plants
@@ -1361,7 +1363,6 @@ class Metrc(object):
             label = data['PlantLabel']
             return self.get_plants(label=label, license_number=license_number)
         return response
-
 
     def create_plants(self, data, license_number='', return_obs=False):
         """Use a plant to create an immature plant batch.
@@ -1393,7 +1394,6 @@ class Metrc(object):
                         return_obs.append(obs)
             return return_obs
 
-
     def create_plant_package(self, data, license_number='', return_obs=False):
         """Create plant package.
         Args:
@@ -1401,7 +1401,6 @@ class Metrc(object):
             license_number (str): A specific license number.
         """
         return self.create_plant_packages([data], license_number)
-
 
     def create_plant_packages(self, data, license_number='', return_obs=False):
         """Create plant packages.
@@ -1412,7 +1411,6 @@ class Metrc(object):
         url = METRC_PLANTS_URL % 'create/plantbatch/packages'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
-
 
     def get_plants(
             self,
@@ -1453,7 +1451,6 @@ class Metrc(object):
             except AttributeError:
                 return response
 
-
     def manage_plants(self, data, action, license_number='', return_obs=False):
         """Manage plant(s) by applying a given action.
         Args:
@@ -1470,7 +1467,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return updated plants.
 
-
     def move_plants(self, data, license_number='', return_obs=False):
         """Move multiple plants.
         Args:
@@ -1480,31 +1476,25 @@ class Metrc(object):
         return self.manage_plants(data, action='moveplants', license_number=license_number)
         # TODO: Optionally return updated plants.
 
-
     def destroy_plants(self, data, license_number=''):
         """Destroy plants."""
         return self.manage_plants(data, action='destroyplants', license_number=license_number)
-
 
     def flower_plants(self, data, license_number='', return_obs=False):
         """Flower plants."""
         return self.manage_plants(data, action='changegrowthphases', license_number=license_number)
 
-
     def harvest_plants(self, data, license_number='', return_obs=False):
         """Harvest plants."""
         return self.manage_plants(data, action='harvestplants', license_number=license_number)
-
 
     def manicure_plants(self, data, license_number='', return_obs=False):
         """Manicure plants."""
         return self.manage_plants(data, action='manicureplants', license_number=license_number)
 
-
     def add_plant_additives(self, data, license_number='', return_obs=False):
         """Add additive(s) to given plant(s)."""
         return self.manage_plants(data, action='additives', license_number=license_number)
-
 
     def get_additive_types(self, license_number='', return_obs=False):
         """Get additive types."""
@@ -1516,9 +1506,7 @@ class Metrc(object):
         return self.get_plants(action='growthphases', license_number=license_number)
     
 
-
     # TODO: Implement endpoint: "additives/bylocation"
-
 
     #-------------------------------------------------------------------
     # Sales
@@ -1568,7 +1556,6 @@ class Metrc(object):
         except AttributeError:
             return [Receipt(self, x, license_number) for x in response]
 
-
     def get_transactions(
             self,
             license_number='',
@@ -1596,7 +1583,6 @@ class Metrc(object):
         except AttributeError:
             return [Transaction(self, x, license_number) for x in response]
 
-
     def get_customer_types(self, license_number=''):
         """Get all customer types.
         Args:
@@ -1608,7 +1594,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def create_receipt(self, data, license_number='', return_obs=False):
         """Create a receipt.
         Args:
@@ -1616,7 +1601,6 @@ class Metrc(object):
             license_number (str): A specific license number.
         """
         return self.create_receipts(data, license_number, return_obs)
-
 
     def create_receipts(self, data, license_number='', return_obs=False):
         """Create receipt(s).
@@ -1629,7 +1613,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created receipts.
 
-
     def update_receipts(self, data, license_number='', return_obs=False):
         """Update receipt(s).
         Args:
@@ -1641,7 +1624,6 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return the updated receipts.
 
-
     def delete_receipt(self, uid, license_number=''):
         """Delete receipt.
         Args:
@@ -1651,7 +1633,6 @@ class Metrc(object):
         url = METRC_SALES_URL % f'receipts/{uid}'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     def create_transactions(self, data, date=None, license_number='', return_obs=False):
         """Create transaction(s).
@@ -1669,7 +1650,6 @@ class Metrc(object):
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created transactions.
 
-
     def update_transactions(self, data, date=None, license_number='', return_obs=False):
         """Update transaction(s).
         Args:
@@ -1685,7 +1665,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return the updated transactions.
-
 
     #-------------------------------------------------------------------
     # Strains
@@ -1709,7 +1688,6 @@ class Metrc(object):
         except AttributeError:
             return [Strain(self, x, license_number) for x in response]
 
-
     def create_strain(self, data, license_number='', return_obs=False):
         """Create a strain.
         Args:
@@ -1728,7 +1706,6 @@ class Metrc(object):
         if response:
             return response[0]
         return response
-
 
     def create_strains(self, data, license_number='', return_obs=False):
         """Create strain(s).
@@ -1755,7 +1732,6 @@ class Metrc(object):
                         return_obs.append(obs)
             return return_obs
 
-
     def update_strain(self, data, license_number='', return_obs=False):
         """Update strain.
         Args:
@@ -1773,7 +1749,6 @@ class Metrc(object):
         if response:
             return response[0]
         return response
-
 
     def update_strains(self, data, license_number='', return_obs=False):
         """Update strain(s).
@@ -1797,7 +1772,6 @@ class Metrc(object):
                 return_obs.append(obs)
             return return_obs
 
-
     def delete_strain(self, uid, license_number=''):
         """Delete strain.
         Args:
@@ -1807,7 +1781,6 @@ class Metrc(object):
         url = METRC_STRAINS_URL % uid
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     #-------------------------------------------------------------------
     # Transfers
@@ -1841,7 +1814,6 @@ class Metrc(object):
         except AttributeError:
             return [Transfer(self, x, license_number) for x in response]
 
-
     def get_transfer_packages(self, uid, license_number='', action='packages'):
         """Get shipments.
         Args:
@@ -1857,7 +1829,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def get_transfer_types(self, license_number=''):
         """Get all transfer types.
         Args:
@@ -1870,9 +1841,8 @@ class Metrc(object):
         response = self.request('get', url, params=params)
         try:
             return [clean_dictionary(x, camel_to_snake) for x in response]
-        except:
+        except (AttributeError, TypeError):
             return response
-
 
     def get_package_statuses(self, license_number=''):
         """Get all package status choices.
@@ -1885,7 +1855,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def get_transporters(self, uid):
         """Get the data for a transporter.
         Args:
@@ -1894,7 +1863,6 @@ class Metrc(object):
         url = METRC_TRANSFERS_URL % f'{uid}/transporters'
         return self.request('get', url)
 
-
     def get_transporter_details(self, uid):
         """Get the details of the transporter driver and vehicle.
         Args:
@@ -1902,7 +1870,6 @@ class Metrc(object):
         """
         url = METRC_TRANSFERS_URL % f'{uid}/transporters/details'
         return self.request('get', url)
-
 
     def create_transfer(self, data, license_number='', return_obs=False):
         """Create a transfer.
@@ -1923,7 +1890,6 @@ class Metrc(object):
             return response[0]
         return response
 
-
     def create_transfers(self, data, license_number='', return_obs=False):
         """Create transfer(s).
         Args:
@@ -1938,7 +1904,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created transfers.
-
 
     def update_transfer(self, data, license_number='', return_obs=False):
         """Update a given transfer.
@@ -1957,7 +1922,6 @@ class Metrc(object):
         if response:
             return response[0]
         return response
-
 
     def update_transfers(self, data, license_number='', return_obs=False):
         """Update transfer(s).
@@ -1981,7 +1945,6 @@ class Metrc(object):
                 return_obs.append(obs)
             return return_obs
 
-
     def delete_transfer(self, uid, license_number=''):
         """Delete transfer.
         Args:
@@ -1991,7 +1954,6 @@ class Metrc(object):
         url = METRC_TRANSFERS_URL % f'external/incoming/{uid}'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     #-------------------------------------------------------------------
     # Transfer Templates
@@ -2032,7 +1994,6 @@ class Metrc(object):
         except AttributeError:
             return [TransferTemplate(self, x, license_number) for x in response]
 
-
     def create_transfer_templates(self, data, license_number='', return_obs=False):
         """Create transfer_template(s).
         Args:
@@ -2042,7 +2003,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('post', url, data=data, params=params)
         # TODO: Optionally return the created transfer templates.
-
 
     def update_transfer_templates(self, data, license_number='', return_obs=False):
         """Update transfer template(s).
@@ -2054,7 +2014,6 @@ class Metrc(object):
         return self.request('put', url, data=data, params=params)
         # TODO: Optionally return the updated transfer templates.
 
-
     def delete_transfer_template(self, uid, license_number=''):
         """Delete transfer template.
         Args:
@@ -2063,7 +2022,6 @@ class Metrc(object):
         url = METRC_TRANSFER_TEMPLATE_URL % uid
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('delete', url, params=params)
-
 
     #-------------------------------------------------------------------
     # Waste
@@ -2078,7 +2036,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def get_waste_reasons(self, license_number=''):
         """Get all waste reasons for plants for a given license.
         Args:
@@ -2088,7 +2045,6 @@ class Metrc(object):
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
 
-
     def get_waste_types(self, license_number=''):
         """Get all waste types for harvests for a given license.
         Args:
@@ -2097,7 +2053,6 @@ class Metrc(object):
         url = METRC_HARVESTS_URL % 'waste/types'
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
-
 
     #-------------------------------------------------------------------
     # Processing (new endpoint for NJ!)
@@ -2121,14 +2076,11 @@ class Metrc(object):
     # - GET /processing/v1/jobtypes/attributes
     # - GET /processing/v1/jobtypes/categories
 
-
     #-------------------------------------------------------------------
     # Miscellaneous
     #-------------------------------------------------------------------
 
-
     # TODO: GET /caregivers/v1/status/{caregiverLicenseNumber}
-
 
     def get_units_of_measure(self, license_number=''):
         """Get all units of measurement.
@@ -2140,7 +2092,6 @@ class Metrc(object):
         url = METRC_UOM_URL
         params = self.format_params(license_number=license_number or self.primary_license)
         return self.request('get', url, params=params)
-
 
     def import_tags(self, file_path, row_start=0, row_end=None, number=10):
         """Import plant and package tags.

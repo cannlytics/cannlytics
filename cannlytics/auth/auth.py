@@ -1,27 +1,27 @@
 """
 Authentication Logic | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2026 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 1/22/2021
-Updated: 8/24/2023
-License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+Updated: 9/21/2026
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
-Description: Authentication mechanisms for the Cannlytics API,
-specifically API request authentication and verification.
+Description:
+    Authentication mechanisms for the Cannlytics API, specifically API
+    request authentication and verification. Requires the `firebase`
+    extra. ``sha256_hmac`` lives in ``cannlytics.utils.hashing`` and is
+    re-exported here, so code that only needs the hash does not need
+    Firebase.
 """
-# Standard imports.
-import hmac
-from hashlib import sha256
-
-# Internal imports.
-from ..firebase import (
+# Internal imports:
+from cannlytics.firebase import (
     get_custom_claims,
     get_document,
     verify_session_cookie,
     verify_token,
 )
-
+from cannlytics.utils.hashing import sha256_hmac  # noqa: F401 (re-exported)
 
 def authenticate_request(request):
     """Verifies that the user has authenticated with a Firebase ID token
@@ -39,18 +39,17 @@ def authenticate_request(request):
         if session_cookie is None:
             session_cookie = request.session.get('__session')
         claims = verify_session_cookie(session_cookie, check_revoked=True)
-    except:
+    except Exception:
         try:
             authorization = request.META['HTTP_AUTHORIZATION']
             key = authorization.split(' ').pop()
             try:
                 claims = get_user_from_api_key(key)
-            except:
+            except Exception:
                 claims = verify_token(key)
-        except:
+        except Exception:
             pass
     return claims
-
 
 def get_user_from_api_key(api_key: str) -> dict:
     """Identify a user given an API key.
@@ -68,15 +67,3 @@ def get_user_from_api_key(api_key: str) -> dict:
     user_claims['permissions'] = key_data['permissions']
     user_claims['uid'] = uid
     return user_claims
-
-
-def sha256_hmac(secret, message):
-    """Create a SHA256-HMAC (hash-based message authentication code).
-    Args:
-        secret (str): A server-side app secret.
-        message (str): The client's secret.
-    Returns:
-        (str): An HMAC string.
-    Credit: https://stackoverflow.com/a/66958131/5021266
-    """
-    return hmac.new(bytes(secret, 'UTF-8'), message.encode(), sha256).hexdigest()

@@ -1,0 +1,42 @@
+# Source distribution contents.
+#
+# The WHEEL is governed by [tool.setuptools] in pyproject.toml; this
+# file governs the SDIST only. Without it, setuptools guesses, and the
+# guess has included build artifacts and local data in the past.
+
+include LICENSE
+include README.md
+include CHANGELOG.md
+include pyproject.toml
+recursive-include cannlytics py.typed
+recursive-include cannlytics *.md
+recursive-include tests *.py
+
+# ── Never ship these ─────────────────────────────────────────────
+exclude .env
+exclude .env.*
+# Later rules win, so the template is re-included after the exclusion.
+include .env.example
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.log
+global-exclude .DS_Store
+prune .github
+prune .venv
+prune .ruff_cache
+prune .pytest_cache
+prune docs/_build
+prune .datasets
+
+# COA PDF fixtures.
+#
+# These are third-party lab documents. Kentucky's were obtained through
+# a public records request and are public documents, so the constraint
+# here is practical rather than legal: a published sdist is permanent
+# and hard to retract, and a wheel is not the right distribution
+# channel for other labs' paperwork. Excluded unconditionally so that a
+# local working copy can never reach a distribution by accident.
+prune tests/test_coas/test_algorithms/cb
+prune tests/test_coas/test_algorithms/ky
+global-exclude *.pdf

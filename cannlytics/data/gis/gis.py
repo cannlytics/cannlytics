@@ -1,74 +1,102 @@
 """
 Geographic Information Systems (GIS) Data | Cannlytics
-Copyright (c) 2021-2022 Cannlytics and Cannlytics Contributors
+Copyright (c) 2021-2026 Cannlytics and Cannlytics Contributors
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/5/2021
-Updated: 7/3/2023
+Updated: 9/28/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
+    Geographic tools: state data and population from the Federal
+    Reserve's FRED, geocoding and place search with Google Maps, and
+    driving distance and routes between two points.
 
-    This script contains useful GIS functions.
-
+    The libraries are imported when a function needs them, so this
+    module always imports; a function whose library is missing names
+    the extra to install (``pip install "cannlytics[utils]"``).
 """
-# Standard imports.
+# Standard imports:
+import importlib
+import logging
+import os
+import re
 from datetime import datetime
 from time import sleep
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-# External imports.
+# External imports:
 from dotenv import dotenv_values
-from fredapi import Fred
-from googlemaps import Client, places
-import zipcodes
 
-# Internal imports.
-from cannlytics.firebase import initialize_firebase, get_document
+# Module logger. A library must not print to stdout.
+logger = logging.getLogger(__name__)
 
+def _require(module: str, extra: str = 'utils') -> Any:
+    """Import an optional library, or say which extra provides it."""
+    try:
+        return importlib.import_module(module)
+    except ImportError as error:
+        raise ImportError(f'{module} is needed here: pip install "cannlytics[{extra}]"') from error
 
-def get_google_maps_api_key() -> str:
-    """Get Google Maps API key.
+# === Google Maps API key ===
+
+def _key_from_secret_manager() -> Optional[str]:
+    """The key from Google Secret Manager, in the default credentials' project."""
+    import google.auth
+    from cannlytics.firebase import access_secret_version
+    _, project_id = google.auth.default()
+    return access_secret_version(project_id=project_id, secret_id='GOOGLE_MAPS_API_KEY', version_id='latest')
+
+def _key_from_firestore() -> Optional[str]:
+    """The key from the Firestore document ``admin/google``."""
+    from cannlytics.firebase import get_document, initialize_firebase
+    data = get_document('admin/google', database=initialize_firebase())
+    return (data or {}).get('google_maps_api_key')
+
+def get_google_maps_api_key(env_file: str = '.env') -> str:
+    """Find a Google Maps API key.
+
+    Looks, in order, in the environment variable ``GOOGLE_MAPS_API_KEY``,
+    in ``env_file`` (read, not loaded: the environment is not changed),
+    in Google Secret Manager, and in the Firestore document
+    ``admin/google``. The last two need ``cannlytics[firebase]`` and
+    credentials; their failures are logged, not raised.
+
     Returns:
-        (str): Returns the Google Maps API key stored
-            in a local .env file, Google Secret Manager, or Firestore.
+        The key.
+
+    Raises:
+        RuntimeError: If no source has one.
     """
-    import os
-    from dotenv import load_dotenv
-    
-    # Try to get the key from .env file.
-    load_dotenv()
-    google_maps_api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    if google_maps_api_key:
-        return google_maps_api_key
+    key = os.environ.get('GOOGLE_MAPS_API_KEY')
+    if key:
+        return key
+    if env_file and os.path.exists(env_file):
+        key = dotenv_values(env_file).get('GOOGLE_MAPS_API_KEY')
+        if key:
+            return key
+    for name, source in (('Secret Manager', _key_from_secret_manager), ('Firestore', _key_from_firestore)):
+        try:
+            key = source()
+        except Exception as error:
+            logger.warning('No Google Maps API key from %s: %s', name, error)
+            continue
+        if key:
+            return key
+    raise RuntimeError(
+        'No Google Maps API key: set GOOGLE_MAPS_API_KEY in the environment or in '
+        f'{env_file!r}, or store it in Secret Manager or Firestore (admin/google).'
+    )
 
-    # Try to get the key from Google Secret Manager.
-    try:
-        from cannlytics.firebase import access_secret_version
-        import google.auth
-        _, project_id = google.auth.default()
-        google_maps_api_key = access_secret_version(
-            project_id=project_id,
-            secret_id='GOOGLE_MAPS_API_KEY',
-            version_id='latest',
-        )
-        if google_maps_api_key:
-            return google_maps_api_key
-    except Exception as e:
-        print(f"Failed to get Google Maps API key from Secret Manager: {e}")
+def initialize_googlemaps(env_file: Optional[str] = './.env') -> Any:
+    """A Google Maps client, keyed from ``env_file`` or ``get_google_maps_api_key``."""
+    googlemaps = _require('googlemaps')
+    key = None
+    if env_file and os.path.exists(env_file):
+        key = dotenv_values(env_file).get('GOOGLE_MAPS_API_KEY')
+    return googlemaps.Client(key=key or get_google_maps_api_key())
 
-    # Try to get the key from Firestore.
-    try:
-        database = initialize_firebase()
-        data = get_document('admin/google', database=database)
-        if data and 'google_maps_api_key' in data:
-            return data['google_maps_api_key']
-    except Exception as e:
-        print(f"Failed to get Google Maps API key from Firestore: {e}")
-
-    # Raise an exception if the key is not found.
-    raise Exception("Failed to get Google Maps API key")
-
+# === FRED ===
 
 def get_state_data(
         state: str,
@@ -77,25 +105,28 @@ def get_state_data(
         district: Optional[str] = '',
         obs_start: Optional[Any] = None,
         obs_end: Optional[Any] = None,
-    ) -> dict:
-    """Get a given state's data from the Fed Fred API, given a data code.
-    Args:
-        state (str): The state abbreviation for the state to retrieve data.
-        code (str): The FRED code for the data, for example "POP".
-        fred_api_key (str): A Fed FRED API key. You can sign up for a free API key at
-            http://research.stlouisfed.org/fred2/. You can also pass `None`
-            and set the environment variable 'FRED_API_KEY' to the value of
-            your API key.
-    Returns:
-        (dict): Returns a dictionary with population values and source.
-    """
-    fred = Fred(api_key=fred_api_key)
-    code = f'{state.upper()}{code.upper()}{district.upper()}'
-    series = fred.get_series(code, obs_start, obs_end)
-    if len(series) == 1:
-        return series[0]
-    return series
+    ) -> Any:
+    """A state's series from FRED, by series code.
 
+    Args:
+        state: The state's abbreviation, in either case.
+        code: The FRED code after the state, for example ``'POP'``.
+        fred_api_key: A FRED API key (free at
+            https://fred.stlouisfed.org/docs/api/api_key.html), or
+            ``None`` to use the environment variable ``FRED_API_KEY``.
+        district: A suffix some series take.
+        obs_start: The first observation date.
+        obs_end: The last observation date.
+
+    Returns:
+        The single value if the series has one observation, else the
+        series (a pandas Series indexed by date).
+    """
+    fredapi = _require('fredapi')
+    series = fredapi.Fred(api_key=fred_api_key).get_series(
+        f'{state.upper()}{code.upper()}{(district or "").upper()}', obs_start, obs_end,
+    )
+    return series.iloc[0] if len(series) == 1 else series
 
 def get_state_population(
         state: str,
@@ -104,196 +135,201 @@ def get_state_population(
         obs_start: Optional[Any] = None,
         obs_end: Optional[Any] = None,
         multiplier: Optional[float] = 1000.0,
-    ) -> dict:
-    """Get a given state's latest population from the Fed Fred API,
-    getting the number in 1000's and returning the absolute value.
-    Args:
-        state (str): The state abbreviation for the state to retrieve
-            population data. The abbreviation can be upper or lower case.
-        fred_api_key (str): A Fed FRED API key. You can sign up for a free API key at
-            http://research.stlouisfed.org/fred2/. You can also pass `None`
-            and set the environment variable 'FRED_API_KEY' to the value of
-            your API key.
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    """A state's resident population from FRED (series ``<STATE>POP``).
+
+    FRED reports thousands of people; ``multiplier`` converts them.
+    Missing observations are skipped.
+
     Returns:
-        (dict): Returns a dictionary with population values and source.
+        One dictionary (the latest observation, by default) or a list,
+        each with ``population``, ``population_formatted``,
+        ``population_source_code``, ``population_source``, and
+        ``population_at`` (ISO date).
     """
-    pops = []
-    fred = Fred(api_key=fred_api_key)
-    code = f'{state.upper()}POP{district.upper()}'
-    series = fred.get_series(code, obs_start, obs_end)
+    fredapi = _require('fredapi')
+    code = f'{state.upper()}POP{(district or "").upper()}'
+    series = fredapi.Fred(api_key=fred_api_key).get_series(code, obs_start, obs_end)
+    observations = []
     for index, value in series.items():
-        real_pop = int(value * multiplier)
-        pops.append({
-            'population': real_pop,
-            'population_formatted': f'{real_pop:,}',
+        if value != value:  # NaN: no observation
+            continue
+        population = int(round(value * multiplier))
+        observations.append({
+            'population': population,
+            'population_formatted': f'{population:,}',
             'population_source_code': code,
             'population_source': f'https://fred.stlouisfed.org/series/{code}',
             'population_at': index.isoformat()[:10],
         })
-    if len(pops) == 1:
-        return pops[0]
-    return pops
+    return observations[0] if len(observations) == 1 else observations
 
+# === Google Maps ===
 
 def geocode_addresses(
-        data,
+        data: Any,
         api_key: Optional[str] = None,
         pause: Optional[float] = 0.0,
         address_field: Optional[str] = '',
     ) -> Any:
-    """Geocode addresses in a dataframe.
+    """Geocode the addresses in a DataFrame, in place.
+
     Args:
-        data (DataFrame): A DataFrame containing the addresses to geocode.
-        api_key (str): A Google Maps API key.
-        pause (float): An optional pause to wait between requests, 0.0 by default.
-        address_field (str): An optional field to specify the address field,
-            otherwise assumes the DataFrame has `street`, `city`, `state`,
-            and `zip_code` columns.
+        data: The DataFrame. Without ``address_field`` it needs
+            ``street``, ``city``, ``state``, and ``zip_code`` columns.
+        api_key: A Google Maps API key (default: ``get_google_maps_api_key``).
+        pause: Seconds to wait between requests.
+        address_field: A column holding whole addresses.
+
     Returns:
-        (DataFrame): Returns the DataFrame with `latitude`, `longitude`,
-        and `formatted_address` columns.
+        The same DataFrame, with ``formatted_address``, ``latitude``,
+        ``longitude``, ``state`` (overwritten with Google's code),
+        ``state_name``, and ``county`` filled where Google finds the address.
     """
-    if api_key is None:
-        api_key = get_google_maps_api_key()
-    gmaps = Client(key=api_key)
-    for index, item in data.iterrows():
-        if index and pause:
+    googlemaps = _require('googlemaps')
+    client = googlemaps.Client(key=api_key or get_google_maps_api_key())
+    for position, (index, item) in enumerate(data.iterrows()):
+        if position and pause:
             sleep(pause)
-        if address_field:
-            address = item[address_field]
-        else:
-            address = f'{item.street}, {item.city}, {item.state} {item.zip_code}'
-        geocode_result = gmaps.geocode(address)
-        if geocode_result:
-            data.at[index, 'formatted_address'] = geocode_result[0]['formatted_address']
-            location = geocode_result[0]['geometry']['location']
-            data.at[index, 'latitude'] = location['lat']
-            data.at[index, 'longitude'] = location['lng']
-            for info in geocode_result[0]['address_components']:
-                key = info['types'][0]
-                if key == 'administrative_area_level_1':
-                    data.at[index, 'state'] = info['short_name']
-                    data.at[index, 'state_name'] = info['long_name']
-                if key == 'administrative_area_level_2':
-                    data.at[index, 'county'] = info['long_name']
+        address = item[address_field] if address_field else f'{item.street}, {item.city}, {item.state} {item.zip_code}'
+        results = client.geocode(address)
+        if not results:
+            continue
+        result = results[0]
+        data.at[index, 'formatted_address'] = result['formatted_address']
+        data.at[index, 'latitude'] = result['geometry']['location']['lat']
+        data.at[index, 'longitude'] = result['geometry']['location']['lng']
+        for component in result['address_components']:
+            kind = component['types'][0] if component['types'] else ''
+            if kind == 'administrative_area_level_1':
+                data.at[index, 'state'] = component['short_name']
+                data.at[index, 'state_name'] = component['long_name']
+            elif kind == 'administrative_area_level_2':
+                data.at[index, 'county'] = component['long_name']
     return data
 
+_STATE_ZIP = re.compile(r'^([A-Z]{2})(?:\s+(\d{5}(?:-\d{4})?))?$')
+
+def parse_formatted_address(formatted_address: str) -> Dict[str, str]:
+    """Split a Google formatted address into street, city, state, and ZIP code.
+
+    ``'1 Main St, Suite 5, Lacey, WA 98503, USA'`` gives street
+    ``'1 Main St, Suite 5'``, city ``'Lacey'``, state ``'WA'``, and
+    zipcode ``'98503'``. Parts that are not there are left out.
+    """
+    parts = [part.strip() for part in formatted_address.split(',') if part.strip()]
+    if parts and parts[-1] in ('USA', 'United States'):
+        parts = parts[:-1]
+    parsed = {}
+    match = _STATE_ZIP.match(parts[-1]) if parts else None
+    if not match:
+        return parsed
+    parsed['state'] = match.group(1)
+    if match.group(2):
+        parsed['zipcode'] = match.group(2)
+    if len(parts) >= 2:
+        parsed['city'] = parts[-2]
+    if len(parts) >= 3:
+        parsed['street'] = ', '.join(parts[:-2])
+    return parsed
 
 def search_for_address(
         query: str,
         api_key: Optional[str] = None,
         fields: Optional[List[str]] = None,
-    ) -> dict:
-    """Search for the address of a given name.
+    ) -> Dict[str, Any]:
+    """Find the address of a place by name with Google Places.
+
     Args:
-        query (str): The text to use to search for an address.
-        api_key (): Optional, None by default.
-        fields (list): Optional, `formatted_address` is included by default.
+        query: The text to search for, such as a business name and city.
+        api_key: A Google Maps API key (default: ``get_google_maps_api_key``).
+        fields: Place fields to request (default: the formatted address
+            and location).
+
     Returns:
-        (list): A list of potential results.
+        The place's fields, with ``latitude`` and ``longitude`` and,
+        from the formatted address, ``street``, ``city``, ``state``,
+        ``zipcode``, and ``county`` (``''`` when unknown).
+
     Raises:
-        (IndexError): Raises an `IndexError` if no candidate is found.
+        IndexError: If no place matches.
     """
-    if api_key is None:
-        api_key = get_google_maps_api_key()
-    if fields is None:
-        fields = [
-            'formatted_address',
-            'geometry/location/lat',
-            'geometry/location/lng',
-        ]
-    gmaps = Client(key=api_key)
-    search = places.find_place(gmaps, query, 'textquery')
-    place_id = search['candidates'][0]['place_id']
-    place = places.place(gmaps, place_id, fields=fields)
-    result = place['result']
+    googlemaps = _require('googlemaps')
+    places = importlib.import_module('googlemaps.places')
+    client = googlemaps.Client(key=api_key or get_google_maps_api_key())
+    fields = fields or ['formatted_address', 'geometry/location/lat', 'geometry/location/lng']
+    search = places.find_place(client, query, 'textquery')
+    place = places.place(client, search['candidates'][0]['place_id'], fields=fields)
+    result = dict(place['result'])
     candidate = {}
-    if result.get('geometry'):
-        location = result['geometry']['location']
-        candidate['latitude'] = location['lat']
-        candidate['longitude'] = location['lng']
-        del result['geometry']
+    geometry = result.pop('geometry', None)
+    if geometry:
+        candidate['latitude'] = geometry['location']['lat']
+        candidate['longitude'] = geometry['location']['lng']
     if result.get('formatted_address'):
-        formatted_address = result['formatted_address']
-        parts = formatted_address.split(',')
-        if len(parts) == 4:
-            candidate['street'] = parts[0]
-            candidate['city'] = parts[1].strip()
-            candidate['state'], candidate['zipcode'] = tuple(parts[2].strip().split(' '))
-        else:
-            candidate['city'] = parts[0].strip()
-            candidate['state'], candidate['zipcode'] = tuple(parts[1].strip().split(' '))
-        try:
-            candidate['county'] = zipcodes.matching(candidate['zipcode'])[0]['county']
-        except:
-            candidate['county'] = ''
+        candidate.update(parse_formatted_address(result['formatted_address']))
+        candidate['county'] = ''
+        if candidate.get('zipcode'):
+            try:
+                matches = _require('zipcodes').matching(candidate['zipcode'])
+                candidate['county'] = matches[0]['county'] if matches else ''
+            except (ImportError, ValueError, TypeError) as error:
+                logger.debug('No county for %s: %s', candidate['zipcode'], error)
     return {**result, **candidate}
 
-
 def get_transfer_distance(
-        api_key,
-        start,
-        end,
-        mode='driving',
-) -> Tuple[int, int]:
-    """Get the distance and duration of a transfer.
-    Args:
-        client (Client): A googlemaps API client.
-        start (string): The starting point, either lat,long as a string or an address.
-        end (string): The ending point, either lat,long as a string or an address.
-        mode (string): The transportation method, driving by default.
-    Returns:
-        (int, int): Returns a tuple of the distance in kilometers and the
-            duration in seconds.
-    """
-    client = Client(key=api_key)
-    driving_distances = client.distance_matrix(start, end, mode=mode)
-    elements = driving_distances['rows'][0]['elements'][0]
-    km = elements['distance']['value']
-    duration = elements['duration']['value']
-    return km, duration
+        api_key: str,
+        start: str,
+        end: str,
+        mode: str = 'driving',
+    ) -> Tuple[int, int]:
+    """The distance and travel time between two places.
 
+    Args:
+        api_key: A Google Maps API key.
+        start: The origin, as ``'lat,long'`` or an address.
+        end: The destination, likewise.
+        mode: ``'driving'`` (default), ``'walking'``, ``'bicycling'``,
+            or ``'transit'``.
+
+    Returns:
+        ``(meters, seconds)``.
+    """
+    googlemaps = _require('googlemaps')
+    matrix = googlemaps.Client(key=api_key).distance_matrix(start, end, mode=mode)
+    element = matrix['rows'][0]['elements'][0]
+    return element['distance']['value'], element['duration']['value']
 
 def get_transfer_route(
-        api_key,
-        start,
-        end,
-        departure_time=None,
-        mode='driving',
-) -> str:
-    """Get the route of a transfer.
+        api_key: str,
+        start: str,
+        end: str,
+        departure_time: Optional[datetime] = None,
+        mode: str = 'driving',
+    ) -> Tuple[int, int, str]:
+    """The route between two places.
+
     Args:
-        client (Client): A googlemaps API client.
-        start (string): The starting point, either lat,long as a string or an address.
-        end (string): The ending point, either lat,long as a string or an address.
-        departure_time (datetime): The time of departure, defaults to now (optional).
-        mode (string): The transportation method, driving by default (optional).
+        api_key: A Google Maps API key.
+        start: The origin, as ``'lat,long'`` or an address.
+        end: The destination, likewise.
+        departure_time: When to leave (default: now).
+        mode: ``'driving'`` (default), ``'walking'``, ``'bicycling'``,
+            or ``'transit'``.
+
     Returns:
-        (str): Returns the route as a polyline string.
+        ``(meters, seconds, polyline)``, the polyline in Google's
+        encoded format.
     """
-    client = Client(key=api_key)
-    if departure_time is None:
-        departure_time = datetime.now()
-    driving_directions = client.directions(
-        start,
-        end,
-        mode=mode,
-        departure_time=departure_time
+    googlemaps = _require('googlemaps')
+    directions = googlemaps.Client(key=api_key).directions(
+        start, end, mode=mode, departure_time=departure_time or datetime.now(),
     )
-    m = driving_directions[0]['legs'][0]['distance']['value']
-    min = driving_directions[0]['legs'][0]['duration']['value']
-    polyline = driving_directions[0]['overview_polyline']['points']
-    return m, min, polyline
+    leg = directions[0]['legs'][0]
+    return leg['distance']['value'], leg['duration']['value'], directions[0]['overview_polyline']['points']
 
-
-def initialize_googlemaps(env_file: Optional[str] = './.env') -> Any:
-    """Initialize the Google Maps client.
-    Args:
-        env_file (str): A file path to a .env file with a `GOOGLE_MAPS_API_KEY`
-            environment variable.
-    Returns:
-        (Client): A googlemaps API client.
-    """
-    config = dotenv_values(env_file)
-    google_maps_api_key = config['GOOGLE_MAPS_API_KEY']
-    return Client(key=google_maps_api_key)
+__all__ = [
+    'geocode_addresses', 'get_google_maps_api_key', 'get_state_data', 'get_state_population',
+    'get_transfer_distance', 'get_transfer_route', 'initialize_googlemaps', 'parse_formatted_address',
+    'search_for_address',
+]

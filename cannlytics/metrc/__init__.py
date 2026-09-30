@@ -1,10 +1,12 @@
 """
 Cannlytics Metrc Client Initialization | Cannlytics
-Copyright (c) 2021-2022 Cannlytics
+Copyright (c) 2021-2026 Cannlytics
 
-Authors: Keegan Skeate <https://github.com/keeganskeate>
+Authors:
+    Keegan Skeate <https://github.com/keeganskeate>
 Created: 11/6/2021
-Updated: 1/14/2023
+Updated: 9/21/2026
+License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 """
 from typing import Any, Optional
 from .client import Metrc
@@ -29,7 +31,6 @@ from .models import (
     Transaction,
     Waste,
 )
-
 
 def initialize_metrc(
         vendor_api_key: str,
@@ -60,26 +61,28 @@ def initialize_metrc(
         state=state,
     )
 
+# Strings, not objects: `from cannlytics.metrc import *` raises
+# `TypeError: Item in __all__ must be str` otherwise.
 __all__ = [
-    initialize_metrc,
-    Metrc,
-    MetrcAPIError,
-    Delivery,
-    Category,
-    Employee,
-    Facility,
-    Item,
-    Location,
-    Harvest,
-    Package,
-    Patient,
-    Plant,
-    PlantBatch,
-    LabResult,
-    Receipt,
-    Strain,
-    Transfer,
-    TransferTemplate,
-    Transaction,
-    Waste,
+    'initialize_metrc',
+    'Metrc',
+    'MetrcAPIError',
+    'Delivery',
+    'Category',
+    'Employee',
+    'Facility',
+    'Item',
+    'Location',
+    'Harvest',
+    'Package',
+    'Patient',
+    'Plant',
+    'PlantBatch',
+    'LabResult',
+    'Receipt',
+    'Strain',
+    'Transfer',
+    'TransferTemplate',
+    'Transaction',
+    'Waste',
 ]
