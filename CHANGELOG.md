@@ -75,9 +75,8 @@ been falling back past its first provider on every call.
 ### Fixed: privacy and web tools
 
 - `create_user` no longer sets a `robohash.org/<email>` photo URL,
-  which disclosed each user's e-mail address to a third party whenever
-  the avatar was shown; `tools/clear_robohash_photos.py` clears the
-  URLs already stored (a dry run unless `--apply`).
+  which would disclose each user's e-mail address to a third party whenever
+  the avatar was shown; No `robohash.org/<email>` URLs were stored.
 - `cannlytics.data.web`: `get_page_email` never returned from its
   fallback and took `logo@2x.png` for an address; the metadata getters
   read `name` attributes as `property`; Edge started with Chrome's
