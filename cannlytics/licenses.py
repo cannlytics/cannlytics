@@ -230,9 +230,12 @@ def license_match_level(left: Any, right: Any, state: Optional[str] = None) -> O
 def categorize_license_type(license_type: Any) -> str:
     """Fold a jurisdiction's license type into one of the categories.
 
-    The first keyword found decides, in the table's order, so a
-    ``'Retail Dispensary and Cultivation'`` is retail (the table lists
-    the specific before the general).
+    The first keyword found decides, in the table's order, and the
+    table lists the specific before the general: a ``'Microbusiness
+    Retailer'`` is a microbusiness. A state's own vocabulary can still
+    need its own mapping (Arizona's "Marijuana Establishment" is a
+    storefront); keep such a crosswalk with the data and use this as
+    the suggestion for terms it lacks.
 
     Args:
         license_type: The type as the regulator names it.

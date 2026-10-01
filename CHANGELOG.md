@@ -16,6 +16,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] — Unreleased
 
+### Changed
+
+- License categories: `Delivery` (to consumers, including couriers),
+  `Nursery` (propagation) and `Research and Development` join the
+  vocabulary. "Retail Delivery" and couriers were Distribution/Transport;
+  nurseries were Cultivation.
+- `categorize_license_type` puts the specific before the general, as its
+  documentation said: `microbusiness` and `vertically integrated` now
+  win over the activity words they appear with, so Missouri's
+  "microbusiness-retailer" and "microbusiness-wholesale" are both
+  microbusinesses. It also knows agency terms that named no keyword:
+  Michigan's "Safety Compliance Facility" (a laboratory) and
+  "Provisioning Center", "Compassion Center", "Treatment Center" and
+  Florida's "MMTC", Hawaii's "Production Center", Massachusetts'
+  "Cooperative", "Producer", "Courier" and "Wholesaler". A dataset with
+  its own crosswalk (cannabis_licenses) should still map each agency
+  term explicitly; this is the suggestion for terms it lacks.
+
 ### Fixed
 
 - `get_file_url` signs on Cloud Run, Cloud Functions, and Compute

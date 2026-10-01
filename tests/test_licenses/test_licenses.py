@@ -92,7 +92,7 @@ class TestTypesAndStatuses:
         ('Retail', 'Retail/Dispensary'), ('Adult-Use Retailer', 'Retail/Dispensary'), ('Medical Dispensary', 'Retail/Dispensary'),
         ('Cultivator - Tier 2', 'Cultivation'), ('Grower', 'Cultivation'), ('Manufacturer', 'Manufacturing/Processing'),
         ('Processor', 'Manufacturing/Processing'), ('Testing Laboratory', 'Testing Laboratory'), ('Lab', 'Testing Laboratory'),
-        ('Distributor', 'Distribution/Transport'), ('Delivery', 'Distribution/Transport'),
+        ('Distributor', 'Distribution/Transport'), ('Delivery', 'Delivery'),
         ('Microbusiness', 'Microbusiness'), ('Vertically Integrated', 'Vertically Integrated'),
         ('Event Organizer', 'Other/Unclassified'), (None, 'Other/Unclassified'), ('N/A', 'Other/Unclassified'),
     ])
@@ -140,3 +140,39 @@ class TestMergeCascade:
         raw = 'MMTC-2015-0001'
         license_match_level(raw, 'MMTC20150001', 'fl')
         assert normalize_license_number(raw) == raw
+
+
+# Agency terms that named no keyword or met a general one first; from
+# the cannabis_licenses review (DEV-2026-0912, D7).
+@pytest.mark.parametrize('license_type, category', [
+    ('Safety Compliance Facility', 'Testing Laboratory'),
+    ('Provisioning Center', 'Retail/Dispensary'),
+    ('Compassion Center', 'Retail/Dispensary'),
+    ('Medical Marijuana Treatment Center', 'Vertically Integrated'),
+    ('Medical - MMTC', 'Vertically Integrated'),
+    ('Medical Production Center', 'Cultivation'),
+    ('Craft Marijuana Cooperative', 'Cultivation'),
+    ('Wholesaler', 'Distribution/Transport'),
+    ('Marijuana Courier', 'Delivery'),
+    ('Retail Delivery', 'Delivery'),
+    ('Cultivation Nursery', 'Nursery'),
+    ('Marijuana Research Facility', 'Research and Development'),
+    ('Microbusiness Delivery', 'Microbusiness'),
+    ('Licensed Producer Registration', 'Cultivation'),
+    # Siblings stay together: the specific term comes first.
+    ('microbusiness-wholesale', 'Microbusiness'),
+    ('microbusiness-retailer', 'Microbusiness'),
+    ('Vertically Integrated Cultivation', 'Vertically Integrated'),
+    # General terms keep their precedence.
+    ('Cooperative Retail', 'Retail/Dispensary'),
+    ('Retail Dispensary and Cultivation', 'Cultivation'),
+    ('Producer Tier 2', 'Cultivation'),
+])
+def test_agency_terms(license_type, category):
+    assert categorize_license_type(license_type) == category
+
+
+def test_every_keyword_maps_to_a_category():
+    from cannlytics.constants import LICENSE_CATEGORIES, LICENSE_TYPE_KEYWORDS
+    assert set(LICENSE_TYPE_KEYWORDS.values()) <= set(LICENSE_CATEGORIES)
+

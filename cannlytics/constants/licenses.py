@@ -24,10 +24,13 @@ from typing import Dict, List
 class LicenseCategory(str, Enum):
     """The categories every jurisdiction's license types fold into."""
     CULTIVATION = 'Cultivation'
+    NURSERY = 'Nursery'                        # propagation: clones, immature plants, seeds
     RETAIL = 'Retail/Dispensary'
+    DELIVERY = 'Delivery'                      # to consumers, including couriers
     MANUFACTURING = 'Manufacturing/Processing'
-    DISTRIBUTION = 'Distribution/Transport'
+    DISTRIBUTION = 'Distribution/Transport'    # between businesses, including wholesalers
     TESTING = 'Testing Laboratory'
+    RESEARCH = 'Research and Development'      # research, and education with plants
     MICROBUSINESS = 'Microbusiness'
     INTEGRATED = 'Vertically Integrated'
     OTHER = 'Other/Unclassified'
@@ -38,6 +41,25 @@ LICENSE_CATEGORIES: List[str] = [category.value for category in LicenseCategory]
 # found in a license type decides, so the specific come before the
 # general. See `cannlytics.licenses.categorize_license_type`.
 LICENSE_TYPE_KEYWORDS: Dict[str, str] = {
+    # Specific terms first. A microbusiness or vertically integrated
+    # license is that, whatever else its name lists ("Microbusiness
+    # Retailer", "Vertically Integrated Cultivation").
+    'microbusiness': 'Microbusiness',
+    'vertically integrated': 'Vertically Integrated',
+    # Agency terms that name no activity keyword.
+    'safety compliance': 'Testing Laboratory',      # Michigan's laboratories
+    'provisioning center': 'Retail/Dispensary',     # Michigan's medical dispensaries
+    'compassion center': 'Retail/Dispensary',       # Rhode Island, Delaware
+    'treatment center': 'Vertically Integrated',    # Massachusetts and Florida medical
+    'mmtc': 'Vertically Integrated',                # Florida's treatment centers
+    # Activities with their own category, ahead of the general terms
+    # they appear with ("Cultivation Nursery", "Retail Delivery").
+    'nursery': 'Nursery',
+    'delivery': 'Delivery',
+    'courier': 'Delivery',
+    'research': 'Research and Development',
+    'r&d': 'Research and Development',
+    # Cultivation.
     'cultivation': 'Cultivation',
     'cultivator': 'Cultivation',
     'grower': 'Cultivation',
@@ -45,30 +67,37 @@ LICENSE_TYPE_KEYWORDS: Dict[str, str] = {
     'indoor': 'Cultivation',
     'outdoor': 'Cultivation',
     'mixed-light': 'Cultivation',
-    'nursery': 'Cultivation',
+    'production center': 'Cultivation',             # Hawaii
+    'producer': 'Cultivation',                      # Washington, Health Canada
+    # Retail.
     'retail': 'Retail/Dispensary',
     'retailer': 'Retail/Dispensary',
     'dispensary': 'Retail/Dispensary',
     'dispensaries': 'Retail/Dispensary',
     'store': 'Retail/Dispensary',
     'storefront': 'Retail/Dispensary',
+    # After retail, so a "Cooperative Retail" stays retail.
+    'cooperative': 'Cultivation',                   # Massachusetts craft cooperatives
+    # Manufacturing.
     'manufacturer': 'Manufacturing/Processing',
     'manufacturing': 'Manufacturing/Processing',
     'processor': 'Manufacturing/Processing',
     'processing': 'Manufacturing/Processing',
     'extraction': 'Manufacturing/Processing',
     'infusion': 'Manufacturing/Processing',
+    # Distribution.
     'distributor': 'Distribution/Transport',
     'distribution': 'Distribution/Transport',
     'transport': 'Distribution/Transport',
     'transporter': 'Distribution/Transport',
-    'delivery': 'Distribution/Transport',
+    'wholesaler': 'Distribution/Transport',
+    'wholesale': 'Distribution/Transport',
+    # Testing.
     'testing': 'Testing Laboratory',
     'laboratory': 'Testing Laboratory',
     'lab': 'Testing Laboratory',
-    'microbusiness': 'Microbusiness',
+    # General fallbacks.
     'micro': 'Microbusiness',
-    'vertically integrated': 'Vertically Integrated',
     'integrated': 'Vertically Integrated',
 }
 
