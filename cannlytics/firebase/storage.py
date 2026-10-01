@@ -138,8 +138,35 @@ def get_file_url(
     url = blob.generate_signed_url(
         expiration=timedelta(seconds=expiration),
         method='GET',
+        **_signing_kwargs(blob),
     )
     return url
+
+
+def _signing_kwargs(blob: Any) -> dict:
+    """Arguments that let token-only credentials sign a URL.
+
+    On Cloud Run, Cloud Functions, and Compute Engine the default
+    credentials hold an access token, not a private key, and cannot sign
+    locally. Given the service account's e-mail and a current token, the
+    storage library signs through the IAM Credentials API instead; the
+    account needs ``iam.serviceAccounts.signBlob`` on itself (the
+    Service Account Token Creator role). Credentials that can sign (a
+    service account key) need nothing.
+    """
+    import google.auth.credentials
+    credentials = getattr(getattr(blob, 'client', None), '_credentials', None)
+    if not isinstance(credentials, google.auth.credentials.Credentials):
+        return {}
+    if isinstance(credentials, google.auth.credentials.Signing):
+        return {}
+    if not credentials.valid:
+        from google.auth.transport.requests import Request
+        credentials.refresh(Request())
+    email = getattr(credentials, 'service_account_email', None)
+    if not email or email == 'default':
+        return {}
+    return {'service_account_email': email, 'access_token': credentials.token}
 
 
 def list_files(

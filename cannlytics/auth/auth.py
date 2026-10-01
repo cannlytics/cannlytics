@@ -23,6 +23,12 @@ from cannlytics.firebase import (
 )
 from cannlytics.utils.hashing import sha256_hmac  # noqa: F401 (re-exported)
 
+# The message to return when `authenticate_request` finds no user.
+AUTH_ERROR = (
+    'Authentication failed. Please login to the console or provide a valid '
+    'API key in an `Authentication: Bearer <token>` header.'
+)
+
 def authenticate_request(request):
     """Verifies that the user has authenticated with a Firebase ID token
     or passed a valid API key in an `Authentication: Bearer <token>` header.

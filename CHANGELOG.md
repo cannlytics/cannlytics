@@ -16,15 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] — Unreleased
 
-### Summary
+### Fixed
 
-### Fixed:
+- `get_file_url` signs on Cloud Run, Cloud Functions, and Compute
+  Engine. Their default credentials hold a token, not a private key, so
+  signing failed; the URL is now signed through the IAM Credentials API.
+  The service account needs the Service Account Token Creator role on
+  itself. Found while upgrading the website to 1.0.5.
+- An unknown AI provider raises a `ValueError` that names the providers
+  (it was a `KeyError`); `'google'`, `'claude'`, and `'grok'` are
+  accepted for `'gemini'`, `'anthropic'`, and `'xai'`
+  (`resolve_provider`).
 
-### Changed:
+### Added
 
-### Removed:
+- `cannlytics.auth.AUTH_ERROR`, the message for a request with no user,
+  so applications need not keep a copy.
 
-### Documentation:
+### Changed
+
+- The package description matches what was published for 1.0.5
+  ("…and Metrc API access").
 
 ---
 

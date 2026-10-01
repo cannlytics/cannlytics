@@ -98,3 +98,8 @@ class TestGetUserFromApiKey:
         result = get_user_from_api_key('client_api_key')
         assert result['uid'] == 'user_abc'
         assert result['permissions'] == {'read': True}
+
+
+def test_the_auth_error_message_is_exported():
+    from cannlytics.auth import AUTH_ERROR
+    assert 'Bearer' in AUTH_ERROR and AUTH_ERROR.startswith('Authentication failed')

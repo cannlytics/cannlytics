@@ -173,3 +173,23 @@ class TestPriceSchedule:
 
     def test_flex_still_halves(self):
         assert get_model_cost('openai', 'gpt-6-sol', 1_000_000, 0, flex=True) == pytest.approx(1.00)
+
+
+class TestProviderNames:
+
+    @pytest.mark.parametrize('name, key', [('google', 'gemini'), ('Google', 'gemini'), ('claude', 'anthropic'),
+                                           ('grok', 'xai'), ('anthropic', 'anthropic'), (' openai ', 'openai')])
+    def test_names_and_aliases(self, name, key):
+        from cannlytics.data.coas.config import resolve_provider
+        assert resolve_provider(name) == key
+
+    def test_an_unknown_name_lists_the_providers(self):
+        from cannlytics.data.coas.config import resolve_provider
+        with pytest.raises(ValueError, match='anthropic, openai, gemini, xai'):
+            resolve_provider('bard')
+
+    def test_the_client_accepts_an_alias(self, monkeypatch):
+        from cannlytics.data.coas.ai_client import AIClient
+        monkeypatch.delenv('GOOGLE_API_KEY', raising=False)
+        client = AIClient(provider='google', api_key=None, config={})
+        assert client.provider == 'gemini' and client.model == AI_PROVIDERS['gemini']['default_model']

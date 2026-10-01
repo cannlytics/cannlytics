@@ -99,7 +99,7 @@ class TestVersion:
         assert 'version' not in pyproject['project'], 'pyproject.toml restates the version'
         assert 'version' in pyproject['project']['dynamic']
         assert pyproject['tool']['setuptools']['dynamic']['version'] == {'attr': 'cannlytics.__version__'}
-        assert re.fullmatch(r'\d+\.\d+\.\d+([ab]|rc)?\d*', cannlytics.__version__)
+        assert re.fullmatch(r'\d+\.\d+\.\d+((a|b|rc)\d+)?(\.dev\d+)?', cannlytics.__version__)
 
     def test_changelog_has_an_entry_for_this_version(self):
         # Between releases, main carries x.y.z.devN with an

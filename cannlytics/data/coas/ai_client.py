@@ -27,16 +27,15 @@ Description:
 """
 # Standard imports:
 import base64
-import json
 import logging
 import os
 import tempfile
-import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 # Internal imports (within cannlytics.data.coas):
 from cannlytics.data.coas.config import (
+    resolve_provider,
     effective_prices,
     AI_PROVIDERS,
     FLEX_COST_MULTIPLIER,
@@ -207,8 +206,8 @@ class AIClient:
             config: Optional[Dict] = None,
             logger: Optional[logging.Logger] = None,
         ):
-        self.provider = provider
-        self.provider_config = AI_PROVIDERS[provider]
+        self.provider = resolve_provider(provider)
+        self.provider_config = AI_PROVIDERS[self.provider]
         self.model = model or self.provider_config['default_model']
         self.model_config = self.provider_config['models'][self.model]
         self._api_key = api_key
@@ -216,7 +215,7 @@ class AIClient:
         self.logger = logger or logging.getLogger(__name__)
         self.client = None
         self._exhausted = False
-        self.use_flex = provider == 'openai'
+        self.use_flex = self.provider == 'openai'
         self._flex_failures = 0
         self._warned_unconstrained = False
         self._init_client()

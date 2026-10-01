@@ -282,6 +282,21 @@ DATA_QUALITY: Dict[str, float] = {
 # ║ Helper Functions                                                 ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
+# Other names people use for the providers above.
+PROVIDER_ALIASES: Dict[str, str] = {'claude': 'anthropic', 'google': 'gemini', 'grok': 'xai'}
+
+def resolve_provider(name: str) -> str:
+    """The provider key for a name or alias: ``'google'`` is ``'gemini'``.
+
+    Raises:
+        ValueError: For a name that is neither a provider nor an alias.
+    """
+    key = str(name).strip().lower()
+    key = PROVIDER_ALIASES.get(key, key)
+    if key not in AI_PROVIDERS:
+        raise ValueError(f'Unknown AI provider {name!r}: use one of {", ".join(get_provider_priority())}.')
+    return key
+
 def get_provider_priority() -> list:
     """Return provider keys sorted by priority (lowest = first).
 

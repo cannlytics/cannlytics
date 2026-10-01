@@ -108,3 +108,58 @@ class TestRenameFile:
         mock_storage_bucket.blob('folder/old.pdf')
         rename_file('folder', 'old.pdf', 'new.pdf')
         assert 'new.pdf' in mock_storage_bucket._blobs
+
+
+class TestSignedUrlCredentials:
+    """`get_file_url` on Cloud Run, where credentials hold only a token."""
+
+    def _bucket_for(self, credentials):
+        blob = MagicMock()
+        blob.client._credentials = credentials
+        blob.generate_signed_url.return_value = 'https://signed.example/x'
+        bucket = MagicMock()
+        bucket.blob.return_value = blob
+        return bucket, blob
+
+    def test_token_only_credentials_sign_through_iam(self):
+        import google.auth.credentials
+
+        class TokenOnly(google.auth.credentials.Credentials):
+            def __init__(self):
+                super().__init__()
+                self.service_account_email, self.refreshes = 'default', 0
+
+            def refresh(self, request):
+                self.token, self.refreshes = 'token-123', self.refreshes + 1
+                self.service_account_email = 'site@cannlytics.iam.gserviceaccount.com'
+
+        credentials = TokenOnly()
+        bucket, blob = self._bucket_for(credentials)
+        with patch('cannlytics.firebase.storage.storage.bucket', return_value=bucket):
+            assert get_file_url('users/x/coa.pdf') == 'https://signed.example/x'
+        kwargs = blob.generate_signed_url.call_args.kwargs
+        assert kwargs['service_account_email'] == 'site@cannlytics.iam.gserviceaccount.com'
+        assert kwargs['access_token'] == 'token-123' and credentials.refreshes == 1
+
+    def test_credentials_with_a_key_sign_locally(self):
+        import google.auth.credentials
+
+        class WithKey(google.auth.credentials.Credentials, google.auth.credentials.Signing):
+            def refresh(self, request):
+                pass
+
+            def sign_bytes(self, message):
+                return b'signature'
+
+            @property
+            def signer_email(self):
+                return 'key@cannlytics.iam.gserviceaccount.com'
+
+            @property
+            def signer(self):
+                return None
+
+        bucket, blob = self._bucket_for(WithKey())
+        with patch('cannlytics.firebase.storage.storage.bucket', return_value=bucket):
+            get_file_url('users/x/coa.pdf')
+        assert 'access_token' not in blob.generate_signed_url.call_args.kwargs
