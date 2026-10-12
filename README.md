@@ -260,6 +260,25 @@ metadata, analyses = coa['metadata'], coa['analyses']
 ```
 
 Each COA is identified by its `pdf_hash`, the SHA-256 of the whole file.
+A result that is not a number is `None` with a `qualifier` (`ND`, `<LOQ`,
+`>ULOQ`, …), never `0.0`.
+
+To read a COA with Claude in one request, or thousands as a Message
+Batch at half price:
+
+```python
+from cannlytics.data.coas import AIClient
+from cannlytics.data.coas.batch import AnthropicBatches, chunk_requests, extraction_request
+
+client = AIClient(provider='anthropic', model='claude-opus-5-5', effort='high')
+coa, cost, input_tokens, output_tokens = client.parse_coa(pdf_path='coa.pdf')
+# coa: {'metadata': {...}, 'results': [...]}, or None (client.last_problem says why)
+
+# Many COAs: one request per PDF, keyed by its SHA-256.
+requests = [extraction_request(sha, pdf_bytes, 'claude-opus-5-5') for sha, pdf_bytes in pdfs]
+batches = AnthropicBatches()
+batch_ids = [batches.submit(chunk) for chunk in chunk_requests(requests)]
+```
 
 See the [COA documentation](https://github.com/cannlytics/cannlytics/blob/main/cannlytics/data/coas/readme.md) for full details.
 

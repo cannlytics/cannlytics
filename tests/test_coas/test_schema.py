@@ -442,9 +442,11 @@ class TestPydanticModels:
 
     @pytest.mark.skipif(LabTestMetadata is None, reason='Pydantic not installed')
     def test_metadata_defaults(self):
+        # 1.0.6: a number the COA does not print is None, not 0.0.
         m = LabTestMetadata()
         assert m.product_name == ''
-        assert m.total_thc == 0.0
+        assert m.total_thc is None and m.batch_size is None and m.sample_weight is None
+        assert m.potency_basis == '' and m.date_harvested == ''
         assert m.analyses == []
 
     @pytest.mark.skipif(LabTestMetadata is None, reason='Pydantic not installed')
@@ -456,9 +458,16 @@ class TestPydanticModels:
 
     @pytest.mark.skipif(LabTestResult is None, reason='Pydantic not installed')
     def test_result_defaults(self):
+        # 1.0.6: no printed number is None, with a qualifier, never 0.0.
         r = LabTestResult(key='delta_9_thc', name='THC')
-        assert r.value == 0.0
+        assert r.value is None and r.qualifier == ''
+        assert r.limit is None and r.lod is None and r.loq is None
         assert r.units == ''
+
+    @pytest.mark.skipif(LabTestResult is None, reason='Pydantic not installed')
+    def test_a_non_detect_is_a_null_value_with_a_qualifier(self):
+        r = LabTestResult(key='abamectin', name='Abamectin', value=None, qualifier='ND', units='ppb')
+        assert r.model_dump()['value'] is None and r.qualifier == 'ND'
 
     @pytest.mark.skipif(LabAnalysis is None, reason='Pydantic not installed')
     def test_analysis_with_results(self):

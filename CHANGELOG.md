@@ -16,7 +16,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.6] — Unreleased
 
-### Changed
+### Summary
+
+COA parsing restarts on Claude. A COA is now read in one request (the
+PDF once, a cached prompt, an effort level, and the answer constrained
+to a JSON schema), the same way for one COA and for thousands sent as a
+Message Batch at half price. A result that is not a number — a
+non-detect, "<LOQ", "N/A" — is now `null` with a qualifier: every prompt
+before 1.0.6 asked for "ND" as `0.0`, which made a non-detect
+indistinguishable from a measured zero.
+
+### Changed: a missing number is null, not zero
+
+Code that relied on `0.0` for "not printed" or "not detected" must now
+handle `None`.
+
+- `LabTestResult.value`, `limit`, `lod`, and `loq` are optional and
+  default to `None` (they were `0.0`), and so are `LabTestMetadata`'s
+  `batch_size`, `sample_weight`, `total_thc`, `total_cbd`,
+  `total_cannabinoids`, and `total_terpenes`.
+- Results carry a `qualifier`: `''` for a number, or one of `ND`,
+  `<LOD`, `<LOQ`, `>ULOQ`, `detected`, `NR`, `NT`
+  (`RESULT_QUALIFIERS`). `parse_result_value` reads a printed result
+  (`'<0.10'` → `(None, '<LOQ', 0.1)`, `'>100'` → `(None, '>ULOQ',
+  100.0)`), and `normalize_qualifier` matches without regard to case,
+  since structured outputs do not guarantee an enum's capitalization.
+- The prompts ask for `null` and a qualifier, never `0.0`, for a
+  non-detect, and for `null` where a number is not printed. They also
+  ask for the potency basis and units, which were written for the
+  cannabis_results pipeline but never reached the package's prompts.
+- Metadata gains `date_harvested`, `potency_basis` (`dry_weight`,
+  `wet_weight`, or `both`), and `potency_units_reported`.
+
+### Added: whole-COA extraction
+
+- `cannlytics.data.coas.extraction`: one request per COA, the document
+  first and then the instruction, with the system prompt cached and
+  `COAExtraction` as a structured output (`output_config.format`). No
+  forced tool use and no thinking settings, both of which Claude Opus
+  5.5 refuses. `response_json` says why an answer has no JSON
+  (`refusal`, `max_tokens`, `no_json`); `normalize_extraction` reads
+  both the new shape and the single-page shape; `split_extraction`
+  returns the metadata and the results by analysis (the cache shape the
+  datasets already use); `attribution` records the provider, model,
+  effort, mode, prompt version (`PROMPT_VERSION`), cost, and batch.
+- `AIClient.parse_coa(pdf_path=...)`: the same request for one COA.
+- `COAExtraction`, `COAResult`, `coa_extraction_schema`,
+  `strict_json_schema`, and `schema_complexity`. The extraction schema
+  has no optional properties and ten union types, within Anthropic's
+  limits of 24 and 16 (`MAX_OPTIONAL_PROPERTIES`,
+  `MAX_UNION_PROPERTIES`).
+
+### Added: Message Batches
+
+- `cannlytics.data.coas.batch`: `extraction_request` (the PDF's SHA-256
+  is the `custom_id`, and the prompt is cached for an hour),
+  `chunk_requests` (batches cut by size and count, within 100,000
+  requests and 256 MB; 200 MB by default), `AnthropicBatches` (`submit`,
+  `retrieve`, `results`, `raw_results` (to keep: the API deletes results
+  after 29 days), `cancel`, and `count_tokens`, which is free),
+  `outcome_from_result` (a request that errored, was canceled, or
+  expired costs nothing; an answer from a model the price table does not
+  know is priced as the model requested, or as `None`, never as free),
+  and `estimate_cost`. `batch_backend('openai')` raises
+  `NotImplementedError`: other providers' batches can be added behind the
+  same interface. The datasets' campaign and benchmark scripts
+  (cannabis_results: `batch_parse.py`, `benchmark_parsers.py`) are built
+  on it.
+
+### Changed: Claude models and prices (verified 2026-10-09)
+
+- Claude Haiku 5.5: $0.10 and $0.50 per million input and output
+  tokens for prompts up to 100,000 tokens, $0.50 and $2.50 above
+  (`long_context`). Claude Haiku 4.5 is marked legacy.
+- Prices of batches (`batch_discount`, 0.5), cache reads (`cache_read`,
+  per model), and cache writes (1.25 times the input price for five
+  minutes, 2 times for an hour; `CACHE_WRITE_MULTIPLIERS`).
+  `get_model_cost` takes `cache_write_tokens`, `cache_read_tokens`,
+  `cache_ttl`, and `batch`; `token_cost` is the calculation itself, and
+  `effective_prices` applies the long-context tier.
+- Effort levels (`efforts`, `default_effort`; `resolve_effort`). The
+  client sends `high` unless asked otherwise, because the API's own
+  default differs by model (`medium` on Opus 5.5 and Haiku 5.5). Thinking
+  counts toward `max_tokens`, so the default output cap rises with
+  effort, from 16,000 at `low` to 128,000 at `max`
+  (`default_max_tokens`).
+- `AIClient` takes `effort`, `max_tokens`, and `prompt_cache`, and keeps
+  a running `total_cost`. An unknown model raises a `ValueError`.
+  Anthropic requests cache the system prompt, send the effort in
+  `output_config`, and use a structured output when given a schema; the
+  cost counts cache reads and writes, and a response with no JSON still
+  records what it cost (`last_problem` says why).
+- The default Claude model remains `claude-sonnet-5-5` until the
+  extraction benchmark in cannabis_results names one.
+- Requires `anthropic>=1.11` (the version cannabis_results pins), for
+  `output_config`.
+
+### Changed: caches
+
+- `rekey_cache` keeps the **last** line for a key, as `Bogart` does when
+  it loads a cache, so a re-parse appended after an old answer is the
+  one kept (the first was kept before, which could bring the old answer
+  back). `legacy_field` records a re-keyed entry's old key.
+
+### Changed: licenses
 
 - License categories: `Delivery` (to consumers, including couriers),
   `Nursery` (propagation) and `Research and Development` join the
@@ -51,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `cannlytics.auth.AUTH_ERROR`, the message for a request with no user,
   so applications need not keep a copy.
 
-### Changed
+### Changed: packaging
 
 - The package description matches what was published for 1.0.5
   ("…and Metrc API access").

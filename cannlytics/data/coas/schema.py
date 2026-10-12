@@ -42,6 +42,19 @@ Description:
             - LabTestMetadata: COA metadata extraction target
             - LabTestResult: Single analyte measurement
             - LabAnalysis: Results for one analysis type
+            - COAResult, COAExtraction: a whole COA in one response
+              (metadata and every analyte of every analysis)
+            - coa_extraction_schema(): that response as a strict JSON
+              schema (every field required, absent numbers null)
+
+        Non-detects (1.0.6):
+            - RESULT_QUALIFIERS: what a printed result says besides, or
+              instead of, a number ("ND", "<LOQ", ...)
+            - normalize_qualifier(), parse_result_value(): read them
+              from text such as "ND" or "<0.10"
+            A non-detect is a null value with the qualifier "ND", never
+            0.0: the two mean different things, and 0.0 was what every
+            parsed non-detect became before.
 
         Dataclass Models (for pipeline / database):
             - LabResult: Full lab result record with all fields
@@ -59,6 +72,10 @@ Description:
     validate_result) are defined in `cannlytics.schema` and re-exported
     here; the analyte keys and aliases in `cannlytics.constants`.
 """
+# Standard imports:
+import re
+from typing import Any, Dict, Optional, Tuple
+
 # Internal imports:
 from cannlytics.constants import (  # noqa: F401 (re-exported)
     ANALYTE_ALIASES,
@@ -133,10 +150,107 @@ ANALYSIS_CONFIGS = {
     },
 }
 
+# The analyses a whole-COA extraction sorts its results into: the seven
+# above, and `other` for anything else (vitamin E acetate, for example).
+ANALYSIS_NAMES = tuple(ANALYSIS_CONFIGS) + ('other',)
+
 # ╔══════════════════════════════════════════════════════════════════╗
-# ║ Analyte Key Normalization                                        ║
+# ║ Result Qualifiers (non-detects and other printed results)        ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
+# What a printed result says besides, or instead of, a number. A result
+# with a number has the qualifier ''. With "ND" (or "<LOD") the value is
+# null: not detected is not a measurement of zero.
+RESULT_QUALIFIERS = (
+    '',          # a number is the result
+    'ND',        # not detected (also "absent", "none detected")
+    '<LOD',      # printed as below the limit of detection
+    '<LOQ',      # detected, below the limit of quantitation ("BQL", "<0.10")
+    '>ULOQ',     # above the upper limit of quantitation
+    'detected',  # present, without a number ("present", "positive")
+    'NR',        # the row is printed without a result
+    'NT',        # not tested
+)
+
+# Potency basis, as the COA states it (``potency_basis``).
+POTENCY_BASES = ('', 'dry_weight', 'wet_weight', 'both')
+
+_QUALIFIER_WORDS = {
+    'nd': 'ND', 'n.d.': 'ND', 'n/d': 'ND', 'not detected': 'ND', 'none detected': 'ND',
+    'absent': 'ND', 'not present': 'ND', 'negative': 'ND', 'neg': 'ND', '0 detected': 'ND',
+    '<lod': '<LOD', '< lod': '<LOD', 'below lod': '<LOD', '<mdl': '<LOD', 'bdl': '<LOD',
+    '<loq': '<LOQ', '< loq': '<LOQ', 'below loq': '<LOQ', 'bql': '<LOQ', 'blq': '<LOQ',
+    '<lloq': '<LOQ', 'trace': '<LOQ', 'tr': '<LOQ', '<rl': '<LOQ',
+    '>uloq': '>ULOQ', '> uloq': '>ULOQ', 'above uloq': '>ULOQ', '>uql': '>ULOQ',
+    'detected': 'detected', 'present': 'detected', 'positive': 'detected', 'pos': 'detected',
+    'nr': 'NR', 'not reported': 'NR', 'n/r': 'NR', 'n/a': 'NR', 'na': 'NR', '--': 'NR', '-': 'NR',
+    'nt': 'NT', 'not tested': 'NT', 'n/t': 'NT', 'not analyzed': 'NT',
+}
+
+# Longest first, so "not detected" wins over "nd" and "<loq" over "<".
+_QUALIFIER_PREFIXES = sorted((w for w in _QUALIFIER_WORDS if len(w) > 1 and w not in ('na', 'tr', 'nr', 'nt', 'pos', 'neg')),
+                             key=len, reverse=True)
+
+def normalize_qualifier(value: Any) -> str:
+    """The qualifier in ``RESULT_QUALIFIERS`` for a printed word or a
+    model's spelling of one: ``'nd'`` and ``'Not Detected'`` are ``'ND'``,
+    ``'bql'`` is ``'<LOQ'``. Anything else (a number, an unknown word,
+    ``None``) is ``''``."""
+    if value is None:
+        return ''
+    text = ' '.join(str(value).strip().lower().split())
+    if not text:
+        return ''
+    if text in _QUALIFIER_WORDS:
+        return _QUALIFIER_WORDS[text]
+    for canonical in RESULT_QUALIFIERS:
+        if canonical and text == canonical.lower():
+            return canonical
+    # A qualifier followed by a note: "ND (<0.01)", "<LOQ (0.05)".
+    for word in _QUALIFIER_PREFIXES:
+        if text.startswith(word) and not text[len(word):len(word) + 1].isalnum():
+            return _QUALIFIER_WORDS[word]
+    return ''
+
+def parse_result_value(value: Any) -> Tuple[Optional[float], str, Optional[float]]:
+    """Read a printed result: ``(number or None, qualifier, limit or None)``.
+
+    ``'12.5'`` is ``(12.5, '', None)``; ``'ND'`` is ``(None, 'ND', None)``;
+    ``'<0.10'`` is ``(None, '<LOQ', 0.1)``, the number being the limit the
+    result is below; ``'>100'`` is ``(None, '>ULOQ', 100.0)``. A number is
+    returned as it is, and an unreadable string as ``(None, '', None)``.
+    """
+    if value is None:
+        return None, '', None
+    if isinstance(value, bool):
+        return None, '', None
+    if isinstance(value, (int, float)):
+        return (float(value), '', None) if value == value else (None, '', None)
+    text = str(value).strip()
+    if not text:
+        return None, '', None
+    qualifier = normalize_qualifier(text)
+    if qualifier:
+        note = re.search(r'(\d+\.?\d*|\.\d+)', text) if qualifier in ('<LOD', '<LOQ', '>ULOQ') else None
+        return None, qualifier, (float(note.group(1)) if note else None)
+    compact = text.replace(',', '').replace(' ', '')
+    for prefix, qualifier in (('<', '<LOQ'), ('>', '>ULOQ')):
+        if compact.startswith(prefix):
+            number = _leading_number(compact[1:].lstrip('='))
+            if number is not None:
+                return None, qualifier, number
+    number = _leading_number(compact)
+    return (number, '', None) if number is not None else (None, '', None)
+
+def _leading_number(text: str) -> Optional[float]:
+    """The number a string starts with (units may follow), or None."""
+    match = re.match(r'^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?', text)
+    if not match:
+        return None
+    try:
+        return float(match.group(0))
+    except ValueError:
+        return None
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Pydantic Models for AI Structured Output                         ║
@@ -149,13 +263,24 @@ ANALYSIS_CONFIGS = {
 # JSON extraction with manual validation.
 
 try:
+    from typing import Literal
+
     from pydantic import BaseModel as PydanticBaseModel
+    from pydantic import Field
+
+    Qualifier = Literal['', 'ND', '<LOD', '<LOQ', '>ULOQ', 'detected', 'NR', 'NT']
+    AnalysisName = Literal[
+        'cannabinoids', 'terpenes', 'pesticides', 'heavy_metals', 'microbials',
+        'residual_solvents', 'moisture_foreign_matter', 'other',
+    ]
+    PotencyBasis = Literal['', 'dry_weight', 'wet_weight', 'both']
 
     class LabTestMetadata(PydanticBaseModel):
         """Pydantic model for AI-extracted COA metadata.
 
         Used as the ``response_format`` for structured-output API
-        calls when extracting metadata from page 1 of a COA.
+        calls. A number the COA does not print is ``None`` (1.0.6; it was
+        0.0, which a reader cannot tell from a measured zero).
         """
         product_name: str = ''
         strain_name: str = ''
@@ -163,8 +288,9 @@ try:
         date_tested: str = ''
         date_received: str = ''
         date_collected: str = ''
+        date_harvested: str = ''
         batch_number: str = ''
-        batch_size: float = 0.0
+        batch_size: Optional[float] = Field(None, description='Grams; null if not printed.')
         lab: str = ''
         lab_license_number: str = ''
         lab_address: str = ''
@@ -180,27 +306,32 @@ try:
         distributor: str = ''
         distributor_license_number: str = ''
         sample_id: str = ''
-        sample_weight: float = 0.0
-        total_cannabinoids: float = 0.0
-        total_cbd: float = 0.0
-        total_thc: float = 0.0
-        total_terpenes: float = 0.0
+        sample_weight: Optional[float] = Field(None, description='Grams; null if not printed.')
+        total_cannabinoids: Optional[float] = Field(None, description='Percent; null if the COA prints no total.')
+        total_cbd: Optional[float] = Field(None, description='Percent; null if the COA prints no total.')
+        total_thc: Optional[float] = Field(None, description='Percent; null if the COA prints no total.')
+        total_terpenes: Optional[float] = Field(None, description='Percent; null if the COA prints no total.')
+        potency_basis: PotencyBasis = ''
+        potency_units_reported: str = ''
         status: str = ''
         analyses: list[str] = []
 
     class LabTestResult(PydanticBaseModel):
         """A single analyte measurement extracted by AI.
 
-        Used inside ``LabAnalysis.results`` for structured-output
-        extraction of per-analyte data from COA tables.
+        ``value`` is the printed result as a number, or ``None`` when the
+        COA prints none; ``qualifier`` says what was printed instead
+        (``'ND'``, ``'<LOQ'``, ...; see ``RESULT_QUALIFIERS``). Limits the
+        COA does not print are ``None``.
         """
         key: str
         name: str
-        value: float = 0.0
+        value: Optional[float] = Field(None, description='The result as a number; null when none is printed.')
+        qualifier: Qualifier = Field('', description='"" for a number; ND, <LOD, <LOQ, >ULOQ, detected, NR or NT otherwise.')
         units: str = ''
-        limit: float = 0.0
-        lod: float = 0.0
-        loq: float = 0.0
+        limit: Optional[float] = None
+        lod: Optional[float] = None
+        loq: Optional[float] = None
         status: str = ''
 
     class LabAnalysis(PydanticBaseModel):
@@ -212,6 +343,27 @@ try:
         """
         analysis: str
         results: list[LabTestResult] = []
+
+    class COAResult(PydanticBaseModel):
+        """One analyte row of a whole-COA extraction: its analysis first,
+        then the fields of ``LabTestResult``."""
+        analysis: AnalysisName = 'other'
+        key: str
+        name: str
+        value: Optional[float] = Field(None, description='The result as a number; null when none is printed.')
+        qualifier: Qualifier = Field('', description='"" for a number; ND, <LOD, <LOQ, >ULOQ, detected, NR or NT otherwise.')
+        units: str = ''
+        limit: Optional[float] = None
+        lod: Optional[float] = None
+        loq: Optional[float] = None
+        status: str = ''
+
+    class COAExtraction(PydanticBaseModel):
+        """A whole COA in one response: its metadata and every analyte
+        row of every analysis (1.0.6). One request reads the PDF once,
+        where the per-analysis calls read it once per analysis."""
+        metadata: LabTestMetadata
+        results: list[COAResult] = []
 
 except ImportError as _pydantic_error:
     # Pydantic not installed — structured output unavailable.
@@ -226,11 +378,80 @@ except ImportError as _pydantic_error:
     LabTestMetadata = None
     LabTestResult = None
     LabAnalysis = None
+    COAResult = None
+    COAExtraction = None
     PYDANTIC_AVAILABLE = False
     PYDANTIC_IMPORT_ERROR = str(_pydantic_error)
 else:
     PYDANTIC_AVAILABLE = True
     PYDANTIC_IMPORT_ERROR = None
+
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║ Strict JSON Schemas (structured outputs)                         ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# Claude's structured outputs compile a schema into a grammar and limit
+# its size: at most 24 optional properties and 16 properties with union
+# types (``anyOf`` or a type list, as a nullable number is) per request.
+# A strict schema lists every property as required, so it has no
+# optional ones; the unions are the nullable numbers.
+MAX_OPTIONAL_PROPERTIES = 24
+MAX_UNION_PROPERTIES = 16
+
+def strict_json_schema(model: Any) -> Dict[str, Any]:
+    """A Pydantic model's JSON schema made strict for structured outputs:
+    every property required and ``additionalProperties`` false on every
+    object, with ``$defs`` kept for reuse. Defaults are dropped (with every
+    property required they would only lengthen the grammar)."""
+    if model is None:
+        raise ImportError('Structured COA schemas require pydantic: pip install "cannlytics[coa,ai]"')
+    schema = model.model_json_schema()
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            node.pop('default', None)
+            if node.get('type') == 'object' and 'properties' in node:
+                node['additionalProperties'] = False
+                node['required'] = list(node['properties'])
+            for value in node.values():
+                visit(value)
+        elif isinstance(node, list):
+            for value in node:
+                visit(value)
+
+    visit(schema)
+    return schema
+
+def schema_complexity(schema: Dict[str, Any]) -> Dict[str, int]:
+    """Count what limits a structured-output schema: properties not listed
+    as required (``optional``) and properties whose type is a union
+    (``unions``), each definition counted once."""
+    counts = {'optional': 0, 'unions': 0, 'properties': 0}
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            props = node.get('properties')
+            if isinstance(props, dict):
+                required = set(node.get('required', []))
+                for name, prop in props.items():
+                    counts['properties'] += 1
+                    if name not in required:
+                        counts['optional'] += 1
+                    if isinstance(prop, dict) and ('anyOf' in prop or isinstance(prop.get('type'), list)):
+                        counts['unions'] += 1
+            for value in node.values():
+                visit(value)
+        elif isinstance(node, list):
+            for value in node:
+                visit(value)
+
+    visit(schema)
+    return counts
+
+def coa_extraction_schema() -> Dict[str, Any]:
+    """The whole-COA response (``COAExtraction``) as a strict JSON schema,
+    within Claude's structured-output limits (tested)."""
+    return strict_json_schema(COAExtraction)
 
 def require_structured_output_models() -> None:
     """Raise if the Pydantic response models are unavailable.

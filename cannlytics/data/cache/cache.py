@@ -257,6 +257,7 @@ def rekey_cache(
         key_map: dict[str, str],
         output_path: str | None = None,
         hash_fields: tuple[str, ...] = ('pdf_hash', 'hash'),
+        legacy_field: str | None = None,
     ) -> dict[str, int]:
     """Rewrite a cache's keys, such as pre-1.0.0 SHA-1 keys to SHA-256.
 
@@ -265,6 +266,12 @@ def rekey_cache(
     untouched unless ``output_path`` is omitted, in which case the cache
     is replaced atomically.
 
+    When two lines end up with one key, the **last** wins, as when
+    ``Bogart`` loads the cache: a re-parse appended after an old entry is
+    the one readers saw, and the one kept. (Before 1.0.6 the first won,
+    so a rekey could bring back an old answer that a re-parse had
+    replaced.) The kept entry stays where the key first appeared.
+
     Args:
         cache_path: The JSONL cache to read.
         key_map: Map of old key to new key. Keys absent from the map
@@ -272,11 +279,12 @@ def rekey_cache(
         output_path: Where to write. Defaults to ``cache_path``.
         hash_fields: Fields inside each value that repeat the key and
             are rewritten along with it.
+        legacy_field: If given (e.g. ``'pdf_hash_legacy'``), a re-keyed
+            dict value records its old key in this field.
 
     Returns:
         Counts: ``total``, ``rekeyed``, ``unchanged``, and ``collisions``
-        (entries dropped because their new key was already taken; the
-        first entry wins, as in ``Bogart.set``).
+        (entries replaced by a later line with the same key).
 
     Raises:
         FileNotFoundError: If ``cache_path`` does not exist.
@@ -297,9 +305,6 @@ def rekey_cache(
             for key, value in record.items():
                 stats['total'] += 1
                 new_key = key_map.get(key, key)
-                if new_key in entries:
-                    stats['collisions'] += 1
-                    continue
                 if new_key != key:
                     stats['rekeyed'] += 1
                     if isinstance(value, dict):
@@ -307,8 +312,12 @@ def rekey_cache(
                             k: (new_key if k in hash_fields and v == key else v)
                             for k, v in value.items()
                         }
+                        if legacy_field:
+                            value.setdefault(legacy_field, key)
                 else:
                     stats['unchanged'] += 1
+                if new_key in entries:
+                    stats['collisions'] += 1
                 entries[new_key] = value
     _write_jsonl_atomic(output_path or cache_path, entries.items())
     return stats

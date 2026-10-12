@@ -246,15 +246,29 @@ def _client(provider, fake, model=None):
 
 class TestAnthropicStreams:
 
-    def test_streams_with_the_full_output_limit_and_keeps_only_text(self):
+    def test_streams_with_room_for_thinking_and_keeps_only_text(self):
         # A thinking block (no `.text`) precedes the answer on Opus 5.5 and Fable 5.1.
         fake = _FakeAnthropic([_Block(thinking='...', signature='sig'), _Block(text='{"lab": "KCA"}')])
         client = _client('anthropic', fake, model='claude-opus-5-5')
         parsed, cost, in_tok, out_tok = client._call_anthropic('system', 'user', None, None, 'COA text', 'metadata')
         assert parsed == {'lab': 'KCA'} and (in_tok, out_tok) == (1_000, 200)
         assert [kind for kind, _ in fake.calls] == ['stream']
-        assert fake.calls[0][1]['max_tokens'] == 128_000
+        sent = fake.calls[0][1]
+        # 1.0.6: the effort is sent explicitly (the API default on Opus 5.5 is
+        # medium), and max_tokens leaves room for thinking at that effort.
+        assert sent['output_config'] == {'effort': 'high'}
+        assert sent['max_tokens'] == 64_000
+        assert sent['system'][0]['cache_control'] == {'type': 'ephemeral'}
+        assert 'thinking' not in sent and 'tool_choice' not in sent
         assert cost == pytest.approx((1_000 * 4.00 + 200 * 20.00) / 1_000_000)
+
+    def test_max_effort_gets_the_full_output_limit(self):
+        fake = _FakeAnthropic([_Block(text='{}')])
+        client = _client('anthropic', fake, model='claude-opus-5-5')
+        client.effort, client.max_tokens = 'max', 128_000
+        client._call_anthropic('s', 'u', None, None, 't', 'metadata')
+        assert fake.calls[0][1]['output_config']['effort'] == 'max'
+        assert fake.calls[0][1]['max_tokens'] == 128_000
 
     def test_default_model_request_would_exceed_the_sdk_non_streaming_limit(self):
         # The reason for streaming: above ~21,333 tokens the SDK refuses a

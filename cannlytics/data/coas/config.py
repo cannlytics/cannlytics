@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/1/2026
-Updated: 9/29/2026
+Updated: 10/9/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -40,6 +40,19 @@ Description:
           fidelity check (see the model's note) and are never a default.
         - Retired models are removed: naming one fails at construction
           rather than at the first request.
+        - ``long_context`` prices replace the base prices for a request
+          whose prompt (input plus cached tokens) is longer than ``above``
+          tokens (Claude Haiku 5.5, above 100,000).
+        - Prompt caching: a cache read costs ``cache_read`` times the input
+          price; a write costs ``CACHE_WRITE_MULTIPLIERS`` times it (1.25
+          for five minutes, 2 for an hour).
+        - ``batch_discount`` is the provider's batch price as a share of the
+          standard price (Anthropic's Message Batches: 0.5, on every token).
+          Only providers whose batches cannlytics submits declare it.
+        - ``efforts`` are the effort levels a model accepts, and
+          ``default_effort`` the one the client sends when none is given.
+          It is sent explicitly because the API default differs by model
+          (``medium`` on Claude Opus 5.5 and Haiku 5.5, ``high`` on others).
 
     Usage::
 
@@ -56,43 +69,82 @@ from typing import Any, Dict, Optional, Tuple, Union
 # ║ AI Provider Configuration                                        ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
-# The date every price below was checked against the provider's page.
+# The date every price below was checked against the provider's page. A
+# provider's own ``prices_verified`` is later when only its prices were
+# checked since (Anthropic: 2026-10-09, with Claude Haiku 5.5 added).
 PRICES_VERIFIED: str = '2026-09-29'
+
+# Effort levels, lowest first (``output_config.effort`` on Claude).
+EFFORT_LEVELS = ('low', 'medium', 'high', 'xhigh', 'max')
+
+# Output cap sent by default for each effort: thinking counts toward
+# ``max_tokens``, so higher effort needs more room. Capped by the model's
+# ``max_output_tokens``.
+EFFORT_MAX_TOKENS = {'low': 16_000, 'medium': 32_000, 'high': 64_000, 'xhigh': 96_000, 'max': 128_000}
+
+# Prompt-cache write prices, as multiples of the input price.
+CACHE_WRITE_MULTIPLIERS = {'5m': 1.25, '1h': 2.0}
 
 AI_PROVIDERS: Dict[str, Dict[str, Any]] = {
     'anthropic': {
         'name': 'Anthropic Claude',
         'pricing_url': 'https://platform.claude.com/docs/en/about-claude/pricing',
+        'prices_verified': '2026-10-09',
+        # Message Batches: half price on every token, results within 24 hours.
+        'batch_discount': 0.5,
         'models': {
-            # The fastest current Claude, and the least expensive.
+            # The least expensive Claude: a tenth of Haiku 4.5's price for
+            # prompts up to 100,000 tokens, five times that above them.
+            'claude-haiku-5-5': {
+                'input': 0.10, 'output': 0.50,
+                'long_context': {'above': 100_000, 'input': 0.50, 'output': 2.50},
+                'cache_read': 0.10,
+                'supports_pdf': True, 'supports_images': True,
+                'supports_structured_output': True,
+                'efforts': EFFORT_LEVELS, 'default_effort': 'high',
+                'max_output_tokens': 128_000,
+            },
+            # Superseded by Haiku 5.5 at a tenth of the price; no effort levels.
             'claude-haiku-4-5-20251001': {
                 'input': 1.00, 'output': 5.00,
+                'cache_read': 0.10,
                 'supports_pdf': True, 'supports_images': True,
-                'supports_structured_output': False,
+                'supports_structured_output': True,
                 'max_output_tokens': 64_000,
+                'legacy': True,
             },
             # Latest Sonnet; same price as Sonnet 5.
             'claude-sonnet-5-5': {
                 'input': 2.00, 'output': 10.00,
+                'cache_read': 0.05,
                 'supports_pdf': True, 'supports_images': True,
-                'supports_structured_output': False,
+                'supports_structured_output': True,
+                'efforts': EFFORT_LEVELS, 'default_effort': 'high',
                 'max_output_tokens': 128_000,
             },
             # Opus 5.5 and Fable 5.1 always think before answering; the
-            # client keeps only the text blocks of a response.
+            # client keeps only the text blocks of a response. Thinking
+            # cannot be disabled, and forced tool use is refused (400), so
+            # structured output goes through `output_config.format`.
             'claude-opus-5-5': {
                 'input': 4.00, 'output': 20.00,
+                'cache_read': 0.05,
                 'supports_pdf': True, 'supports_images': True,
-                'supports_structured_output': False,
+                'supports_structured_output': True,
+                'efforts': EFFORT_LEVELS, 'default_effort': 'high',
                 'max_output_tokens': 128_000,
             },
             'claude-fable-5-1': {
                 'input': 10.00, 'output': 50.00,
+                'cache_read': 0.025,
                 'supports_pdf': True, 'supports_images': True,
-                'supports_structured_output': False,
+                'supports_structured_output': True,
+                'efforts': EFFORT_LEVELS, 'default_effort': 'high',
                 'max_output_tokens': 128_000,
             },
         },
+        # Until the extraction benchmark names a model, the middle of the
+        # range: Opus 5.5 costs twice as much and Haiku 5.5 a twentieth.
         'default_model': 'claude-sonnet-5-5',
         'env_key': 'ANTHROPIC_API_KEY',
         'priority': 1,
@@ -316,6 +368,7 @@ def get_provider_priority() -> list:
 def effective_prices(
         model_config: Dict[str, Any],
         on: Optional[Union[date, str]] = None,
+        prompt_tokens: Optional[int] = None,
     ) -> Tuple[float, float]:
     """The input and output price of a model on a date.
 
@@ -324,6 +377,9 @@ def effective_prices(
         on: The date (default: today). Entries of ``price_schedule``
             whose ``from`` date has arrived replace the base price, the
             latest winning.
+        prompt_tokens: The request's prompt length (input plus cached
+            tokens). Above a model's ``long_context`` threshold, its long
+            context prices apply.
 
     Returns:
         ``(input, output)`` in USD per 1,000,000 tokens.
@@ -333,7 +389,62 @@ def effective_prices(
     for change in sorted(model_config.get('price_schedule', []), key=lambda c: c['from']):
         if change['from'] <= when:
             prices = (change['input'], change['output'])
+    tier = model_config.get('long_context')
+    if tier and prompt_tokens is not None and prompt_tokens > tier['above']:
+        prices = (tier['input'], tier['output'])
     return prices
+
+def token_cost(
+        provider: str,
+        model: str,
+        input_tokens: int,
+        output_tokens: int,
+        cache_write_tokens: int = 0,
+        cache_read_tokens: int = 0,
+        cache_ttl: str = '5m',
+        batch: bool = False,
+        flex: bool = False,
+        on: Optional[Union[date, str]] = None,
+    ) -> float:
+    """The USD cost of one request from its usage.
+
+    Args:
+        provider: Provider key.
+        model: Model identifier.
+        input_tokens: Uncached input tokens. (Anthropic reports cache
+            reads and writes apart from ``input_tokens``.)
+        output_tokens: Output tokens, thinking included.
+        cache_write_tokens: Tokens written to the prompt cache.
+        cache_read_tokens: Tokens read from the prompt cache.
+        cache_ttl: ``'5m'`` or ``'1h'``, the duration of the cache written.
+        batch: Whether the request ran in a batch (``batch_discount``).
+        flex: Whether OpenAI flex processing was used.
+        on: Price date (default: today); see ``effective_prices``.
+
+    Raises:
+        KeyError: For an unknown provider or model.
+        ValueError: For a batch request to a provider without batches.
+    """
+    provider_config = AI_PROVIDERS[provider]
+    model_config = provider_config['models'][model]
+    prompt = input_tokens + cache_write_tokens + cache_read_tokens
+    input_price, output_price = effective_prices(model_config, on, prompt_tokens=prompt)
+    write = CACHE_WRITE_MULTIPLIERS.get(cache_ttl, CACHE_WRITE_MULTIPLIERS['5m'])
+    read = model_config.get('cache_read', 0.1)
+    cost = (
+        input_tokens * input_price
+        + cache_write_tokens * input_price * write
+        + cache_read_tokens * input_price * read
+        + output_tokens * output_price
+    ) / 1_000_000
+    if batch:
+        discount = provider_config.get('batch_discount')
+        if discount is None:
+            raise ValueError(f'{provider} batches are not supported by cannlytics')
+        cost *= discount
+    if flex:
+        cost *= FLEX_COST_MULTIPLIER
+    return cost
 
 def get_model_cost(
         provider: str,
@@ -343,20 +454,30 @@ def get_model_cost(
         num_images: int = 0,
         flex: bool = False,
         on: Optional[Union[date, str]] = None,
+        *,
+        cache_write_tokens: int = 0,
+        cache_read_tokens: int = 0,
+        cache_ttl: str = '5m',
+        batch: bool = False,
     ) -> float:
     """Calculate the cost of a single API call.
 
     Args:
         provider: Provider key (e.g., 'anthropic', 'openai').
-        model: Model identifier (e.g., 'claude-haiku-4-5-20251001').
+        model: Model identifier (e.g., 'claude-haiku-5-5').
         input_tokens: Input tokens, as the API reports them (images and
-            PDF pages included).
+            PDF pages included; for Anthropic, cache reads and writes are
+            reported, and passed, apart).
         output_tokens: Output tokens, thinking included.
         num_images: Images sent. Adds a surcharge only for a model that
             declares ``image_cost``; none of the registered models do,
             since their images are already input tokens.
         flex: Whether OpenAI flex processing was used.
         on: Price date (default: today); see ``effective_prices``.
+        cache_write_tokens: Tokens written to the prompt cache.
+        cache_read_tokens: Tokens read from the prompt cache.
+        cache_ttl: Duration of the cache written, ``'5m'`` or ``'1h'``.
+        batch: Whether the call ran in a batch, at ``batch_discount``.
 
     Returns:
         Cost in USD.
@@ -364,13 +485,38 @@ def get_model_cost(
     Raises:
         KeyError: If provider or model is not found in AI_PROVIDERS.
     """
-    model_config = AI_PROVIDERS[provider]['models'][model]
-    input_price, output_price = effective_prices(model_config, on)
-    cost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000
-    cost += num_images * model_config.get('image_cost', 0.0)
-    if flex:
-        cost *= FLEX_COST_MULTIPLIER
-    return cost
+    cost = token_cost(provider, model, input_tokens, output_tokens,
+                      cache_write_tokens=cache_write_tokens, cache_read_tokens=cache_read_tokens,
+                      cache_ttl=cache_ttl, batch=batch, flex=flex, on=on)
+    return cost + num_images * AI_PROVIDERS[provider]['models'][model].get('image_cost', 0.0)
+
+def resolve_effort(provider: str, model: str, effort: Optional[str] = None) -> Optional[str]:
+    """The effort level to send: ``effort`` if the model accepts it, the
+    model's ``default_effort`` if none is given, or ``None`` for a model
+    without effort levels.
+
+    Raises:
+        ValueError: For an effort the model does not accept.
+    """
+    model_config = AI_PROVIDERS[resolve_provider(provider)]['models'][model]
+    levels = model_config.get('efforts')
+    if not levels:
+        if effort:
+            raise ValueError(f'{model} takes no effort level (asked for {effort!r}).')
+        return None
+    if effort is None:
+        return model_config.get('default_effort')
+    effort = str(effort).strip().lower()
+    if effort not in levels:
+        raise ValueError(f'{model} accepts effort {", ".join(levels)}; not {effort!r}.')
+    return effort
+
+def default_max_tokens(provider: str, model: str, effort: Optional[str] = None) -> int:
+    """The output cap to send: room for thinking at the effort level
+    (``EFFORT_MAX_TOKENS``), within the model's ``max_output_tokens``."""
+    model_config = AI_PROVIDERS[resolve_provider(provider)]['models'][model]
+    cap = model_config.get('max_output_tokens', 16_384)
+    return min(cap, EFFORT_MAX_TOKENS.get(effort or '', cap))
 
 def get_env_key(provider: str) -> str:
     """Get the environment variable name for a provider's API key.

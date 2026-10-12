@@ -89,7 +89,8 @@ coa = [
 
 # AI-powered COA parsing and embeddings — multi-provider support.
 ai = [
-    "anthropic>=0.30",
+    # 1.11 or later: `output_config` (effort and structured outputs).
+    "anthropic>=1.11",
     "openai>=1.0",
     "google-genai>=1.0",
     # Required, not optional: without pydantic, schema.py leaves

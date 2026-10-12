@@ -174,7 +174,6 @@ class TestPriceSchedule:
     def test_flex_still_halves(self):
         assert get_model_cost('openai', 'gpt-6-sol', 1_000_000, 0, flex=True) == pytest.approx(1.00)
 
-
 class TestProviderNames:
 
     @pytest.mark.parametrize('name, key', [('google', 'gemini'), ('Google', 'gemini'), ('claude', 'anthropic'),
@@ -193,3 +192,75 @@ class TestProviderNames:
         monkeypatch.delenv('GOOGLE_API_KEY', raising=False)
         client = AIClient(provider='google', api_key=None, config={})
         assert client.provider == 'gemini' and client.model == AI_PROVIDERS['gemini']['default_model']
+
+class TestClaudeRegistry:
+    """Claude 5.5 prices, effort levels, the prompt cache and batches (1.0.6)."""
+
+    def test_anthropic_prices_were_verified_since_the_registry_date(self):
+        from datetime import date
+        from cannlytics.data.coas.config import PRICES_VERIFIED
+        verified = AI_PROVIDERS['anthropic']['prices_verified']
+        assert date.fromisoformat(PRICES_VERIFIED) <= date.fromisoformat(verified) <= date.today()
+
+    @pytest.mark.parametrize('model, prices', [
+        ('claude-haiku-5-5', (0.10, 0.50)), ('claude-sonnet-5-5', (2.00, 10.00)),
+        ('claude-opus-5-5', (4.00, 20.00)), ('claude-fable-5-1', (10.00, 50.00)),
+    ])
+    def test_claude_prices(self, model, prices):
+        from cannlytics.data.coas.config import effective_prices
+        assert effective_prices(AI_PROVIDERS['anthropic']['models'][model]) == prices
+
+    def test_haiku_5_5_prices_a_long_prompt_at_its_long_context_rate(self):
+        from cannlytics.data.coas.config import token_cost
+        short = token_cost('anthropic', 'claude-haiku-5-5', 100_000, 1_000)
+        long = token_cost('anthropic', 'claude-haiku-5-5', 100_001, 1_000)
+        assert short == pytest.approx((100_000 * 0.10 + 1_000 * 0.50) / 1e6)
+        assert long == pytest.approx((100_001 * 0.50 + 1_000 * 2.50) / 1e6)
+
+    def test_cached_tokens_count_toward_the_prompt_length(self):
+        from cannlytics.data.coas.config import token_cost
+        # 60,000 uncached and 60,000 read from the cache: a 120,000-token prompt.
+        cost = token_cost('anthropic', 'claude-haiku-5-5', 60_000, 0, cache_read_tokens=60_000)
+        assert cost == pytest.approx((60_000 * 0.50 + 60_000 * 0.50 * 0.10) / 1e6)
+
+    @pytest.mark.parametrize('ttl, multiplier', [('5m', 1.25), ('1h', 2.0)])
+    def test_cache_writes_cost_more_than_input(self, ttl, multiplier):
+        from cannlytics.data.coas.config import token_cost
+        cost = token_cost('anthropic', 'claude-opus-5-5', 0, 0, cache_write_tokens=1_000_000, cache_ttl=ttl)
+        assert cost == pytest.approx(4.00 * multiplier)
+
+    def test_a_batch_is_half_price(self):
+        standard = get_model_cost('anthropic', 'claude-opus-5-5', 20_000, 10_000)
+        batch = get_model_cost('anthropic', 'claude-opus-5-5', 20_000, 10_000, batch=True)
+        assert standard == pytest.approx(0.28) and batch == pytest.approx(0.14)
+
+    def test_batches_are_priced_only_where_cannlytics_submits_them(self):
+        with pytest.raises(ValueError, match='batches'):
+            get_model_cost('openai', 'gpt-6-sol', 1_000, 1_000, batch=True)
+
+class TestEffort:
+
+    def test_the_default_is_sent_explicitly(self):
+        from cannlytics.data.coas.config import resolve_effort
+        # The API's own default is medium on Opus 5.5; cannlytics asks for high.
+        assert resolve_effort('anthropic', 'claude-opus-5-5') == 'high'
+        assert resolve_effort('claude', 'claude-opus-5-5', ' MAX ') == 'max'
+
+    def test_a_model_without_effort_levels_takes_none(self):
+        from cannlytics.data.coas.config import resolve_effort
+        assert resolve_effort('anthropic', 'claude-haiku-4-5-20251001') is None
+        with pytest.raises(ValueError, match='no effort'):
+            resolve_effort('anthropic', 'claude-haiku-4-5-20251001', 'high')
+
+    def test_an_unknown_effort_names_the_levels(self):
+        from cannlytics.data.coas.config import resolve_effort
+        with pytest.raises(ValueError, match='low, medium, high, xhigh, max'):
+            resolve_effort('anthropic', 'claude-sonnet-5-5', 'ultra')
+
+    @pytest.mark.parametrize('model, effort, tokens', [
+        ('claude-opus-5-5', 'low', 16_000), ('claude-opus-5-5', 'high', 64_000),
+        ('claude-opus-5-5', 'max', 128_000), ('claude-haiku-4-5-20251001', None, 64_000),
+    ])
+    def test_higher_effort_gets_more_room_to_think(self, model, effort, tokens):
+        from cannlytics.data.coas.config import default_max_tokens
+        assert default_max_tokens('anthropic', model, effort) == tokens

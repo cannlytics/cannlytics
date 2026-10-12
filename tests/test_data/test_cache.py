@@ -227,14 +227,29 @@ class TestRekeyCache:
         assert reloaded.get(sha1) is None
         assert reloaded.get(sha256) == {'pdf_hash': sha256, 'results': [{'key': 'thc', 'value': None}]}
 
-    def test_collision_keeps_the_first_entry(self, tmp_path):
+    def test_collision_keeps_the_last_entry_as_bogart_reads_it(self, tmp_path):
+        # 1.0.6: the later line wins, as when Bogart loads a cache; before,
+        # the first won, so a rekey could restore an answer a re-parse replaced.
         path = str(tmp_path / 'c.jsonl')
         cache = Bogart(path)
         cache.set('new', {'v': 'already-here'})
         cache.set('old', {'v': 'late'})
         stats = rekey_cache(path, {'old': 'new'})
         assert stats['collisions'] == 1
-        assert Bogart(path).cache == {'new': {'v': 'already-here'}}
+        assert Bogart(path).cache == {'new': {'v': 'late'}}
+
+    def test_a_duplicate_key_keeps_its_last_line_like_load(self, tmp_path):
+        path = tmp_path / 'c.jsonl'
+        path.write_text('{"k": {"v": 1}}\n{"x": {"v": 0}}\n{"k": {"v": 2}}\n', encoding='utf-8')
+        before = Bogart(str(path)).cache
+        rekey_cache(str(path), {})
+        assert Bogart(str(path)).cache == before == {'k': {'v': 2}, 'x': {'v': 0}}
+
+    def test_the_old_key_can_be_kept_in_the_value(self, tmp_path):
+        path = str(tmp_path / 'c.jsonl')
+        Bogart(path).set('a' * 40, {'pdf_hash': 'a' * 40})
+        rekey_cache(path, {'a' * 40: 'b' * 64}, legacy_field='pdf_hash_legacy')
+        assert Bogart(path).get('b' * 64) == {'pdf_hash': 'b' * 64, 'pdf_hash_legacy': 'a' * 40}
 
     def test_output_path_leaves_the_input_untouched(self, tmp_path):
         src, dst = str(tmp_path / 'src.jsonl'), str(tmp_path / 'dst.jsonl')

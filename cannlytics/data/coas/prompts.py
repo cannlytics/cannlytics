@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/9/2026
-Updated: 3/9/2026
+Updated: 10/9/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -14,9 +14,16 @@ Description:
     ``parse_coas.py`` when routing COAs to AI-powered extraction.
 
     Prompt sets:
+        - EXTRACTION: The whole COA in one request: metadata and every
+          analyte of every analysis (1.0.6; used with ``COAExtraction``)
         - METADATA: Extract product/lab/producer metadata from page 1
         - ANALYSIS: Extract results for a specific analysis type
         - SINGLE_PAGE: One-shot extraction for single-page COAs
+
+    Non-detects (1.0.6): every prompt now asks for a null value with the
+    qualifier "ND" where the COA prints ND. The earlier prompts asked for
+    0.0, so every parsed non-detect became a measurement of zero, whichever
+    model read it. ``PROMPT_VERSION`` is recorded with each parse.
 
     Each set consists of a system prompt (role + schema + rules) and
     a user prompt (task instruction). The system prompts are designed
@@ -32,6 +39,49 @@ Description:
           across all tested COA formats.
 """
 
+# The prompts' version, recorded with every parse (``parsing_prompt_version``).
+PROMPT_VERSION = '2026-10-09'
+
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║ Whole-COA Extraction Prompts (1.0.6)                             ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+EXTRACTION_SYSTEM_PROMPT = """You are an expert reader of cannabis Certificates of Analysis (COAs). Extract the attached COA into the JSON schema: its metadata, and one result for every analyte row printed in every analysis. Read every page. Record only what is printed: never infer or compute a value, except the unit conversions below.
+
+METADATA
+- product_name as printed; strain_name if a cultivar is named.
+- product_type, lowercase, one of: flower, preroll, concentrate, vape, edible, tincture, topical, other. Pre-roll or joint is preroll; cartridge, disposable or pod is vape; live resin, rosin, shatter, wax, badder, distillate, kief or hash is concentrate; gummy, chocolate, beverage or capsule is edible.
+- Dates as YYYY-MM-DD. date_tested is when testing was completed (the report date if it is the only date). date_received, date_collected and date_harvested when printed. "" when not printed.
+- lab, producer and distributor names and addresses as printed; states as 2-letter codes.
+- License numbers, sample IDs and batch numbers: copy every character exactly, telling 0 from O, 1 from I and l, 8 from B, and 5 from S.
+- batch_size and sample_weight in grams (convert only from a printed unit); null when not printed.
+- total_thc, total_cbd, total_cannabinoids and total_terpenes: only when the COA prints the total, in percent. A total printed in mg/g is divided by 10 (737.71 mg/g is 73.771). When potency is printed only per serving, unit, package or mL (no percent and no mg/g), leave the totals null. Null means not printed, which is different from 0.
+- potency_basis: "dry_weight" for "dry weight", "DW", "dry basis" or "moisture corrected"; "wet_weight" for "as received" or "wet weight"; "both" when both are printed; "" when the COA does not say.
+- potency_units_reported: the units printed for the potency totals before any conversion: "%", "mg/g", "mg/serving", "mg/unit", "mg/package", "mg/mL", or "".
+- status: the overall result printed on the COA, "pass" or "fail", or "".
+- analyses: every analysis on the COA, from: cannabinoids, terpenes, pesticides, heavy_metals, microbials, residual_solvents, moisture_foreign_matter, other.
+
+RESULTS: one per analyte row, detected or not
+- analysis: cannabinoids, terpenes, pesticides, heavy_metals, microbials (mycotoxins such as aflatoxins and ochratoxin A included), residual_solvents, moisture_foreign_matter (moisture content, water activity and foreign matter), or other (anything else).
+- key: a snake_case analyte key, such as delta_9_thc, thca, cbd, cbda, cbg, cbn, beta_myrcene, d_limonene, beta_caryophyllene, alpha_pinene, linalool, abamectin, lead, total_yeast_and_mold, aspergillus_flavus, butane, moisture_content, water_activity. name: the analyte exactly as printed.
+- value: the result as a number, in the units given in units. value is null when no number is printed as the result.
+- qualifier: "" when the result is a number. Otherwise what is printed: "ND" for not detected, none detected, absent or negative; "<LOD" for below the limit of detection; "<LOQ" for detected but below the limit of quantitation ("<LOQ", "BQL", "trace"); ">ULOQ" for above the upper limit of quantitation; "detected" for present or positive without a number; "NR" for a row printed with no result; "NT" for not tested.
+- A result printed as "<" with a number (such as "<0.10") is value null, qualifier "<LOQ", and the number in loq unless an LOQ column gives it. A result printed as ">" with a number is value null, qualifier ">ULOQ".
+- Never record a non-detect as 0. 0 is a value only when the COA prints the number 0.
+- units: the units of value as printed, with "percent" for %. Other examples: "mg/g", "mg", "ppm", "ppb", "ug/g", "cfu/g", "aw".
+- Cannabinoids and terpenes: when both percent and mg/g columns are printed, use the percent column (units "percent"). Edibles may be reported in mg per serving or unit; record them as printed.
+- limit: the action limit printed for the analyte, in the units of value; null when none. lod and loq: the limits of detection and quantitation printed for the analyte; null when not printed.
+- status: "pass" or "fail" when printed for the analyte; "" otherwise.
+
+READING TABLES
+COA tables often have several numeric columns. The result column is labeled Result, Amount, Concentration or Tested, or by its units (%, mg/g, ppm, ppb, cfu/g). LOD and LOQ columns are method limits, usually small numbers: never put them in value. Limit, Action Level or Action Limit columns go in limit. When a row has two result columns in different units (% and mg/g, the mg/g one 10 times larger), use the percent column. Keep every row's numbers with that row."""
+
+EXTRACTION_USER_PROMPT = (
+    'Extract this Certificate of Analysis: the metadata, and one result for '
+    'every analyte row in every analysis, detected or not. Non-detects are '
+    'null values with the qualifier "ND", never 0. Totals are in percent and '
+    'null when the COA does not print them.'
+)
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Metadata Extraction Prompts                                      ║
@@ -49,7 +99,8 @@ Fields to extract:
 | date_received | str | "2024-01-22" | Sample received date (ISO YYYY-MM-DD) |
 | date_collected | str | "" | Sample collection date (ISO YYYY-MM-DD) |
 | batch_number | str | "BN-2024-123" | Batch, lot, or metrc batch number |
-| batch_size | float | 1000.0 | Batch size in grams (convert lbs/oz if needed) |
+| date_harvested | str | "" | Harvest date, if printed (ISO YYYY-MM-DD) |
+| batch_size | float | 1000.0 | Batch size in grams (convert lbs/oz if needed); null if not printed |
 | lab | str | "SC Laboratories" | Testing laboratory full name |
 | lab_license_number | str | "C8-0000013-LIC" | Lab license — copy EVERY character carefully |
 | lab_address | str | "123 Main St" | Lab street address |
@@ -65,11 +116,13 @@ Fields to extract:
 | distributor | str | "" | Distributor name (if listed) |
 | distributor_license_number | str | "" | Distributor license (if listed) |
 | sample_id | str | "2RLS-240530-018" | Lab sample ID — copy carefully |
-| sample_weight | float | 1.0 | Sample weight in grams |
+| sample_weight | float | 1.0 | Sample weight in grams; null if not printed |
 | total_cannabinoids | float | 54.79 | Total cannabinoids — ALWAYS in percent (%) |
 | total_cbd | float | 0.5 | Total CBD — ALWAYS in percent (%) |
 | total_thc | float | 18.0 | Total THC — ALWAYS in percent (%) |
 | total_terpenes | float | 2.0 | Total terpenes — ALWAYS in percent (%) |
+| potency_basis | str | "dry_weight" | "dry_weight", "wet_weight", "both", or "" if the COA does not say |
+| potency_units_reported | str | "%" | Units printed for the potency totals before conversion: "%", "mg/g", "mg/serving", "mg/unit", "mg/package", "mg/mL" |
 | status | str | "pass" | Overall pass/fail status |
 | analyses | list | ["cannabinoids", "terpenes"] | List of all analysis types on the COA |
 
@@ -81,9 +134,11 @@ CRITICAL RULES:
 
 3. DATES: Convert any date format to ISO (YYYY-MM-DD). "03/11/2024" → "2024-03-11". "March 11, 2024" → "2024-03-11". Use the test completion date for date_tested, not the report date.
 
-4. DEFAULT VALUES: Return null for total_thc, total_cbd, total_cannabinoids, and total_terpenes if the value is NOT explicitly printed on the COA. Return 0.0 for other numeric fields (batch_size, sample_weight) not found. Return "" for string fields not found. IMPORTANT: null means the value was not tested or not reported — this is scientifically different from 0.0.
+4. DEFAULT VALUES: Return null for any number NOT explicitly printed on the COA (the totals, batch_size, sample_weight). Return "" for string fields not found. IMPORTANT: null means the value was not tested or not reported — this is scientifically different from 0.0.
 
-5. PRODUCT TYPE: Use lowercase. "Pre-Roll" → "preroll". "Vape Cartridge" → "vape". "Live Resin" → "concentrate". "Gummies" → "edible"."""
+5. PRODUCT TYPE: Use lowercase. "Pre-Roll" → "preroll". "Vape Cartridge" → "vape". "Live Resin" → "concentrate". "Gummies" → "edible".
+
+6. POTENCY BASIS AND UNITS: Set potency_basis to "dry_weight" for wording such as "dry weight", "DW", "dry basis" or "moisture corrected", and to "wet_weight" for "as received" or "wet weight"; use "" if the COA does not say. Set potency_units_reported to the units exactly as printed. If the COA reports potency only as mg per serving, unit or package (no percent and no mg/g), return null for the totals instead of converting."""
 
 METADATA_USER_PROMPT = (
     'Extract the metadata from this Certificate of Analysis (COA). '
@@ -92,7 +147,6 @@ METADATA_USER_PROMPT = (
     'Copy license numbers and sample IDs character-by-character. '
     'Return valid JSON matching the LabTestMetadata schema.'
 )
-
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Analysis Extraction Prompts                                      ║
@@ -106,11 +160,12 @@ ANALYSIS_SYSTEM_PROMPT = """You are an expert cannabis Certificate of Analysis (
   |-------|------|-------------|
   | key | str | Standardized analyte key (snake_case) |
   | name | str | Lab's displayed analyte name (as printed) |
-  | value | float | The MEASURED TEST RESULT value (see rules below) |
+  | value | float or null | The MEASURED TEST RESULT value; null when no number is printed |
+  | qualifier | str | "" for a number; "ND", "<LOD", "<LOQ", ">ULOQ", "detected", "NR" or "NT" otherwise |
   | units | str | Units of the value field (see rules below) |
-  | limit | float | Action/regulatory limit (0.0 if not shown) |
-  | lod | float | Limit of Detection (0.0 if not shown) |
-  | loq | float | Limit of Quantification (0.0 if not shown) |
+  | limit | float or null | Action/regulatory limit (null if not shown) |
+  | lod | float or null | Limit of Detection (null if not shown) |
+  | loq | float or null | Limit of Quantification (null if not shown) |
   | status | str | "pass", "fail", or "" |
 
 ═══════════════════════════════════════════════════════════════
@@ -152,7 +207,7 @@ KEY RULES FOR IDENTIFYING THE CORRECT VALUE:
 
 3. UNIT PREFERENCE for Pesticides and Heavy Metals:
    - Use the units shown on the COA: typically "ppb", "ppm", "ug/g", or "ug/kg".
-   - The RESULT column contains the test result. "ND" (Not Detected) = 0.0.
+   - The RESULT column contains the test result. "ND" (Not Detected) is value null with qualifier "ND".
    - The ACTION LIMIT column goes in the "limit" field.
 
 4. UNIT PREFERENCE for Microbials:
@@ -163,11 +218,12 @@ KEY RULES FOR IDENTIFYING THE CORRECT VALUE:
    - Moisture content: use "percent".
    - Water activity (aW): use "aW" (dimensionless, typically 0.0-1.0).
 
-6. HANDLING SPECIAL VALUES:
-   - "ND" (Not Detected) → value = 0.0
-   - "<LOQ" → value = 0.0 (the analyte was detected but below quantification)
-   - "N/A" or blank → value = 0.0
-   - "Pass"/"Fail" in the result column (with no numeric value) → value = 0.0, set status field instead
+6. HANDLING SPECIAL VALUES (never record a non-detect as 0.0):
+   - "ND" (Not Detected) → value = null, qualifier = "ND"
+   - "<LOQ" → value = null, qualifier = "<LOQ" (detected but below quantification)
+   - "<0.10" → value = null, qualifier = "<LOQ", loq = 0.10 unless an LOQ column gives it
+   - "N/A" or blank → value = null, qualifier = "NR"
+   - "Pass"/"Fail" in the result column (with no numeric value) → value = null, set status instead
 
 7. GENERAL:
    - Extract ONLY results for the specified analysis type.
@@ -183,7 +239,6 @@ ANALYSIS_USER_PROMPT = (
     'Return valid JSON with "analysis" and "results" fields.'
 )
 
-
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ Single-Page COA Extraction Prompts                               ║
 # ╚══════════════════════════════════════════════════════════════════╝
@@ -195,7 +250,7 @@ Return JSON with these top-level fields:
 - "cannabinoids": List of result objects for cannabinoid analytes (if present).
 - "terpenes": List of result objects for terpene analytes (if present).
 
-Each result object: {"key": "snake_case_name", "name": "Lab Display Name", "value": 0.0, "units": "percent", "limit": 0.0, "lod": 0.0, "loq": 0.0, "status": "pass"}
+Each result object: {"key": "snake_case_name", "name": "Lab Display Name", "value": 1.23, "qualifier": "", "units": "percent", "limit": null, "lod": null, "loq": null, "status": ""}. A non-detect is {"value": null, "qualifier": "ND", ...}.
 
 CRITICAL RULES:
 
@@ -211,9 +266,9 @@ CRITICAL RULES:
    - If both appear, the percent column has smaller values (e.g., 73.771%) and the mg/g column is ~10× larger (e.g., 737.71 mg/g). Use the percent column.
    - EXCEPTION for edibles: use mg or mg/g as shown on the COA.
 
-4. HANDLING SPECIAL VALUES: "ND" = 0.0. "<LOQ" = 0.0. Blank = 0.0.
+4. HANDLING SPECIAL VALUES: "ND" is value null with qualifier "ND"; "<LOQ" is value null with qualifier "<LOQ"; blank is value null with qualifier "NR". Never record a non-detect as 0.0.
 
-5. DEFAULT VALUES: Return null for total_thc, total_cbd, total_cannabinoids, total_terpenes if NOT explicitly shown on the COA (null = not tested/reported, which is different from 0.0). Return 0.0 for other missing numeric fields (batch_size, sample_weight). Return "" for missing strings. Dates in ISO format (YYYY-MM-DD). product_type in lowercase (flower, concentrate, edible, preroll, vape, tincture).
+5. DEFAULT VALUES: Return null for total_thc, total_cbd, total_cannabinoids, total_terpenes if NOT explicitly shown on the COA (null = not tested/reported, which is different from 0.0). Return null for other missing numeric fields (batch_size, sample_weight). Return "" for missing strings. Dates in ISO format (YYYY-MM-DD). product_type in lowercase (flower, concentrate, edible, preroll, vape, tincture).
 
 6. LICENSE/SAMPLE IDs: Copy EVERY character carefully — distinguish 0/O, 1/I/l, 8/B, 5/S.
 

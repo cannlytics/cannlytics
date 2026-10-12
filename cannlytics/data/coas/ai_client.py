@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/7/2024
-Updated: 3/19/2026
+Updated: 10/9/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -22,8 +22,14 @@ Description:
 
     Public API:
         - CostTracker: Cumulative cost tracking across providers.
-        - AIClient: Unified AI client with parse_metadata(),
-          parse_analysis(), and parse_single_page() methods.
+        - AIClient: Unified AI client with parse_coa() (the whole COA in
+          one request, 1.0.6), parse_metadata(), parse_analysis(), and
+          parse_single_page() methods.
+
+    Claude (1.0.6): responses are schema-constrained (structured outputs
+    through ``output_config.format``; forced tool use is refused by Opus
+    5.5), the effort level is sent explicitly, the system prompt is
+    cached, and cache reads and writes are priced.
 """
 # Standard imports:
 import base64
@@ -36,12 +42,21 @@ from typing import Any, Dict, List, Optional, Tuple
 # Internal imports (within cannlytics.data.coas):
 from cannlytics.data.coas.config import (
     resolve_provider,
-    effective_prices,
+    resolve_effort,
+    default_max_tokens,
+    token_cost,
     AI_PROVIDERS,
-    FLEX_COST_MULTIPLIER,
     FLEX_TIMEOUT,
 )
+from cannlytics.data.coas.extraction import (
+    message_usage,
+    normalize_extraction,
+    pdf_base64,
+    response_json,
+)
 from cannlytics.data.coas.prompts import (
+    EXTRACTION_SYSTEM_PROMPT,
+    EXTRACTION_USER_PROMPT,
     METADATA_SYSTEM_PROMPT,
     METADATA_USER_PROMPT,
     ANALYSIS_SYSTEM_PROMPT,
@@ -63,14 +78,18 @@ from cannlytics.data.coas.pdf_utils import (
 # Lazy-import schema (Pydantic models may be None).
 try:
     from cannlytics.data.coas.schema import (
+        COAExtraction,
         LabTestMetadata,
         LabAnalysis,
         PYDANTIC_AVAILABLE,
         PYDANTIC_IMPORT_ERROR,
+        strict_json_schema,
     )
 except ImportError:
+    COAExtraction = None
     LabTestMetadata = None
     LabAnalysis = None
+    strict_json_schema = None
     PYDANTIC_AVAILABLE = False
     PYDANTIC_IMPORT_ERROR = 'cannlytics.data.coas.schema could not be imported'
 
@@ -101,8 +120,10 @@ class CostTracker:
             cost: float,
             analysis: str = '',
             pdf_hash: str = '',
+            **extra: Any,
         ):
-        """Record a single API call's cost."""
+        """Record a single API call's cost. Extra fields (``effort``,
+        ``cache_read_tokens``, ``batch_id``, ...) are kept with it."""
         entry = {
             'timestamp': datetime.now().isoformat(),
             'provider': provider,
@@ -112,6 +133,7 @@ class CostTracker:
             'cost': cost,
             'analysis': analysis,
             'pdf_hash': pdf_hash,
+            **extra,
         }
         self.records.append(entry)
         self.total_cost += cost
@@ -189,6 +211,13 @@ class AIClient:
         config: Optional dict mapping env key names to values
             (e.g., ``{'ANTHROPIC_API_KEY': 'sk-ant-...'}``).
         logger: Optional logger instance.
+        effort: Effort level for models that take one (Claude 5.5 and
+            Fable 5.1: ``'low'`` to ``'max'``). Defaults to the model's
+            ``default_effort`` and is always sent explicitly.
+        max_tokens: Output cap, thinking included (Claude; default: by
+            effort, see ``default_max_tokens``).
+        prompt_cache: Cache the system prompt (Claude). A cache write
+            costs 1.25 times the input price and each read a tenth or less.
 
     Usage::
 
@@ -205,11 +234,24 @@ class AIClient:
             api_key: Optional[str] = None,
             config: Optional[Dict] = None,
             logger: Optional[logging.Logger] = None,
+            effort: Optional[str] = None,
+            max_tokens: Optional[int] = None,
+            prompt_cache: bool = True,
         ):
         self.provider = resolve_provider(provider)
         self.provider_config = AI_PROVIDERS[self.provider]
         self.model = model or self.provider_config['default_model']
+        if self.model not in self.provider_config['models']:
+            raise ValueError(f'Unknown {self.provider} model {self.model!r}: use one of '
+                             f'{", ".join(self.provider_config["models"])}.')
         self.model_config = self.provider_config['models'][self.model]
+        self.effort = resolve_effort(self.provider, self.model, effort)
+        self.max_tokens = int(max_tokens or (
+            default_max_tokens(self.provider, self.model, self.effort) if self.provider == 'anthropic'
+            else self.model_config.get('max_output_tokens', 16_384)))
+        self.prompt_cache = prompt_cache
+        self.total_cost = 0.0          # every call's cost, failed answers included
+        self.last_problem = ''         # why the last answer had no JSON, if it had none
         self._api_key = api_key
         self._config = config or {}
         self.logger = logger or logging.getLogger(__name__)
@@ -319,22 +361,56 @@ class AIClient:
             output_tokens: int,
             num_images: int = 0,
             used_flex: bool = False,
+            *,
+            cache_write_tokens: int = 0,
+            cache_read_tokens: int = 0,
+            cache_ttl: str = '5m',
+            batch: bool = False,
         ) -> float:
         """Calculate the cost of a single API call in USD.
 
         Token counts are the API's own, which already include image and
         PDF input; ``num_images`` adds a surcharge only for a model that
-        declares ``image_cost`` (none of the registered models do).
+        declares ``image_cost`` (none of the registered models do). Cache
+        writes and reads are priced at their multiples of the input price,
+        and a batch at the provider's ``batch_discount``.
         """
-        input_price, output_price = effective_prices(self.model_config)
-        token_cost = (input_tokens * input_price + output_tokens * output_price) / 1_000_000
-        image_cost = num_images * self.model_config.get('image_cost', 0.0)
-        cost = token_cost + image_cost
-        if used_flex:
-            cost *= FLEX_COST_MULTIPLIER
-        return cost
+        cost = token_cost(self.provider, self.model, input_tokens, output_tokens,
+                          cache_write_tokens=cache_write_tokens, cache_read_tokens=cache_read_tokens,
+                          cache_ttl=cache_ttl, batch=batch, flex=used_flex)
+        return cost + num_images * self.model_config.get('image_cost', 0.0)
 
     # ── Public parsing methods ─────────────────────────────────────
+
+    def parse_coa(
+            self,
+            pdf_path: Optional[str] = None,
+            page_images: Optional[List[str]] = None,
+            page_text: Optional[str] = None,
+        ) -> Tuple[Optional[Dict], float, int, int]:
+        """Parse a whole COA in one request (1.0.6).
+
+        The model reads the PDF once and returns the metadata and every
+        analyte of every analysis (``COAExtraction``), normalized by
+        ``normalize_extraction``: non-detects are null values with the
+        qualifier ``'ND'``.
+
+        Returns: ``(parsed, cost, input_tokens, output_tokens)`` where
+        ``parsed`` is ``{'metadata': {...}, 'results': [...]}`` or ``None``
+        (see ``last_problem``).
+        """
+        parsed, cost, in_tok, out_tok = self._call_ai(
+            system_prompt=EXTRACTION_SYSTEM_PROMPT,
+            user_prompt=EXTRACTION_USER_PROMPT,
+            pdf_path=pdf_path,
+            page_images=page_images,
+            page_text=page_text,
+            response_schema=COAExtraction,
+            mode='coa',
+        )
+        if parsed is not None:
+            parsed = normalize_extraction(parsed)
+        return parsed, cost, in_tok, out_tok
 
     def parse_metadata(
             self,
@@ -419,22 +495,27 @@ class AIClient:
         if not self.is_available:
             return None, 0.0, 0, 0
 
+        self.last_problem = ''
         try:
             if self.provider in ('openai', 'xai'):
-                return self._call_openai(
+                result = self._call_openai(
                     system_prompt, user_prompt, pdf_path,
                     page_images, page_text, response_schema, mode,
                 )
             elif self.provider == 'anthropic':
-                return self._call_anthropic(
+                result = self._call_anthropic(
                     system_prompt, user_prompt, pdf_path,
-                    page_images, page_text, mode,
+                    page_images, page_text, mode, response_schema,
                 )
             elif self.provider == 'gemini':
-                return self._call_gemini(
+                result = self._call_gemini(
                     system_prompt, user_prompt, pdf_path,
                     page_images, page_text, response_schema, mode,
                 )
+            else:
+                return None, 0.0, 0, 0
+            self.total_cost += result[1]
+            return result
         except Exception as e:
             error_str = str(e).lower()
             if '429' in error_str or 'rate' in error_str or 'quota' in error_str:
@@ -647,19 +728,29 @@ class AIClient:
             self,
             system_prompt, user_prompt, pdf_path,
             page_images, page_text, mode,
+            response_schema=None,
         ) -> Tuple[Optional[Dict], float, int, int]:
-        """Call Anthropic Claude with PDF or image support."""
+        """Call Anthropic Claude with PDF or image support.
+
+        With a response model and a model that supports structured
+        outputs, the answer is constrained to its strict JSON schema
+        (``output_config.format``); otherwise the schema is described in
+        the system prompt. The effort level goes in ``output_config``;
+        thinking is left adaptive (Opus 5.5 refuses to disable it). The
+        system prompt is cached unless ``prompt_cache`` is off.
+
+        A response without JSON still costs its tokens: the cost is
+        returned with ``None``, and ``last_problem`` says why.
+        """
         content = []
 
         if pdf_path and self.supports_pdf:
-            with open(long_path(pdf_path), 'rb') as f:
-                pdf_b64 = base64.b64encode(f.read()).decode('utf-8')
             content.append({
                 'type': 'document',
                 'source': {
                     'type': 'base64',
                     'media_type': 'application/pdf',
-                    'data': pdf_b64,
+                    'data': pdf_base64(pdf_path),
                 },
             })
         elif page_images:
@@ -678,42 +769,51 @@ class AIClient:
 
         content.append({'type': 'text', 'text': user_prompt})
 
-        if mode == 'metadata':
-            json_schema = metadata_json_hint()
+        schema = None
+        if response_schema is not None and self.structured_output_active:
+            schema = strict_json_schema(response_schema)
+            system_text = system_prompt
         else:
-            json_schema = analysis_json_hint()
+            hint = (metadata_json_hint() if mode == 'metadata'
+                    else analysis_json_hint() if mode == 'analysis' else '')
+            system_text = (f'{system_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON'
+                           + (f' matching this schema:\n{hint}' if hint else '.'))
+        system_block = {'type': 'text', 'text': system_text}
+        if self.prompt_cache:
+            system_block['cache_control'] = {'type': 'ephemeral'}
 
-        enhanced_system = (
-            f'{system_prompt}\n\n'
-            f'IMPORTANT: Respond ONLY with valid JSON matching this schema:\n'
-            f'{json_schema}'
-        )
+        kwargs = {
+            'model': self.model,
+            'max_tokens': self.max_tokens,
+            'system': [system_block],
+            'messages': [{'role': 'user', 'content': content}],
+        }
+        output_config = {}
+        if self.effort:
+            output_config['effort'] = self.effort
+        if schema:
+            output_config['format'] = {'type': 'json_schema', 'schema': schema}
+        if output_config:
+            kwargs['output_config'] = output_config
 
         # Streamed, then collected: the Anthropic SDK refuses a
         # non-streaming request whose `max_tokens` could run past ten
         # minutes (above about 21,000 tokens), so with the models' real
         # output limits every non-streaming call failed before it was sent.
-        with self.client.messages.stream(
-            model=self.model,
-            max_tokens=self.model_config.get('max_output_tokens', 16_384),
-            system=enhanced_system,
-            messages=[{'role': 'user', 'content': content}],
-        ) as stream:
+        with self.client.messages.stream(**kwargs) as stream:
             response = stream.get_final_message()
 
-        text = ''.join(
-            block.text for block in response.content
-            if hasattr(block, 'text')
-        )
-        parsed = extract_json(text)
+        usage = message_usage(response)
+        cost = self.calculate_cost(usage['input'], usage['output'],
+                                   cache_write_tokens=usage['cache_write'],
+                                   cache_read_tokens=usage['cache_read'])
+        in_tok = usage['input'] + usage['cache_write'] + usage['cache_read']
+        parsed, problem = response_json(response)
         if parsed is None:
-            return None, 0.0, 0, 0
-
-        in_tok = response.usage.input_tokens
-        out_tok = response.usage.output_tokens
-        cost = self.calculate_cost(in_tok, out_tok)
-
-        return parsed, cost, in_tok, out_tok
+            self.last_problem = problem
+            self.logger.warning(f'anthropic/{self.model}: no JSON in the answer ({problem}).')
+            return None, cost, in_tok, usage['output']
+        return parsed, cost, in_tok, usage['output']
 
     # ── Gemini ────────────────────────────────────────────────────
 

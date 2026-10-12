@@ -95,22 +95,41 @@ priority order if a provider fails or runs out of quota:
 
 | Priority | Provider | Default model | Other models | Key |
 |---|---|---|---|---|
-| 1 | Anthropic Claude | `claude-haiku-4-5-20251001` | `claude-sonnet-5`, `claude-opus-5-5`, `claude-fable-5-1`, `claude-sonnet-4-5-20250929` | `ANTHROPIC_API_KEY` |
+| 1 | Anthropic Claude | `claude-sonnet-5-5` | `claude-haiku-5-5`, `claude-opus-5-5`, `claude-fable-5-1`, `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
 | 2 | OpenAI | `gpt-6-sol` | `gpt-6-luna`, `gpt-6-astra`, `gpt-5-mini`, `gpt-5` | `OPENAI_API_KEY` |
 | 3 | Google Gemini | `gemini-3.8-flash` | `gemini-3.5-flash-lite`, `gemini-3.1-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-pro` | `GOOGLE_API_KEY` |
 | 4 | xAI Grok | `grok-4.7` | `grok-4.3` | `XAI_API_KEY` |
 
 Prices and capabilities are in `cannlytics.data.coas.config`
 (`AI_PROVIDERS`, checked against each provider's price page on
-2026-09-28; `get_model_cost` prices a call on any date, since
-some prices are scheduled to change). Models flagged `legacy` are
-superseded but selectable; `quarantined` models failed a fidelity check
-and are never a default. Before a large run, check every configured
-provider with one live request each:
+2026-09-28, and Anthropic's again on 2026-10-09; `get_model_cost` prices
+a call on any date, since some prices are scheduled to change, and
+counts prompt-cache reads and writes and batch discounts). Models
+flagged `legacy` are superseded but selectable; `quarantined` models
+failed a fidelity check and are never a default. Before a large run,
+check every configured provider with one live request each:
 
 ```
 python tools/check_ai_providers.py
 ```
+
+### Whole-COA extraction and batches (1.0.6)
+
+`AIClient.parse_coa` reads a COA in one request: the PDF once, a cached
+system prompt, an effort level (`low` to `max`; `high` unless given),
+and the answer constrained to the `COAExtraction` JSON schema. The same
+request, built by `cannlytics.data.coas.batch.extraction_request`, can
+be sent by the thousand as a Claude Message Batch at half price:
+`chunk_requests` cuts the requests into batches within Anthropic's
+limits (100,000 requests or 256 MB each), `AnthropicBatches` submits
+and collects them, and `outcome_from_result` normalizes each answer
+and prices it. Each answer records how it was made
+(`extraction.attribution`: provider, model, effort, mode, prompt
+version, and cost). Other providers' batches are not yet supported.
+
+A result that is not a number is `None` with a `qualifier`: `ND`,
+`<LOD`, `<LOQ`, `>ULOQ`, `detected`, `NR` (not reported) or `NT` (not
+tested). `parse_result_value('<0.10')` gives `(None, '<LOQ', 0.1)`.
 
 ## The results
 
