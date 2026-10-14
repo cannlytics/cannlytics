@@ -153,11 +153,20 @@ handle `None`.
 
 - `cannlytics.auth.AUTH_ERROR`, the message for a request with no user,
   so applications need not keep a copy.
+- Dates in extracted metadata (`date_tested`, `date_received`,
+  `date_collected`, `date_harvested`) are normalized to `YYYY-MM-DD`
+  (`normalize_date`): a model copies a date as printed ("9/9/2025",
+  "Sep 9, 2025"), which is part of why 43% of the first benchmark's
+  answers disagreed with their reference on the date. A date that cannot
+  be read is kept as printed.
 
 ### Changed: packaging
 
 - The package description matches what was published for 1.0.5
   ("…and Metrc API access").
+- Tests that draw PDFs skip, with a reason, when `reportlab` (a `test`
+  extra) is not installed, instead of failing (42 failures and 14
+  errors in an environment without it).
 
 ---
 

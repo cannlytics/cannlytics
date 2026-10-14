@@ -95,6 +95,7 @@ from cannlytics.data.coas.config import AI_PROVIDERS, get_model_cost, resolve_ef
 # ── Whole-COA extraction and batches (1.0.6) ─────────────────────
 from cannlytics.data.coas.extraction import (
     anthropic_extraction_params,
+    normalize_date,
     normalize_extraction,
     split_extraction,
 )
@@ -149,6 +150,7 @@ __all__ = [
     'LAB_REGISTRY',
     # ── Whole-COA extraction and batches ──────────────────────
     'anthropic_extraction_params',
+    'normalize_date',
     'normalize_extraction',
     'split_extraction',
     'AnthropicBatches',

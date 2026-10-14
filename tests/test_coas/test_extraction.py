@@ -18,7 +18,9 @@ from cannlytics.data.coas.extraction import (
     attribution,
     message_cost,
     message_usage,
+    normalize_date,
     normalize_extraction,
+    normalize_metadata,
     normalize_result,
     response_json,
     split_extraction,
@@ -213,3 +215,26 @@ def test_every_claude_model_is_priced_for_batches_and_the_cache():
     for name, model in provider['models'].items():
         assert model['supports_structured_output'] is True, name
         assert 0 < model['cache_read'] <= 0.1, name
+
+
+class TestDates:
+    """Dates come back as printed ("9/9/2025"); they are stored as ISO dates."""
+
+    @pytest.mark.parametrize('text, iso', [
+        ('2025-09-09', '2025-09-09'), ('9/9/2025', '2025-09-09'), ('09/09/25', '2025-09-09'),
+        ('Sep 9, 2025', '2025-09-09'), ('September 9th, 2025', '2025-09-09'), ('9-Sep-2025', '2025-09-09'),
+        ('2025-09-09T10:30:00Z', '2025-09-09'), ('9/9/2025 10:30 AM', '2025-09-09'), ('2025/9/9', '2025-09-09'),
+        ('12-05-2024', '2024-12-05'),
+    ])
+    def test_printed_dates_become_iso(self, text, iso):
+        assert normalize_date(text) == iso
+
+    @pytest.mark.parametrize('text', ['9/31/2025', 'N/A', '', None, 'pending'])
+    def test_what_is_not_a_date_is_none(self, text):
+        assert normalize_date(text) is None
+
+    def test_metadata_dates_are_normalized_and_unreadable_ones_kept(self):
+        out = normalize_metadata({'date_tested': '9/9/2025', 'date_received': 'pending', 'date_collected': None})
+        assert out['date_tested'] == '2025-09-09'
+        assert out['date_received'] == 'pending'          # kept as printed: nothing is lost
+        assert out['date_collected'] is None

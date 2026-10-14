@@ -58,6 +58,7 @@ def gemini_client(vector=(0.6, 0.8), per_content=True):
     return client
 
 def make_pdf(pages):
+    pytest.importorskip('reportlab', reason='reportlab makes the test PDFs: pip install "cannlytics[test]"')
     from reportlab.pdfgen import canvas
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, invariant=1)

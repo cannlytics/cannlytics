@@ -5,7 +5,7 @@ Copyright (c) 2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/9/2026
-Updated: 10/9/2026
+Updated: 10/11/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -20,7 +20,8 @@ Description:
     the datasets), so the two cannot drift apart.
 
     Responses are normalized the same way whichever path made them:
-    qualifiers from ``RESULT_QUALIFIERS``, canonical analyte keys, and a
+    qualifiers from ``RESULT_QUALIFIERS``, canonical analyte keys, dates as
+    ``YYYY-MM-DD`` (a model copies them as printed, "9/9/2025"), and a
     non-detect is a null value, never 0.0.
 
     Usage::
@@ -37,6 +38,8 @@ Description:
 import base64
 import json
 import os
+import re
+from datetime import date
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Internal imports:
@@ -66,6 +69,8 @@ from cannlytics.data.coas.schema import (
 NUMERIC_METADATA = ('batch_size', 'sample_weight', 'total_cannabinoids',
                     'total_cbd', 'total_thc', 'total_terpenes')
 NUMERIC_RESULT = ('value', 'limit', 'lod', 'loq')
+# Fields of a metadata response that are dates (``YYYY-MM-DD`` once normalized).
+DATE_METADATA = ('date_tested', 'date_received', 'date_collected', 'date_harvested')
 # Qualifiers that mean no number is the result.
 NO_NUMBER = {'ND', '<LOD', '<LOQ', '>ULOQ', 'detected', 'NR', 'NT'}
 
@@ -224,6 +229,49 @@ def _analysis(value: Any) -> str:
             return name
     return 'other'
 
+_MONTHS = {m: i for i, m in enumerate(
+    ('jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'), start=1)}
+_TIME = re.compile(r'(?:[ T]\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?\s*(?:[ap]\.?m\.?)?\s*(?:z|[+-]\d{2}:?\d{2}|[a-z]{3})?)$',
+                   re.I)
+
+
+def _valid_date(y: int, m: int, d: int) -> Optional[str]:
+    if y < 100:
+        y += 2000
+    try:
+        return date(y, m, d).isoformat()
+    except ValueError:
+        return None
+
+
+def normalize_date(value: Any) -> Optional[str]:
+    """A printed date as ``YYYY-MM-DD``, or None if it is not one.
+
+    Reads ISO dates, US dates (month first: ``9/9/2025``, ``09-09-25``),
+    and month names (``Sep 9, 2025``, ``9-Sep-2025``), with or without a
+    time of day.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    text = _TIME.sub('', text).strip().rstrip(',')
+    m = re.fullmatch(r'(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})', text)
+    if m:
+        return _valid_date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    m = re.fullmatch(r'(\d{1,2})[-/.](\d{1,2})[-/.](\d{2}|\d{4})', text)
+    if m:
+        return _valid_date(int(m.group(3)), int(m.group(1)), int(m.group(2)))
+    m = re.fullmatch(r'([a-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})', text, re.I)
+    if m and m.group(1)[:3].lower() in _MONTHS:
+        return _valid_date(int(m.group(3)), _MONTHS[m.group(1)[:3].lower()], int(m.group(2)))
+    m = re.fullmatch(r'(\d{1,2})[-\s]([a-z]{3,9})\.?[-\s,]+(\d{2}|\d{4})', text, re.I)
+    if m and m.group(2)[:3].lower() in _MONTHS:
+        return _valid_date(int(m.group(3)), _MONTHS[m.group(2)[:3].lower()], int(m.group(1)))
+    return None
+
+
 def normalize_result(row: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """One analyte row in the dataset's form, or None for a row with
     neither a key nor a name.
@@ -266,12 +314,16 @@ def normalize_result(row: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     }
 
 def normalize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
-    """Metadata with numbers as numbers or None, a standard product type,
-    a potency basis from ``POTENCY_BASES``, and ``analyses`` as a list."""
+    """Metadata with numbers as numbers or None, dates as ``YYYY-MM-DD``
+    (a date that cannot be read is kept as printed), a standard product
+    type, a potency basis from ``POTENCY_BASES``, and ``analyses`` as a list."""
     out = dict(metadata or {})
     for field in NUMERIC_METADATA:
         if field in out:
             out[field] = _number(out[field])
+    for field in DATE_METADATA:
+        if out.get(field):
+            out[field] = normalize_date(out[field]) or out[field]
     if out.get('product_type'):
         out['product_type'] = normalize_product_type(out['product_type']) or out['product_type']
     basis = str(out.get('potency_basis') or '').strip().lower().replace(' ', '_')

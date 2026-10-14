@@ -266,7 +266,9 @@ def sample_lab_results_list(sample_lab_result):
 # ╚══════════════════════════════════════════════════════════════════╝
 
 def _make_pdf(path: str, page_texts: list) -> str:
-    """Generate a minimal PDF with the given text on each page."""
+    """Generate a minimal PDF with the given text on each page (skips the
+    test when reportlab, a test extra, is not installed)."""
+    pytest.importorskip('reportlab', reason='reportlab makes the test PDFs: pip install "cannlytics[test]"')
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
 
