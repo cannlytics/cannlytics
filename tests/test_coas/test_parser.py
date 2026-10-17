@@ -114,6 +114,39 @@ class TestAdaptAlgorithmOutput:
         assert 'terpenes' in adapted['analyses']
         assert 'heavy_metals' in adapted['analyses']
 
+    def test_a_result_without_an_analysis_is_grouped_by_its_analyte(self):
+        """'analysis': None raised AttributeError before 1.0.6."""
+        raw = {'results': [
+            {'analysis': None, 'key': 'thca', 'name': 'THCA', 'value': 20.1},
+            {'key': 'mystery_compound', 'name': 'Mystery', 'value': 1.0},
+            {'analysis': 7, 'key': 'lead', 'value': 0.01},
+        ]}
+        adapted = adapt_algorithm_output(raw, 'hash', 'kaycha')
+        groups = {name: [r['key'] for r in entry['results']] for name, entry in adapted['analyses'].items()}
+        assert groups['cannabinoids'] == ['thca']
+        assert groups['unknown'] == ['mystery_compound']
+        assert groups['7'] == ['lead']
+        # The rows name their analysis too (a dataset keeps a row's own).
+        assert adapted['analyses']['cannabinoids']['results'][0]['analysis'] == 'cannabinoids'
+        assert adapted['analyses']['unknown']['results'][0]['analysis'] == 'unknown'
+        assert raw['results'][0]['analysis'] is None              # the input is not changed
+
+    def test_a_mycotoxin_in_a_shared_section_is_a_mycotoxin(self):
+        raw = {'results': [
+            {'analysis': 'Microbials & Mycotoxins', 'key': 'aflatoxin_b1', 'name': 'Aflatoxin B1', 'value': None},
+            {'analysis': 'Microbials & Mycotoxins', 'key': 'total_yeast_and_mold', 'value': 100.0},
+        ]}
+        adapted = adapt_algorithm_output(raw, 'hash', 'kaycha')
+        assert [r['key'] for r in adapted['analyses']['mycotoxins']['results']] == ['aflatoxin_b1']
+        assert [r['key'] for r in adapted['analyses']['microbials']['results']] == ['total_yeast_and_mold']
+        assert adapted['analyses']['mycotoxins']['results'][0]['analysis'] == 'mycotoxins'
+        assert adapted['analyses']['microbials']['results'][0]['analysis'] == 'Microbials & Mycotoxins'
+
+    def test_the_parsing_algorithm_names_the_registry_version(self):
+        from cannlytics.data.coas.registry import LAB_REGISTRY
+        adapted = adapt_algorithm_output({'results': [{'key': 'thca', 'value': 1.0}]}, 'hash', 'kaycha')
+        assert adapted['metadata']['parsing_algorithm'] == f"kaycha_v{LAB_REGISTRY['kaycha']['version']}"
+
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║ COAdoc Initialization                                            ║
 # ╚══════════════════════════════════════════════════════════════════╝

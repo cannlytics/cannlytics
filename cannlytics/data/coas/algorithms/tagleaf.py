@@ -5,7 +5,7 @@ Copyright (c) 2022-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 3/6/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -34,6 +34,60 @@ Description:
         * Single-page potency-only COAs (QA/non-compliance)
         * Multi-page compliance COAs (potency + terpenes + contaminants)
 
+    Result tables (pdfplumber ``extract_tables``), one analyte per row:
+        Safety:  ANALYTE | LIMIT | AMT | LOD/LOQ | PASS/FAIL
+                 "ABAMECTIN | 0.1 µg/g | ND | 0.0117/0.0429 | PASS"
+        Potency: ANALYTE | AMT | AMT | LOD/LOQ | PASS/FAIL
+                 "THCA | 44.5938 % | 445.938 mg/g | 0.0268/0.4 |"
+        Foreign material: ANALYTE | LIMIT | AMT | PASS/FAIL
+    A table that breaks across a page continues on the next page
+    without its header row. The pesticide list is printed in two halves
+    side by side, so both halves continue that way (2 River Labs).
+
+    Fixes (10/13/2026), from a benchmark of 4 California COAs read by
+    four Claude models that agree with each other:
+        * A result is never a limit. A table without its header row
+          (the continuation of a table broken by a page) had its first
+          analyte taken for the header, which was accepted because its
+          status cell reads PASS. With no LIMIT label in that "header"
+          the rows were read as potency rows, whose first number is the
+          result, so every non-detect read its action limit (2 River
+          Labs pesticides: flonicamid 0.1, imidacloprid 5.0 ug/g; Pure
+          Cannalyst foreign material: mold and sand 25.0 percent), and
+          the first analyte of each continuation (fipronil,
+          spiromesifen) was lost. A header is now a row of column
+          labels with no values (_header_layout), and columns are read
+          by their labels. A table without one takes the layout of the
+          last header with as many columns for the same analysis, or,
+          if it prints a PASS/FAIL or LOD/LOQ column, a layout read from
+          its cells, where the result of a safety analysis is the column
+          that prints "ND" (a limit never does), else the one after the
+          limit (_continued_layout, _infer_layout).
+        * Non-detects keep their qualifier (``parse_result_value``):
+          "ND" is value None, qualifier 'ND'; "<LOQ" and "<0.05" are
+          value None, qualifier '<LOQ', with 'loq' from the LOD/LOQ
+          column or else the printed bound. A measured 0 stays 0.0.
+          Every result row carries 'qualifier'; 'limit', 'lod' and
+          'loq' are None when not printed (they were 0.0).
+        * Units are the read cell's or column's own ('0.4457 aw' is
+          'aw', '0.1 µg/g' is 'ug/g'), else the analysis default; water
+          activity is 'aw' (it was 'aW').
+        * Moisture and water activity rows that print a value are kept
+          (they were dropped with the status-bar entries "MOISTURE
+          TESTED", "WATER ACTIVITY PASS").
+        * One-row tables (a single analyte left on a page) are read,
+          and a header printed as a table of its own is the layout of
+          the next table (both were skipped).
+        * Rows named TOTAL THC / TOTAL CBD are skipped like their
+          starred forms (totals are metadata), and rows that print
+          nothing but a name (sub-headings) are not analytes.
+        * Review (10/14/2026): a continued table whose amount cells are
+          blank reads no result, not its limits.
+
+    Foreign material "MOLD" (percent of sample area) is keyed 'mold';
+    ``normalize_analyte_key`` maps 'mold' to the microbial
+    'total_yeast_and_mold' (an alias in ``cannlytics.constants``).
+
 Data Points:
 
     ✓ product_name, strain_name, product_type
@@ -60,6 +114,8 @@ from typing import Any, Dict, List, Optional, Tuple
 # External imports:
 import pdfplumber
 
+# Internal imports:
+from cannlytics.data.coas.schema import parse_result_value
 
 # ── TagLeaf LIMS Constants ────────────────────────────────────────
 
@@ -146,11 +202,62 @@ ANALYTE_KEY_MAP = {
     'ASPERGILLUS TERREUS': 'aspergillus_terreus',
     'SALMONELLA SPP.': 'salmonella_spp',
     'VITAMIN E ACETATE': 'vitamin_e_acetate',
+    'MOISTURE': 'moisture_content',
+    'MOISTURE CONTENT': 'moisture_content',
 }
 
 # Metrc tag prefixes (used to identify Metrc IDs in text).
 METRC_PREFIXES = ['1A40']
 
+# Printed units → the package's units ("percent" for %).
+UNIT_ALIASES = {
+    '%': 'percent',
+    'mg/g': 'mg/g',
+    'mg': 'mg',
+    'ug/g': 'ug/g',
+    'ug/kg': 'ug/kg',
+    'ppm': 'ppm',
+    'ppb': 'ppb',
+    'cfu/g': 'cfu/g',
+    'aw': 'aw',
+}
+
+# A units token at the end of a cell ("0.1 µg/g", "25 %", "AMT (%)").
+_UNIT_TOKEN = r'(?:%|(?<![a-z])(?:mg/g|[uµμ]g/k?g|ppm|ppb|cfu/g|aw|mg))'
+_TRAILING_UNITS = re.compile(
+    r'\(?\s*(' + _UNIT_TOKEN + r')\s*\)?\s*$', re.IGNORECASE)
+
+# A printed number, optionally a bound, optionally with units.
+_NUMBER_CELL = re.compile(
+    r'^[<>]?\s*=?\s*[-+]?(?:\d[\d,]*\.?\d*|\.\d+)\s*' + _UNIT_TOKEN + r'?$',
+    re.IGNORECASE)
+
+# An LOD/LOQ cell: "0.0117/0.0429" (not a date, not "1/3g").
+_LOD_LOQ_CELL = re.compile(
+    r'^\d*\.?\d+\s*/\s*\d*\.?\d+\s*' + _UNIT_TOKEN + r'?$', re.IGNORECASE)
+
+# Words a PASS/FAIL column prints.
+_STATUS_CELLS = {'PASS', 'FAIL', 'PASSED', 'FAILED', 'TESTED', 'NOT TESTED'}
+
+# Qualifiers that are a reading (a non-detect, a bound, "detected").
+_READ_QUALIFIERS = {'ND', '<LOD', '<LOQ', '>ULOQ', 'detected'}
+
+# Column labels of a header row, by role, in order of precedence
+# (searched after units are removed, so "LIMIT OF DETECTION" is an LOD,
+# not a limit). "PASS/FAI" and "LOD/LO" are labels cut short by
+# pdfplumber.
+_COLUMN_ROLES = (
+    ('lod_loq', re.compile(r'^(?:LOD\s*/|LOQ\s*/)')),
+    ('lod', re.compile(r'^(?:LOD|MDL)$|LIMIT OF DETECTION|DETECTION LIMIT')),
+    ('loq', re.compile(r'^(?:LOQ|LLOQ)$|LIMIT OF QUANTI|QUANTITATION LIMIT')),
+    ('status', re.compile(r'^(?:PASS\s*/|STATUS$|P\s*/\s*F$)')),
+    ('limit', re.compile(r'\bLIMITS?\b|\bACTION\b|^MAX(?:IMUM)?$')),
+    ('result', re.compile(r'^(?:AMT|AMOUNT|RESULTS?|CONC(?:ENTRATION)?)\b')),
+    ('name', re.compile(r'^(?:ANALYTES?|COMPOUNDS?)\b')),
+)
+
+# Analyses whose tables print two amounts (% and mg/g) and no limit.
+_POTENCY_ANALYSES = {'cannabinoids', 'terpenes'}
 
 # ── Utility Functions ─────────────────────────────────────────────
 
@@ -172,24 +279,73 @@ def _snake_case(text: str) -> str:
     s = s.strip('_')
     return s
 
+def _parse_number(text: str) -> Optional[float]:
+    """Parse a plain number (a limit, LOD or LOQ) from a cell.
 
-def _parse_number(text: str) -> float:
-    """Parse a numeric string, handling ND, <LOQ, etc."""
+    '0.1 µg/g' is 0.1, '5,000' is 5000.0, '1 per 3g' is 1.0. A blank
+    cell, a word ('ND', 'LOD', '--') or a bound ('<0.05') is None: a
+    bound is a qualifier, not a number. Until 10/13/2026 these were 0.0,
+    and results were read with this function; read a result with
+    _parse_result.
+    """
     if not text or not isinstance(text, str):
-        return 0.0
-    text = text.strip().upper()
-    if text in ('ND', 'N/A', '', '-', 'N D', 'PASS', 'FAIL'):
-        return 0.0
-    if '<' in text or 'LOQ' in text:
-        return 0.0
-    # Remove units suffixes.
-    text = re.sub(r'\s*(mg/g|%|µg/g|µg/kg|ug/g|ug/kg|ppm|ppb|cfu/g|aw|mg)\s*$',
-                  '', text, flags=re.IGNORECASE).strip()
+        return None
+    text = text.strip().replace(',', '')
+    if not text or text[0] in '<>':
+        return None
+    match = re.match(r'^[-+]?(?:\d+\.?\d*|\.\d+)', text)
+    if not match:
+        return None
     try:
-        return float(text.replace(',', ''))
-    except (ValueError, TypeError):
-        return 0.0
+        return float(match.group(0))
+    except ValueError:
+        return None
 
+def _parse_result(text: str) -> Tuple[Optional[float], str, Optional[float]]:
+    """Read a printed result cell as ``(value, qualifier, bound)``.
+
+    Uses the package's qualifier semantics (``parse_result_value``):
+    '44.5938 %' is (44.5938, '', None); 'ND' is (None, 'ND', None);
+    '<LOQ' is (None, '<LOQ', None); '<0.05' is (None, '<LOQ', 0.05),
+    the bound being the limit the result is below; '0' is (0.0, '',
+    None). A blank cell is (None, 'NR', None): no result is printed.
+    """
+    text = ' '.join(str(text or '').split())
+    if not text:
+        return None, 'NR', None
+    return parse_result_value(text)
+
+def _normalize_units(token: str) -> Optional[str]:
+    """The package's name for a printed units token ('µg/g' is 'ug/g',
+    '%' is 'percent'), or None."""
+    if not token:
+        return None
+    token = token.strip().lower().replace('µ', 'u').replace('μ', 'u')
+    return UNIT_ALIASES.get(token)
+
+def _cell_units(text: str) -> Optional[str]:
+    """The units a cell prints after its number or label: '0.1 µg/g' is
+    'ug/g', '0.4457 aw' is 'aw', 'AMT (%)' is 'percent'. None if none."""
+    if not text:
+        return None
+    match = _TRAILING_UNITS.search(' '.join(str(text).split()))
+    return _normalize_units(match.group(1)) if match else None
+
+def _is_lod_loq(text: str) -> bool:
+    """Whether a cell is an LOD/LOQ pair such as '0.0117/0.0429'."""
+    return bool(text) and bool(_LOD_LOQ_CELL.match(' '.join(str(text).split())))
+
+def _is_value_cell(text: str) -> bool:
+    """Whether a cell prints a reading: a number (with or without units
+    or a '<' bound) or a qualifier such as 'ND' or '<LOQ'. Placeholders
+    ('--', 'N/A'), status words and labels are not readings."""
+    text = ' '.join(str(text or '').split())
+    if not text:
+        return False
+    if _NUMBER_CELL.match(text):
+        return True
+    _, qualifier, _ = parse_result_value(text)
+    return qualifier in _READ_QUALIFIERS
 
 def _parse_date(text: str) -> str:
     """Parse a date string to ISO format (YYYY-MM-DD)."""
@@ -203,19 +359,19 @@ def _parse_date(text: str) -> str:
             continue
     return text
 
-
-def _parse_lod_loq(text: str) -> Tuple[float, float]:
-    """Parse a LOD/LOQ string like '0.0109/0.24767'."""
-    if not text or '/' not in text:
-        return 0.0, 0.0
-    parts = text.strip().split('/')
+def _parse_lod_loq(text: str) -> Tuple[Optional[float], Optional[float]]:
+    """Parse a LOD/LOQ string like '0.0109/0.24767' (units may follow).
+    Returns (None, None) when the cell is not such a pair (until
+    10/13/2026, (0.0, 0.0))."""
+    if not text or not _is_lod_loq(text):
+        return None, None
+    numbers = re.findall(r'\d*\.?\d+', text.replace(',', ''))
+    if len(numbers) != 2:
+        return None, None
     try:
-        lod = float(parts[0].strip())
-        loq = float(parts[1].strip())
-        return lod, loq
-    except (ValueError, IndexError):
-        return 0.0, 0.0
-
+        return float(numbers[0]), float(numbers[1])
+    except ValueError:
+        return None, None
 
 def _extract_tagleaf_url(pdf) -> str:
     """Find the TagLeaf LIMS URL from page footers."""
@@ -228,7 +384,6 @@ def _extract_tagleaf_url(pdf) -> str:
             url = re.sub(r'\s+Page\s+\d+.*$', '', url).strip()
             return url
     return ''
-
 
 # ── Core Parsing Functions ────────────────────────────────────────
 
@@ -297,7 +452,6 @@ def _parse_header(lines: List[str]) -> Dict:
 
     return obs
 
-
 def _parse_sample_line(lines: List[str]) -> Dict:
     """Parse the SAMPLE: line for product_name, product_type, client, status."""
     obs = {}
@@ -334,7 +488,6 @@ def _parse_sample_line(lines: List[str]) -> Dict:
 
             break
     return obs
-
 
 def _parse_metadata_fields(text: str) -> Dict:
     """Extract structured metadata fields from page 1 text."""
@@ -436,7 +589,6 @@ def _parse_metadata_fields(text: str) -> Dict:
 
     return obs
 
-
 def _parse_cultivator_distributor(text: str) -> Dict:
     """Extract cultivator/distributor/manufacturer info from page 1."""
     obs = {}
@@ -470,7 +622,6 @@ def _parse_cultivator_distributor(text: str) -> Dict:
 
     return obs
 
-
 def _detect_current_analysis(line: str) -> Optional[str]:
     """Detect analysis section from a header line."""
     line_upper = line.upper()
@@ -478,7 +629,6 @@ def _detect_current_analysis(line: str) -> Optional[str]:
         if keyword.upper() in line_upper:
             return analysis
     return None
-
 
 # Known analyte names per analysis type for content-based inference.
 _CANNABINOID_NAMES = {
@@ -530,20 +680,25 @@ _MOISTURE_NAMES = {
     'INSECT FRAGMENT', 'MOLD', 'SAND', 'CINDERS',
 }
 
-
-def _infer_analysis_from_content(table) -> Optional[str]:
+def _infer_analysis_from_content(table, has_header: bool = True) -> Optional[str]:
     """Infer analysis type from the analyte names in a table's rows.
 
     This is more reliable than section-header tracking for multi-section
     pages where pdfplumber table positions don't map cleanly to text
     line numbers.
+
+    Args:
+        table: Rows of cells, as from pdfplumber ``extract_tables``.
+        has_header: Whether the first row is a header (skipped). A
+            table continued from the previous page has none.
     """
-    if not table or len(table) < 2:
+    start = 1 if has_header else 0
+    if not table or len(table) <= start:
         return None
 
     # Collect analyte names from first ~8 data rows.
     names = []
-    for row in table[1:9]:
+    for row in table[start:start + 8]:
         if row and row[0]:
             names.append(str(row[0]).strip().upper().replace('\n', ' '))
 
@@ -599,19 +754,356 @@ def _infer_analysis_from_content(table) -> Optional[str]:
         return best
     return None
 
+# ── Result Tables ─────────────────────────────────────────────────
+
+# Rows that are not analytes: status-bar entries ("POTENCY PASS",
+# "MOISTURE TESTED"), notes and page furniture that pdfplumber can
+# extract as table rows.
+_STATUS_KEYWORDS = {
+    'POTENCY', 'FOREIGN', 'METALS', 'MICROBIAL', 'MICRO',
+    'MOISTURE', 'MOIST', 'MYCOTOXINS', 'MYCOTOXIN', 'MYCO',
+    'PESTICIDES', 'PESTICIDE', 'PEST', 'SOLVENTS', 'SOLVENT',
+    'TERPENES', 'TERPENE', 'TERP', 'WATER', 'ADDITIVES',
+    'BATCH RESULT', 'PASS', 'FAIL', 'TESTED',
+    'CANNABINOID OVERVIEW', 'REGULATORY COMPLIANCE',
+    'RESULTS CERTIFIED', 'SAMPLE WAS TESTED',
+    'ALL LQC SAMPLES', 'DRY-WEIGHT', 'DRY WEIGHT',
+    'ACCREDITATIONS', 'A2LA ACCREDITED',
+    'PAGE', 'CERTIFICATE OF ANALYSIS',
+}
+
+# Total/summary and per-serving/per-package rows (totals are metadata).
+_SKIP_PATTERNS = [
+    'TOTAL THC/', 'TOTAL CBD/', 'CBD/SRV', 'CBD/PKG',
+    'THC/SRV', 'THC/PKG', '/SRV', '/PKG',
+    'TOTAL THC**', 'TOTAL CBD**', 'TOT THC', 'TOT CBD',
+    'TOTAL THC *', 'TOTAL CBD *',
+    'TOTAL CANNABINOIDS', 'SUM OF CANNABINOIDS',
+    'SUM OF TERPENES',
+]
+_TOTAL_ROWS = {'TOTAL THC', 'TOTAL CBD'}
+
+# Units of analytes whose row may print none, whatever table they are in.
+_ANALYTE_UNITS = {'water_activity': 'aw', 'moisture_content': 'percent'}
+
+def _cell_text(cell: Any) -> str:
+    """A table cell as one line of text ('' for None)."""
+    return ' '.join(str(cell or '').split())
+
+def _column_role(text: str) -> Tuple[Optional[str], Optional[str]]:
+    """The role and units of a header cell.
+
+    'AMT (%)' is ('result', 'percent'), 'LIMIT' is ('limit', None),
+    'LOD/LOQ' is ('lod_loq', None), 'PASS/FAIL' is ('status', None), and
+    a units-only cell such as 'MG/G' is an amount column. (None, None)
+    for anything else.
+    """
+    raw = _cell_text(text)
+    if not raw:
+        return None, None
+    units = None
+    match = _TRAILING_UNITS.search(raw)
+    if match:
+        units = _normalize_units(match.group(1))
+        raw = raw[:match.start()]
+    label = raw.strip(' ()').upper()
+    if not label:
+        return ('result', units) if units else (None, None)
+    for role, pattern in _COLUMN_ROLES:
+        if pattern.search(label):
+            return role, units
+    return None, None
+
+def _header_layout(cells: List[str]) -> Optional[Dict]:
+    """Read the column layout of a header row, or None if the row is not
+    a header. A header is column labels (at least two) and no values, so
+    the first row of a table continued from the previous page, which
+    prints an analyte and its PASS, is not one.
+
+    Returns:
+        A dict of column indices: 'result' (the AMT column, or of two
+        the one labeled %), 'result2' (the other amount), 'limit',
+        'lod_loq', 'lod', 'loq' and 'status' (None when absent), with
+        'units' (index -> units printed in that column's label) and
+        'ncols'.
+    """
+    roles: Dict[str, List[int]] = {}
+    units: Dict[int, str] = {}
+    for i, cell in enumerate(cells):
+        if not cell:
+            continue
+        if _is_value_cell(cell) or _is_lod_loq(cell):
+            return None
+        role, unit = _column_role(cell)
+        if role is None:
+            continue
+        roles.setdefault(role, []).append(i)
+        if unit:
+            units[i] = unit
+    if sum(len(found) for found in roles.values()) < 2:
+        return None
+
+    def first(role: str) -> Optional[int]:
+        return (roles.get(role) or [None])[0]
+
+    limit = first('limit')
+    amounts = [i for i in roles.get('result', []) if i > 0]
+    if not amounts:
+        # No amount label: the column after the limit, else the first
+        # column without a label.
+        taken = {i for found in roles.values() for i in found}
+        free = [i for i in range(1, len(cells)) if i not in taken]
+        amounts = [i for i in free if limit is not None and i > limit][:1] or free[:1]
+    if not amounts:
+        return None
+    result = amounts[0]
+    result2 = amounts[1] if len(amounts) > 1 else None
+    if result2 is not None and units.get(result2) == 'percent' \
+            and units.get(result) != 'percent':
+        result, result2 = result2, result
+    return {
+        'ncols': len(cells),
+        'result': result,
+        'result2': result2,
+        'limit': limit,
+        'lod_loq': first('lod_loq'),
+        'lod': first('lod'),
+        'loq': first('loq'),
+        'status': first('status'),
+        'units': units,
+    }
+
+def _table_segments(rows: List[List[str]]) -> List[Tuple[Optional[List[str]], Optional[Dict], List[List[str]]]]:
+    """Split a table's rows at its header rows.
+
+    Returns:
+        A list of (header row, layout, body rows). Rows before the
+        first header (a table continued from the previous page) form a
+        segment whose header and layout are None. A header with no rows
+        after it (a header printed at the foot of a page) is returned
+        with an empty body.
+    """
+    segments = [(None, None, [])]
+    for row in rows:
+        layout = _header_layout(row)
+        if layout is not None:
+            segments.append((row, layout, []))
+        else:
+            segments[-1][2].append(row)
+    return [s for s in segments if s[1] is not None or s[2]]
+
+def _looks_like_result_row(cells: List[str]) -> bool:
+    """Whether a row reads as an analyte row: a name, then at least one
+    reading or LOD/LOQ pair (a section title with a PASS is not one)."""
+    if not cells or not cells[0]:
+        return False
+    if _is_value_cell(cells[0]) or _is_lod_loq(cells[0]):
+        return False
+    return any(_is_value_cell(c) or _is_lod_loq(c) for c in cells[1:] if c)
+
+def _infer_layout(rows: List[List[str]], analysis: Optional[str]) -> Dict:
+    """The column layout of a table without a header, read from its
+    cells: the LOD/LOQ column (every cell a pair), the PASS/FAIL column
+    (every cell a status word), and the value columns before them.
+
+    Cannabinoids and terpenes print AMT then AMT (% then mg/g): the
+    result is the first. Safety analyses print LIMIT then AMT: the
+    result is the one column that prints non-detects or bounds ('ND',
+    '<LOQ'), which a limit never is, else the second, even when only
+    the first prints anything; the limit is the column before it (else
+    after it).
+    """
+    ncols = max(len(r) for r in rows)
+
+    def column(i: int) -> List[str]:
+        return [r[i] for r in rows if i < len(r) and r[i]]
+
+    lod_loq = next((i for i in range(1, ncols)
+                    if column(i) and all(_is_lod_loq(c) for c in column(i))), None)
+    status = next((i for i in range(ncols - 1, 0, -1)
+                   if column(i) and all(c.upper() in _STATUS_CELLS for c in column(i))), None)
+    end = min(i for i in (lod_loq, status, ncols) if i is not None)
+    values = list(range(1, end))
+    filled = [i for i in values if column(i)]
+    layout = {
+        'ncols': ncols, 'result': None, 'result2': None, 'limit': None,
+        'lod_loq': lod_loq, 'lod': None, 'loq': None, 'status': status,
+        'units': {},
+    }
+    if analysis in _POTENCY_ANALYSES:
+        amounts = filled or values
+        layout['result'] = amounts[0] if amounts else None
+        layout['result2'] = amounts[1] if len(amounts) > 1 else None
+        return layout
+    flagged = [i for i in filled if any(
+        _parse_result(c)[1] in _READ_QUALIFIERS for c in column(i))]
+    if len(flagged) == 1:
+        result = flagged[0]
+    elif len(filled) >= 2:
+        result = filled[1]
+    elif len(values) >= 2:
+        # LIMIT then AMT with the AMT cells blank: the one filled column
+        # is the limit, and the result is not printed (10/14/2026: it
+        # was read as the result).
+        result = values[1]
+    elif filled:
+        result = filled[0]
+    else:
+        result = values[0] if values else None
+    layout['result'] = result
+    if result is not None:
+        before = [i for i in values if i < result]
+        after = [i for i in filled if i > result]
+        layout['limit'] = before[-1] if before else (after[0] if after else None)
+    return layout
+
+def _table_analysis(header: List[str], body: List[List[str]],
+                    page_default: Optional[str]) -> str:
+    """The analysis of a table with a header row: from its analyte
+    names, else its header labels, else the page's section header,
+    else the units in its header."""
+    analysis = _infer_analysis_from_content([header] + body)
+    header_str = ' '.join(header).upper()
+    if not analysis:
+        for keyword, name in ANALYSIS_SECTION_MAP.items():
+            if keyword.upper() in header_str:
+                analysis = name
+                break
+    if not analysis:
+        analysis = page_default
+    if not analysis:
+        units = _table_units('', header)
+        analysis = {
+            'ug/g': 'pesticides', 'ug/kg': 'mycotoxins',
+            'cfu/g': 'microbials', 'aw': 'moisture_foreign_matter',
+        }.get(units)
+        if not analysis and 'MOISTURE' in header_str:
+            analysis = 'moisture_foreign_matter'
+    return analysis or 'cannabinoids'
+
+def _table_units(analysis: str, header: Optional[List[str]] = None) -> str:
+    """The units of a table's rows that print none: the analysis
+    default, unless the header names other units."""
+    units = STANDARD_UNITS.get(analysis, 'percent')
+    text = ' '.join(header or []).lower().replace('µ', 'u').replace('μ', 'u')
+    if 'ug/g' in text:
+        units = 'ug/g'
+    elif 'ug/kg' in text:
+        units = 'ug/kg'
+    elif 'cfu' in text:
+        units = 'cfu/g'
+    elif re.search(r'\baw\b', text):
+        units = 'aw'
+    return units
+
+def _continued_layout(body: List[List[str]], analysis: Optional[str],
+                      layouts: List[Dict]) -> Optional[Dict]:
+    """The layout of a table without a header.
+
+    The layout of the last header with as many columns for the analysis
+    its analytes name (the table it continues). Otherwise the table must
+    print a PASS/FAIL or LOD/LOQ column, as TagLeaf result tables do (a
+    summary such as "TOTAL THC | 39.4781 %" does not), and its layout
+    is read from its cells (_infer_layout); when its analytes do not
+    name the analysis, it takes the layout and analysis of the last
+    header with as many columns. None when no layout applies.
+    """
+    ncols = len(body[0])
+    same = [layout for layout in reversed(layouts) if layout['ncols'] == ncols]
+    for layout in same:
+        if analysis and layout['analysis'] == analysis:
+            return layout
+    inferred = _infer_layout(body, analysis)
+    if inferred['status'] is None and inferred['lod_loq'] is None:
+        return None
+    if analysis:
+        return {**inferred, 'analysis': analysis}
+    return same[0] if same else None
+
+def _is_status_row(name_upper: str) -> bool:
+    """Whether a row name is a status-bar entry or note, not an analyte."""
+    if name_upper in _STATUS_KEYWORDS:
+        return True
+    words = name_upper.split()
+    return bool(words) and words[0] in _STATUS_KEYWORDS and len(name_upper) < 30
+
+def _is_moisture_name(name_upper: str) -> bool:
+    """Whether a row name is moisture or water activity."""
+    return name_upper.startswith(('MOISTURE', 'WATER ACTIVITY'))
+
+def _read_result_row(cells: List[str], layout: Dict, units: str) -> Dict:
+    """Read one analyte row with a column layout.
+
+    The result is read from the amount column only, never from the
+    limit, LOD or LOQ; a non-detect is value None with its qualifier
+    ('ND'), and '<0.05' is value None, qualifier '<LOQ', with 'loq' 0.05
+    when the row prints no LOQ. Units are those printed in the result
+    cell, else in its column label, else in the limit, else ``units``.
+
+    Returns:
+        A dict with 'value', 'qualifier', 'units', 'limit', 'lod',
+        'loq' and 'status'.
+    """
+    def cell(index: Optional[int]) -> str:
+        return cells[index] if index is not None and index < len(cells) else ''
+
+    result_at = layout['result']
+    result_text = cell(result_at)
+    # Of two amounts, read the one printed in percent.
+    other = cell(layout.get('result2'))
+    if other and _cell_units(other) == 'percent' \
+            and _cell_units(result_text) not in (None, 'percent'):
+        result_at, result_text = layout['result2'], other
+    value, qualifier, bound = _parse_result(result_text)
+
+    limit_text = cell(layout.get('limit'))
+    lod, loq = _parse_lod_loq(cell(layout.get('lod_loq')))
+    if layout.get('lod') is not None:
+        lod = _parse_number(cell(layout['lod']))
+    if layout.get('loq') is not None:
+        loq = _parse_number(cell(layout['loq']))
+    if bound is not None:
+        if qualifier == '<LOQ' and loq is None:
+            loq = bound
+        elif qualifier == '<LOD' and lod is None:
+            lod = bound
+
+    column_units = layout.get('units') or {}
+    status = cell(layout.get('status')).upper()
+    return {
+        'value': value,
+        'qualifier': qualifier,
+        'units': (
+            _cell_units(result_text)
+            or column_units.get(result_at)
+            or _cell_units(limit_text)
+            or column_units.get(layout.get('limit'))
+            or units
+        ),
+        'limit': _parse_number(limit_text),
+        'lod': lod,
+        'loq': loq,
+        'status': status.lower() if status in ('PASS', 'FAIL') else '',
+    }
 
 def _parse_results_from_tables(pdf) -> Tuple[List[Dict], List[str]]:
     """Extract all analyte results from all pages using table extraction.
 
-    Strategy: For each page, scan the full page text to find ALL analysis
-    section headers (e.g., "CANNABINOID PROFILE BY UPLC-UV // APR 02, 2024").
-    Then assign each table to the most recent section header that precedes it.
+    Strategy: Each table is split at its header rows, and each part is
+    read with the column layout of its header (_header_layout). A part
+    without a header, the continuation of a table broken by a page, is
+    read with the layout of the table it continues, or a layout read
+    from its cells (_continued_layout). The analysis of a table is
+    inferred from its analyte names, else from the page's section
+    headers (e.g., "CANNABINOID PROFILE BY UPLC-UV // APR 02, 2024").
 
     Returns:
         Tuple of (results_list, analyses_list).
     """
     results = []
     analyses = set()
+    layouts: List[Dict] = []
+    pending: Optional[Tuple[List[str], Dict]] = None
 
     for page in pdf.pages:
         text = page.extract_text() or ''
@@ -642,161 +1134,92 @@ def _parse_results_from_tables(pdf) -> Tuple[List[Dict], List[str]]:
         page_default_analysis = section_headers[0][1] if section_headers else None
 
         for table in tables:
-            if not table or len(table) < 2:
+            rows = [[_cell_text(c) for c in row] for row in (table or []) if row]
+            rows = [row for row in rows if any(row)]
+            if not rows:
                 continue
 
-            header = table[0]
-            if not header:
-                continue
-            header_str = ' '.join(str(c or '') for c in header).upper()
+            for header, layout, body in _table_segments(rows):
 
-            # Skip non-result tables (overview, cultivator info, etc.).
-            if not any(kw in header_str for kw in
-                       ['ANALYTE', 'AMT', 'LOD', 'PASS', 'LIMIT']):
-                continue
+                # A header printed alone: its rows are the next table's.
+                if layout is not None and not body:
+                    pending = (header, layout)
+                    continue
 
-            # ── Determine analysis type for this table ────────
-            # PRIMARY: Content-based inference from analyte names.
-            # This is the most reliable method for multi-section pages.
-            table_analysis = _infer_analysis_from_content(table)
-
-            # FALLBACK 1: Check table header_str for analysis keywords.
-            if not table_analysis:
-                for keyword, analysis in ANALYSIS_SECTION_MAP.items():
-                    if keyword.upper() in header_str:
-                        table_analysis = analysis
-                        break
-
-            # FALLBACK 2: Use section headers from page text.
-            if not table_analysis:
-                table_analysis = page_default_analysis
-
-            # FALLBACK 3: Infer from header units.
-            if not table_analysis:
-                if 'µG/G' in header_str or 'UG/G' in header_str:
-                    table_analysis = 'pesticides'
-                elif 'µG/KG' in header_str or 'UG/KG' in header_str:
-                    table_analysis = 'mycotoxins'
-                elif 'CFU' in header_str:
-                    table_analysis = 'microbials'
-                elif 'AW' in header_str or 'MOISTURE' in header_str:
-                    table_analysis = 'moisture_foreign_matter'
+                # ── Determine the layout and analysis ─────────────
+                if layout is None:
+                    body = [row for row in body if _looks_like_result_row(row)]
+                    if not body:
+                        continue
+                    if pending and pending[1]['ncols'] == len(body[0]):
+                        header, layout = pending
+                if layout is not None:
+                    table_analysis = _table_analysis(header, body, page_default_analysis)
+                    layout = {**layout, 'analysis': table_analysis}
+                    layouts.append(layout)
+                    units = _table_units(table_analysis, header)
                 else:
-                    table_analysis = 'cannabinoids'
+                    table_analysis = _infer_analysis_from_content(body, has_header=False)
+                    layout = _continued_layout(body, table_analysis, layouts)
+                    if layout is None or layout.get('result') is None:
+                        continue
+                    table_analysis = layout['analysis']
+                    units = _table_units(table_analysis)
+                pending = None
 
-            # Determine units from header.
-            units = STANDARD_UNITS.get(table_analysis, 'percent')
-            if 'µg/g' in header_str.lower() or 'ug/g' in header_str.lower():
-                units = 'ug/g'
-            elif 'µg/kg' in header_str.lower() or 'ug/kg' in header_str.lower():
-                units = 'ug/kg'
-            elif 'CFU' in header_str.upper():
-                units = 'cfu/g'
-            elif 'AW' in header_str.upper():
-                units = 'aW'
+                # Parse data rows.
+                for cells in body:
+                    if not cells[0] or cells[0].startswith('**'):
+                        continue
 
-            # Identify column indices.
-            col_names = [str(c or '').upper().strip() for c in header]
-            has_limit = any('LIMIT' in c for c in col_names)
+                    analyte_name = cells[0]
+                    if len(analyte_name) < 2:
+                        continue
 
-            # Parse data rows.
-            for row in table[1:]:
-                if not row or not any(row):
-                    continue
+                    # Skip total/summary and per-serving/per-package rows.
+                    name_upper = analyte_name.upper()
+                    if any(p in name_upper for p in _SKIP_PATTERNS):
+                        continue
+                    if name_upper.strip(' *:') in _TOTAL_ROWS:
+                        continue
 
-                cells = [str(c or '').strip() for c in row]
-                if not cells[0] or cells[0].startswith('**'):
-                    continue
+                    # Skip sub-headings and notes (no cells but the name).
+                    if not any(cells[1:]):
+                        continue
 
-                analyte_name = cells[0].replace('\n', ' ').strip()
-                if not analyte_name or len(analyte_name) < 2:
-                    continue
+                    key = _snake_case(analyte_name)
+                    reading = _read_result_row(
+                        cells, layout, _ANALYTE_UNITS.get(key, units))
 
-                # Skip total/summary and per-serving/per-package rows.
-                name_upper = analyte_name.upper()
-                skip_patterns = [
-                    'TOTAL THC/', 'TOTAL CBD/', 'CBD/SRV', 'CBD/PKG',
-                    'THC/SRV', 'THC/PKG', '/SRV', '/PKG',
-                    'TOTAL THC**', 'TOTAL CBD**', 'TOT THC', 'TOT CBD',
-                    'TOTAL THC *', 'TOTAL CBD *',
-                    'TOTAL CANNABINOIDS', 'SUM OF CANNABINOIDS',
-                    'SUM OF TERPENES',
-                ]
-                if any(p in name_upper for p in skip_patterns):
-                    continue
+                    # Skip status summary bar entries that pdfplumber may
+                    # extract as table rows (e.g., "POTENCY PASS ...").
+                    # Moisture and water activity are analytes when they
+                    # print a reading.
+                    analysis = table_analysis
+                    if _is_moisture_name(name_upper):
+                        if reading['value'] is None \
+                                and reading['qualifier'] not in _READ_QUALIFIERS:
+                            continue
+                        analysis = 'moisture_foreign_matter'
+                    elif _is_status_row(name_upper):
+                        continue
 
-                # Skip status summary bar entries that pdfplumber may
-                # extract as table rows (e.g., "POTENCY PASS ...").
-                status_keywords = {
-                    'POTENCY', 'FOREIGN', 'METALS', 'MICROBIAL', 'MICRO',
-                    'MOISTURE', 'MOIST', 'MYCOTOXINS', 'MYCOTOXIN', 'MYCO',
-                    'PESTICIDES', 'PESTICIDE', 'PEST', 'SOLVENTS', 'SOLVENT',
-                    'TERPENES', 'TERPENE', 'TERP', 'WATER', 'ADDITIVES',
-                    'BATCH RESULT', 'PASS', 'FAIL', 'TESTED',
-                    'CANNABINOID OVERVIEW', 'REGULATORY COMPLIANCE',
-                    'RESULTS CERTIFIED', 'SAMPLE WAS TESTED',
-                    'ALL LQC SAMPLES', 'DRY-WEIGHT', 'DRY WEIGHT',
-                    'ACCREDITATIONS', 'A2LA ACCREDITED',
-                    'PAGE', 'CERTIFICATE OF ANALYSIS',
-                }
-                if name_upper in status_keywords:
-                    continue
-                # Also skip if first word is a status keyword and rest
-                # looks like "PASS" or "FAIL" or another keyword.
-                first_word = name_upper.split()[0] if name_upper.split() else ''
-                if first_word in status_keywords and len(analyte_name) < 30:
-                    continue
-
-                key = _snake_case(analyte_name)
-                result = {
-                    'analysis': table_analysis,
-                    'key': key,
-                    'name': analyte_name,
-                    'value': 0.0,
-                    'units': units,
-                    'limit': 0.0,
-                    'lod': 0.0,
-                    'loq': 0.0,
-                    'status': '',
-                }
-
-                # Parse cells based on column structure.
-                if has_limit and len(cells) >= 4:
-                    # ANALYTE | LIMIT | AMT | LOD/LOQ | PASS/FAIL
-                    result['limit'] = _parse_number(cells[1])
-                    result['value'] = _parse_number(cells[2])
-                    if len(cells) >= 4:
-                        lod, loq = _parse_lod_loq(cells[3])
-                        result['lod'] = lod
-                        result['loq'] = loq
-                    if len(cells) >= 5:
-                        status = cells[4].strip().upper()
-                        if status in ('PASS', 'FAIL'):
-                            result['status'] = status.lower()
-                elif len(cells) >= 4:
-                    # ANALYTE | AMT | AMT(mg/g) | LOD/LOQ | PASS/FAIL
-                    result['value'] = _parse_number(cells[1])
-                    if len(cells) >= 4:
-                        lod, loq = _parse_lod_loq(cells[3])
-                        result['lod'] = lod
-                        result['loq'] = loq
-                    if len(cells) >= 5:
-                        status = cells[4].strip().upper()
-                        if status in ('PASS', 'FAIL'):
-                            result['status'] = status.lower()
-                elif len(cells) >= 3:
-                    # Short format: ANALYTE | AMT | PASS/FAIL
-                    result['value'] = _parse_number(cells[1])
-                    if len(cells) >= 3:
-                        status = cells[2].strip().upper()
-                        if status in ('PASS', 'FAIL'):
-                            result['status'] = status.lower()
-
-                analyses.add(table_analysis)
-                results.append(result)
+                    result = {
+                        'analysis': analysis,
+                        'key': key,
+                        'name': analyte_name,
+                        'value': reading['value'],
+                        'qualifier': reading['qualifier'],
+                        'units': reading['units'],
+                        'limit': reading['limit'],
+                        'lod': reading['lod'],
+                        'loq': reading['loq'],
+                        'status': reading['status'],
+                    }
+                    analyses.add(analysis)
+                    results.append(result)
 
     return results, sorted(analyses)
-
 
 def _parse_batch_status(text: str) -> Dict:
     """Extract per-analysis pass/fail statuses from page 1."""
@@ -811,7 +1234,6 @@ def _parse_batch_status(text: str) -> Dict:
         key = name.strip().lower()
         statuses[key] = status.strip().lower()
     return statuses
-
 
 # ── Main Entry Points ─────────────────────────────────────────────
 
@@ -902,17 +1324,17 @@ def parse_tagleaf_pdf(
 
         # ── Compute totals from results if not in metadata ────
         if results:
-            # Total terpenes.
+            # Total terpenes (a non-detect's value is None).
             if not obs.get('total_terpenes'):
                 terp_sum = sum(
                     r['value'] for r in results
                     if r['analysis'] == 'terpenes'
                     and r['key'] != 'total_terpenes'
-                    and r['value'] > 0
+                    and (r['value'] or 0) > 0
                 )
                 # Check if a total_terpenes result exists.
                 for r in results:
-                    if r['key'] == 'total_terpenes' and r['value'] > 0:
+                    if r['key'] == 'total_terpenes' and (r['value'] or 0) > 0:
                         obs['total_terpenes'] = r['value']
                         break
                 else:
@@ -952,7 +1374,6 @@ def parse_tagleaf_pdf(
 
     return obs
 
-
 def parse_tagleaf_coa(
         parser: Any = None,
         doc: str = '',
@@ -989,7 +1410,6 @@ def parse_tagleaf_coa(
         )
 
     return parse_tagleaf_pdf(parser, doc)
-
 
 # ── Tests ─────────────────────────────────────────────────────────
 

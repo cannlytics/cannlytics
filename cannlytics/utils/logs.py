@@ -4,15 +4,18 @@ Copyright (c) 2024-2026 Cannlytics
 
 Authors: Keegan Skeate <https://github.com/keeganskeate>
 Created: 12/8/2024
-Updated: 3/22/2026
+Updated: 10/13/2026
 License: <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
+
+Log files are written as UTF-8 on every platform: without an encoding,
+Windows writes them in its ANSI code page (cp1252), and a message with an
+emoji or a "Δ" became a "--- Logging error ---" traceback instead of a line.
 """
 from datetime import datetime
 import logging
 import os
 import tempfile
 from typing import Optional, Union
-
 
 def initialize_logs(
         name: str,
@@ -60,7 +63,7 @@ def initialize_logs(
             log_dir = tempfile.gettempdir()
         os.makedirs(log_dir, exist_ok=True)
         log_file = os.path.join(log_dir, f'{prefix}{timestamp}.log')
-        file_handler = logging.FileHandler(log_file, mode=filemode)
+        file_handler = logging.FileHandler(log_file, mode=filemode, encoding='utf-8')
         file_handler.setFormatter(formatter)
         file_handler.setLevel(level)
         logger.addHandler(file_handler)

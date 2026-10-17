@@ -732,7 +732,6 @@ ANALYTE_ALIASES = {
     'chlorpyrifos': 'chlorpyrifos',
     'chromium': 'chromium',
     'cineole': 'eucalyptol',
-    'cis_beta_ocimene': 'beta_ocimene',
     'cis_geraniol': 'geraniol',
     'cis_nerolidol': 'cis_nerolidol',
     'cis_ocimene': 'cis_ocimene',
@@ -1056,8 +1055,8 @@ ANALYTE_ALIASES = {
     'pyrethrin_i': 'pyrethrin_i',
     'pyrethrin_ii': 'pyrethrin_ii',
     'pyrethrins': 'pyrethrins',
-    'pyrethrins_pyrethrin_i': 'pyrethrins',
-    'pyrethrins_pyrethrin_ii': 'pyrethrins',
+    'pyrethrins_pyrethrin_i': 'pyrethrin_i',
+    'pyrethrins_pyrethrin_ii': 'pyrethrin_ii',
     'pyrethrins_total': 'pyrethrins',
     'pyridaben': 'pyridaben',
     'pyriproxifen': 'pyriproxyfen',
@@ -1229,6 +1228,44 @@ ANALYTE_ALIASES = {
     'ym': 'total_yeast_and_mold',
     'z_nerolidol': 'nerolidol',
 }
+
+# Labels the lab algorithms and the AI parses met in October 2026 that no
+# alias named (cannlytics 1.0.6): each is one canonical analyte. "Pyrethrins,
+# Pyrethrin I" names the isomer, not the total (above), which a COA prints on
+# its own row: mapped to the total, the isomers overwrote it. cis-beta-ocimene
+# is the isomer, not the mixture (beta_ocimene, CAS 13877-91-3), as
+# trans-beta-ocimene is.
+ANALYTE_ALIASES.update({
+    '1_1_1_trichloroethane': 'trichloroethane',
+    '1_1_1_2_tetrafluoroethane': 'tetrafluoroethane',
+    'hfc_134a': 'tetrafluoroethane',
+    'r_134a': 'tetrafluoroethane',
+    'dichloroethane': '1_2_dichloroethane',
+    'dmso': 'dimethyl_sulfoxide',
+    'water_content': 'moisture_content',
+    'piperonylbutoxide': 'piperonyl_butoxide',
+    'spinosyn_ad': 'spinosad',
+    'spinosyn_a_d': 'spinosad',
+    'spinosad_a_d': 'spinosad',
+    'aerobic_bacteria': 'total_aerobic_bacteria',
+    'trans_b_ocimene': 'trans_ocimene',
+    'trans_beta_ocimene': 'trans_ocimene',
+    'cis_b_ocimene': 'cis_ocimene',
+    'cis_beta_ocimene': 'cis_ocimene',
+    'stems_over_3mm': 'stems',
+    'stems_3mm': 'stems',
+    'sand_soil_or_cinders': 'soil',
+    'stx': 'stec',
+    # The Delta-10-THC isomers by their full stereodescriptors.
+    '6ar_9r_delta_10_thc': '9r_delta_10_thc',
+    '6ar_9r_delta10_thc': '9r_delta_10_thc',
+    '6ar_9r_d10_thc': '9r_delta_10_thc',
+    'delta_10_thc_6ar_9r': '9r_delta_10_thc',
+    '6ar_9s_delta_10_thc': '9s_delta_10_thc',
+    '6ar_9s_delta10_thc': '9s_delta_10_thc',
+    '6ar_9s_d10_thc': '9s_delta_10_thc',
+    'delta_10_thc_6ar_9s': '9s_delta_10_thc',
+})
 
 def snake_case_analyte(label: str) -> str:
     """Snake-case a laboratory label the way the alias table expects.

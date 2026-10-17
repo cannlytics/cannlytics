@@ -237,3 +237,28 @@ class TestAliasInvariants:
 
     def test_a_section_heading_is_not_an_analyte(self):
         assert normalize_analyte_key('Mycotoxin') == 'mycotoxin'
+
+class TestOctoberAliases:
+    """Labels the lab algorithms and the AI parses met in October 2026
+    (cannlytics 1.0.6) that no alias named, and the pyrethrin isomers,
+    which were mapped to the total they print beside."""
+
+    @pytest.mark.parametrize('label, key', [
+        ('Pyrethrins, Pyrethrin I', 'pyrethrin_i'), ('Pyrethrins, Pyrethrin II', 'pyrethrin_ii'),
+        ('Pyrethrins', 'pyrethrins'), ('1,1,1-Trichloroethane', 'trichloroethane'),
+        ('1,1,1,2-Tetrafluoroethane', 'tetrafluoroethane'), ('HFC-134a', 'tetrafluoroethane'),
+        ('R-134a', 'tetrafluoroethane'), ('Dichloroethane', '1_2_dichloroethane'), ('DMSO', 'dimethyl_sulfoxide'),
+        ('Water Content', 'moisture_content'), ('Piperonylbutoxide', 'piperonyl_butoxide'),
+        ('Spinosyn A/D', 'spinosad'), ('Spinosad A/D', 'spinosad'), ('Aerobic Bacteria', 'total_aerobic_bacteria'),
+        ('trans-\u03b2-Ocimene', 'trans_ocimene'), ('trans-b-Ocimene', 'trans_ocimene'),
+        ('cis-beta-Ocimene', 'cis_ocimene'), ('Stems over 3mm', 'stems'), ('Sand, Soil or Cinders', 'soil'),
+        ('STX', 'stec'), ('(6aR,9R)-Δ10-THC', '9r_delta_10_thc'), ('(6aR,9S)-d10-THC', '9s_delta_10_thc'),
+        ('Δ10-THC (6aR,9S)', '9s_delta_10_thc'),
+    ])
+    def test_label(self, label, key):
+        assert normalize_analyte_key(label) == key
+
+    def test_the_isomers_and_the_total_stay_apart(self):
+        keys = {normalize_analyte_key(label) for label in
+                ('Pyrethrins', 'Pyrethrins, Pyrethrin I', 'Pyrethrins, Pyrethrin II')}
+        assert keys == {'pyrethrins', 'pyrethrin_i', 'pyrethrin_ii'}

@@ -95,7 +95,7 @@ priority order if a provider fails or runs out of quota:
 
 | Priority | Provider | Default model | Other models | Key |
 |---|---|---|---|---|
-| 1 | Anthropic Claude | `claude-sonnet-5-5` | `claude-haiku-5-5`, `claude-opus-5-5`, `claude-fable-5-1`, `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
+| 1 | Anthropic Claude | `claude-haiku-5-5` | `claude-sonnet-5-5`, `claude-opus-5-5`, `claude-fable-5-1`, `claude-haiku-4-5-20251001` | `ANTHROPIC_API_KEY` |
 | 2 | OpenAI | `gpt-6-sol` | `gpt-6-luna`, `gpt-6-astra`, `gpt-5-mini`, `gpt-5` | `OPENAI_API_KEY` |
 | 3 | Google Gemini | `gemini-3.8-flash` | `gemini-3.5-flash-lite`, `gemini-3.1-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-pro` | `GOOGLE_API_KEY` |
 | 4 | xAI Grok | `grok-4.7` | `grok-4.3` | `XAI_API_KEY` |

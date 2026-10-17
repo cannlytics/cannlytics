@@ -38,6 +38,12 @@ class TestAIProviders:
         config = AI_PROVIDERS[provider]
         assert config['default_model'] in config['models']
 
+    def test_the_default_claude_is_the_benchmarks_choice(self):
+        # cannabis_results' extraction benchmark, run r2 (2026-10-12).
+        anthropic = AI_PROVIDERS['anthropic']
+        assert anthropic['default_model'] == 'claude-haiku-5-5'
+        assert anthropic['models']['claude-haiku-5-5']['default_effort'] == 'high'
+
     @pytest.mark.parametrize('provider', ['anthropic', 'openai', 'gemini', 'xai'])
     def test_models_have_pricing(self, provider):
         for model_name, model_config in AI_PROVIDERS[provider]['models'].items():

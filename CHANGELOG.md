@@ -8,13 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **Versioning convention.** The third number moves quickly (up to 99) as
 > internal iterations land; whichever `1.0.x` is acceptable at the time is
 > the one published to PyPI. The second number moves with major releases
-> and the first only with a change of paradigm. PyPI's latest release is
-> still `0.0.17` (December 2023): nothing in the `1.0.x` series has been
-> published yet.
+> and the first only with a change of paradigm. `1.0.5` (September 2026)
+> was the first `1.0.x` release on PyPI; `1.0.0` to `1.0.4` were never
+> published.
 
 ---
 
-## [1.0.6] — Unreleased
+## [1.0.6] — 2026-10-14
 
 ### Summary
 
@@ -24,7 +24,10 @@ to a JSON schema), the same way for one COA and for thousands sent as a
 Message Batch at half price. A result that is not a number — a
 non-detect, "<LOQ", "N/A" — is now `null` with a qualifier: every prompt
 before 1.0.6 asked for "ND" as `0.0`, which made a non-detect
-indistinguishable from a measured zero.
+indistinguishable from a measured zero. The extraction benchmark this
+made possible chose the default model, Claude Haiku 5.5, and found five
+lab algorithms reading action limits, LOQs or the wrong column as
+results; all five are fixed and keep qualifiers too.
 
 ### Changed: a missing number is null, not zero
 
@@ -107,8 +110,13 @@ handle `None`.
   `output_config`, and use a structured output when given a schema; the
   cost counts cache reads and writes, and a response with no JSON still
   records what it cost (`last_problem` says why).
-- The default Claude model remains `claude-sonnet-5-5` until the
-  extraction benchmark in cannabis_results names one.
+- The default Claude model is `claude-haiku-5-5` at `high` effort, the
+  extraction benchmark's choice (cannabis_results run r2, decided
+  2026-10-12): the least expensive arm non-inferior to Claude Opus 5.5
+  at high effort within the benchmark's margins (2% of values, 10% of
+  fully correct COAs), at 0.038 of its cost on the same COAs. Earlier
+  1.0.6 builds defaulted to `claude-sonnet-5-5`; pass `model=` to keep
+  it.
 - Requires `anthropic>=1.11` (the version cannabis_results pins), for
   `output_config`.
 
@@ -136,6 +144,84 @@ handle `None`.
   "Cooperative", "Producer", "Courier" and "Wholesaler". A dataset with
   its own crosswalk (cannabis_licenses) should still map each agency
   term explicitly; this is the suggestion for terms it lacks.
+
+### Fixed: five lab algorithms, found by the benchmark
+
+The cannabis_results benchmark (October 2026) scored four Claude
+models against references that were, for most labs, an algorithm's
+output. Where all four models agreed with each other and not with the
+algorithm, the algorithm was wrong, the same way on every COA of its
+layout. Each fix below is tested on the layout's text, and each
+algorithm's version is raised, so a dataset that records
+`parsing_algorithm` (cannabis_results: `parse_coas.py
+--reparse-outdated`) can parse its COAs again.
+
+- Kaycha Labs (1.1.0): a result is never an LOD, LOQ or action limit
+  (Arizona acephate read its limit, 0.4 ppm; Florida and New York
+  acetone read 750 ppm); rows are read from the page's header row, or
+  from their PASS/FAIL cell. New York terpenes are read from the
+  percent column (they were mg/unit), and New York cannabinoids no
+  longer shift two analytes to the left (the two Δ10-THC isomer
+  columns are restored, and the COA's Total THC checks the alignment).
+  A row that prints no limit is not compared with one, and a number
+  before the status with nothing after it (a limit or a result) is not
+  read; a header row applies only to rows whose status it places.
+- Confident Cannabis (1.2.0): units name the column the value was read
+  from (a table printing % and mg/g was labelled mg/g while read from
+  %, so every cannabinoid and terpene was 10 times off by its label;
+  ppb is no longer ug/g); heavy metals and microbials no longer read
+  their limits as results; tables printed side by side are split into
+  their two rows (the right-hand pesticides and terpenes were dropped),
+  and a row past the end of the shorter table keeps its own analysis
+  and units (ochratoxin A in ug/kg was a heavy metal in ppm).
+- SC Labs (1.1.0): the first row of every table was dropped (THCa, the
+  largest terpene, acetone, arsenic, STEC); cannabinoids and terpenes
+  were 0.0, and residual solvents, pesticides, heavy metals and
+  mycotoxins `None`, for every analyte, because pdfplumber merges
+  columns into fewer cells. Rows are now read by token.
+- TagLeaf (1.1.0): a table continued from the previous page had its
+  first analyte taken for its header row and its non-detects read as
+  their action limits; a header is now a row of labels without values,
+  and a continued table whose amount cells are blank does not read its
+  limits instead.
+- Phyto-Farma Labs (1.1.0): analyte names were cut at their first
+  digit, shifting the row's cells ("Acetone (2-Propanone)" read its
+  limit, 5000 ppm), and rows whose name begins with one ("2-Propanol",
+  "3-Carene") or was cut to one character (Δ8-, Δ9- and Δ10-THC) were
+  dropped; 2023 trace metals reported their action limits; moisture
+  content was `None`.
+- Every one of them keeps a non-detect's qualifier
+  (`parse_result_value`: "ND" is `None` with `ND`, "<0.1" is `None`
+  with `<LOQ` and `loq` 0.1) instead of a number, gives each row a
+  `qualifier`, and leaves an LOD, LOQ or limit the COA does not print
+  `None` (it was `0.0`). A limit printed in words before a result word
+  ("Not Detected in 1 g  Detected  FAIL") is not the result.
+- `adapt_algorithm_output` no longer fails on a result whose
+  `analysis` is `None`; such a row is grouped by its analyte's
+  analysis, and a mycotoxin printed in a shared "Microbials &
+  Mycotoxins" section is grouped with the mycotoxins.
+
+### Fixed: analyte keys
+
+- "Pyrethrins, Pyrethrin I" and "Pyrethrins, Pyrethrin II" are the
+  isomers (`pyrethrin_i`, `pyrethrin_ii`), not the total: mapped to
+  `pyrethrins`, they overwrote the total a COA prints on its own row.
+- cis-β-ocimene is the isomer, `cis_ocimene`, as trans-β-ocimene is
+  `trans_ocimene`; it was `beta_ocimene`, the isomer mixture (CAS
+  13877-91-3), while trans-β-ocimene had no alias, so a COA printing
+  both isomers kept them under two unrelated keys.
+- Labels the algorithms and the AI parses met that no alias named:
+  1,1,1-trichloroethane, 1,1,1,2-tetrafluoroethane (HFC-134a, R-134a),
+  dichloroethane, DMSO, water content, piperonylbutoxide, spinosyn A/D,
+  aerobic bacteria, trans-β-ocimene, stems over 3 mm, sand, soil or
+  cinders, STX (Shiga toxin: `stec`), and the Δ10-THC isomers by their
+  full stereodescriptors ("(6aR,9R)-Δ10-THC" is `9r_delta_10_thc`).
+
+### Fixed: logs on Windows
+
+- `initialize_logs` writes its file as UTF-8. Windows wrote it in its
+  ANSI code page, and a message with an emoji or a "Δ" became a
+  "--- Logging error ---" traceback instead of a line.
 
 ### Fixed
 

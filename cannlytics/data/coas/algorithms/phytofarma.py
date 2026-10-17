@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 6/26/2024
-Updated: 3/8/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -39,6 +39,67 @@ Description:
         * Some COAs embed third-party lab results (Keystone State Testing,
           Talon Analytical) -- these pages are skipped.
 
+    Row layouts (one analyte per line; see _read_tables, _table_layout):
+        Cannabinoids: NAME LOQ RESULT [MG/SERVING ...]
+                      "Δ9-THC 0.5 4.48", "Cannabidiol (CBD) 0.5 <LOQ"
+        Terpenes:     NAME LOQ RESULT ("3-Carene 0.00042 <LOQ")
+        Contaminants (metals, mycotoxins, pesticides, solvents, TAPC and
+        TYMC plating, filth, moisture, water activity), modern:
+                      NAME LOQ LIMIT RESULT STATUS
+                      "Acetone (2-Propanone) 15.9 5000 <LOQ PASS"
+                      A cell may be blank: moisture content prints no
+                      LOQ number, "Sum of Aflatoxins" no LOQ.
+        Trace metals, 2023 (historic): the result is not the cell before
+                      the status (it holds the action limit). The column
+                      of a table's "<LOQ" cells, or else its header row,
+                      locates the result column.
+        Microbials MDG: NAME TYPE LOQ LIMIT RESULT STATUS
+                      "Salmonella species Bacterial 1 Not Detected
+                      Not Detected PASS"
+
+    Fixes (10/13/2026), from a benchmark of four Phyto-Farma COAs read
+    by four Claude models that agree with each other:
+        * Analyte names were cut at their first digit, so the cells of a
+          name holding a digit shifted one place: "Acetone (2-Propanone)
+          15.9 5000 <LOQ PASS" read the action limit (5000 ppm) as the
+          result, as did Aflatoxin B1-G2 (0.02), Ethyl ether,
+          Trichloroethane and MGK-264; Tetrafluoroethane and
+          Indole-3-butyric acid read their LOQs. Rows that begin with a digit
+          ("2-Propanol", "1,2-Dichloroethane", "3-Carene") or whose cut
+          name was one character (Δ8-, Δ9- and both Δ10-THC) were
+          dropped, and "Stems >3mm in diameter (%)" read as null. A row
+          is now split at the longest known analyte name it begins with,
+          or before its trailing run of cells (_split_row).
+        * 2023 trace metals reported the eight action limits as results
+          (copper 30 for 15.94 ug/g). A contaminant table's result column
+          is found from its non-detect cells or its header row; the cell
+          before the status is the result only when neither says
+          otherwise, and then a passing "result" above its "limit"
+          means the three numbers are taken by size (_table_layout,
+          _order_by_size).
+        * Non-detects keep their qualifier: "<LOQ" was read as 0.0 and is
+          now value None, qualifier '<LOQ', with the row's LOQ (or the
+          bound of "<0.13" when the row prints none); "Not Detected" is
+          value None, qualifier 'ND'. A printed 0.00 stays 0.0. Every
+          row carries 'qualifier', 'lod', 'loq', 'limit' and 'status'
+          (None when not printed). LOD, LOQ and limit cells are never
+          read as the result.
+        * Moisture content was null: its row has two numbers before the
+          status, and cells were read from the left. Contaminant cells
+          are read from the status backwards. The filth, moisture and
+          water activity tables are read together and each row goes to
+          its own analysis: water activity was also reported in percent
+          from the filth table. Mammalian excreta is in mg/lb, as its
+          name says.
+        * MDG pathogen rows were keyed with their microbial type
+          ('salmonella_species_bacterial'); the type is now a cell, and
+          "Not Detected" a result.
+        * A section's rows no longer include the tables printed below
+          it (mycotoxins were also reported as heavy metals), and each
+          analyte appears once per analysis.
+        * Keys: 1,2-dichloroethane is '1_2_dichloroethane' and DMSO
+          'dimethyl_sulfoxide' (canonical keys); stems stay 'stems'.
+
 Data Points:
 
     * product_name, product_type, product_subtype, strain_name
@@ -56,12 +117,16 @@ import hashlib
 import json
 import logging
 import re
+from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 # External imports (only pdfplumber allowed per dependency policy):
 import pdfplumber
 
+# Internal imports:
+from cannlytics.constants import analysis_for_analyte
+from cannlytics.data.coas.schema import parse_result_value
 
 # ── Phyto-Farma Labs Constants ──────────────────────────────────────
 
@@ -224,7 +289,7 @@ ANALYTE_KEY_MAP = {
     'STX1 GENE (SHIGA TOXIN GENE 1)': 'stx1_gene',
     'STX2 GENE (SHIGA TOXIN GENE 2)': 'stx2_gene',
     # Residual solvents
-    '1,2-DICHLOROETHANE (ETHYLENE DICHLORIDE, ETHYLENE CHLORIDE)': 'dichloroethane',
+    '1,2-DICHLOROETHANE (ETHYLENE DICHLORIDE, ETHYLENE CHLORIDE)': '1_2_dichloroethane',
     '2-PROPANOL (ISOPROPANOL, ISOPROPYL ALCOHOL)': 'isopropanol',
     'ACETONE (2-PROPANONE)': 'acetone',
     'ACETONITRILE': 'acetonitrile',
@@ -232,7 +297,7 @@ ANALYTE_KEY_MAP = {
     'BUTANES, TOTAL': 'butanes',
     'CHLOROFORM': 'chloroform',
     'DICHLOROMETHANE (METHYLENE CHLORIDE)': 'dichloromethane',
-    'DIMETHYL SULFOXIDE (DMSO)': 'dmso',
+    'DIMETHYL SULFOXIDE (DMSO)': 'dimethyl_sulfoxide',
     'ETHANOL (ETHYL ALCOHOL)': 'ethanol',
     'ETHYL ACETATE (ACETIC ACID ETHYL ESTER)': 'ethyl_acetate',
     'ETHYL ETHER (DIETHYL ETHER, 1,1\'-OXYBISETHANE)': 'ethyl_ether',
@@ -248,7 +313,7 @@ ANALYTE_KEY_MAP = {
     'XYLENES, TOTAL (ORTHO-, META-, PARA-)': 'xylenes',
     # Foreign matter
     'MAMMALIAN EXCRETA (MG/LB)': 'mammalian_excreta',
-    'STEMS >3MM IN DIAMETER (%)': 'stems_over_3mm',
+    'STEMS >3MM IN DIAMETER (%)': 'stems',
     'OTHER FOREIGN MATERIAL (%)': 'other_foreign_material',
     # Moisture / Water activity
     'MOISTURE CONTENT': 'moisture_content',
@@ -350,7 +415,6 @@ SKIP_PATTERNS = {
 # Logger.
 logger = logging.getLogger(__name__)
 
-
 # ── Utility Functions ──────────────────────────────────────────────
 
 def _snake_case(name: str) -> str:
@@ -361,7 +425,11 @@ def _snake_case(name: str) -> str:
     upper = stripped.upper()
     # Remove trailing † and * markers for lookup.
     clean_upper = re.sub(r'[†*]+$', '', upper).strip()
-    mapped = ANALYTE_KEY_MAP.get(upper) or ANALYTE_KEY_MAP.get(clean_upper)
+    mapped = (
+        ANALYTE_KEY_MAP.get(upper)
+        or ANALYTE_KEY_MAP.get(clean_upper)
+        or _KEY_BY_NAME.get(_name_norm(stripped))
+    )
     if mapped:
         return mapped
     # Fallback: normalize to snake_case.
@@ -371,27 +439,44 @@ def _snake_case(name: str) -> str:
     s = s.strip('_')
     return s
 
-
 def _parse_number(text: str) -> Optional[float]:
-    """Parse a numeric value from text.
-    Returns None for ND/Not Detected, 0.0 for <LOQ, float otherwise.
+    """Parse a plain number (an LOQ, limit or total) from text.
+    Handles: '0.13', '5,000', '0', '10.90%', '3.3E+06'.
+    Returns None for ND / Not Detected / N/A / words and for a bound
+    such as '<LOQ' or '<0.13': a bound is a qualifier, not a number
+    (until 10/13/2026 it returned 0.0). Read results with _parse_result.
     """
     if text is None:
         return None
-    t = text.strip().replace(',', '')
+    t = str(text).strip().replace(',', '')
     if not t or t in ('ND', 'N/A', '-', '', 'Not Detected', 'None'):
         return None
-    if t.startswith('Not '):
+    if t.startswith('Not ') or t[0] in '<>≤≥' or 'LOQ' in t.upper():
         return None
-    if t.startswith('<') or 'LOQ' in t.upper():
-        return 0.0
-    # Strip trailing non-numeric chars.
-    t = re.sub(r'[^0-9.\-].*$', '', t)
+    match = re.match(r'^[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?', t)
+    if not match:
+        return None
     try:
-        return float(t)
+        return float(match.group(0))
     except (ValueError, TypeError):
         return None
 
+def _parse_result(text: Optional[str]) -> Tuple[Optional[float], str, Optional[float]]:
+    """Read a printed result as ``(value, qualifier, bound)``.
+
+    Uses the package's qualifier semantics (``parse_result_value``):
+    '5.93' is (5.93, '', None); '0.00' is (0.0, '', None); 'ND' and
+    'Not Detected' are (None, 'ND', None); '<LOQ' is (None, '<LOQ',
+    None) and '<0.13' is (None, '<LOQ', 0.13), the bound being the
+    limit the result is below. 'None' (a pending MDG test) and a blank
+    cell are (None, '', None).
+    """
+    if text is None:
+        return None, '', None
+    t = str(text).replace('_', ' ').strip().rstrip('*†‡')
+    if not t or t.upper() == 'NONE':
+        return None, '', None
+    return parse_result_value(t)
 
 def _parse_date(text: str) -> str:
     """Parse date string to ISO format (YYYY-MM-DD).
@@ -409,12 +494,10 @@ def _parse_date(text: str) -> str:
             continue
     return t
 
-
 def _find_first_number(line: str) -> int:
     """Find the index of the first numeric value or '<' in a line."""
     match = re.search(r'[\d<]', line)
     return match.start() if match else len(line)
-
 
 def _is_phyto_farma_page(text: str) -> bool:
     """Check if a page belongs to Phyto-Farma (not a third-party lab)."""
@@ -427,7 +510,6 @@ def _is_phyto_farma_page(text: str) -> bool:
         return True
     return True  # Default to True for pages without lab headers.
 
-
 def _detect_format(front_text: str) -> str:
     """Detect COA format era from front page text.
     Returns: 'modern' or 'historic'.
@@ -437,7 +519,6 @@ def _detect_format(front_text: str) -> str:
     if 'Certificate:' in front_text and 'Accreditation' in front_text:
         return 'modern'
     return 'historic'
-
 
 # ── Metadata Parsing ───────────────────────────────────────────────
 
@@ -615,7 +696,6 @@ def _parse_metadata_modern(front_text: str, front_page) -> Dict:
 
     return obs
 
-
 def _parse_metadata_historic(front_text: str, front_page) -> Dict:
     """Parse metadata from a historic-format page 1."""
     obs = {}
@@ -684,6 +764,505 @@ def _parse_metadata_historic(front_text: str, front_page) -> Dict:
 
     return obs
 
+# ── Row Reading ────────────────────────────────────────────────────
+#
+# A table row is an analyte name followed by its cells. Names can hold
+# digits ("Acetone (2-Propanone)", "Aflatoxin B1", "Δ9-THC", "Stems
+# >3mm in diameter (%)"), so a row is split at the longest known
+# analyte name it begins with, and otherwise before its trailing run of
+# cells (_split_row). The cells are sorted into values, status, units
+# and microbial type (_read_cells). Contaminant values are then read
+# from the status backwards, in the column order the table itself shows
+# (_table_layout).
+
+# Multi-word cells, joined so that a row splits into one token per cell.
+_MULTIWORD_CELLS = (
+    (re.compile(
+        r'\b(?:Not|None)\s+Detected'
+        r'(?:\s+in\s+(?:\d+(?:\.\d+)?\s*)?(?:g|grams?|mL)\b)?',
+        re.IGNORECASE), 'Not_Detected'),
+    (re.compile(
+        r'\b(Absent|Detected|Present)\s+in\s+(?:\d+(?:\.\d+)?\s*)?(?:g|grams?|mL)\b',
+        re.IGNORECASE), r'\1'),
+    (re.compile(r'\bNot\s+Tested\b', re.IGNORECASE), 'Not_Tested'),
+    (re.compile(r'\bNot\s+Required\b', re.IGNORECASE), 'Not_Required'),
+    # '< 0.13' and '< LOQ' are one cell.
+    (re.compile(r'([<>≤≥])\s+(?=\d|\.\d|LOQ\b|LOD\b)', re.IGNORECASE), r'\1'),
+)
+
+# What a cell can hold besides a number.
+_STATUS_WORDS = {
+    'PASS': 'pass', 'PASSED': 'pass', 'FAIL': 'fail', 'FAILED': 'fail',
+    'TESTED': 'tested',
+}
+_RESULT_WORDS = {
+    '<LOQ', '<LOD', '>ULOQ', 'ND', 'N.D.', 'N/D', 'NOT_DETECTED', 'ABSENT',
+    'NEGATIVE', 'DETECTED', 'PRESENT', 'POSITIVE', 'NOT_TESTED', 'NT',
+    'BLQ', 'BQL',
+}
+_BLANK_WORDS = {'N/A', 'NA', '-', '--', '---', 'NONE', 'NR', 'NOT_REQUIRED'}
+_TYPE_WORDS = {'BACTERIAL', 'FUNGAL'}
+_UNIT_WORDS = {
+    '%': 'percent', 'PERCENT': 'percent', 'PPM': 'ppm', 'PPB': 'ppb',
+    'UG/G': 'ug/g', 'MG/G': 'mg/g', 'MG/KG': 'mg/kg', 'UG/KG': 'ug/kg',
+    'CFU/G': 'cfu/g', 'AW': 'aw', 'MG/LB': 'mg/lb',
+    'MG/SERVING': 'mg/serving', 'MG/UNIT': 'mg/unit',
+}
+_NUMBER_CELL = re.compile(r'^[-+]?(?:\d[\d,]*(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?%?$')
+_BOUND_CELL = re.compile(r'^[<>≤≥]=?(?:\d[\d,]*(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?%?$')
+
+# Header columns, in the order a header row names them.
+_HEADER_COLUMNS = (
+    ('type', r'\bTYPE\b'),
+    ('lod', r'\bLOD\b'),
+    ('loq', r'\bLOQ\b'),
+    ('limit', r'\b(?:ACTION|ALLOWABLE)\s+(?:LIMIT|LEVEL)S?\b'
+              r'|\bLIMITS?\b|\bACTION\b|\bALLOWABLE\b'),
+    ('result', r'\bRESULTS?\b'),
+    ('status', r'\bPASS\s*/\s*FAIL\b|\bSTATUS\b'),
+    ('units', r'\bUNITS?\b'),
+)
+
+# The modern contaminant columns, counted back from the status.
+_DEFAULT_LAYOUT = {-3: 'loq', -2: 'limit', -1: 'result'}
+
+# Analyses of the keys this module emits that the canonical analyte
+# lists (cannlytics.constants) do not hold, or group differently.
+_KEY_ANALYSES = {
+    'mammalian_excreta': 'foreign_matter',
+    'stems': 'foreign_matter',
+    'other_foreign_material': 'foreign_matter',
+    'moisture_content': 'moisture',
+    'water_activity': 'water_activity',
+    'mold_count': 'microbials',
+    'yeast_count': 'microbials',
+    'e_coli_gene': 'microbials',
+    'e_coli_shigella': 'microbials',
+    'stx1_gene': 'microbials',
+    'stx2_gene': 'microbials',
+    'delta_10_thc_rs': 'cannabinoids',
+    'delta_10_thc_rr': 'cannabinoids',
+    'trans_beta_ocimene': 'terpenes',
+    'cinerin_i': 'pesticides',
+    'jasmolin_i': 'pesticides',
+}
+_CANONICAL_ANALYSES = {
+    'cannabinoids': 'cannabinoids',
+    'terpenes': 'terpenes',
+    'pesticides': 'pesticides',
+    'heavy_metals': 'heavy_metals',
+    'mycotoxins': 'mycotoxins',
+    'microbes': 'microbials',
+    'residual_solvents': 'residual_solvents',
+    'foreign_matter': 'foreign_matter',
+}
+
+# The filth, moisture and water activity tables share a page; each row
+# goes to its own analysis, with that analysis' units.
+_PHYSICAL_KEYWORDS = ('Foreign Matter', 'Filth', 'Moisture Content', 'Water Activity')
+_PHYSICAL_ROUTES = {
+    'foreign_matter': ('foreign_matter', 'percent'),
+    'moisture': ('moisture', 'percent'),
+    'water_activity': ('water_activity', 'aw'),
+}
+
+def _normalize_dashes(text: str) -> str:
+    """En and em dashes and the minus sign as '-'."""
+    return text.replace('–', '-').replace('—', '-').replace('−', '-')
+
+def _name_norm(text: str) -> str:
+    """A printed analyte name as the name index holds it: upper case,
+    footnote marks dropped, curly quotes straightened, '∆' as 'Δ'."""
+    t = _normalize_dashes(str(text)).upper()
+    t = t.replace('’', "'").replace('‘', "'").replace('∆', 'Δ')
+    t = re.sub(r'[*†‡]+', '', t)
+    t = re.sub(r'Δ\s+(?=\d)', 'Δ', t)
+    return ' '.join(t.split())
+
+# Every printed name in ANALYTE_KEY_MAP, normalized, to its key.
+_KEY_BY_NAME = {_name_norm(name): key for name, key in ANALYTE_KEY_MAP.items()}
+
+def _is_known_name(name: str) -> bool:
+    """Whether ANALYTE_KEY_MAP holds this printed name."""
+    return bool(name) and _name_norm(name) in _KEY_BY_NAME
+
+def _unit_of(token: str) -> Optional[str]:
+    """The standard spelling of a unit ('µg/g', '(%)'), or None."""
+    t = token.strip().strip('()').upper().replace('Μ', 'U').replace('µ', 'U')
+    return _UNIT_WORDS.get(t)
+
+def _name_units(name: str) -> Optional[str]:
+    """The unit a name prints in parentheses ('Mammalian excreta (mg/lb)')."""
+    match = re.search(r'\(([^()]+)\)\s*$', name)
+    return _unit_of(match.group(1)) if match else None
+
+def _cell_kind(token: str) -> str:
+    """What a cell holds: 'status', 'qualifier' (a printed non-detect or
+    a bound such as '<0.13'), 'number', 'blank' ('N/A', '-', 'None'),
+    'type' (the MDG microbial type), 'unit', or 'word' (anything else,
+    such as part of a name)."""
+    t = token.strip().rstrip('*†‡')
+    if not t:
+        return 'blank'
+    upper = t.upper()
+    if upper in _STATUS_WORDS:
+        return 'status'
+    if upper in _RESULT_WORDS or _BOUND_CELL.match(t):
+        return 'qualifier'
+    if _NUMBER_CELL.match(t):
+        return 'number'
+    if upper in _BLANK_WORDS:
+        return 'blank'
+    if upper in _TYPE_WORDS:
+        return 'type'
+    if _unit_of(t):
+        return 'unit'
+    return 'word'
+
+def _tokenize(line: str) -> List[str]:
+    """Split a row into tokens, multi-word cells joined ('Not_Detected')."""
+    text = _normalize_dashes(line)
+    for pattern, replacement in _MULTIWORD_CELLS:
+        text = pattern.sub(replacement, text)
+    return text.split()
+
+def _split_row(line: str) -> Tuple[str, List[str]]:
+    """Split a table row into its analyte name and its cells.
+
+    The name is the longest known analyte name the row begins with,
+    when a cell (not one more word of a longer name) follows it, and
+    otherwise everything before the row's trailing run of cells. Until
+    10/13/2026 the name ended at the row's first digit, which cut
+    "Acetone (2-Propanone)" to "Acetone (" and shifted its cells.
+    """
+    tokens = _tokenize(line)
+    for n in range(len(tokens), 0, -1):
+        if not _is_known_name(' '.join(tokens[:n])):
+            continue
+        cells = tokens[n:]
+        if cells and _cell_kind(cells[0]) == 'word':
+            continue
+        return ' '.join(tokens[:n]), cells
+    i = len(tokens)
+    while i > 0 and _cell_kind(tokens[i - 1]) != 'word':
+        i -= 1
+    return ' '.join(tokens[:i]), tokens[i:]
+
+def _has_value(cells: List[str]) -> bool:
+    """Whether a row's cells hold a number or a printed result."""
+    return any(_cell_kind(cell) in ('number', 'qualifier') for cell in cells)
+
+def _is_skip_line(line: str) -> bool:
+    """Whether a line is known not to be an analyte row."""
+    upper_line = line.upper().strip()
+    if any(skip in upper_line for skip in SKIP_PATTERNS):
+        return True
+    if upper_line.startswith('DATE '):
+        return True
+    if upper_line.startswith('* ANALYTE') or upper_line.startswith('†'):
+        return True
+    if 'SOP:' in line or 'Analyzed By:' in line or 'Analyst:' in line:
+        return True
+    if 'Date:' in line or 'Sample Weight:' in line:
+        return True
+    return False
+
+def _parse_header(line: str) -> List[str]:
+    """The columns a header row names, in order: 'Analyte LOQ Action
+    Limit Results Pass/Fail' is ['loq', 'limit', 'result', 'status']."""
+    upper = line.upper().replace('LOD/LOQ', 'LOQ')
+    found = []
+    for column, pattern in _HEADER_COLUMNS:
+        found.extend((match.start(), column) for match in re.finditer(pattern, upper))
+    columns = []
+    for _, column in sorted(found):
+        if column not in columns:
+            columns.append(column)
+    return columns
+
+def _read_tables(text: str) -> List[Tuple[Optional[List[str]], List[Tuple[str, List[str]]]]]:
+    """Read a section's text into tables of (name, cells) rows.
+
+    Each 'Analyte' header row starts a table and names its columns. A
+    line counts as a row when its cells hold a number or a printed
+    result ('<LOQ', 'Not Detected'), so a row need not hold a digit.
+    A name that pdfplumber wraps around its cells ("Sum of 0.02 0.000
+    PASS" over "Aflatoxins", or a name on the lines above and below a
+    line of cells) is joined when the joined name is a known one.
+    """
+    tables = [(None, [])]
+    lines = [line.strip() for line in text.split('\n')]
+    fragment = ''
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        i += 1
+        if not line:
+            continue
+        if line.upper().startswith('ANALYTE'):
+            tables.append((_parse_header(line), []))
+            fragment = ''
+            continue
+        if _is_skip_line(line):
+            fragment = ''
+            continue
+        name, cells = _split_row(line)
+        if not _has_value(cells):
+            # A title, or part of a name wrapped onto its own line.
+            fragment = line if name and not cells else ''
+            continue
+        if not _is_known_name(name):
+            following = ''
+            if i < len(lines) and lines[i] and not _is_skip_line(lines[i]):
+                next_name, next_cells = _split_row(lines[i])
+                if next_name and not next_cells and not next_name.upper().startswith('ANALYTE'):
+                    following = lines[i]
+            candidates = []
+            if following:
+                candidates.append((f'{name} {following}'.strip(), True))
+            if fragment:
+                candidates.append((f'{fragment} {name}'.strip(), False))
+                if following:
+                    candidates.append((f'{fragment} {following}', True))
+            for candidate, uses_following in candidates:
+                if _is_known_name(candidate):
+                    name = candidate
+                    if uses_following:
+                        i += 1
+                    break
+        fragment = ''
+        clean_name = re.sub(r'[†*]+$', '', name).strip()
+        if len(clean_name) < 2 or not re.search(r'[A-Za-zΔ∆]', clean_name):
+            continue
+        tables[-1][1].append((name, cells))
+    return [(header, rows) for header, rows in tables if rows]
+
+def _read_cells(cells: List[str]) -> Dict:
+    """Sort a row's cells into its values, in order, and its status,
+    units and microbial type.
+
+    A run of words is one cell (a limit printed as "Report Results
+    Only"), and nothing after the status belongs to the row.
+    """
+    row = {'vals': [], 'kinds': [], 'words': [], 'status': None, 'units': None, 'type': None}
+    in_words = False
+    for token in cells:
+        kind = _cell_kind(token)
+        t = token.strip().rstrip('*†‡')
+        if row['status'] is not None and kind != 'unit':
+            break
+        if kind == 'status':
+            row['status'] = _STATUS_WORDS[t.upper()]
+        elif kind == 'unit':
+            row['units'] = row['units'] or _unit_of(t)
+        elif kind == 'type':
+            row['type'] = t.capitalize()
+        elif kind == 'word':
+            if not in_words:
+                row['vals'].append('')
+                row['kinds'].append('blank')
+                row['words'].append(True)
+        else:
+            if kind == 'number' and t.endswith('%'):
+                row['units'] = row['units'] or 'percent'
+            row['vals'].append(t)
+            row['kinds'].append(kind)
+            row['words'].append(False)
+        in_words = kind == 'word'
+    # Words after the last value of a row without a status are not a cell.
+    while row['status'] is None and row['words'] and row['words'][-1]:
+        for field in ('vals', 'kinds', 'words'):
+            row[field].pop()
+    return row
+
+def _number_at(row: Dict, position: int) -> Optional[float]:
+    """The plain number at a position counted back from the status."""
+    if -position > len(row['vals']) or row['kinds'][position] != 'number':
+        return None
+    return _parse_number(row['vals'][position])
+
+def _layout_around(result_at: int, width: int, rows: List[Dict]) -> Dict[int, str]:
+    """Name the columns beside a known result column. Of two others, the
+    one whose numbers are smaller in most rows is the LOQ, the other the
+    limit (the left one is the LOQ when the numbers do not say)."""
+    others = [p for p in range(-max(width, 3), 0) if p != result_at][-3:]
+    names = ['lod', 'loq', 'limit'][-len(others):] if others else []
+    if len(others) == 2:
+        left, right = others
+        smaller = Counter()
+        for row in rows:
+            a, b = _number_at(row, left), _number_at(row, right)
+            if a is not None and b is not None and a != b:
+                smaller[left if a < b else right] += 1
+        if smaller[right] > smaller[left]:
+            others = [right, left]
+    layout = {result_at: 'result'}
+    layout.update(zip(others, names, strict=False))
+    return layout
+
+def _table_layout(
+        rows: List[Dict],
+        header: Optional[List[str]] = None,
+    ) -> Tuple[Dict[int, str], bool]:
+    """Locate the result, LOQ and limit columns of a contaminant table,
+    counted back from the status (-1 is the cell before it).
+
+    The column holding the table's printed non-detects ('<LOQ', 'ND',
+    '<0.13') is the result column. Failing that, the header row places
+    it, when it names as many value columns as the rows have. Failing
+    both, the modern layout (LOQ, limit, result) is assumed. Returns the
+    layout and whether the table itself established it.
+
+    The 2023 trace metals table does not put its result before the
+    status; reading that cell (r10) reported the eight action limits.
+    """
+    widths = Counter(len(row['vals']) for row in rows if row['vals'])
+    width = widths.most_common(1)[0][0] if widths else 0
+    named = None
+    if header:
+        columns = [c for c in header if c not in ('type', 'status', 'units')]
+        if 'result' in columns and len(columns) == width:
+            named = {i - len(columns): c for i, c in enumerate(columns)}
+    spots = Counter()
+    for row in rows:
+        found = [
+            i - len(row['vals'])
+            for i, kind in enumerate(row['kinds'])
+            if kind == 'qualifier'
+        ]
+        if len(found) == 1:
+            spots[found[0]] += 1
+    if spots:
+        result_at = spots.most_common(1)[0][0]
+        if named and named.get(result_at) == 'result':
+            return named, True
+        return _layout_around(result_at, width, rows), True
+    if named:
+        return named, True
+    return dict(_DEFAULT_LAYOUT), False
+
+def _order_by_size(cells: Dict[str, str], status: Optional[str]) -> Dict[str, str]:
+    """Check an assumed layout against the row's status: a passing
+    result is at most its limit, and a failing one is above it. When
+    the LOQ, limit and result numbers say otherwise, they are taken by
+    size (a passing result lies between its LOQ and its limit)."""
+    if status not in ('pass', 'fail'):
+        return cells
+    tokens = [cells.get(field) for field in ('loq', 'limit', 'result')]
+    numbers = [_parse_number(token) for token in tokens]
+    if any(number is None for number in numbers):
+        return cells
+    _, limit, result = numbers
+    if (status == 'pass' and result <= limit) or (status == 'fail' and result > limit):
+        return cells
+    ranked = [
+        token for _, token in sorted(zip(numbers, tokens, strict=False), key=lambda pair: pair[0])
+    ]
+    if status == 'pass':
+        return {**cells, 'loq': ranked[0], 'result': ranked[1], 'limit': ranked[2]}
+    return {**cells, 'loq': ranked[0], 'limit': ranked[1], 'result': ranked[2]}
+
+def _assign_cells(
+        row: Dict,
+        col_spec: str,
+        layout: Optional[Dict[int, str]] = None,
+        trusted: bool = True,
+    ) -> Dict[str, str]:
+    """Name a row's values by column: 'loq', 'limit', 'result', etc."""
+    vals = row['vals']
+    if col_spec in ('loq_value', 'terpene'):
+        # Cannabinoids: LOQ | value | mg/serving ...; terpenes: LOQ | value.
+        if len(vals) == 1:
+            return {'result': vals[0]}
+        cells = {'loq': vals[0], 'result': vals[1]}
+        if col_spec == 'loq_value' and len(vals) >= 3:
+            cells['mg_per_serving'] = vals[2]
+        return cells
+    if col_spec == 'microbial_mdg':
+        # Type | LOQ | Allowable Limit | Results: the result is the last
+        # value; the limit is a number only when the row prints one.
+        cells = {'result': vals[-1]}
+        numbers = [
+            v for v, k in zip(vals[:-1], row['kinds'][:-1], strict=False) if k == 'number'
+        ]
+        if numbers:
+            cells['loq'] = numbers[0]
+        if len(numbers) > 1:
+            cells['limit'] = numbers[1]
+        return cells
+    layout = layout or _DEFAULT_LAYOUT
+    cells = {field: vals[pos] for pos, field in layout.items() if -pos <= len(vals)}
+    if not trusted:
+        cells = _order_by_size(cells, row['status'])
+    return cells
+
+def _result_row(
+        analysis: str,
+        key: str,
+        name: str,
+        units: str,
+        cells: Dict[str, str],
+        status: Optional[str],
+    ) -> Dict:
+    """Build a result: a non-detect is value None with its qualifier,
+    and an LOD, LOQ or limit is never the value."""
+    value, qualifier, bound = _parse_result(cells.get('result'))
+    loq = _parse_number(cells.get('loq'))
+    lod = _parse_number(cells.get('lod'))
+    if bound is not None:
+        if qualifier == '<LOQ' and loq is None:
+            loq = bound
+        elif qualifier == '<LOD' and lod is None:
+            lod = bound
+    result = {
+        'analysis': analysis,
+        'key': key,
+        'name': name,
+        'value': value,
+        'qualifier': qualifier,
+        'units': units,
+        'lod': lod,
+        'loq': loq,
+        'limit': _parse_number(cells.get('limit')),
+        'status': status,
+    }
+    if 'mg_per_serving' in cells:
+        result['mg_per_serving'] = _parse_number(cells['mg_per_serving'])
+    return result
+
+def _key_analysis(key: str) -> Optional[str]:
+    """The analysis an analyte key belongs to, or None if unknown."""
+    if key in _KEY_ANALYSES:
+        return _KEY_ANALYSES[key]
+    try:
+        return _CANONICAL_ANALYSES.get(analysis_for_analyte(key))
+    except Exception:
+        return None
+
+def _first_keyword(text: str, keywords: Tuple[str, ...]) -> Optional[str]:
+    """The keyword held by the first line that holds any of them."""
+    for line in text.split('\n'):
+        for keyword in keywords:
+            if keyword in line:
+                return keyword
+    return None
+
+def _dedupe_results(results: List[Dict]) -> List[Dict]:
+    """One result per analysis and key: the first that has a value or a
+    qualifier, else the first."""
+    chosen, order = {}, []
+    for result in results:
+        index = (result.get('analysis'), result.get('key'))
+        if index not in chosen:
+            chosen[index] = result
+            order.append(index)
+            continue
+        held = chosen[index]
+        if held.get('value') is None and not held.get('qualifier') and (
+            result.get('value') is not None or result.get('qualifier')
+        ):
+            chosen[index] = result
+    return [chosen[index] for index in order]
 
 # ── Results Parsing (Modern Format) ────────────────────────────────
 
@@ -692,6 +1271,7 @@ def _parse_analyte_table_text(
     analysis: str,
     units: str,
     col_spec: str = 'loq_value',
+    routes: Optional[Dict[Optional[str], Tuple[str, str]]] = None,
 ) -> List[Dict]:
     """Parse analyte results from text-extracted table rows.
 
@@ -710,150 +1290,77 @@ def _parse_analyte_table_text(
         Water Activity: Analyte | LOQ | Action Limit | Results | Pass/Fail
 
     col_spec controls how columns are parsed:
-        'loq_value': LOQ then value (cannabinoids, terpenes)
-        'loq_limit_value_status': LOQ, limit, value, status (metals, pesticides, etc.)
-        'microbial_type': Microbial Type, LOQ, Limit, Results, Status (MDG)
-        'microbial_plating': LOQ, Action Limit, Results, Status (TAPC/TYMC)
+        'loq_value': LOQ then value (cannabinoids)
+        'terpene': LOQ then value (terpenes)
+        'microbial_mdg': Microbial Type, LOQ, Limit, Results, Status (MDG)
+        'loq_limit_value_status', 'microbial_plating', 'foreign_matter':
+            contaminant tables, read from the status backwards in the
+            column order the table shows (see _table_layout).
+
+    routes maps the analysis a row's key belongs to (None: unknown) to
+    the (analysis, units) the row is reported under; rows of any other
+    analysis are a table printed below this one and are skipped. By
+    default every row is reported under `analysis` and `units`.
+
+    Every result has 'value' and 'qualifier' ('<LOQ' is value None,
+    qualifier '<LOQ'), 'lod', 'loq', 'limit', 'units' and 'status'
+    (None when not printed).
     """
+    if routes is None:
+        routes = {analysis: (analysis, units), None: (analysis, units)}
     results = []
-    lines = text.split('\n')
+    for header, table in _read_tables(text):
+        rows = []
+        for name, cells in table:
+            key = _snake_case(re.sub(r'[†*]+$', '', name).strip())
+            if not key or key == '_skip_':
+                continue
 
-    for line in lines:
-        line = line.strip()
-        if not line:
+            # Skip total/summary rows.
+            if key.startswith('total_') and key not in (
+                'total_aflatoxins', 'total_aerobic_bacteria',
+                'total_yeast_and_mold',
+            ):
+                continue
+
+            # Skip rows of another analysis (a table printed below).
+            family = _key_analysis(key)
+            if family not in routes:
+                continue
+
+            row = _read_cells(cells)
+            if not row['vals']:
+                continue
+            rows.append((name, key, family, row))
+        if not rows:
             continue
 
-        # Skip known non-data lines.
-        upper_line = line.upper().strip()
-        if any(skip in upper_line for skip in SKIP_PATTERNS):
-            continue
-        if upper_line.startswith('ANALYTE') or upper_line.startswith('DATE '):
-            continue
-        if upper_line.startswith('* ANALYTE') or upper_line.startswith('†'):
-            continue
-        if 'SOP:' in line or 'Analyzed By:' in line or 'Analyst:' in line:
-            continue
-        if 'Date:' in line or 'Sample Weight:' in line:
-            continue
+        layout, trusted = None, True
+        if col_spec not in ('loq_value', 'terpene', 'microbial_mdg'):
+            layout, trusted = _table_layout([row for *_, row in rows], header)
 
-        # Find the first number position to split name from values.
-        first_num = _find_first_number(line)
-        if first_num >= len(line) or first_num < 2:
-            continue
-
-        name = line[:first_num].strip()
-        value_str = line[first_num:].strip()
-
-        # Remove trailing asterisks and daggers from name, but keep for lookup.
-        clean_name = re.sub(r'[†*]+$', '', name).strip()
-        if not clean_name or len(clean_name) < 2:
-            continue
-
-        # Look up the key.
-        key = _snake_case(name)
-        if key == '_skip_':
-            continue
-
-        # Skip total/summary rows.
-        if key.startswith('total_') and key not in (
-            'total_aflatoxins', 'total_aerobic_bacteria',
-            'total_yeast_and_mold',
-        ):
-            continue
-
-        values = value_str.split()
-
-        result = {
-            'analysis': analysis,
-            'key': key,
-            'name': clean_name,
-            'units': units,
-        }
-
-        try:
-            if col_spec == 'loq_value':
-                # Cannabinoids: LOQ | value | mg/serving | homogeneity?
-                if len(values) >= 2:
-                    result['loq'] = _parse_number(values[0])
-                    result['value'] = _parse_number(values[1])
-                    if len(values) >= 3:
-                        result['mg_per_serving'] = _parse_number(values[2])
-
-            elif col_spec == 'terpene':
-                # Terpenes: LOQ | Results
-                if len(values) >= 2:
-                    result['loq'] = _parse_number(values[0])
-                    result['value'] = _parse_number(values[1])
-                elif len(values) == 1:
-                    result['value'] = _parse_number(values[0])
-
-            elif col_spec == 'loq_limit_value_status':
-                # Metals/Mycotoxins/Pesticides/Solvents: LOQ | Limit | Results | Pass/Fail
-                if len(values) >= 4:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-                    result['status'] = values[3].lower() if values[3] in ('PASS', 'FAIL', 'Pass', 'Fail') else None
-                elif len(values) >= 3:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-
-            elif col_spec == 'microbial_mdg':
-                # MDG: Microbial Type | LOQ | Allowable Limit | Results | Pass/Fail
-                # Type is text (Bacterial/Fungal), so first number is LOQ.
-                type_match = re.match(r'(Bacterial|Fungal|None)\s+(.*)', value_str)
-                if type_match:
-                    remaining = type_match.group(2).strip().split()
-                    if len(remaining) >= 4:
-                        result['loq'] = _parse_number(remaining[0])
-                        result['limit'] = remaining[1] + ' ' + remaining[2] if remaining[1] == 'Not' else _parse_number(remaining[1])
-                        result['value'] = _parse_number(remaining[-2]) if remaining[-2] not in ('Detected', 'None') else None
-                        result['status'] = remaining[-1].lower() if remaining[-1] in ('PASS', 'FAIL', 'None') else None
-                else:
-                    # Fallback: just grab what we can.
-                    if len(values) >= 3:
-                        result['value'] = _parse_number(values[-2]) if values[-2] not in ('Detected',) else None
-                        result['status'] = values[-1].lower() if values[-1] in ('PASS', 'FAIL') else None
-
-            elif col_spec == 'microbial_plating':
-                # TAPC/TYMC: LOQ | Action Limit | Results | Pass/Fail
-                if len(values) >= 4:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-                    result['status'] = values[3].lower() if values[3] in ('PASS', 'FAIL') else None
-                elif len(values) >= 3:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-
-            elif col_spec == 'foreign_matter':
-                # LOQ | Action Limit | Results | Pass/Fail
-                if len(values) >= 4:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-                    result['status'] = values[3].lower() if values[3] in ('PASS', 'FAIL') else None
-                elif len(values) >= 3:
-                    result['loq'] = _parse_number(values[0])
-                    result['limit'] = _parse_number(values[1])
-                    result['value'] = _parse_number(values[2])
-
-        except (IndexError, ValueError):
-            continue
-
-        results.append(result)
+        for name, key, family, row in rows:
+            clean_name = re.sub(r'[†*]+$', '', name).strip()
+            row_analysis, row_units = routes[family]
+            # Units printed in a contaminant row or in a name win; a
+            # potency row's unit cells can belong to other columns.
+            printed = row['units'] if col_spec not in ('loq_value', 'terpene') else None
+            row_units = printed or _name_units(clean_name) or row_units
+            cells = _assign_cells(row, col_spec, layout, trusted)
+            results.append(_result_row(
+                row_analysis, key, clean_name, row_units, cells, row['status'],
+            ))
 
     return results
-
 
 def _extract_section_text(
     page_text: str,
     section_keyword: str,
     end_keywords: Optional[List[str]] = None,
 ) -> str:
-    """Extract text for a specific section from a page."""
+    """Extract text for a specific section from a page, from its
+    'Analyte' header row (kept, as it names the columns) to the first
+    stop marker."""
     lines = page_text.split('\n')
     start = None
     for i, line in enumerate(lines):
@@ -861,7 +1368,7 @@ def _extract_section_text(
             # Look for the actual data start (the 'Analyte' header row).
             for j in range(max(0, i - 2), min(len(lines), i + 5)):
                 if 'Analyte' in lines[j]:
-                    start = j + 1
+                    start = j
                     break
             if start is None:
                 start = i + 1
@@ -883,7 +1390,6 @@ def _extract_section_text(
             break
 
     return '\n'.join(lines[start:end])
-
 
 # ── Main Parsing Function ──────────────────────────────────────────
 
@@ -945,7 +1451,7 @@ def parse_phyto_farma_pdf(
             try:
                 page = pdf.pages[page_idx]
                 page_text = page.extract_text() or ''
-                page_text = page_text.replace('\x00', '')
+                page_text = _normalize_dashes(page_text.replace('\x00', ''))
             except Exception:
                 continue
 
@@ -1174,42 +1680,34 @@ def parse_phyto_farma_pdf(
                             all_results.extend(sol_results)
                             analyses.append('residual_solvents')
 
-            # ── Foreign Matter ──
-            if ('Foreign Matter' in page_text or 'Filth and Foreign' in page_text) and 'Analyte' in page_text:
-                if 'foreign_matter' not in analyses:
-                    keyword = 'Foreign Matter' if 'Foreign Matter' in page_text else 'Filth'
-                    section = _extract_section_text(page_text, keyword)
-                    if section:
-                        fm_results = _parse_analyte_table_text(
-                            section, 'foreign_matter', 'percent', 'foreign_matter'
-                        )
-                        if fm_results:
-                            all_results.extend(fm_results)
-                            analyses.append('foreign_matter')
-
-            # ── Moisture Content ──
-            if 'Moisture Content' in page_text and 'Analyte' in page_text:
-                if 'moisture' not in analyses:
-                    section = _extract_section_text(page_text, 'Moisture Content')
-                    if section:
-                        moist_results = _parse_analyte_table_text(
-                            section, 'moisture', 'percent', 'loq_limit_value_status'
-                        )
-                        if moist_results:
-                            all_results.extend(moist_results)
-                            analyses.append('moisture')
-
-            # ── Water Activity ──
-            if 'Water Activity' in page_text and 'Analyte' in page_text:
-                if 'water_activity' not in analyses:
-                    section = _extract_section_text(page_text, 'Water Activity')
-                    if section:
-                        wa_results = _parse_analyte_table_text(
-                            section, 'water_activity', 'aw', 'loq_limit_value_status'
-                        )
-                        if wa_results:
-                            all_results.extend(wa_results)
-                            analyses.append('water_activity')
+            # ── Foreign Matter, Moisture Content, Water Activity ──
+            # The three tables are printed one after another. They are
+            # read from the first one's title down, and each row goes to
+            # its own analysis and units (until 10/13/2026 the filth
+            # table swallowed the other two: water activity in percent).
+            physical = [a for a in _PHYSICAL_ROUTES if a not in analyses]
+            keyword = _first_keyword(page_text, _PHYSICAL_KEYWORDS)
+            if physical and keyword and 'Analyte' in page_text:
+                section = _extract_section_text(page_text, keyword)
+                if section:
+                    routes = {a: _PHYSICAL_ROUTES[a] for a in physical}
+                    filth_table = 'Foreign Matter' in page_text or 'Filth' in page_text
+                    if 'foreign_matter' in physical and filth_table:
+                        # Unknown analytes of a filth table (e.g. insects).
+                        routes[None] = _PHYSICAL_ROUTES['foreign_matter']
+                    physical_results = _parse_analyte_table_text(
+                        section, 'foreign_matter', 'percent', 'foreign_matter',
+                        routes=routes,
+                    )
+                    all_results.extend(physical_results)
+                    # An analysis is done once a known analyte of it is read.
+                    for analysis_name in physical:
+                        if any(
+                            r['analysis'] == analysis_name
+                            and _key_analysis(r['key']) == analysis_name
+                            for r in physical_results
+                        ):
+                            analyses.append(analysis_name)
 
             # ── Extract methods/SOPs from any page ──
             for sop_match in re.finditer(r'SOP[:#]?\s*([\w.\-]+)', page_text):
@@ -1230,13 +1728,16 @@ def parse_phyto_farma_pdf(
     # ── Phase 5: Build final output ──────────────────────────
     obs = {**PHYTO_FARMA, **obs}
 
+    # One result per analysis and analyte (a section can be read twice).
+    all_results = _dedupe_results(all_results)
+
     # Ensure required fields have defaults.
     obs.setdefault('product_name', '')
     obs.setdefault('status', 'pass')
     obs.setdefault('date_tested', '')
 
     # Serialize results and analyses.
-    analyses = sorted(set(analyses))
+    analyses = sorted(set(analyses) | {r['analysis'] for r in all_results})
     methods = sorted(set(methods))
     obs['analyses'] = json.dumps(analyses)
     obs['results'] = json.dumps(all_results)
@@ -1260,7 +1761,6 @@ def parse_phyto_farma_pdf(
     obs['coa_pdf'] = pdf_path.replace('\\', '/').split('/')[-1]
 
     return obs
-
 
 def _parse_from_pdf_object(parser, pdf_obj, **kwargs) -> Dict:
     """Handle legacy calls that pass a pdfplumber PDF object directly."""
@@ -1289,7 +1789,6 @@ def _parse_from_pdf_object(parser, pdf_obj, **kwargs) -> Dict:
     id_input = obs.get('product_name', '') + obs.get('producer', '')
     obs['sample_id'] = hashlib.sha256(id_input.encode()).hexdigest()[:16]
     return obs
-
 
 # ── Entry Point (LAB_REGISTRY compatible) ──────────────────────────
 
@@ -1322,7 +1821,6 @@ def parse_phyto_farma_coa(
 
     return parse_phyto_farma_pdf(parser, doc, **kwargs)
 
-
 def is_phyto_farma(pdf_path: str) -> bool:
     """Quick check if a PDF is a Phyto-Farma Labs COA."""
     try:
@@ -1337,7 +1835,6 @@ def is_phyto_farma(pdf_path: str) -> bool:
             )
     except Exception:
         return False
-
 
 # ── Tests ──────────────────────────────────────────────────────────
 

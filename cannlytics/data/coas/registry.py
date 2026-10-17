@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 3/9/2026
-Updated: 9/26/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -51,7 +51,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
                           'Orion Therapeutics'],
         'module': 'confidentcannabis',
         'algorithm': 'parse_cc_coa',
-        'version': '1.1.0',
+        'version': '1.2.0',
         'states': ['az', 'ca', 'co', 'la', 'mo', 'ny', 'or', 'wa'],
         'tier': 3,
         'lims': True,
@@ -62,7 +62,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['TagLeaf', 'lims.tagleaf'],
         'module': 'tagleaf',
         'algorithm': 'parse_tagleaf_coa',
-        'version': '1.0.0',
+        'version': '1.1.0',
         'states': ['ca', 'mo', 'ny', 'or',],
         'tier': 3,
         'lims': True,
@@ -73,7 +73,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['SC Labs', 'SC Laboratories'],
         'module': 'sclabs',
         'algorithm': 'parse_sc_labs_coa',
-        'version': '1.0.0',
+        'version': '1.1.0',
         'states': ['az', 'ca', 'or', 'co', 'mi'],
         'tier': 3,
         'lims': False,
@@ -95,7 +95,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['Kaycha Labs', 'Kaycha Laboratory'],
         'module': 'kaycha',
         'algorithm': 'parse_kaycha_coa',
-        'version': '1.0.0',
+        'version': '1.1.0',
         'states': ['az', 'fl', 'ny', 'oh', 'nj'],
         'tier': 3,
         'lims': False,
@@ -118,7 +118,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['Phyto-Farma Labs', 'Phyto-farma Labs'],
         'module': 'phytofarma',
         'algorithm': 'parse_phyto_farma_coa',
-        'version': '1.0.0',
+        'version': '1.1.0',
         'states': ['ny'],
         'tier': 3,
         'lims': False,

@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 2/1/2026
-Updated: 10/9/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -143,9 +143,13 @@ AI_PROVIDERS: Dict[str, Dict[str, Any]] = {
                 'max_output_tokens': 128_000,
             },
         },
-        # Until the extraction benchmark names a model, the middle of the
-        # range: Opus 5.5 costs twice as much and Haiku 5.5 a twentieth.
-        'default_model': 'claude-sonnet-5-5',
+        # The extraction benchmark's choice (cannabis_results run r2,
+        # decided 2026-10-12): Haiku 5.5 at its default effort, high, the
+        # least expensive arm non-inferior to Opus 5.5 at high effort
+        # within the benchmark's margins (2% of values, 10% of fully
+        # correct COAs), at 0.038 of its cost on the same COAs. A larger
+        # run is to narrow the margins.
+        'default_model': 'claude-haiku-5-5',
         'env_key': 'ANTHROPIC_API_KEY',
         'priority': 1,
         'free_tier': False,

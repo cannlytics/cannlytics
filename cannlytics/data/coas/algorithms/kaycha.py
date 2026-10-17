@@ -5,7 +5,7 @@ Copyright (c) 2022-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 3/6/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -34,6 +34,53 @@ Description:
         * Format eras: 2020 (2-page minimal), 2022 (Gainesville),
           2024+ (modern FL/NY/AZ), 2025+ (medical/tabular NY/AZ)
 
+    Row layouts (one analyte per line, see _read_row):
+        FL:  "ACETONE 75.000 ppm 750 PASS ND"
+             NAME LOD UNITS LIMIT STATUS RESULT
+        NY:  "ACEQUINOCYL 0.1000 ppm 2 PASS <0.1000"
+             NAME LOQ UNITS LIMIT STATUS RESULT
+        AZ:  "ACEPHATE ppm 0.0100 0.2000 0.4 PASS ND"
+             NAME UNITS LOD LOQ LIMIT STATUS RESULT
+        NY terpenes: "LIMONENE 0.0040 10 PASS 0.5100 5.1000"
+             NAME LOQ LIMIT STATUS RESULT(%) RESULT(mg/unit)
+
+    Fixes (10/13/2026), from a benchmark of 12 COAs read by four
+    Claude models that agree with each other almost perfectly:
+        * A result is never an LOD, LOQ or action limit. Tabular NY/AZ
+          rows took the row's last number, which is the limit whenever
+          the result is "ND" (AZ pesticides: acephate read as 0.4 ppm);
+          FL-layout section rows took the number after the units, which
+          is the limit in "LOD UNITS LIMIT STATUS RESULT" rows (FL and
+          NY residual solvents: acetone read as 750 ppm). Rows are now
+          read from the page's header row when one is printed, and
+          otherwise from the PASS/FAIL/TESTED cell (_read_row).
+        * NY terpenes are read from the percent column (they were read
+          from mg/unit, 10x the percent for a 1 g unit; the TOTAL
+          TERPENES row was read as its LOQ, 0.1).
+        * NY cannabinoids: the two D10-THC isomer columns lead the
+          '%' row but their names print on lines of their own, so the
+          values were assigned two analytes to the left (CBN got CBGA's
+          value, THCV got D9-THC's). The isomers are restored to the
+          front of the header, and a Total THC self-consistency check
+          (D9-THC + 0.877 * THCA) rejects an alignment the COA's own
+          total contradicts (_align_cannabinoids).
+        * Non-detects keep their qualifier: "ND" / "Not Present" is
+          value None, qualifier 'ND'; "<0.1000" is value None,
+          qualifier '<LOQ', with 'loq' 0.1 when the row prints no LOQ
+          of its own (it was read as the number 0.1). A measured 0
+          stays 0.0. Every result row now carries 'qualifier', 'lod',
+          'loq', 'limit' and 'status' (None when not printed).
+        * The D10-THC isomers map to the canonical keys
+          '9r_delta_10_thc' / '9s_delta_10_thc'.
+        * Review (10/14/2026): a row that prints no limit is not
+          compared with one (its LOQ was read as the result of
+          "BIFENAZATE 0.1000 ppm PASS 0.1500"); a number before the
+          status with nothing after it is not read; the FL pesticide
+          pattern keeps its order on a FAIL; a header applies only to
+          rows whose status it places; and of two result words the one
+          nearer the status is the result ("Not Detected in 1 g
+          Detected FAIL" is a detection).
+
 Data Points:
 
     * product_name, product_type, strain_name
@@ -59,6 +106,8 @@ from typing import Any, Dict, List, Optional, Tuple
 # External imports (only pdfplumber allowed per dependency policy):
 import pdfplumber
 
+# Internal imports:
+from cannlytics.data.coas.schema import parse_result_value
 
 # ── Kaycha Labs Constants ──────────────────────────────────────────
 
@@ -160,8 +209,8 @@ ANALYTE_KEY_MAP = {
     'D8-THC': 'delta_8_thc',
     'D8 THC': 'delta_8_thc',
     'DELTA-8 THC': 'delta_8_thc',
-    '(6AR,9R) D10-THC': 'delta_10_thc_9r',
-    '(6AR,9S) D10-THC': 'delta_10_thc_9s',
+    '(6AR,9R) D10-THC': '9r_delta_10_thc',
+    '(6AR,9S) D10-THC': '9s_delta_10_thc',
     'TOTAL CANNABINOIDS': 'total_cannabinoids',
     'TOTAL CBD': 'total_cbd',
     'TOTAL THC': 'total_thc',
@@ -267,7 +316,6 @@ SKIP_KEYWORDS = {
 # Logger.
 logger = logging.getLogger(__name__)
 
-
 # ── Utility Functions ──────────────────────────────────────────────
 
 def _snake_case(name: str) -> str:
@@ -284,22 +332,20 @@ def _snake_case(name: str) -> str:
     s = re.sub(r'\s+', '_', s.strip())
     return s.lower()
 
-
 def _parse_number(text: str) -> Optional[float]:
-    """Parse a numeric value from text.
-    Handles: ND, 'Not Present', '<LOQ', '<0.100', numeric values, '0'.
-    Returns None for ND/Not Present, float otherwise.
+    """Parse a plain number (an LOD, LOQ, limit or total) from text.
+    Handles: '0.1000', '5,000', '0', '0.1575 Q3' (flag stripped).
+    Returns None for ND / 'Not Present' / 'N/A' and for a bound such
+    as '<0.100' or '>100': a bound is a qualifier, not a number (until
+    10/13/2026 '<0.100' returned 0.1). Read results with _parse_result.
     """
     if text is None:
         return None
     t = text.strip().replace(',', '')
     if not t or t in ('ND', 'N/A', 'Not Present', 'Not Detected', ''):
         return None
-    if t.startswith('Not '):
+    if t.startswith('Not ') or t[0] in '<>':
         return None
-    # Handle <LOQ or <value patterns.
-    if t.startswith('<'):
-        t = t[1:]
     # Strip qualifier flags (e.g., "0.1575 Q3" -> "0.1575").
     t = re.sub(r'\s+[A-Z]\d+\s*$', '', t)
     # Strip trailing non-numeric chars.
@@ -310,6 +356,20 @@ def _parse_number(text: str) -> Optional[float]:
     except (ValueError, TypeError):
         return None
 
+def _parse_result(text: Optional[str]) -> Tuple[Optional[float], str, Optional[float]]:
+    """Read a printed result as ``(value, qualifier, bound)``.
+
+    Uses the package's qualifier semantics (``parse_result_value``):
+    '0.5100' is (0.51, '', None); 'ND' and 'Not Present' are
+    (None, 'ND', None); '<0.1000' is (None, '<LOQ', 0.1), the bound
+    being the limit the result is below; '0' is (0.0, '', None).
+    Kaycha flags after a number ('0.1575 Q3') are dropped.
+    """
+    if text is None:
+        return None, '', None
+    t = str(text).replace('_', ' ').strip()
+    t = re.sub(r'\s+[A-Z]\d{1,2}\s*$', '', t)
+    return parse_result_value(t)
 
 def _parse_date(text: str) -> str:
     """Parse date string to ISO format (YYYY-MM-DD).
@@ -335,7 +395,6 @@ def _parse_date(text: str) -> str:
             continue
     return t
 
-
 def _detect_location(text: str) -> str:
     """Detect which Kaycha location produced this COA."""
     t = text.lower()
@@ -348,7 +407,6 @@ def _detect_location(text: str) -> str:
     if 'tempe, az' in t or '1231 w. warner' in t or '1231 w warner' in t:
         return 'tempe'
     return 'davie'  # Default fallback.
-
 
 def _detect_format(text: str, location: str) -> str:
     """Detect the COA format variant.
@@ -365,7 +423,6 @@ def _detect_format(text: str, location: str) -> str:
             return 'az_tabular'
         return 'az_standard'
     return 'fl_standard'
-
 
 # ── Metadata Parsing ───────────────────────────────────────────────
 
@@ -527,10 +584,15 @@ def _parse_metadata(text: str, lines: List[str], location: str) -> Dict:
 
     return obs
 
-
 def _parse_totals(text: str, lines: List[str]) -> Dict:
-    """Parse total THC, CBD, and cannabinoids from page 1."""
+    """Parse total THC, CBD, and cannabinoids from page 1.
+
+    A total printed as a non-detect or a bound ('ND', '<0.1000') is
+    None, and it still takes its place in the row, so that "25.5961%
+    ND 29.7057%" does not read total cannabinoids as total CBD.
+    """
     obs = {}
+    from_row = set()
     for i, line in enumerate(lines):
         if 'Total THC' in line and 'Total CBD' in line:
             # Next line has the percentages (e.g., "25.5961% <0.1000 29.7057%").
@@ -541,32 +603,33 @@ def _parse_totals(text: str, lines: List[str]) -> Dict:
                 values = []
                 for t in tokens:
                     t_clean = t.rstrip('%')
-                    if re.match(r'^<?[\d.]+$', t_clean):
+                    if re.match(r'^<?[\d.,]+$', t_clean) and re.search(r'\d', t_clean):
                         values.append(t_clean)
-                if len(values) >= 1:
-                    obs['total_thc'] = _parse_number(values[0])
-                if len(values) >= 2:
-                    obs['total_cbd'] = _parse_number(values[1])
-                if len(values) >= 3:
-                    obs['total_cannabinoids'] = _parse_number(values[2])
+                    elif t_clean.upper() in ('ND', '<LOQ', '<LOD', 'NR', 'NT', 'N/A'):
+                        values.append(t_clean)
+                for field, cell in zip(
+                    ('total_thc', 'total_cbd', 'total_cannabinoids'), values,
+                    strict=False,
+                ):
+                    obs[field] = _parse_result(cell)[0]
+                    from_row.add(field)
             break
 
     # Try alternate layout where totals are on separate lines (NY medical).
-    if obs.get('total_thc') is None:
+    if obs.get('total_thc') is None and 'total_thc' not in from_row:
         m = re.search(r'Total THC\s*[\n:]*\s*([\d.]+)\s*%', text)
         if m:
             obs['total_thc'] = _parse_number(m.group(1))
-    if obs.get('total_cbd') is None:
+    if obs.get('total_cbd') is None and 'total_cbd' not in from_row:
         m = re.search(r'Total CBD\s*[\n:]*\s*([\d.]+)\s*%', text)
         if m:
             obs['total_cbd'] = _parse_number(m.group(1))
-    if obs.get('total_cannabinoids') is None:
+    if obs.get('total_cannabinoids') is None and 'total_cannabinoids' not in from_row:
         m = re.search(r'Total Cannabinoids\s*(?:Q\d+)?\s*[\n:]*\s*([\d.]+)\s*%', text)
         if m:
             obs['total_cannabinoids'] = _parse_number(m.group(1))
 
     return obs
-
 
 def _parse_safety_statuses(text: str) -> Tuple[Dict, List[str]]:
     """Parse safety result statuses from the icon bar on page 1."""
@@ -611,62 +674,537 @@ def _parse_safety_statuses(text: str) -> Tuple[Dict, List[str]]:
 
     return obs, analyses
 
+# ── Row Reading (shared by the section parsers) ────────────────────
+#
+# Every terpene and contaminant row is an analyte name followed by
+# cells: detection limit(s), units, action limit, status, result, and
+# for NY terpenes a second result in mg/unit (layouts in the module
+# docstring). Some tables print the result before the status instead
+# ("NAME LOD UNITS RESULT STATUS LIMIT"). A row is read from the
+# page's header row when one is printed and its columns match the
+# cells; otherwise from the status cell (see _read_row).
+
+# Words printed in place of a number. Multi-word results are joined
+# with '_' before a line is split into tokens.
+_MULTIWORD_RESULTS = (
+    (re.compile(r'\bNot\s+Present\b', re.IGNORECASE), 'Not_Present'),
+    (re.compile(r'\bNot\s+Detected\b', re.IGNORECASE), 'Not_Detected'),
+    (re.compile(r'\bNone\s+Detected\b', re.IGNORECASE), 'None_Detected'),
+)
+_RESULT_WORDS = {
+    'ND', 'N/D', 'N.D.', 'NOT_PRESENT', 'NOT_DETECTED', 'NONE_DETECTED',
+    'ABSENT', 'PRESENT', 'DETECTED', 'NEGATIVE', 'POSITIVE',
+    '<LOQ', '<LOD', '>ULOQ', 'BLQ', 'BQL', 'NR', 'NT', 'N/A', 'NA',
+}
+# Pathogen results ("ASPERGILLUS TERREUS Not Present PASS"), which
+# pass unless the row says otherwise, and word results in general,
+# after which a row may print filler ("Not Detected in 1 g PASS").
+_PATHOGEN_RESULTS = {'NOT_PRESENT', 'NOT_DETECTED', 'NONE_DETECTED', 'ABSENT', 'NEGATIVE'}
+_WORD_RESULTS = _PATHOGEN_RESULTS | {'PRESENT', 'DETECTED', 'POSITIVE'}
+_UNIT_WORDS = {
+    'ppm', 'ppb', 'ug/g', 'µg/g', 'μg/g', 'ug/kg', 'mg/g', 'mg/kg',
+    'mg/ml', 'mg/unit', 'mg/serving', 'mg', 'cfu/g', 'aw', '%', 'percent',
+}
+_STATUS_WORDS = {
+    'PASS': 'pass', 'PASSED': 'pass', 'FAIL': 'fail', 'FAILED': 'fail',
+    'TESTED': 'tested',
+}
+_NUMBER_TOKEN = re.compile(r'^[<>]?=?(?:\d+(?:,\d{3})*(?:\.\d*)?|\.\d+)$')
+# Qualifier flags printed beside a result ("0.1575 Q3").
+_FLAG_TOKEN = re.compile(r'^[A-Z]\d{1,2}$')
+# Solvent names that begin with locants ("1,1-DICHLOROETHENE").
+_LOCANT_NAME = re.compile(r'^\d+(?:,\d+)*-[A-Za-z]')
+# Characters an FL-layout analyte name is made of (those of the r10
+# name regex, plus '+' for "OCHRATOXIN A+").
+_STRICT_NAME_TOKEN = re.compile(r'^[A-Z0-9\-(),>+]+$')
+# An uppercase word after a row's cells: the name of a second record
+# that pdfplumber merged onto the line from a neighboring column.
+_RECORD_START = re.compile(r"^[A-Z][A-Z0-9\-(),.'/+]*[A-Z][A-Z0-9\-(),.'/+]*$")
+
+# Header columns, in the order a header row names them.
+_HEADER_COLUMNS = (
+    ('lod', r'\bLOD\b'),
+    ('loq', r'\bLOQ\b'),
+    ('units', r'\bUNITS?\b'),
+    ('limit', r'\bACTION\s*LEVELS?\b|\bACTION\s*LIMITS?\b|\bLIMITS?\b'),
+    ('status', r'\bPASS\s*/\s*FAIL\b|\bSTATUS\b'),
+    ('qualifier', r'\bQUALIFIERS?\b'),
+)
+_HEADER_RESULT = re.compile(r'\bRESULTS?\b(?:\s*\(\s*([^)]*)\))?')
+
+def _tokenize(line: str) -> List[str]:
+    """Split a row into tokens: multi-word results joined ('Not_Present'),
+    footnote stars dropped, '< 0.1000' rejoined as '<0.1000' and a
+    number glued to its units ('0.1000ppm') split."""
+    text = line.replace('*', ' ')
+    for pattern, joined in _MULTIWORD_RESULTS:
+        text = pattern.sub(joined, text)
+    text = re.sub(r'([<>])\s+(?=[\d.]|LO[DQ]\b)', r'\1', text, flags=re.IGNORECASE)
+    text = re.sub(r'(?<=\d)(ppm|ppb|cfu/g|ug/g|mg/g|%)(?=\s|$)', r' \1', text, flags=re.IGNORECASE)
+    return text.split()
+
+def _token_kind(token: str) -> str:
+    """Classify a token: 'value', 'unit', 'status' or 'other'."""
+    if _NUMBER_TOKEN.match(token):
+        return 'value'
+    upper = token.upper()
+    if upper in _RESULT_WORDS:
+        return 'value'
+    if upper in _STATUS_WORDS:
+        return 'status'
+    lower = token.lower()
+    if lower in _UNIT_WORDS:
+        return 'unit'
+    if '/' in lower and len(lower) <= 8 and not re.search(r'\d', lower):
+        return 'unit'  # e.g. 'ug/L', 'CFU/mL'
+    return 'other'
+
+def _split_name(tokens: List[str]) -> Tuple[List[str], List[str]]:
+    """Split a row's tokens into the analyte name and its cells. The
+    name ends at the first value, unit or status token, or at a later
+    token that starts like a number (a first token may be a locant
+    name such as '1,1-DICHLOROETHENE')."""
+    for idx, token in enumerate(tokens):
+        if _token_kind(token) != 'other' or (idx and re.match(r'^[<>.\d]', token)):
+            return tokens[:idx], tokens[idx:]
+    return tokens, []
+
+def _is_strict_name(name_tokens: List[str]) -> bool:
+    """An FL-layout analyte name: uppercase words, digits, '-(),>+'."""
+    if not name_tokens:
+        return False
+    first = name_tokens[0]
+    if not (first[0].isalpha() or _LOCANT_NAME.match(first)):
+        return False
+    return all(_STRICT_NAME_TOKEN.match(t) for t in name_tokens)
+
+def _parse_header(line: str) -> Optional[List[str]]:
+    """Read a table header row into its column order, or None.
+
+    e.g. "Solvents LOD Units Action Level Pass/Fail Result" is
+    ['lod', 'units', 'limit', 'status', 'result']; "ANALYTES LOQ ACTION
+    LEVEL PASS/FAIL RESULT (%) RESULT (mg/g)" is ['loq', 'limit',
+    'status', 'result', 'result_mg']. A header names a result and at
+    least two of LOD, LOQ, action level and pass/fail, and prints no
+    digits. Two headers merged side by side (a repeated column) are not
+    read, so their rows fall back to the status-anchored reading.
+    """
+    text = ' '.join(str(line).upper().split())
+    if not text or re.search(r'\d', text):
+        return None
+    found = []
+    for column, pattern in _HEADER_COLUMNS:
+        matches = list(re.finditer(pattern, text))
+        if len(matches) > 1:
+            return None
+        if matches:
+            found.append((matches[0].start(), column))
+    results = list(_HEADER_RESULT.finditer(text))
+    if not results or len(results) > 2:
+        return None
+    for k, m in enumerate(results):
+        unit = (m.group(1) or '').strip()
+        if 'MG' in unit:
+            column = 'result_mg'
+        elif '%' in unit or 'PERCENT' in unit or k == 0:
+            column = 'result'
+        else:
+            column = 'result_2'
+        found.append((m.start(), column))
+    columns = [c for _, c in sorted(found)]
+    if 'result' not in columns or len(columns) != len(set(columns)):
+        return None
+    if len({'lod', 'loq', 'limit', 'status'} & set(columns)) < 2:
+        return None
+    return columns
+
+def _detection_for(location: str, default: str) -> str:
+    """Which detection limit a lone number before the limit is: NY
+    (Albany) prints the LOQ; FL and AZ print the LOD first."""
+    if location == 'albany':
+        return 'loq'
+    if location in ('davie', 'gainesville', 'tempe'):
+        return 'lod'
+    return default
+
+def _cell_type(token: str) -> str:
+    """'number', 'result_word' (ND, <x, Present) or 'placeholder' (NA)."""
+    value, qualifier, _ = _parse_result(token)
+    if value is not None:
+        return 'number'
+    if qualifier in ('', 'NR', 'NT'):
+        return 'placeholder'
+    return 'result_word'
+
+def _result_after_status(before: str, after: str, status: Optional[str]) -> bool:
+    """Whether the cell after the status (rather than the one before it)
+    is the result. Exactly one non-detect / bound among the two is the
+    result; of two numbers, a PASS result cannot exceed its limit and a
+    FAIL result must; otherwise the layout of every Kaycha table seen
+    so far applies (result after the status)."""
+    a, b = _cell_type(after), _cell_type(before)
+    if a != b:
+        if 'placeholder' in (a, b):
+            return b == 'placeholder'
+        return a == 'result_word'
+    if a == 'number' and status in ('pass', 'fail'):
+        x, y = _parse_result(after)[0], _parse_result(before)[0]
+        if x != y:
+            return x < y if status == 'pass' else x > y
+    return True
+
+def _detection_limits(cells: List[str], detection: str,
+                      units_first: bool) -> Tuple[Optional[float], Optional[float]]:
+    """(lod, loq) from the detection cells before the limit: two cells
+    are LOD then LOQ (AZ); one is the state's detection limit."""
+    nums = [_parse_number(t) for t in cells if _cell_type(t) == 'number']
+    if len(nums) >= 2:
+        return nums[0], nums[1]
+    if len(nums) == 1:
+        if detection == 'loq' and not units_first:
+            return None, nums[0]
+        return nums[0], None
+    return None, None
+
+def _read_row(tokens: List[str], layout: Optional[List[str]] = None,
+              detection: str = 'lod', terpene: bool = False,
+              ordered: bool = False) -> Optional[Dict]:
+    """Read the cells after an analyte name.
+
+    Returns a dict with 'value', 'qualifier', 'units', 'lod', 'loq',
+    'limit', 'status', 'n_values' (cells read) and 'extra' (further
+    result cells, e.g. mg/unit), or None when the row has no value.
+
+    1. Header: when the page printed a header row and its numeric
+       columns match the row's value cells one to one, each cell is
+       what its column says.
+    2. Status anchor: with cells on both sides of PASS/FAIL/TESTED, the
+       result is the first cell after it unless _result_after_status
+       says the cell before it is; a PASS/FAIL row's cell before the
+       result is its limit, and the cells before that are LOD/LOQ.
+       Never the last number of the row: in "ppm 0.0100 0.2000 0.4
+       PASS ND" that is the limit 0.4. Cells are compared only when
+       the row prints more cells before the status than its detection
+       limits (one LOD or LOQ, or the LOD and LOQ after units): with
+       none more, there is no limit to mistake the result for
+       ("BIFENAZATE 0.1000 ppm PASS 0.1500" is 0.15, not its LOQ). A
+       row whose cells are known to be in the documented order
+       (``ordered``: the FL pesticide pattern) is never reordered.
+       A number before the status with nothing after it may be a limit
+       or a result: it is not read (a result word, "ND", is).
+    3. No status cell: detection limit(s) first, then the result (the
+       last cell; for terpenes the first cell after the LOQ, since a
+       mg/unit cell may follow).
+    """
+    cells = []
+    started = False
+    for token in tokens:
+        kind = _token_kind(token)
+        if kind == 'other':
+            if _FLAG_TOKEN.match(token) or not any(c.isalnum() for c in token):
+                continue
+            if started and _RECORD_START.match(token):
+                break  # A second record merged onto the line.
+            continue
+        if kind in ('value', 'status'):
+            started = True
+        cells.append((kind, token))
+    values = [(i, t) for i, (kind, t) in enumerate(cells) if kind == 'value']
+    if not values:
+        return None
+    units = next((t.lower() for kind, t in cells if kind == 'unit'), None)
+    status_at = next((i for i, (kind, _) in enumerate(cells) if kind == 'status'), None)
+    status = _STATUS_WORDS[cells[status_at][1].upper()] if status_at is not None else None
+    units_first = any(kind == 'unit' for kind, _ in cells[:values[0][0]])
+    value_tokens = [t for _, t in values]
+
+    result = limit = None
+    detection_cells, extra = [], []
+    columns = [c for c in (layout or []) if c in ('lod', 'loq', 'limit') or c.startswith('result')]
+    fits = bool(columns) and len(columns) == len(value_tokens)
+    if fits and status_at is not None and 'status' in layout:
+        # The header's status falls where the row's does: a header from
+        # another table (terpenes' "RESULT (%) RESULT (mg/g)") with as
+        # many value columns would put the action limit in the result.
+        printed_before = sum(1 for i, _ in values if i < status_at)
+        fits = printed_before == sum(1 for c in layout[:layout.index('status')] if c in columns)
+    if fits:
+        # 1. Header-driven.
+        assigned = dict(zip(columns, value_tokens, strict=True))
+        result = assigned.get('result')
+        limit = assigned.get('limit')
+        extra = [assigned[c] for c in columns if c.startswith('result') and c != 'result']
+        lod = _parse_number(assigned['lod']) if 'lod' in assigned else None
+        loq = _parse_number(assigned['loq']) if 'loq' in assigned else None
+    else:
+        if status_at is not None:
+            before = [t for i, t in values if i < status_at]
+            after = [t for i, t in values if i > status_at]
+        else:
+            before, after = value_tokens, []
+        n_detect = 2 if units_first else 1
+        if before and after:
+            # 2. Status-anchored.
+            has_limit = len(before) > n_detect
+            if ordered or not has_limit or _result_after_status(before[-1], after[0], status):
+                result, extra = after[0], after[1:]
+                if has_limit:
+                    limit, detection_cells = before[-1], before[:-1]
+                else:
+                    detection_cells = before
+            else:
+                result, limit = before[-1], after[0]
+                detection_cells, extra = before[:-1], after[1:]
+        elif after:
+            result, extra = after[0], after[1:]
+        elif status_at is not None:
+            if _cell_type(before[-1]) == 'number':
+                return None   # a limit or a result: which, the row does not say
+            result, detection_cells = before[-1], before[:-1]
+        else:
+            # 3. No status cell.
+            n = 2 if units_first else 1
+            if terpene and len(before) > n:
+                detection_cells, result, extra = before[:n], before[n], before[n + 1:]
+            else:
+                result = before[-1]
+                detection_cells = before[:-1][:n]
+                middle = before[n:-1]
+                limit = middle[-1] if middle else None
+        lod, loq = _detection_limits(detection_cells, detection, units_first)
+
+    value, qualifier, bound = _parse_result(result)
+    if bound is not None:
+        if qualifier == '<LOQ' and loq is None:
+            loq = bound
+        elif qualifier == '<LOD' and lod is None:
+            lod = bound
+    return {
+        'value': value,
+        'qualifier': qualifier,
+        'units': units,
+        'lod': lod,
+        'loq': loq,
+        'limit': _parse_number(limit) if limit else None,
+        'status': status,
+        'n_values': len(value_tokens),
+        'extra': extra,
+    }
+
+def _read_word_row(cells: List[str], layout: Optional[List[str]] = None,
+                   detection: str = 'lod') -> Optional[Tuple[Dict, str]]:
+    """Read a row whose result is a word ("Not Present", "Detected"),
+    or None when it has none. Cells after the word other than a status
+    are dropped, so "Not Detected in 1 g PASS" is not read as 1. Of two
+    words, the one nearer the status is the result.
+    Returns the row and the status to assume when none is printed
+    ('pass' for a non-detect, '' otherwise)."""
+    status_at = next((k for k, c in enumerate(cells) if _token_kind(c) == 'status'), len(cells))
+    words = [k for k, c in enumerate(cells[:status_at]) if c.upper() in _WORD_RESULTS]
+    if not words:
+        words = [k for k, c in enumerate(cells) if c.upper() in _WORD_RESULTS]
+    if not words:
+        return None
+    # The last word before the status: a limit printed in words comes
+    # first ("Not Detected in 1 g  Detected  FAIL" detected salmonella).
+    word_at = words[-1]
+    statuses = [c for c in cells[word_at + 1:] if _token_kind(c) == 'status'][:1]
+    # The cells before the first word are the row's (LOQ, units); those
+    # between the two words belong to the limit ("in 1 g").
+    row = _read_row(cells[:words[0]] + [cells[word_at]] + statuses, layout=layout, detection=detection)
+    if row is None:
+        return None
+    return row, 'pass' if cells[word_at].upper() in _PATHOGEN_RESULTS else ''
+
+def _result_record(analysis: str, name: str, row: Dict,
+                   units: Optional[str] = None,
+                   status: Optional[str] = None) -> Dict:
+    """One result dict in the module's output form."""
+    return {
+        'analysis': analysis,
+        'key': _snake_case(name),
+        'name': name,
+        'value': row['value'],
+        'qualifier': row['qualifier'],
+        'units': units if units is not None else row['units'],
+        'lod': row['lod'],
+        'loq': row['loq'],
+        'limit': row['limit'],
+        'status': status if status is not None else row['status'],
+    }
 
 # ── Cannabinoid Parsing ────────────────────────────────────────────
 
-def _parse_cannabinoids(text: str, lines: List[str]) -> List[Dict]:
-    """Parse cannabinoid results from page 1."""
+# The D10-THC isomer labels, printed above 'D10-THC' in NY headers.
+_D10_LABEL = re.compile(r'\(\s*6A?R\s*,\s*9\s*([RS])\s*\)', re.IGNORECASE)
+_D10_NAMES = {'R': '(6AR,9R) D10-THC', 'S': '(6AR,9S) D10-THC'}
+
+def _cannabinoid_header(lines: List[str], i: int) -> Tuple[List[str], List[str]]:
+    """The analyte names over the '%' row at ``lines[i]``, and the D10-THC
+    isomer columns printed in the header block (up to 8 lines above).
+
+    Names come from the nearest lines above the '%' row, stopping once
+    five names are found. In NY headers the isomer columns print as
+    '(6AR,9R)' and 'D10-THC' on lines of their own, which that search
+    either misses or appends after THCV; they are returned separately
+    so that _align_cannabinoids can put them where their cells are.
+    """
+    header_line = ''
+    for lookback in range(1, 4):
+        if i - lookback >= 0:
+            candidate = lines[i - lookback]
+            # Skip non-header lines.
+            if candidate.startswith('mg') or candidate.startswith('LOD') or candidate.startswith('LOQ'):
+                continue
+            if any(x in candidate for x in ['Total THC', 'Container', 'SAFETY']):
+                continue
+            header_line = candidate + ' ' + header_line
+            # Stop if we have enough analyte names.
+            names_found = re.findall(r'[A-Z][A-Z0-9\-]+', header_line)
+            if len(names_found) >= 5:
+                break
+    # Drop the isomer labels, summary columns ("TOTAL CAN NABINOIDS
+    # (DRY)") and column captions.
+    header_clean = _D10_LABEL.sub(' ', header_line)
+    names = [
+        n for n in header_clean.split()
+        if n not in ('(DRY)', 'TOTAL', 'CAN', 'NABINOIDS', 'Analyte', 'Qualifier')
+    ]
+    # The D10-THC isomer columns anywhere in the header block.
+    isomers, d10_tokens = [], 0
+    for candidate in lines[max(0, i - 8):i]:
+        for m in _D10_LABEL.finditer(candidate):
+            if m.group(1).upper() not in isomers:
+                isomers.append(m.group(1).upper())
+        d10_tokens += sum(
+            1 for t in _D10_LABEL.sub(' ', candidate).split()
+            if t.strip('()-,').upper() == 'D10-THC'
+        )
+    count = min(2, max(len(isomers), d10_tokens))
+    order = isomers + [x for x in ('R', 'S') if x not in isomers]
+    return names, [_D10_NAMES[x] for x in order[:count]]
+
+def _total_thc_check(pairs: List[Tuple[str, int]], cells: List[str],
+                     total_thc: Optional[float]) -> Optional[bool]:
+    """Whether an alignment agrees with the printed Total THC
+    (D9-THC + 0.877 * THCA, within 2% or 0.01 points); None when the
+    COA prints no usable Total THC or the alignment has neither."""
+    if total_thc is None or not 0 < total_thc <= 100:
+        return None
+    found = {}
+    for name, idx in pairs:
+        key = _snake_case(name)
+        if key in ('delta_9_thc', 'thca'):
+            found[key] = _parse_result(cells[idx])[0] or 0.0
+    if not found:
+        return None
+    computed = found.get('delta_9_thc', 0.0) + 0.877 * found.get('thca', 0.0)
+    return abs(computed - total_thc) <= max(0.02 * total_thc, 0.01)
+
+def _align_cannabinoids(names: List[str], d10_names: List[str],
+                        cells: List[str],
+                        total_thc: Optional[float]) -> List[Tuple[str, int]]:
+    """Pair each analyte name with the index of its cell in the '%' row.
+
+    The header explains the row when the counts agree: the D10-THC
+    isomers lead the row (NY: 13 cells for the 11 names on the line
+    above plus 2 isomers), or the row has one cell per name. The
+    alignment is then checked against the printed Total THC. If it
+    disagrees and another alignment (the names as parsed, or the names
+    shifted right past unexplained leading cells) agrees, that one is
+    used. If none agrees: a header-explained alignment is kept (the
+    total may be printed per unit or misread); an unexplained one is
+    dropped, so no misaligned value is emitted.
+    """
+    n = len(cells)
+    others = [name for name in names if 'D10' not in name.upper()]
+
+    def pairs_for(name_list: List[str], offset: int = 0) -> List[Tuple[str, int]]:
+        return [(name, offset + j) for j, name in enumerate(name_list) if offset + j < n]
+
+    if d10_names and n == len(others) + len(d10_names):
+        primary, explained = pairs_for(d10_names + others), True
+    elif n == len(names):
+        primary, explained = pairs_for(names), True
+    elif n == len(others):
+        primary, explained = pairs_for(others), True
+    else:
+        primary, explained = pairs_for(names), False
+    if _total_thc_check(primary, cells, total_thc) is not False:
+        return primary
+    alternatives = [pairs_for(names), pairs_for(others)]
+    if d10_names:
+        alternatives.append(pairs_for(d10_names + others))
+    alternatives += [pairs_for(others, k) for k in range(1, n - len(others) + 1)]
+    for alternative in alternatives:
+        if alternative != primary and _total_thc_check(alternative, cells, total_thc):
+            logger.warning(
+                'Kaycha cannabinoids: header alignment contradicts Total THC '
+                '%s; using the alignment that agrees with it.', total_thc,
+            )
+            return alternative
+    if explained:
+        logger.warning(
+            'Kaycha cannabinoids: D9-THC + 0.877 * THCA disagrees with the '
+            'printed Total THC %s; keeping the header alignment.', total_thc,
+        )
+        return primary
+    logger.warning(
+        'Kaycha cannabinoids: %d cells for %d names and no alignment agrees '
+        'with Total THC %s; cannabinoid rows dropped.', n, len(names), total_thc,
+    )
+    return []
+
+def _limit_cell(row: List[Optional[float]], idx: int, position: int,
+                n_cells: int) -> Optional[float]:
+    """The LOD/LOQ for a cannabinoid: a full LOD/LOQ row has a cell per
+    '%' cell (index ``idx``); a shorter one a cell per name."""
+    if len(row) == n_cells:
+        return row[idx]
+    return row[position] if position < len(row) else None
+
+def _parse_cannabinoids(text: str, lines: List[str],
+                        totals: Optional[Dict] = None) -> List[Dict]:
+    """Parse cannabinoid results from page 1.
+
+    Layout: a header line of analyte names, the '%' row of results,
+    then 'mg/g', 'LOD' and 'LOQ' rows with one cell per analyte:
+
+        D9-THC THCA CBD CBDA D8-THC CBG CBGA CBN THCV CBDV CBC
+        % 0.677 27.824 ND 0.048 ND 0.170 0.401 ND ND ND ND
+
+    NY COAs lead the row with the two D10-THC isomers, whose names
+    print on separate lines ('(6AR,9R)' over 'D10-THC'):
+
+        (6AR,9R) (6AR,9S)
+        CBC CBD CBDA CBDV CBG CBGA D8-THC CBN D9-THC THCA THCV
+        D10-THC D10-THC
+        % <0.1000 <0.1000 <0.1000 <0.1000 0.1100 ... 35.5712 <0.1000
+
+    The cells are paired with names by _align_cannabinoids. ``totals``
+    is _parse_totals' output (computed from the page when omitted).
+    """
     results = []
+    if totals is None:
+        totals = _parse_totals(text, lines)
 
     # Find the % row (cannabinoid values).
     for i, line in enumerate(lines):
         if not line.startswith('%'):
             continue
 
-        # Look back for analyte headers.
-        # Handle multi-line headers (NY D10-THC splits across 2 lines).
-        header_line = ''
-        for lookback in range(1, 4):
-            if i - lookback >= 0:
-                candidate = lines[i - lookback]
-                # Skip non-header lines.
-                if candidate.startswith('mg') or candidate.startswith('LOD') or candidate.startswith('LOQ'):
-                    continue
-                if any(x in candidate for x in ['Total THC', 'Container', 'SAFETY']):
-                    continue
-                header_line = candidate + ' ' + header_line
-                # Stop if we have enough analyte names.
-                names_found = re.findall(r'[A-Z][A-Z0-9\-]+', header_line)
-                if len(names_found) >= 5:
-                    break
+        names, d10_names = _cannabinoid_header(lines, i)
 
-        # Parse analyte names from header.
-        # Handle special D10-THC format: "(6AR,9R)\nD10-THC"
-        header_clean = re.sub(r'\(6AR,9[RS]\)\s*', '', header_line)
-        analyte_names = header_clean.strip().split()
-
-        # Clean: remove '(DRY)' and similar.
-        analyte_names = [n for n in analyte_names if n not in ('(DRY)', 'TOTAL', 'CAN', 'NABINOIDS')]
-
-        # Fix: merge "TOTAL CAN" + "NABINOIDS" -> skip (this is a summary field).
-        # Filter out non-analyte tokens.
-        clean_names = []
-        for n in analyte_names:
-            if n in ('Analyte', 'Qualifier'):
-                continue
-            clean_names.append(n)
-        analyte_names = clean_names
-
-        # Parse values from the % line.
+        # Parse values from the % line (qualifier flags such as Q3 are
+        # not cells).
         values_text = line.lstrip('% ').split('Analyte')[0].strip()
-        values = values_text.split()
+        cells = [v.rstrip('%') for v in values_text.split()]
+        cells = [v for v in cells if v and not _FLAG_TOKEN.match(v)]
 
         # Find LOD/LOQ line.
         lod_values = []
         loq_values = []
         for j in range(i + 1, min(i + 5, len(lines))):
-            if j >= len(lines):
-                break
             if lines[j].startswith('LOD'):
                 lod_parts = lines[j].lstrip('LOD ').split()
                 lod_values = [_parse_number(v) for v in lod_parts if re.match(r'^[\d.]+$', v)]
@@ -675,31 +1213,29 @@ def _parse_cannabinoids(text: str, lines: List[str]) -> List[Dict]:
                 loq_values = [_parse_number(v) for v in loq_parts if re.match(r'^[\d.]+$', v)]
 
         # Build results.
-        for k, name in enumerate(analyte_names):
-            if k >= len(values):
-                break
-            # Skip summary columns.
-            if name in ('TOTAL', 'CAN', 'NABINOIDS'):
-                continue
-            key = _snake_case(name)
-            value = _parse_number(values[k])
-            result = {
+        pairs = _align_cannabinoids(names, d10_names, cells, totals.get('total_thc'))
+        for position, (name, idx) in enumerate(pairs):
+            value, qualifier, bound = _parse_result(cells[idx])
+            lod = _limit_cell(lod_values, idx, position, len(cells))
+            loq = _limit_cell(loq_values, idx, position, len(cells))
+            if bound is not None and qualifier == '<LOQ' and loq is None:
+                loq = bound
+            elif bound is not None and qualifier == '<LOD' and lod is None:
+                lod = bound
+            results.append({
                 'analysis': 'cannabinoids',
-                'key': key,
+                'key': _snake_case(name),
                 'name': name,
                 'value': value,
+                'qualifier': qualifier,
                 'units': 'percent',
-            }
-            if k < len(lod_values):
-                result['lod'] = lod_values[k]
-            if k < len(loq_values):
-                result['loq'] = loq_values[k]
-            results.append(result)
+                'lod': lod,
+                'loq': loq,
+            })
 
         break  # Only parse the first % row.
 
     return results
-
 
 # ── Terpene Parsing ────────────────────────────────────────────────
 
@@ -714,7 +1250,7 @@ def _parse_terpenes_fl(page_text: str) -> Tuple[List[Dict], Optional[float]]:
     # Get total terpenes from "Total (%)" line.
     m = re.search(r'Total\s*\(%?\)\s*[\n\s]*([\d.]+|ND)', page_text)
     if m and m.group(1) != 'ND':
-        total_terpenes = _parse_number(m.group(1))
+        total_terpenes = _parse_result(m.group(1))[0]
 
     # Parse individual terpene lines.
     # FL format: "ANALYTE_NAME  LOD  mg/unit  Result(%)"
@@ -748,30 +1284,52 @@ def _parse_terpenes_fl(page_text: str) -> Tuple[List[Dict], Optional[float]]:
         )
         if m:
             name = m.group(1).strip()
+            value, qualifier, bound = _parse_result(m.group(4))
             if name == 'TOTAL TERPENES':
                 if total_terpenes is None:
-                    total_terpenes = _parse_number(m.group(4))
+                    total_terpenes = value
                 continue
             key = _snake_case(name)
             results.append({
                 'analysis': 'terpenes',
                 'key': key,
                 'name': name,
-                'value': _parse_number(m.group(4)),
+                'value': value,
+                'qualifier': qualifier,
                 'units': 'percent',
                 'lod': _parse_number(m.group(2)),
+                'loq': bound if qualifier == '<LOQ' else None,
+                'limit': None,
+                'status': None,
             })
 
     return results, total_terpenes
 
+def _parse_terpenes_tabular(page_text: str,
+                            location: str = '') -> Tuple[List[Dict], Optional[float]]:
+    """Parse terpenes from NY/AZ tabular ANALYTES format.
 
-def _parse_terpenes_tabular(page_text: str) -> Tuple[List[Dict], Optional[float]]:
-    """Parse terpenes from NY/AZ tabular ANALYTES format."""
+    NY rows print the LOQ, the action limit, the status and then two
+    results, percent first and mg per unit second (for a 1 g unit the
+    mg/unit is 10x the percent):
+
+        TOTAL TERPENES 0.1000 11.5 PASS 1.9000 19.0000
+        LIMONENE 0.0040 10 PASS 0.5100 5.1000
+        FARNESENE 0.0400 10 PASS <0.0400 <0.4000
+
+    The percent cell is read (from the header row when printed, else
+    as the first cell after the status), never the last number below
+    15, which was the mg/unit cell (limonene 5.1 for 0.51%) or, for a
+    "<LOQ" row, the LOQ in mg (0.4). The individual results are checked
+    against the COA's own TOTAL TERPENES row.
+    """
     results = []
     total_terpenes = None
+    detection = _detection_for(location, 'loq')
 
     lines = page_text.split('\n')
     in_terpenes = False
+    layout = None
 
     for line in lines:
         if 'Terpenes' in line and ('PASSED' in line or 'TESTED' in line):
@@ -786,78 +1344,57 @@ def _parse_terpenes_tabular(page_text: str) -> Tuple[List[Dict], Optional[float]
                                     'Mycotoxin', 'Residual', 'Filth', 'Water Activity']):
             break
 
-        # Skip header line.
-        if line.startswith('ANALYTES') or line.startswith('Terpenes'):
+        # Header line: read its column order, then skip it.
+        if line.startswith('ANALYTES'):
+            layout = _parse_header(line)
+            continue
+        if line.startswith('Terpenes'):
+            continue
+        header = _parse_header(line)
+        if header:
+            layout = header
             continue
 
-        # NY tabular: "TERPINOLENE 0.00 PASS 11.900 0.3400"
-        # or: "TOTAL TERPENES 0.1000 11.5 PASS 2.9300 2051.0000"
         parts = line.strip().split()
         if len(parts) < 3:
             continue
 
-        # Find the analyte name (all uppercase words before numbers).
-        name_parts = []
-        value_parts = []
-        for p in parts:
-            if not value_parts and not re.match(r'^[<\d.]', p) and p not in ('PASS', 'FAIL', 'TESTED'):
-                name_parts.append(p)
-            else:
-                value_parts.append(p)
-
-        name = ' '.join(name_parts)
+        # The analyte name is the words before the first cell.
+        name_tokens, cells = _split_name(_tokenize(line.strip()))
+        name = ' '.join(name_tokens)
         if not name or not name[0].isalpha():
             continue
-
-        # Extract numeric values from value_parts.
-        nums = []
-        status = None
-        for v in value_parts:
-            if v in ('PASS', 'FAIL', 'TESTED'):
-                status = v.lower()
-            elif re.match(r'^<?[\d.]+$', v):
-                nums.append(v)
-
-        if name == 'TOTAL TERPENES':
-            # Find the result % value.
-            for n in nums:
-                val = _parse_number(n)
-                if val is not None and val < 20:  # Reasonable terpene total.
-                    total_terpenes = val
-                    break
+        row = _read_row(cells, layout=layout, detection=detection, terpene=True)
+        if row is None:
             continue
 
-        key = _snake_case(name)
-        value = None
-        loq = None
+        if name.upper() == 'TOTAL TERPENES':
+            total_terpenes = row['value']
+            continue
+        results.append(_result_record('terpenes', name, row, units='percent'))
 
-        if nums:
-            loq = _parse_number(nums[0]) if len(nums) >= 1 else None
-            # The result % is typically the second-to-last or a value < 10.
-            for n in reversed(nums):
-                candidate = _parse_number(n)
-                if candidate is not None and candidate < 15:
-                    value = candidate
-                    break
-
-        results.append({
-            'analysis': 'terpenes',
-            'key': key,
-            'name': name,
-            'value': value,
-            'units': 'percent',
-            'loq': loq,
-            'status': status,
-        })
+    # Consistency check: the individual percents add up to the total.
+    measured = [r['value'] for r in results if r['value'] is not None]
+    if total_terpenes is not None and measured:
+        if abs(sum(measured) - total_terpenes) > max(0.15 * total_terpenes, 0.05):
+            logger.warning(
+                'Kaycha terpenes: results sum to %.4f%% but TOTAL TERPENES '
+                'reads %.4f%%; check the column order.', sum(measured), total_terpenes,
+            )
 
     return results, total_terpenes
 
-
 # ── Pesticide Parsing ──────────────────────────────────────────────
 
-def _parse_pesticides_fl(page_text: str) -> List[Dict]:
-    """Parse pesticides from FL two-column format."""
+def _parse_pesticides_fl(page_text: str, location: str = '') -> List[Dict]:
+    """Parse pesticides from FL two-column format.
+
+    Rows are "NAME LOD UNITS LIMIT STATUS RESULT". The result is the
+    first token after the status; any text after it (a second column
+    merged onto the line by pdfplumber) is not part of it.
+    """
     results = []
+    detection = _detection_for(location, 'lod')
     lines = page_text.split('\n')
 
     for line in lines:
@@ -890,126 +1427,120 @@ def _parse_pesticides_fl(page_text: str) -> List[Dict]:
             name = m.group(1).strip()
             if name.upper() in SKIP_KEYWORDS:
                 continue
-            key = _snake_case(name)
-            results.append({
-                'analysis': 'pesticides',
-                'key': key,
-                'name': name,
-                'value': _parse_number(m.group(6)),
-                'units': m.group(3).lower(),
-                'lod': _parse_number(m.group(2)),
-                'limit': _parse_number(m.group(4)),
-                'status': m.group(5).lower(),
-            })
+            result_cell = _tokenize(m.group(6))[:1]
+            if not result_cell or _token_kind(result_cell[0]) != 'value':
+                continue  # No readable result after the status.
+            row = _read_row(
+                [m.group(2), m.group(3), m.group(4), m.group(5)] + result_cell,
+                detection=detection, ordered=True,
+            )
+            if row is None:
+                continue
+            results.append(_result_record('pesticides', name, row))
 
     return results
 
+def _parse_pesticides_tabular(page_text: str, location: str = '') -> List[Dict]:
+    """Parse pesticides from NY/AZ tabular ANALYTES format.
 
-def _parse_pesticides_tabular(page_text: str) -> List[Dict]:
-    """Parse pesticides from NY/AZ tabular ANALYTES format."""
+        NY: "ACEQUINOCYL 0.1000 ppm 2 PASS <0.1000"
+            LOQ UNITS LIMIT STATUS RESULT
+        AZ: "ACEPHATE ppm 0.0100 0.2000 0.4 PASS ND"
+            UNITS LOD LOQ LIMIT STATUS RESULT
+
+    The result is the cell after the status (see _read_row). Until
+    10/13/2026 it was the row's last number, so every AZ non-detect
+    was reported as its action limit (acephate 0.4 ppm).
+    """
     results = []
+    detection = _detection_for(location, 'loq')
     lines = page_text.split('\n')
     in_pesticides = False
+    layout = None
 
     for line in lines:
         if 'Pesticide' in line and ('PASSED' in line or 'FAILED' in line):
             in_pesticides = True
+            layout = None        # a header read before is another table's
             continue
         if line.startswith('ANALYTES'):
+            layout = _parse_header(line)
             continue
         if not in_pesticides:
             continue
         if 'Analyzed' in line or 'Analysis Method' in line or 'Weight:' in line:
             in_pesticides = False
             continue
+        header = _parse_header(line)
+        if header:
+            layout = header
+            continue
 
         line_clean = line.strip()
         if not line_clean or not line_clean[0].isalpha():
             continue
-
-        # NY: "ACEQUINOCYL 0.1000 ppm 2 PASS <0.1000"
-        # AZ: "ACEPHATE ppm 0.0100 0.2000 0.4 PASS ND"
-        # AZ newer: "ACEPHATE ppm 0.0100 0.2000 0.4 PASS ND"
         parts = line_clean.split()
         if len(parts) < 4:
             continue
 
         # Find analyte name.
-        name_parts = []
-        rest_parts = []
-        for p in parts:
-            if not rest_parts and not re.match(r'^[<\d.]', p) and p not in ('ppm', 'PPM', 'ppb', 'PPB', 'PASS', 'FAIL', 'TESTED', 'ug/g'):
-                name_parts.append(p)
-            else:
-                rest_parts.append(p)
-
-        name = ' '.join(name_parts)
+        name_tokens, cells = _split_name(_tokenize(line_clean))
+        name = ' '.join(name_tokens)
         if not name:
             continue
         if name.upper() in SKIP_KEYWORDS:
             continue
-
-        # Extract values.
-        units = 'ppm'
-        nums = []
-        status = None
-        qualifier = None
-        for v in rest_parts:
-            if v.lower() in ('ppm', 'ppb', 'ug/g', 'ug/kg'):
-                units = v.lower()
-            elif v in ('PASS', 'FAIL'):
-                status = v.lower()
-            elif re.match(r'^<?[\d.]+$', v):
-                nums.append(v)
-            elif re.match(r'^[A-Z]\d', v):
-                qualifier = v
-
-        key = _snake_case(name)
-        value = _parse_number(nums[-1]) if nums else None
-        lod = _parse_number(nums[0]) if len(nums) >= 3 else None
-        loq = _parse_number(nums[1]) if len(nums) >= 4 else _parse_number(nums[0]) if len(nums) >= 2 else None
-        limit = None
-        if len(nums) >= 3:
-            limit = _parse_number(nums[-2]) if status else _parse_number(nums[1])
-        elif len(nums) >= 2 and status:
-            limit = _parse_number(nums[0])
-
-        results.append({
-            'analysis': 'pesticides',
-            'key': key,
-            'name': name,
-            'value': value,
-            'units': units,
-            'lod': lod,
-            'limit': limit,
-            'status': status,
-        })
+        row = _read_row(cells, layout=layout, detection=detection)
+        if row is None:
+            continue
+        results.append(_result_record('pesticides', name, row, units=row['units'] or 'ppm'))
 
     return results
-
 
 # ── Other Analysis Parsing ─────────────────────────────────────────
 
 def _parse_section_fl(page_text: str, section_name: str, analysis: str,
-                       default_units: str) -> List[Dict]:
+                       default_units: str, location: str = '') -> List[Dict]:
     """Parse a results section from FL-format pages.
     Works for: residual_solvents, heavy_metals, microbials, mycotoxins,
-    foreign_matter, water_activity, moisture.
+    foreign_matter, water_activity, moisture. NY and AZ COAs whose page
+    1 is not tabular are parsed here too.
+
+    Row layouts:
+        "ACETONE 75.000 ppm 750 PASS ND"          LOD UNITS LIMIT STATUS RESULT
+        "DIMETHYL SULFOXIDE 375.0000 ppm 5000 PASS <375.0000"   (NY, LOQ)
+        "ARSENIC ppm 0.0660 0.2000 0.4 PASS ND"  (AZ, units first)
+        "ASPERGILLUS TERREUS Not Present PASS"   (pathogens)
+
+    Some tables print "LOD UNITS RESULT STATUS LIMIT" instead. The
+    column order comes from the section's header row when it prints one
+    ("Solvents LOD Units Action Level Pass/Fail Result"); otherwise the
+    cells decide (_read_row). Until 10/13/2026 the cell after the units
+    was always taken as the result: in FL residual solvents that is the
+    action limit (acetone 750, ethanol 5000 for "ND").
     """
     results = []
+    detection = _detection_for(location, 'lod')
     lines = page_text.split('\n')
     in_section = False
+    layout = None
 
     for line in lines:
         # Section detection (exact match to avoid Summary contamination).
         if section_name in line and any(x in line for x in ['PASSED', 'FAILED', 'TESTED']):
             in_section = True
+            layout = None
             continue
         if not in_section:
             continue
         # Stop conditions.
         if 'Analyzed by' in line or 'Analysis Method' in line:
             in_section = False
+            continue
+        # Header rows: read the column order, then skip.
+        header = _parse_header(line)
+        if header:
+            layout = header
             continue
         if line.startswith('Analyte') and 'LOD' in line:
             continue
@@ -1019,172 +1550,105 @@ def _parse_section_fl(page_text: str, section_name: str, analysis: str,
             continue
 
         line_clean = line.strip()
-        if not line_clean or not line_clean[0].isalpha():
+        if not line_clean or not (line_clean[0].isalpha() or _LOCANT_NAME.match(line_clean)):
             continue
 
-        # General pattern: "NAME  LOD  UNITS  RESULT  STATUS  LIMIT"
-        # or: "NAME  LOD  UNITS  LIMIT  STATUS  RESULT"
-        # Kaycha varies the column order by analysis type.
-
-        # Try microbial pattern (no LOD for pathogen presence).
-        if 'Not Present' in line_clean:
-            name = line_clean.split('Not Present')[0].strip()
-            key = _snake_case(name)
-            results.append({
-                'analysis': analysis,
-                'key': key,
-                'name': name,
-                'value': None,
-                'units': default_units,
-                'status': 'pass',
-            })
+        name_tokens, cells = _split_name(_tokenize(line_clean))
+        name = ' '.join(name_tokens)
+        if not name:
             continue
-        if 'Not Detected' in line_clean:
-            name_match = re.match(r'^([A-Z][A-Z\s/.()]+?)\s+(?:Not Detected|ND)', line_clean)
-            if name_match:
-                name = name_match.group(1).strip()
-                key = _snake_case(name)
-                results.append({
-                    'analysis': analysis,
-                    'key': key,
-                    'name': name,
-                    'value': None,
-                    'units': default_units,
-                    'status': 'pass',
-                })
+        word = _read_word_row(cells, layout=layout, detection=detection)
+        if word:
+            # "NAME Not Present PASS": a non-detect passes unless the
+            # row says FAIL; "NAME Present FAIL" keeps its failure.
+            row, assumed = word
+            results.append(_result_record(
+                analysis, name, row, units=default_units,
+                status=row['status'] or assumed or None,
+            ))
             continue
-
-        # General numeric pattern.
-        m = re.match(
-            r'^([A-Z][A-Z0-9\- (),>]+?)\s+'
-            r'([\d.]+)\s+'              # LOD/LOQ
-            r'(%|ppm|PPM|ppb|PPB|ug/g|ug/kg|CFU/g|aw|mg)?\s*'  # units (optional)
-            r'([\d.]+|ND|<[\d.]+)\s+'   # result or limit
-            r'(PASS|FAIL|TESTED)?\s*'    # status (optional)
-            r'([\d.]+|ND|<[\d.]+)?',     # limit or result
-            line_clean
-        )
-        if m:
-            name = m.group(1).strip()
-            key = _snake_case(name)
-            units = (m.group(3) or default_units).lower()
-
-            # Determine which value is result vs limit.
-            val1 = m.group(4)
-            status = (m.group(5) or '').lower() or None
-            val2 = m.group(6)
-
-            if status:
-                # FL format: LOD UNITS VALUE STATUS LIMIT
-                # or: LOD UNITS LIMIT STATUS RESULT
-                value = _parse_number(val1)
-                limit = _parse_number(val2)
-            else:
-                value = _parse_number(val1)
-                limit = _parse_number(val2)
-
-            results.append({
-                'analysis': analysis,
-                'key': key,
-                'name': name,
-                'value': value,
-                'units': units,
-                'lod': _parse_number(m.group(2)),
-                'limit': limit,
-                'status': status,
-            })
+        if not _is_strict_name(name_tokens):
+            continue
+        row = _read_row(cells, layout=layout, detection=detection)
+        if row is None:
+            continue
+        # A data row has at least two cells (a detection limit and the
+        # result), or a single word result with a status ("ND PASS"),
+        # and prints a status or units (not "DILUTION 10 20").
+        if row['n_values'] < 2 and not (row['status'] and row['qualifier']):
+            continue
+        if not (row['status'] or row['units']):
+            continue
+        results.append(_result_record(
+            analysis, name, row, units=row['units'] or default_units.lower(),
+        ))
 
     return results
 
-
 def _parse_section_tabular(page_text: str, section_name: str,
-                            analysis: str, default_units: str) -> List[Dict]:
-    """Parse a results section from NY/AZ tabular ANALYTES format."""
+                            analysis: str, default_units: str,
+                            location: str = '') -> List[Dict]:
+    """Parse a results section from NY/AZ tabular ANALYTES format.
+
+        NY: "DIMETHYL SULFOXIDE 375.0000 ppm 5000 PASS <375.0000"
+        AZ: "ARSENIC ppm 0.0660 0.2000 0.4 PASS ND"
+        "ESCHERICHIA COLI SHIGELLA SPP 1.0000 CFU/g Not Present PASS"
+
+    The result is read from the header row or the status cell (see
+    _read_row), never as the row's last number, which is the action
+    limit when the result is a word ("<LOQ").
+    """
     results = []
+    detection = _detection_for(location, 'loq')
     lines = page_text.split('\n')
     in_section = False
+    layout = None
 
     for line in lines:
         if section_name in line and any(x in line for x in ['PASSED', 'FAILED', 'TESTED']):
             in_section = True
+            layout = None
             continue
         if line.startswith('ANALYTES'):
+            layout = _parse_header(line)
             continue
         if not in_section:
             continue
         if 'Analyzed' in line or 'Analysis Method' in line or 'Weight:' in line:
             in_section = False
             continue
+        header = _parse_header(line)
+        if header:
+            layout = header
+            continue
 
         line_clean = line.strip()
-        if not line_clean or not line_clean[0].isalpha():
+        if not line_clean or not (line_clean[0].isalpha() or _LOCANT_NAME.match(line_clean)):
             continue
 
-        # Handle "Not Present" / "Not Detected"
-        if 'Not Present' in line_clean or 'Not Detected' in line_clean:
-            name = re.split(r'\s+(?:Not Present|Not Detected)', line_clean)[0].strip()
-            # Remove trailing numbers/units.
-            name = re.sub(r'\s+\d+\s*$', '', name).strip()
-            key = _snake_case(name)
-            results.append({
-                'analysis': analysis,
-                'key': key,
-                'name': name,
-                'value': None,
-                'units': default_units,
-                'status': 'pass',
-            })
-            continue
-
-        # General tabular pattern.
-        parts = line_clean.split()
-        if len(parts) < 3:
-            continue
-
-        name_parts = []
-        rest_parts = []
-        for p in parts:
-            if not rest_parts and not re.match(r'^[<\d.]', p) and p.lower() not in (
-                'ppm', 'ppb', 'ug/g', 'ug/kg', 'cfu/g', 'aw', '%', 'mg',
-                'pass', 'fail', 'tested'
-            ):
-                name_parts.append(p)
-            else:
-                rest_parts.append(p)
-
-        name = ' '.join(name_parts)
+        name_tokens, cells = _split_name(_tokenize(line_clean))
+        name = ' '.join(name_tokens)
         if not name:
             continue
-
-        key = _snake_case(name)
-        units = default_units
-        nums = []
-        status = None
-        for v in rest_parts:
-            if v.lower() in ('ppm', 'ppb', 'ug/g', 'ug/kg', 'cfu/g', 'aw', '%', 'mg'):
-                units = v.lower()
-            elif v.upper() in ('PASS', 'FAIL', 'TESTED'):
-                status = v.lower()
-            elif re.match(r'^<?[\d.]+$', v):
-                nums.append(v)
-
-        value = _parse_number(nums[-1]) if nums else None
-        loq = _parse_number(nums[0]) if len(nums) >= 2 else None
-        limit = _parse_number(nums[-2]) if len(nums) >= 3 and status else None
-
-        results.append({
-            'analysis': analysis,
-            'key': key,
-            'name': name,
-            'value': value,
-            'units': units,
-            'loq': loq,
-            'limit': limit,
-            'status': status,
-        })
+        word = _read_word_row(cells, layout=layout, detection=detection)
+        if word:
+            # Handle "Not Present" / "Not Detected" (and "Present").
+            row, assumed = word
+            results.append(_result_record(
+                analysis, name, row, units=default_units,
+                status=row['status'] or assumed or None,
+            ))
+            continue
+        if len(line_clean.split()) < 3:
+            continue
+        row = _read_row(cells, layout=layout, detection=detection)
+        if row is None:
+            continue
+        results.append(_result_record(
+            analysis, name, row, units=row['units'] or default_units,
+        ))
 
     return results
-
 
 # ── Main Parser ────────────────────────────────────────────────────
 
@@ -1238,12 +1702,13 @@ def parse_kaycha_pdf(
 
         # ── Phase 3: Parse metadata ───────────────────────────
         obs = _parse_metadata(front_text, lines, location)
-        obs.update(_parse_totals(front_text, lines))
+        totals = _parse_totals(front_text, lines)
+        obs.update(totals)
         status_obs, analyses = _parse_safety_statuses(front_text)
         obs.update(status_obs)
 
         # ── Phase 4: Parse cannabinoids from page 1 ──────────
-        cannabinoid_results = _parse_cannabinoids(front_text, lines)
+        cannabinoid_results = _parse_cannabinoids(front_text, lines, totals=totals)
         if cannabinoid_results:
             all_results.extend(cannabinoid_results)
             if 'cannabinoids' not in analyses:
@@ -1260,7 +1725,7 @@ def parse_kaycha_pdf(
             # -- Terpenes --
             if 'Terpenes' in page_text and ('TESTED' in page_text or 'PASSED' in page_text):
                 if is_tabular or location in ('albany', 'tempe'):
-                    terp_results, total_terp = _parse_terpenes_tabular(page_text)
+                    terp_results, total_terp = _parse_terpenes_tabular(page_text, location=location)
                 else:
                     terp_results, total_terp = _parse_terpenes_fl(page_text)
                 if terp_results:
@@ -1273,9 +1738,9 @@ def parse_kaycha_pdf(
             # -- Pesticides --
             if 'Pesticide' in page_text and ('PASSED' in page_text or 'FAILED' in page_text):
                 if is_tabular or location in ('albany', 'tempe'):
-                    pest_results = _parse_pesticides_tabular(page_text)
+                    pest_results = _parse_pesticides_tabular(page_text, location=location)
                 else:
-                    pest_results = _parse_pesticides_fl(page_text)
+                    pest_results = _parse_pesticides_fl(page_text, location=location)
                 if pest_results:
                     all_results.extend(pest_results)
                     if 'pesticides' not in analyses:
@@ -1285,9 +1750,9 @@ def parse_kaycha_pdf(
             if 'Residual Solvents' in page_text or 'Residual' in page_text and 'Solvent' in page_text:
                 section = 'Residual Solvents' if 'Residual Solvents' in page_text else 'Solvents'
                 if is_tabular:
-                    sol_results = _parse_section_tabular(page_text, section, 'residual_solvents', 'ppm')
+                    sol_results = _parse_section_tabular(page_text, section, 'residual_solvents', 'ppm', location=location)
                 else:
-                    sol_results = _parse_section_fl(page_text, section, 'residual_solvents', 'ppm')
+                    sol_results = _parse_section_fl(page_text, section, 'residual_solvents', 'ppm', location=location)
                 if sol_results:
                     all_results.extend(sol_results)
                     if 'residual_solvents' not in analyses:
@@ -1296,9 +1761,9 @@ def parse_kaycha_pdf(
             # -- Microbials --
             if 'Microbial' in page_text and ('PASSED' in page_text or 'FAILED' in page_text):
                 if is_tabular:
-                    mic_results = _parse_section_tabular(page_text, 'Microbial', 'microbials', 'CFU/g')
+                    mic_results = _parse_section_tabular(page_text, 'Microbial', 'microbials', 'CFU/g', location=location)
                 else:
-                    mic_results = _parse_section_fl(page_text, 'Microbial', 'microbials', 'CFU/g')
+                    mic_results = _parse_section_fl(page_text, 'Microbial', 'microbials', 'CFU/g', location=location)
                 if mic_results:
                     all_results.extend(mic_results)
                     if 'microbials' not in analyses:
@@ -1307,9 +1772,9 @@ def parse_kaycha_pdf(
             # -- Mycotoxins --
             if 'Mycotoxin' in page_text and ('PASSED' in page_text or 'FAILED' in page_text):
                 if is_tabular:
-                    myc_results = _parse_section_tabular(page_text, 'Mycotoxin', 'mycotoxins', 'ppm')
+                    myc_results = _parse_section_tabular(page_text, 'Mycotoxin', 'mycotoxins', 'ppm', location=location)
                 else:
-                    myc_results = _parse_section_fl(page_text, 'Mycotoxin', 'mycotoxins', 'ppm')
+                    myc_results = _parse_section_fl(page_text, 'Mycotoxin', 'mycotoxins', 'ppm', location=location)
                 if myc_results:
                     all_results.extend(myc_results)
                     if 'mycotoxins' not in analyses:
@@ -1318,9 +1783,9 @@ def parse_kaycha_pdf(
             # -- Heavy Metals --
             if 'Heavy Metal' in page_text and ('PASSED' in page_text or 'FAILED' in page_text):
                 if is_tabular:
-                    hm_results = _parse_section_tabular(page_text, 'Heavy Metal', 'heavy_metals', 'ppm')
+                    hm_results = _parse_section_tabular(page_text, 'Heavy Metal', 'heavy_metals', 'ppm', location=location)
                 else:
-                    hm_results = _parse_section_fl(page_text, 'Heavy Metal', 'heavy_metals', 'ppm')
+                    hm_results = _parse_section_fl(page_text, 'Heavy Metal', 'heavy_metals', 'ppm', location=location)
                 if hm_results:
                     all_results.extend(hm_results)
                     if 'heavy_metals' not in analyses:
@@ -1331,9 +1796,9 @@ def parse_kaycha_pdf(
                ('PASSED' in page_text or 'FAILED' in page_text):
                 section = 'Filth' if 'Filth' in page_text else 'Foreign'
                 if is_tabular:
-                    fm_results = _parse_section_tabular(page_text, section, 'foreign_matter', 'percent')
+                    fm_results = _parse_section_tabular(page_text, section, 'foreign_matter', 'percent', location=location)
                 else:
-                    fm_results = _parse_section_fl(page_text, section, 'foreign_matter', 'percent')
+                    fm_results = _parse_section_fl(page_text, section, 'foreign_matter', 'percent', location=location)
                 if fm_results:
                     all_results.extend(fm_results)
                     if 'foreign_matter' not in analyses:
@@ -1342,9 +1807,9 @@ def parse_kaycha_pdf(
             # -- Water Activity --
             if 'Water Activity' in page_text and ('PASSED' in page_text or 'TESTED' in page_text):
                 if is_tabular:
-                    wa_results = _parse_section_tabular(page_text, 'Water Activity', 'water_activity', 'aw')
+                    wa_results = _parse_section_tabular(page_text, 'Water Activity', 'water_activity', 'aw', location=location)
                 else:
-                    wa_results = _parse_section_fl(page_text, 'Water Activity', 'water_activity', 'aw')
+                    wa_results = _parse_section_fl(page_text, 'Water Activity', 'water_activity', 'aw', location=location)
                 if wa_results:
                     all_results.extend(wa_results)
                     if 'water_activity' not in analyses:
@@ -1354,9 +1819,9 @@ def parse_kaycha_pdf(
             if 'Moisture' in page_text and ('PASSED' in page_text or 'TESTED' in page_text):
                 if 'Moisture Content' in page_text or 'Moisture' in page_text:
                     if is_tabular:
-                        mo_results = _parse_section_tabular(page_text, 'Moisture', 'moisture', 'percent')
+                        mo_results = _parse_section_tabular(page_text, 'Moisture', 'moisture', 'percent', location=location)
                     else:
-                        mo_results = _parse_section_fl(page_text, 'Moisture', 'moisture', 'percent')
+                        mo_results = _parse_section_fl(page_text, 'Moisture', 'moisture', 'percent', location=location)
                     if mo_results:
                         all_results.extend(mo_results)
                         if 'moisture' not in analyses:
@@ -1445,7 +1910,6 @@ def parse_kaycha_pdf(
 
     return obs
 
-
 # ── Entry Point (LAB_REGISTRY compatible) ──────────────────────────
 
 def parse_kaycha_coa(
@@ -1477,7 +1941,6 @@ def parse_kaycha_coa(
 
     return parse_kaycha_pdf(parser, doc, **kwargs)
 
-
 def is_kaycha(pdf_path: str) -> bool:
     """Quick check if a PDF is a Kaycha Labs COA."""
     try:
@@ -1492,7 +1955,6 @@ def is_kaycha(pdf_path: str) -> bool:
             )
     except Exception:
         return False
-
 
 # ── Tests ──────────────────────────────────────────────────────────
 

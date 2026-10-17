@@ -5,7 +5,7 @@ Copyright (c) 2024-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 10/7/2024
-Updated: 3/19/2026
+Updated: 10/13/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -77,6 +77,7 @@ except ImportError:
     pdfplumber = None
 
 # Internal imports:
+from cannlytics.constants.analytes import analysis_for_analyte
 from cannlytics.data.coas.ai_client import AIClient, CostTracker
 from cannlytics.data.coas.config import (
     AI_PROVIDERS,
@@ -387,9 +388,16 @@ def adapt_algorithm_output(
     for result in results_list:
         if not isinstance(result, dict):
             continue
-        analysis = result.get('analysis', 'unknown')
-        analysis_normalized = analysis.lower().replace(' ', '_')
-        if 'cannab' in analysis_normalized:
+        # An algorithm may give a row no section ('analysis': None, which
+        # crashed here before 1.0.6), when the analyte names its analysis,
+        # or one section for two analyses ("Microbials & Mycotoxins"),
+        # when an aflatoxin is still a mycotoxin.
+        known = analysis_for_analyte(result.get('key') or result.get('name'))
+        analysis = result.get('analysis') or known or 'unknown'
+        analysis_normalized = str(analysis).strip().lower().replace(' ', '_')
+        if known == 'mycotoxins':
+            analysis_normalized = 'mycotoxins'
+        elif 'cannab' in analysis_normalized:
             analysis_normalized = 'cannabinoids'
         elif 'terp' in analysis_normalized:
             analysis_normalized = 'terpenes'
@@ -403,6 +411,9 @@ def adapt_algorithm_output(
             analysis_normalized = 'residual_solvents'
         elif 'moisture' in analysis_normalized or 'water' in analysis_normalized:
             analysis_normalized = 'moisture_foreign_matter'
+        if not result.get('analysis') or known == 'mycotoxins':
+            # The row says so too: datasets keep a row's own analysis.
+            result = {**result, 'analysis': analysis_normalized}
         if analysis_normalized not in analysis_groups:
             analysis_groups[analysis_normalized] = []
         analysis_groups[analysis_normalized].append(result)
