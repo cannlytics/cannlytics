@@ -1265,6 +1265,15 @@ ANALYTE_ALIASES.update({
     '6ar_9s_delta10_thc': '9s_delta_10_thc',
     '6ar_9s_d10_thc': '9s_delta_10_thc',
     'delta_10_thc_6ar_9s': '9s_delta_10_thc',
+    # R12 (16 October 2026): what the candidate COA algorithms' validation met.
+    'd10_r9_thc': '9r_delta_10_thc',          # Keystone: "d10/R9-THC"
+    'd10_s9_thc': '9s_delta_10_thc',          # Keystone: "d10/S9-THC"
+    'indolebutyric_acid': 'indole_3_butyric_acid',
+    'coliform': 'total_coliforms',
+    'isopropyl_toluene': 'p_cymene',          # 4-isopropyltoluene: a terpene panel's p-cymene (Onward)
+    'p_isopropyltoluene': 'p_cymene',
+    '4_isopropyltoluene': 'p_cymene',
+    'total_yeast_mold_count': 'total_yeast_and_mold',
 })
 
 def snake_case_analyte(label: str) -> str:

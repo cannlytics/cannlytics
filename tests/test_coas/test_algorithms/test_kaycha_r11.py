@@ -423,8 +423,9 @@ def test_ny_cannabinoids_edible_loq_row_aligns_with_the_cells():
 
 def test_cannabinoid_guard_realigns_unexplained_leading_cells(caplog):
     # No isomer labels in the header: 13 cells for 11 names. The printed
-    # Total THC (D9-THC + 0.877 * THCA) picks the alignment.
-    caplog.set_level(logging.WARNING, logger=LOGGER)
+    # Total THC (D9-THC + 0.877 * THCA) picks the alignment. R12: logged at
+    # debug level (counted in ALIGNMENT_NOTES), not warned per COA.
+    caplog.set_level(logging.DEBUG, logger=LOGGER)
     text, lines = ny_front_page([NY_NAMES], CELLS_553B, LOQ_553B)
     rows = kaycha._parse_cannabinoids(text, lines)
     values = {r['key']: r['value'] for r in rows}
@@ -447,8 +448,8 @@ def test_cannabinoid_guard_drops_rows_it_cannot_align(caplog):
 
 def test_cannabinoid_guard_keeps_a_header_explained_alignment(caplog):
     # One cell per name: kept even if the total disagrees (e.g. a total
-    # per unit), with a warning.
-    caplog.set_level(logging.WARNING, logger=LOGGER)
+    # per unit); R12: a debug message and a count, not a warning.
+    caplog.set_level(logging.DEBUG, logger=LOGGER)
     text, lines = fl_front_page(totals='70.000% 0.187% 86.44%')
     rows = kaycha._parse_cannabinoids(text, lines)
     assert by_key(rows, 'delta_9_thc')['value'] == 81.295

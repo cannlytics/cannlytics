@@ -95,7 +95,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['Kaycha Labs', 'Kaycha Laboratory'],
         'module': 'kaycha',
         'algorithm': 'parse_kaycha_coa',
-        'version': '1.1.0',
+        'version': '1.1.1',
         'states': ['az', 'fl', 'ny', 'oh', 'nj'],
         'tier': 3,
         'lims': False,

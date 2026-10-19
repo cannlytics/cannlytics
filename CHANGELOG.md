@@ -14,7 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.6] — 2026-10-14
+## [1.0.6] — Unreleased
+
+> Held until the `cannabis_results`, `cannabis_strains` and
+> `cannabis_analytes` datasets are refactored (decided 16 October 2026),
+> so that what they need lands in one release. The notes below are
+> 1.0.6 as it stands; changes since 14 October are marked "R12".
 
 ### Summary
 
@@ -216,6 +221,22 @@ algorithm's version is raised, so a dataset that records
   aerobic bacteria, trans-β-ocimene, stems over 3 mm, sand, soil or
   cinders, STX (Shiga toxin: `stec`), and the Δ10-THC isomers by their
   full stereodescriptors ("(6aR,9R)-Δ10-THC" is `9r_delta_10_thc`).
+- R12: "d10/R9-THC" and "d10/S9-THC", indolebutyric acid, coliform
+  (`total_coliforms`), isopropyl toluene and 4-isopropyltoluene
+  (`p_cymene`), and "Total Yeast & Mold Count", met by the candidate
+  algorithms' validation in the cannabis_results dataset.
+
+### Changed: Kaycha's Total THC check (R12, kaycha 1.1.1)
+
+- The check that picks the cannabinoid alignment accepts a printed
+  Total THC that adds delta-8 THC and the delta-10 isomers to D9-THC +
+  0.877 × THCA, as New York labs may print it. Before, such a COA failed
+  the check, and a shifted alignment that happened to agree could be
+  taken instead of the header's.
+- The check's notes are counted in `kaycha.ALIGNMENT_NOTES` and logged
+  at debug level: runs printed "disagrees with the printed Total THC;
+  keeping the header alignment" thousands of times. Rows dropped because
+  no alignment agrees are still a warning.
 
 ### Fixed: logs on Windows
 

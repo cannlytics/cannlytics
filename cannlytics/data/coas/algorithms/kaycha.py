@@ -100,6 +100,7 @@ import hashlib
 import json
 import logging
 import re
+from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -1084,22 +1085,33 @@ def _cannabinoid_header(lines: List[str], i: int) -> Tuple[List[str], List[str]]
     order = isomers + [x for x in ('R', 'S') if x not in isomers]
     return names, [_D10_NAMES[x] for x in order[:count]]
 
+_TOTAL_THC_ISOMERS = ('delta_8_thc', '9r_delta_10_thc', '9s_delta_10_thc')
+
+# How the printed Total THC settled each cannabinoid alignment, for a run
+# to report (counted, not logged per COA: R11's runs printed the
+# disagreement thousands of times).
+ALIGNMENT_NOTES: Counter = Counter()
+
 def _total_thc_check(pairs: List[Tuple[str, int]], cells: List[str],
                      total_thc: Optional[float]) -> Optional[bool]:
     """Whether an alignment agrees with the printed Total THC
-    (D9-THC + 0.877 * THCA, within 2% or 0.01 points); None when the
-    COA prints no usable Total THC or the alignment has neither."""
+    (D9-THC + 0.877 * THCA, or that plus D8-THC and the D10-THC isomers,
+    as New York labs may print it; within 2% or 0.01 points); None when
+    the COA prints no usable Total THC or the alignment has neither D9-THC
+    nor THCA."""
     if total_thc is None or not 0 < total_thc <= 100:
         return None
     found = {}
     for name, idx in pairs:
         key = _snake_case(name)
-        if key in ('delta_9_thc', 'thca'):
+        if key in ('delta_9_thc', 'thca') + _TOTAL_THC_ISOMERS:
             found[key] = _parse_result(cells[idx])[0] or 0.0
-    if not found:
+    if 'delta_9_thc' not in found and 'thca' not in found:
         return None
     computed = found.get('delta_9_thc', 0.0) + 0.877 * found.get('thca', 0.0)
-    return abs(computed - total_thc) <= max(0.02 * total_thc, 0.01)
+    extended = computed + sum(found.get(k, 0.0) for k in _TOTAL_THC_ISOMERS)
+    tolerance = max(0.02 * total_thc, 0.01)
+    return abs(computed - total_thc) <= tolerance or abs(extended - total_thc) <= tolerance
 
 def _align_cannabinoids(names: List[str], d10_names: List[str],
                         cells: List[str],
@@ -1131,6 +1143,7 @@ def _align_cannabinoids(names: List[str], d10_names: List[str],
     else:
         primary, explained = pairs_for(names), False
     if _total_thc_check(primary, cells, total_thc) is not False:
+        ALIGNMENT_NOTES['header'] += 1
         return primary
     alternatives = [pairs_for(names), pairs_for(others)]
     if d10_names:
@@ -1138,17 +1151,20 @@ def _align_cannabinoids(names: List[str], d10_names: List[str],
     alternatives += [pairs_for(others, k) for k in range(1, n - len(others) + 1)]
     for alternative in alternatives:
         if alternative != primary and _total_thc_check(alternative, cells, total_thc):
-            logger.warning(
+            ALIGNMENT_NOTES['realigned'] += 1
+            logger.debug(
                 'Kaycha cannabinoids: header alignment contradicts Total THC '
                 '%s; using the alignment that agrees with it.', total_thc,
             )
             return alternative
     if explained:
-        logger.warning(
+        ALIGNMENT_NOTES['header, total disagrees'] += 1
+        logger.debug(
             'Kaycha cannabinoids: D9-THC + 0.877 * THCA disagrees with the '
             'printed Total THC %s; keeping the header alignment.', total_thc,
         )
         return primary
+    ALIGNMENT_NOTES['dropped'] += 1
     logger.warning(
         'Kaycha cannabinoids: %d cells for %d names and no alignment agrees '
         'with Total THC %s; cannabinoid rows dropped.', n, len(names), total_thc,
@@ -2002,7 +2018,6 @@ if __name__ == '__main__':
             print(f'  Analyses: {analyses}')
             print(f'  Results:  {len(results)} analytes')
             # Show per-analysis counts.
-            from collections import Counter
             counts = Counter(r.get('analysis') for r in results)
             for a, c in sorted(counts.items()):
                 print(f'    {a}: {c}')

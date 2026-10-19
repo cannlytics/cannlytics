@@ -254,6 +254,11 @@ class TestOctoberAliases:
         ('cis-beta-Ocimene', 'cis_ocimene'), ('Stems over 3mm', 'stems'), ('Sand, Soil or Cinders', 'soil'),
         ('STX', 'stec'), ('(6aR,9R)-Δ10-THC', '9r_delta_10_thc'), ('(6aR,9S)-d10-THC', '9s_delta_10_thc'),
         ('Δ10-THC (6aR,9S)', '9s_delta_10_thc'),
+        # R12: the candidate algorithms' validation.
+        ('d10/R9-THC', '9r_delta_10_thc'), ('d10/S9-THC', '9s_delta_10_thc'),
+        ('Indolebutyric Acid', 'indole_3_butyric_acid'), ('Coliform', 'total_coliforms'),
+        ('Isopropyl Toluene', 'p_cymene'), ('4-Isopropyltoluene', 'p_cymene'),
+        ('Total Yeast & Mold Count', 'total_yeast_and_mold'),
     ])
     def test_label(self, label, key):
         assert normalize_analyte_key(label) == key
