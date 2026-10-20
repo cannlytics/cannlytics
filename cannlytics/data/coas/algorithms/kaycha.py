@@ -5,7 +5,7 @@ Copyright (c) 2022-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 10/13/2026
+Updated: 10/18/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -80,6 +80,12 @@ Description:
           rows whose status it places; and of two result words the one
           nearer the status is the result ("Not Detected in 1 g
           Detected FAIL" is a detection).
+        * 1.2.0 (10/18/2026), from Arizona COAs of 2025 read by the AI:
+          a date ends its line ("Completed: 04/14/25" took the next
+          line's "Production" and was kept as text, not a date), and a
+          totals row is found under a label printed a line lower ("Total
+          Cannabinoids" between "Total THC Total CBD" and the values: total
+          THC was not read).
 
 Data Points:
 
@@ -477,9 +483,12 @@ def _parse_metadata(text: str, lines: List[str], location: str) -> Dict:
         obs['source_id'] = m.group(1).strip().split('  ')[0].strip()
 
     # Dates.
+    # A time may follow a date on its line ("04/14/25 05:30 PM"), never on
+    # the next: "Completed: 04/14/25" ends its line on Arizona's 2025 COAs,
+    # and the next line's "Production" was read into the date.
     date_fields = {
-        r'Completed\s*:\s*(\S+(?:\s+\S+)?)': 'date_tested',
-        r'Sampled\s*(?:Date)?\s*:\s*(\S+(?:\s+\S+(?:\s+\S+)?)?)': 'date_collected',
+        r'Completed\s*:\s*(\S+(?:[ \t]+\S+)?)': 'date_tested',
+        r'Sampled\s*(?:Date)?\s*:\s*(\S+(?:[ \t]+\S+(?:[ \t]+\S+)?)?)': 'date_collected',
         r'Ordered\s*:\s*(\S+)': 'date_received',
         r'Batch Date\s*:\s*(\S+)': 'date_harvested',
     }
@@ -597,8 +606,9 @@ def _parse_totals(text: str, lines: List[str]) -> Dict:
     for i, line in enumerate(lines):
         if 'Total THC' in line and 'Total CBD' in line:
             # Next line has the percentages (e.g., "25.5961% <0.1000 29.7057%").
-            if i + 1 < len(lines):
-                next_line = lines[i + 1]
+            # A label printed lower than the others ("Total Cannabinoids" on
+            # a line of its own, Arizona 2025) can come between.
+            for next_line in lines[i + 1:i + 3]:
                 # Parse all tokens that look like values (with or without %).
                 tokens = next_line.split()
                 values = []
@@ -608,12 +618,19 @@ def _parse_totals(text: str, lines: List[str]) -> Dict:
                         values.append(t_clean)
                     elif t_clean.upper() in ('ND', '<LOQ', '<LOD', 'NR', 'NT', 'N/A'):
                         values.append(t_clean)
+                if not values and re.fullmatch(r'\s*Total\s+Cannabinoids(?:\s+Q\d+)?\s*', next_line):
+                    continue
+                # A row of totals starts with a value: "Sample Size 3.5 g 2
+                # units" under the labels is not one (R13).
+                if values and tokens and tokens[0].rstrip('%') != values[0]:
+                    break
                 for field, cell in zip(
                     ('total_thc', 'total_cbd', 'total_cannabinoids'), values,
                     strict=False,
                 ):
                     obs[field] = _parse_result(cell)[0]
                     from_row.add(field)
+                break
             break
 
     # Try alternate layout where totals are on separate lines (NY medical).

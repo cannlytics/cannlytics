@@ -5,7 +5,7 @@ Copyright (c) 2022-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 7/15/2022
-Updated: 10/13/2026
+Updated: 10/18/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -114,6 +114,23 @@ Description:
           tables side by side is read with its own analyte's table (its
           analysis and units), and a limit printed in words before a
           result word ("Absence in 1g Presence Fail") is not the result.
+        * 1.3.0 (10/18/2026), from 80 COAs the parser failed on, with AI
+          parses of each (79 Bia Diagnostics of Vermont, on Confident
+          LIMS; one Kaycha Labs): a "Pathogens" panel is microbials, a
+          header row may be led by its panel's title instead of "Analyte"
+          ("Pathogens LOD Results"), the notes under a table are not rows
+          ("Analyst: 049", "LOD = ...", "Reagent Blanks: ..."), a Summary
+          row printing its result ("Moisture 09/05/2025 11.40% - Complete",
+          "Water Activity ... 0.572 aw") is a result, and the client's name
+          is read from beside the sample fields ("Strain: X Collected:
+          Example Farm" was the producer). Every Bia result now agrees
+          with the AI's (235 of 235). An Arizona packet's cover pages are
+          skipped by the first page carrying a Confident Cannabis/LIMS
+          marker (a reference to a Confident Cannabis sample ID or QR code
+          on another lab's COA is not one); the "Certificate of Analysis /
+          Powered by" template's product name is read under the client's
+          license, and its lab from the footer ("tested by Level One Labs,
+          LLC using ...").
 
 Data Points:
 
@@ -347,6 +364,7 @@ ANALYSIS_SECTION_MAP = {
     'metal': 'heavy_metals',
     'microbial': 'microbials',
     'microbiological': 'microbials',
+    'pathogen': 'microbials',
     'mycotoxin': 'mycotoxins',
     'residual solvent': 'residual_solvents',
     'solvent': 'residual_solvents',
@@ -618,6 +636,61 @@ def _is_cover_sheet(text: str) -> bool:
         return True
     return False
 
+# Text that marks a page as Confident Cannabis/LIMS's (its header or footer),
+# read after _deligature; a reference to a Confident Cannabis sample ID or QR
+# code on another lab's COA (Kaycha Labs, Arizona) does not.
+_CC_MARKERS = ('confidentcannabis.com', 'confidentlims.com', 'confident cannabis', 'confident lims')
+_CC_REFERENCES = re.compile(r'confident\s*cannabis\s*(?:sample\s*id|qr\b)', re.IGNORECASE)
+
+def _cc_page(text: str) -> bool:
+    """Whether a page's text carries a Confident Cannabis/LIMS marker."""
+    low = _CC_REFERENCES.sub(' ', _deligature(text or '')).lower()
+    return any(marker in low for marker in _CC_MARKERS)
+
+# Phrases of Arizona's packet cover pages (as the cannabis_results
+# dataset's runs know them): a page that prints one, anywhere, and no
+# sample identifier is a cover page, though it carry a Confident Cannabis
+# link. A COA page may print "Marijuana Establishment Name: ..." in its
+# client block, or a form number ("COA Cover Sheet/Form ...") in its footer,
+# which do not make it a cover page.
+_COVER_PHRASES = (
+    'product testing cover page', 'final product information', 'starting flower information',
+    'starting concentrate information', 'starting material information', 'intended point of sale',
+    'finished product distribution chain',
+)
+# A COA's sample identifier, as Confident Cannabis/LIMS templates label it:
+# "Sample ID:", "LIMS ID:", or "Sample:" (the "Powered by" template).
+_SAMPLE_IDENTIFIER = re.compile(r'\b(?:sample\s*id|lims\s*id|sample)\s*:')
+
+
+def _cover_page(text: str) -> bool:
+    """Whether a page is a packet's cover page: a cover sheet
+    (_is_cover_sheet), or a page printing a cover phrase and no sample
+    identifier (_SAMPLE_IDENTIFIER)."""
+    if _is_cover_sheet(text or ''):
+        return True
+    low = _deligature(text or '').lower()
+    return any(phrase in low for phrase in _COVER_PHRASES) and not _SAMPLE_IDENTIFIER.search(low)
+
+
+def _coa_start(texts: List[str]) -> int:
+    """The index of a PDF's first COA page: the first page carrying a
+    Confident Cannabis/LIMS marker that is not a cover page (a cover sheet
+    may print the COA's Confident Cannabis link), so that a compiled
+    packet's cover pages (Arizona: product information, starting
+    materials, points of sale, 2 to 9 pages) are skipped; else the first
+    page that is not a cover sheet (_is_cover_sheet), as before."""
+    marked = next((i for i, text in enumerate(texts) if _cc_page(text) and not _cover_page(text)), None)
+    if marked is not None:
+        return marked
+    start = 0
+    for i, text in enumerate(texts):
+        if _is_cover_sheet(text):
+            start = i + 1
+        else:
+            break
+    return start
+
 def _find_cc_identifier(pdf) -> str:
     """Check whether a PDF is a Confident Cannabis/LIMS COA."""
     for page in pdf.pages[:3]:
@@ -790,6 +863,21 @@ def _parse_sample_metadata(text: str) -> Dict:
                     break
             break
 
+    # Confident LIMS's "Certificate of Analysis / Powered by" template
+    # (Arizona, 2025: Level One Labs) prints the client's block beside
+    # "Sample: ..." and the product's name under it, after the client's
+    # license: "Lic. #00000114ESQS66067289 Date of Pickup: ..." / "Candy
+    # Fumez" / "Concentrates & Extracts, Other, Butane".
+    if not obs.get('product_name'):
+        for i, line in enumerate(lines):
+            if re.match(r'^\s*Lic\.?\s*#', line):
+                candidate = lines[i + 1].strip() if i + 1 < len(lines) else ''
+                if candidate and ':' not in candidate and len(candidate) > 2 \
+                        and re.search(r'[^\W\d_]', candidate) \
+                        and not re.search(r'\b(?:Total|Cannabinoids|Summary|Analyte)\b', candidate):
+                    obs['product_name'] = candidate
+                break
+
     # Also check for product name in the second text block
     # (some formats: "Product\nFlower - Cured\n...")
     # and the METRC Sample line.
@@ -917,6 +1005,26 @@ def _parse_sample_metadata(text: str) -> Dict:
 
     return obs
 
+# Sample fields printed left of the client block: on one text line,
+# "Strain: HL 001 Example Collected: Example Farm" is the strain, an
+# empty collection date and the client's name (Bia Diagnostics).
+_SAMPLE_LABEL = re.compile(
+    r'\b(?:Sample\s*ID|Sample\s*Size|Strain|Matrix|Type|Lot\s*#|Batch\s*#|Produced|Collected|Received|'
+    r'Completed)\s*:\s*',
+    re.IGNORECASE,
+)
+_LEADING_DATE = re.compile(r'^\d{1,2}/\d{1,2}/\d{2,4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AP]M)?)?\s*')
+
+def _client_column(line: str) -> str:
+    """The client block's text on a line that also prints sample fields
+    to its left: what follows the last field label, less its date (the
+    line itself when it prints no label)."""
+    line = line.strip()
+    labels = list(_SAMPLE_LABEL.finditer(line))
+    if not labels:
+        return line
+    return _LEADING_DATE.sub('', line[labels[-1].end():]).strip()
+
 def _parse_client_info(text: str) -> Dict:
     """Parse producer/client/distributor info from header."""
     obs = {}
@@ -944,7 +1052,7 @@ def _parse_client_info(text: str) -> Dict:
                 if after and not after.startswith('Lic') and len(after) > 3:
                     obs['producer'] = after
                 elif i + 1 < len(lines):
-                    next_line = lines[i + 1].strip()
+                    next_line = _client_column(lines[i + 1])
                     if next_line and not next_line.startswith('Lic'):
                         obs['producer'] = next_line
                 break
@@ -1022,7 +1130,7 @@ def _parse_summary(text: str) -> Dict:
     # Format: "Cannabinoids  12/22/2025  Complete"
     # or:     "Pesticides    Pass"
     status_patterns = re.findall(
-        r'(Cannabinoids|Terpenes|Residual\s*Solvents|Microbials|'
+        r'(Cannabinoids|Terpenes|Residual\s*Solvents|Microbials|Pathogens|'
         r'Mycotoxins|Pesticides|Heavy\s*Metals|Foreign\s*Matter|'
         r'(?:GC(?:MS)?|LC(?:MS)?)\s*Pesticides|Moisture|Water\s*Activity)'
         r'[^\n]*?\s+(Pass|Fail|Complete|Not\s*Tested|Tested)',
@@ -1155,7 +1263,42 @@ def _parse_summary(text: str) -> Dict:
         obs['water_activity'] = _parse_number(
             wa_match.group(1) or wa_match.group(2))
 
+    # A Summary table row printing the result after the date tested
+    # (Bia Diagnostics, Vermont): "Moisture 09/05/2025 11.40% - Complete",
+    # "Water Activity 09/05/2025 0.572 aw - Complete". Read as results
+    # (_summary_results), as the COA prints no table for them.
+    for row in _SUMMARY_RESULT_ROW.finditer(text):
+        field = 'water_activity' if row.group(1).lower().startswith('water') else 'moisture_content'
+        value = _parse_number(row.group(2))
+        if value is not None:
+            obs[field] = value
+            obs.setdefault('_summary_results', {})[field] = value
+
     return obs, list(set(analyses))
+
+# A Summary table row with its result: name, date tested, value and units,
+# then the status ("Moisture 09/05/2025 11.40% - Complete"). The units must
+# be printed: '%' for moisture, 'aw' for water activity.
+_SUMMARY_RESULT_ROW = re.compile(
+    r'(?mi)^\s*(Moisture(?:\s+Content)?(?=\s+\d{1,2}/\d{1,2}/\d{2,4}\s+[\d.]+\s*%)'
+    r'|Water\s+Activity(?=\s+\d{1,2}/\d{1,2}/\d{2,4}\s+[\d.]+\s*aw\b))'
+    r'\s+\d{1,2}/\d{1,2}/\d{2,4}\s+(\d+(?:\.\d+)?)\s*(?:%|aw\b)',
+)
+
+def _summary_results(summary: Dict, results: List[Dict]) -> List[Dict]:
+    """Results for the moisture and water activity a Summary table row
+    prints (_SUMMARY_RESULT_ROW), unless a table already read them."""
+    have = {r.get('key') for r in results}
+    out = []
+    for field, (analysis, name, units) in (
+            ('moisture_content', ('moisture', 'Moisture', 'percent')),
+            ('water_activity', ('water_activity', 'Water Activity', 'aw'))):
+        value = summary.get(field)
+        if value is None or field in have:
+            continue
+        out.append({'analysis': analysis, 'key': field, 'name': name, 'units': units, 'value': value,
+                    'qualifier': '', 'lod': None, 'loq': None, 'limit': None, 'status': None})
+    return out
 
 # ── Results Parsing ───────────────────────────────────────────────
 #
@@ -1296,7 +1439,7 @@ _TOTAL_ANALYTES = {
 
 _SECTION_TITLE = re.compile(
     r'^(Cannabinoids|Terpenes|Pesticides|Heavy\s*Metals|'
-    r'Microbials|Mycotoxins|Residual\s*Solvents|'
+    r'Microbials|Pathogens|Mycotoxins|Residual\s*Solvents|'
     r'Foreign\s*Matter|Moisture|Water\s*Activity|'
     r'(?:GC|LC|GCMS|LCMS)\s*Pesticides|'
     r'Cannabinoids\s+by\s+\S+|'
@@ -1310,7 +1453,7 @@ _SECTION_TITLE = re.compile(
 )
 # A second title on the same line: two tables printed side by side.
 _SECTION_NAMES = re.compile(
-    r'\b(Cannabinoids|Terpenes|Pesticides|Heavy\s*Metals|Microbials|'
+    r'\b(Cannabinoids|Terpenes|Pesticides|Heavy\s*Metals|Microbials|Pathogens|'
     r'Mycotoxins|Residual\s*Solvents|Foreign\s*Matter|Water\s*Activity|'
     r'Moisture)\b',
     re.IGNORECASE,
@@ -1340,6 +1483,9 @@ _SKIP_LINE = [re.compile(p, re.IGNORECASE) for p in (
     r'^Report\s*Notes', r'^See\s*Report',
     r'^Test\s*Comment', r'^Comment:',
     r'^Results\s*based\s*on', r'^If\s*sampled\s*by',
+    # Notes under a table (Bia Diagnostics): "Analyst: 049", "LOD = The
+    # lowest quantity...", "Reagent Blanks: <LOD for all analytes".
+    r'^Analyst\s*:', r'^LOD\s*=', r'^Reagent\s*Blanks?\b', r'^Test\s*Methodology\b',
     r'^LOQ\s*=\s*Limit', r'^ND\s*=\s*Not',
     r'^Pesticides?\s*tested\s*by',
     r'^Residual\s*Solvents?\s*tested\s*by',
@@ -1551,6 +1697,29 @@ def _parse_columns_line(line: str) -> Optional[List[List[List]]]:
             if kind_a == 'col' and kind_b == 'unit' and a[0] in _VALUE_ROLES:
                 a[1] = b
     return groups
+
+# A column header row whose analyte column is headed by the table's title
+# instead of 'Analyte' (Bia Diagnostics, Vermont: "Pathogens LOD Results"
+# under the title "Pathogens Completed").
+_TITLE_LED = re.compile(
+    r'^(Pathogens|Microbials|Mycotoxins|Cannabinoids|Terpenes|Pesticides|'
+    r'Heavy\s*Metals|Residual\s*Solvents)\s+(?=\S)',
+    re.IGNORECASE,
+)
+
+def _title_led_columns(line: str) -> Optional[Tuple[str, List[List[List]]]]:
+    """``(analysis, columns)`` for a header row led by its table's title
+    ("Pathogens LOD Results"), or None. Every word after the title must
+    name a column or units, and two or more value columns are named, so a
+    title with its status ("Pathogens Completed") or method ("Cannabinoids
+    by HPLC") is a title, not a header."""
+    match = _TITLE_LED.match(line)
+    if not match:
+        return None
+    groups = _parse_columns_line(line[match.end():])
+    if not groups:
+        return None
+    return _classify_analysis(match.group(1)), groups
 
 def _parse_units_line(line: str) -> Optional[List[str]]:
     """Read a units row ("% % mg/g", "PPB PPB PPB") into its labels, or
@@ -2053,6 +2222,18 @@ def _parse_results_page(text: str, analysis: Optional[str] = None,
             table = None
             continue
 
+        # A header row led by the table's title ("Pathogens LOD Results"):
+        # read before titles, which it begins like.
+        led = _title_led_columns(stripped)
+        if led:
+            led_analysis, groups = led
+            if table is None or led_analysis not in table.analyses:
+                table = _Table([led_analysis], None)
+                table_id += 1
+                analyses.add(led_analysis)
+            table.set_columns(groups)
+            continue
+
         # Section titles begin a table.
         section = _match_section(stripped)
         if section:
@@ -2104,17 +2285,22 @@ def _parse_results_page(text: str, analysis: Optional[str] = None,
     analyses.update(r['analysis'] for r in results)
     return results, analyses
 
-def _parse_results_from_text(pdf) -> Tuple[List[Dict], List[str]]:
+def _parse_results_from_text(pdf, start: int = 0,
+                             texts: Optional[List[str]] = None) -> Tuple[List[Dict], List[str]]:
     """Extract all analyte results from the PDF text.
 
-    Iterates through each page, identifies analysis sections,
-    and parses analyte lines within each section (_parse_results_page).
+    Iterates through each page from ``start`` (the first COA page),
+    identifies analysis sections, and parses analyte lines within each
+    section (_parse_results_page). ``texts`` are the pages' text, when
+    already extracted.
     """
     results = []
     analyses = set()
 
-    for page in pdf.pages:
-        text = _deligature(page.extract_text() or '')
+    if texts is None:
+        texts = [page.extract_text() or '' for page in pdf.pages]
+    for raw in texts[start:]:
+        text = _deligature(raw)
         if _is_cover_sheet(text):
             continue
         page_results, page_analyses = _parse_results_page(text)
@@ -2192,22 +2378,24 @@ def parse_cc_pdf(
             raise ValueError(f'Empty PDF: {pdf_path}')
 
         # Find the first COA page (skip AZ cover sheets).
-        coa_start = 0
-        for i, page in enumerate(pdf.pages):
-            page_text = page.extract_text() or ''
-            if _is_cover_sheet(page_text):
-                coa_start = i + 1
-            else:
-                break
+        page_texts = [page.extract_text() or '' for page in pdf.pages]
+        coa_start = _coa_start(page_texts)
 
         if coa_start >= len(pdf.pages):
             raise ValueError(f'No COA pages found in: {pdf_path}')
 
         # Extract full text from the first COA page.
-        page1_text = _deligature(pdf.pages[coa_start].extract_text() or '')
+        page1_text = _deligature(page_texts[coa_start])
 
         # ── Parse lab header ──────────────────────────────
         obs = _parse_lab_header(page1_text)
+        if not obs.get('lab'):
+            # The "Certificate of Analysis / Powered by" template names its
+            # lab in the footer only: "This product has been tested by Level
+            # One Labs, LLC using valid testing methodologies ...".
+            tested_by = re.search(r'\btested\s+by\s+(.{3,80}?)\s+using\b', page1_text, re.IGNORECASE)
+            if tested_by:
+                obs['lab'] = tested_by.group(1).strip(' ,.')
 
         # ── Parse sample metadata ─────────────────────────
         obs.update(_parse_sample_metadata(page1_text))
@@ -2226,7 +2414,14 @@ def parse_cc_pdf(
         obs.update(summary_data)
 
         # ── Parse all results from text ───────────────────
-        results, text_analyses = _parse_results_from_text(pdf)
+        results, text_analyses = _parse_results_from_text(pdf, start=coa_start, texts=page_texts)
+
+        # Moisture and water activity printed only in the Summary table.
+        summary_rows = obs.pop('_summary_results', None)
+        if summary_rows:
+            extra = _summary_results(summary_rows, results)
+            results.extend(extra)
+            text_analyses = sorted(set(text_analyses) | {r['analysis'] for r in extra})
 
         # Louisiana/Orion: enforce the null≠zero doctrine for contaminant
         # panels. On these COAs a 0.0 in a metals/pesticide/microbial/mycotoxin/
@@ -2266,9 +2461,7 @@ def parse_cc_pdf(
 
         # ── Determine LIMS variant ────────────────────────
         full_text = _deligature('\n'.join(
-            (pdf.pages[i].extract_text() or '')
-            for i in range(min(3, len(pdf.pages)))
-        )).lower()
+            page_texts[coa_start:coa_start + 3])).lower()
         if 'confidentlims' in full_text or 'confident lims' in full_text:
             obs['lims'] = 'Confident LIMS'
         else:

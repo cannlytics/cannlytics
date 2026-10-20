@@ -633,9 +633,9 @@ def test_regression_foreign_material_with_header():
 RIVER_FRONT = '\n'.join([
     'PRIDE ANALYTICS DBA 2 RIVER LABS // 32475 DATE PALM DRIVE CATHEDRAL CITY CA 92234 // PH: 7605551234',
     'LICENSE # C8-0000054-LIC',
-    'SAMPLE: 014915 (FLOWER) // CLIENT: CI WELLNESS // BATCH: PASS',
-    'SAMPLE ID: 2RLS-231215-003',
-    'BATCH NO.: 37120423MF',
+    'SAMPLE: 010001 (FLOWER) // CLIENT: EXAMPLE WELLNESS // BATCH: PASS',
+    'SAMPLE ID: 2RLS-231215-001',
+    'BATCH NO.: 00000001MF',
     'CANNABINOID PROFILE BY HPLC-DAD // DEC 18, 2023',
     'TOTAL THC: 39.4781 %',
     'TOTAL CBD: 0.0871 %',
@@ -655,7 +655,7 @@ def test_end_to_end_two_river_labs_coa(monkeypatch):
     data = tagleaf.parse_tagleaf_coa(None, 'synthetic.pdf')
     rows = json.loads(data['results'])
     assert data['lab_license_number'] == 'C8-0000054-LIC'
-    assert data['product_name'] == '014915'
+    assert data['product_name'] == '010001'
     assert data['total_thc'] == 39.4781
     assert data['total_terpenes'] == 2.6648
     assert data['lab_results_url'] == 'https://lims.tagleaf.com/coa_/abc123'

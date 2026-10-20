@@ -856,9 +856,9 @@ Published: 02/20/2025
 
 HISTORIC_FRONT = """\
 Phyto-farma Labs
-Client Name: Back Home Farm
-Sample Description: LOBO: Wedding Cake, 3.5g
-Lot Number: LOBO00010
+Client Name: Example Home Farm
+Sample Description: EXMP: Wedding Cake, 3.5g
+Lot Number: EXMP00010
 Results Summary
 Microbial Impurities PASS
 Trace Metals PASS

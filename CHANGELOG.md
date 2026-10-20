@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > Held until the `cannabis_results`, `cannabis_strains` and
 > `cannabis_analytes` datasets are refactored (decided 16 October 2026),
 > so that what they need lands in one release. The notes below are
-> 1.0.6 as it stands; changes since 14 October are marked "R12".
+> 1.0.6 as it stands; changes since 14 October are marked "R12", and
+> since 16 October "R13".
 
 ### Summary
 
@@ -225,6 +226,66 @@ algorithm's version is raised, so a dataset that records
   (`total_coliforms`), isopropyl toluene and 4-isopropyltoluene
   (`p_cymene`), and "Total Yeast & Mold Count", met by the candidate
   algorithms' validation in the cannabis_results dataset.
+- R13: delta-10 THC printed without its isomer ("D10 THC", "D10-THC",
+  "delta10thc", "Delta-10 Tetrahydrocannabinol") is `delta_10_thc`, as
+  "D 10 THC" and "Delta-10 THC" already were; it was `9r_delta_10_thc`,
+  the 9R isomer, an assumption no COA printed. "Shiga Toxin Producing
+  Escherichia coli" is `stec`, as the "E. coli" spelling was (it was
+  `e_coli`, the generic count).
+
+### Fixed: Confident Cannabis on Confident LIMS's labs (R13, confidentcannabis 1.3.0)
+
+Found by 80 COAs the algorithm claimed and failed on in the dataset's
+runs, each with an AI parse: 79 from Bia Diagnostics (Vermont), whose
+COAs Confident LIMS prints, and one Kaycha Labs COA.
+
+- A "Pathogens" panel is microbials, and a header row may be led by its
+  panel's title instead of "Analyte" ("Pathogens LOD Results" under
+  "Pathogens Completed"). The notes under a table ("Analyst: 049",
+  "LOD = ...", "Reagent Blanks: ...") are not rows. All 235 Bia results
+  now agree with the AI's (value, qualifier, units, LOD).
+- Moisture and water activity printed only in the Summary table, after
+  the date tested ("Moisture 09/05/2025 11.40% - Complete", "Water
+  Activity 09/05/2025 0.572 aw - Complete"), are results.
+- The client's name beside the sample fields is the producer ("Strain:
+  HL 001 Example Collected: Example Farm" was taken whole).
+- Arizona's compiled packets (a producer's product information,
+  starting materials and points of sale, then the lab's COA): the COA
+  starts at the first page that carries a Confident Cannabis/LIMS
+  marker. The cover-sheet test stopped at a points-of-sale page or an
+  empty page, so the lab was "Intended Point of Sale Locations" and the
+  product name and totals were lost. A reference to a Confident
+  Cannabis sample ID or QR code on another lab's COA is not a marker,
+  and a cover page that prints the COA's Confident Cannabis link is
+  still a cover page. A cover page prints one of Arizona's cover-page
+  phrases and no sample identifier ("Sample ID:", "LIMS ID:", or the
+  "Powered by" template's "Sample:"); a COA's "Marijuana Establishment
+  Name:" (its client block) and a lab's form number ("COA Cover
+  Sheet/Form ...") do not make a page a cover page.
+- The "Certificate of Analysis / Powered by Confident LIMS" template
+  (Arizona, 2025: Level One Labs): the product name under the client's
+  license, and the lab from the footer ("This product has been tested
+  by Level One Labs, LLC using ...").
+
+### Fixed: Kaycha dates and totals (R13, kaycha 1.2.0)
+
+- A date ends its line: "Completed: 04/14/25" at the end of a line
+  (Arizona, 2025) took the next line's first word and was kept as the
+  text "04/14/25\nProduction" instead of a date.
+- A totals row under labels of which one prints a line lower ("Total
+  THC  Total CBD" / "Total Cannabinoids" / "44.3561%  ND  51.2430%")
+  is read; total THC was missing. A line under the labels that does not
+  start with a value ("Sample Size 3.5 g 2 units") is not read as the
+  totals.
+- Not fixed yet: four COAs of round 2's benchmark (two New York, two
+  Arizona) whose heavy-metal results are read as their action limits
+  (all four Claude arms agree on <LOQ); their texts are needed.
+
+### Changed: test fixtures (R13)
+
+- The R11 tests of SC Labs, Phyto-Farma and TagLeaf quoted real COAs (a
+  client's name, license and address, products, batch and sample IDs);
+  they use invented ones now, as the R12 and R13 tests do.
 
 ### Changed: Kaycha's Total THC check (R12, kaycha 1.1.1)
 

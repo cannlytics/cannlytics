@@ -686,14 +686,14 @@ def test_every_result_row_carries_a_qualifier():
 FRONT_PAGE_7F23 = """\
 SC LABS
 DATE ISSUED 06/30/2023 | OVERALL BATCH RESULT: PASS
-SAMPLE NAME: Citrus Gas (1g)
+SAMPLE NAME: Example Gas (1g)
 Concentrate, Inhalable
 CULTIVATOR / MANUFACTURER DISTRIBUTOR
-Business Name: Central Coast Ag Products, LLC
-License Number: CDPH-10003156
-Address: 1201 West Chestnut Ave. Lompoc, CA 93436
+Business Name: Example Ag Products, LLC
+License Number: CDPH-10000001
+Address: 1201 West Example Ave. Lompoc, CA 93436
 SAMPLE DETAIL
-Batch Number: 230001317 Sample ID: 230627L045
+Batch Number: 230000001 Sample ID: 230627L001
 Date Collected: 06/27/2023 Date Received: 06/28/2023
 Batch Size: 2000.0 units Sample Size: 12.0 units
 Unit Mass: 1 grams per Unit
@@ -706,16 +706,16 @@ SAFETY ANALYSIS - SUMMARY
 Pesticides: PASS Mycotoxins: PASS Residual Solvents: PASS
 Heavy Metals: PASS Microbiology: PASS Foreign Material: PASS
 These results relate only to the sample tested.
-CoA ID: 230627L045-001
+CoA ID: 230627L001-001
 SC Laboratories California LLC. | 100 Pioneer Street, Suite E, Santa Cruz, CA 95060 | sclabs.com
 """
 
 FRONT_PAGE_B5BD = """\
 DATE ISSUED 03/07/2026 | OVERALL BATCH RESULT: PASS
-SAMPLE NAME: Kiva Lost Farm Chew Dragonfruit
+SAMPLE NAME: Example Farm Chew Dragonfruit
 Edible, Gummy
 SAMPLE DETAIL
-Batch Number: 26033CDC01TCD Sample ID: 260305S104
+Batch Number: 26033EXA01TCD Sample ID: 260305S001
 Date Collected: 03/05/2026 Date Received: 03/06/2026
 CANNABINOID ANALYSIS - SUMMARY
 Total THC: 98.772 mg/unit Total CBD: ND
@@ -723,7 +723,7 @@ Sum of Cannabinoids: 106.698 mg/unit Total Cannabinoids: 106.698 mg/unit
 Total CBG: 4.635 mg/unit
 SAFETY ANALYSIS - SUMMARY
 Pesticides: PASS
-CoA ID: 260305S104-001
+CoA ID: 260305S001-001
 sclabs.com
 """
 
@@ -760,10 +760,10 @@ def test_regression_front_page_metadata():
     obs = sclabs._parse_front_page_metadata(FRONT_PAGE_7F23)
     assert obs['date_tested'] == '2023-06-30'
     assert obs['status'] == 'pass'
-    assert obs['product_name'] == 'Citrus Gas (1g)'
+    assert obs['product_name'] == 'Example Gas (1g)'
     assert obs['product_type'] == 'Concentrate, Inhalable'
-    assert obs['batch_number'] == '230001317'
-    assert obs['sample_id'] == '230627L045'
+    assert obs['batch_number'] == '230000001'
+    assert obs['sample_id'] == '230627L001'
     assert obs['date_collected'] == '2023-06-27'
     assert obs['date_received'] == '2023-06-28'
     assert obs['total_thc'] == 83.298
@@ -773,7 +773,7 @@ def test_regression_front_page_metadata():
     assert obs['total_terpenes'] == 4.1713
     assert obs['pesticides_status'] == 'pass'
     assert obs['microbials_status'] == 'pass'
-    assert obs['coa_id'] == '230627L045-001'
+    assert obs['coa_id'] == '230627L001-001'
 
 
 # ── 7. The whole COA, through parse_sc_labs_coa ───────────────────────
@@ -799,7 +799,7 @@ def fake_pdfplumber(monkeypatch):
 def test_parse_sc_labs_coa_end_to_end(fake_pdfplumber):
     # r10: thcva 0.0, myrcene 0.0 mg/g, n-pentane None, thca missing,
     # total_cbd 0.0.
-    data = sclabs.parse_sc_labs_coa(None, '/tmp/230627L045.pdf')
+    data = sclabs.parse_sc_labs_coa(None, '/tmp/230627L001.pdf')
     results = json.loads(data['results'])
     analyses = json.loads(data['analyses'])
     assert by_key(results, 'thca')['value'] == 94.981
@@ -812,9 +812,9 @@ def test_parse_sc_labs_coa_end_to_end(fake_pdfplumber):
     assert data.get('total_cbd') is None
     assert data['total_thc'] == 83.298
     assert data['total_terpenes'] == 4.1713
-    assert data['product_name'] == 'Citrus Gas (1g)'
+    assert data['product_name'] == 'Example Gas (1g)'
     assert data['lab'] == 'SC Labs'
-    assert data['coa_pdf'] == '230627L045.pdf'
+    assert data['coa_pdf'] == '230627L001.pdf'
     for analysis in ('cannabinoids', 'terpenes', 'pesticides', 'mycotoxins',
                      'residual_solvents', 'heavy_metals', 'microbials',
                      'foreign_matter'):
