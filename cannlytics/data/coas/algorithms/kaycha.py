@@ -5,7 +5,7 @@ Copyright (c) 2022-2026 Cannlytics
 Authors:
     Keegan Skeate <https://github.com/keeganskeate>
 Created: 9/17/2022
-Updated: 10/18/2026
+Updated: 10/30/2026
 License: MIT License <https://github.com/cannlytics/cannlytics/blob/main/LICENSE>
 
 Description:
@@ -86,6 +86,44 @@ Description:
           totals row is found under a label printed a line lower ("Total
           Cannabinoids" between "Total THC Total CBD" and the values: total
           THC was not read).
+        * 1.3.0 (10/30/2026), from four Albany (NY) COAs of 2024-2025 that
+          every AI arm of the benchmark read correctly:
+            - Heavy metals: Albany prints the status against the result
+              ("ANTIMONY 0.1000 ug/g <0.1000PASS 2"), so the result was not
+              a cell and the action limit was read in its place (antimony
+              2, arsenic 0.2, cadmium 0.2 or 0.3, chromium 110, copper 30,
+              lead 0.5, mercury 0.1, nickel 2 ug/g). A status glued to the
+              number before it is split off (_tokenize).
+            - Two records on one line ("ACEQUINOCYL 0.1000 ppm 2 PASS
+              <0.1000 PACLOBUTRAZOL 0.1000 ppm 0.4 PASS <0.1000"): the
+              right-hand record was dropped, about half of a two-column
+              pesticide table. Every record on a line is read
+              (_split_records).
+            - Microbials and mycotoxins printed side by side under one title
+              line ("Microbial PASSED Mycotoxins PASSED"): the mycotoxin
+              section read the microbial column, so microbials were filed
+              twice and the aflatoxins and ochratoxin were lost (one,
+              "SPP AFLATOXIN B1", took the end of a microbial's name and its
+              action limit). Where the right-hand section's analytes are
+              known (mycotoxins), each section reads its own column; any
+              other right-hand section reads the records after a line's
+              first (_column_of, _section_records).
+            - The notes and footer under a pesticide table ("... based on 9
+              New York Codes ... Part 130", "ISO 17025 Accreditation # ...")
+              were read as pesticides named after their words ("based_on"
+              130, "..._iso" 17025). A pesticide's name is printed in
+              capitals and its row prints a status or units, and a table
+              that goes on below its method notes is read there only from
+              rows that print a status. The table ends at any section's
+              title (_is_title_line), and another analysis' analyte is
+              never a pesticide.
+            - Rows that sit closer together than pdfplumber's default line
+              tolerance came out as one line of interleaved letters ("A I M
+              P N I Z ..."), which became pesticides named
+              "a_i_m_p_n_i_z_..." with numbers from other rows. A page whose
+              text shows such a line is read again at a tighter tolerance
+              (_page_text), which separates the rows; an interleaved line
+              that remains is not read.
 
 Data Points:
 
@@ -114,6 +152,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pdfplumber
 
 # Internal imports:
+from cannlytics.constants.analytes import analysis_for_analyte
 from cannlytics.data.coas.schema import parse_result_value
 
 # ── Kaycha Labs Constants ──────────────────────────────────────────
@@ -732,6 +771,24 @@ _NUMBER_TOKEN = re.compile(r'^[<>]?=?(?:\d+(?:,\d{3})*(?:\.\d*)?|\.\d+)$')
 _FLAG_TOKEN = re.compile(r'^[A-Z]\d{1,2}$')
 # Solvent names that begin with locants ("1,1-DICHLOROETHENE").
 _LOCANT_NAME = re.compile(r'^\d+(?:,\d+)*-[A-Za-z]')
+# A status printed against the result before it: "<0.1000PASS" (Albany's
+# heavy metals and mycotoxins, 2024-2025).
+_GLUED_STATUS = re.compile(r'(\d|\bND)((?:PASS|FAIL)(?:ED)?)\b')
+# Section titles a page may print side by side on one line, and where the
+# right-hand section's records start on a line it shares with the section
+# beside it: the names of its analytes. Albany prints mycotoxins to the right
+# of microbials, and a microbial's name can wrap into the shared line
+# ("SPP AFLATOXIN B1 ...").
+_SECTION_TITLES = ('Pesticide', 'Heavy Metal', 'Microbial', 'Mycotoxin', 'Residual',
+                   'Filth', 'Foreign', 'Water Activity', 'Moisture', 'Terpene')
+_RIGHT_RECORD_STARTS = {
+    'Mycotoxin': re.compile(r'\b(?:TOTAL\s+)?(?:AFLATOXINS?|OCHRATOXINS?)\b'),
+}
+# The statuses a section prints beside its title.
+_TITLE_STATUS = ('PASSED', 'FAILED', 'TESTED')
+# The line tolerance (points) at which a page with interleaved rows is read
+# again; pdfplumber's default is 3.
+_TIGHT_Y_TOLERANCE = 1.5
 # Characters an FL-layout analyte name is made of (those of the r10
 # name regex, plus '+' for "OCHRATOXIN A+").
 _STRICT_NAME_TOKEN = re.compile(r'^[A-Z0-9\-(),>+]+$')
@@ -752,14 +809,133 @@ _HEADER_RESULT = re.compile(r'\bRESULTS?\b(?:\s*\(\s*([^)]*)\))?')
 
 def _tokenize(line: str) -> List[str]:
     """Split a row into tokens: multi-word results joined ('Not_Present'),
-    footnote stars dropped, '< 0.1000' rejoined as '<0.1000' and a
-    number glued to its units ('0.1000ppm') split."""
+    footnote stars dropped, '< 0.1000' rejoined as '<0.1000', a number
+    glued to its units ('0.1000ppm') split, and a status glued to the
+    result before it ('<0.1000PASS', '19.1120PASS', 'NDPASS') split."""
     text = line.replace('*', ' ')
     for pattern, joined in _MULTIWORD_RESULTS:
         text = pattern.sub(joined, text)
     text = re.sub(r'([<>])\s+(?=[\d.]|LO[DQ]\b)', r'\1', text, flags=re.IGNORECASE)
     text = re.sub(r'(?<=\d)(ppm|ppb|cfu/g|ug/g|mg/g|%)(?=\s|$)', r' \1', text, flags=re.IGNORECASE)
+    text = _GLUED_STATUS.sub(r'\1 \2', text)
     return text.split()
+
+
+def _split_records(tokens: List[str]) -> List[List[str]]:
+    """The records on one line: a new record starts where an uppercase
+    name follows the cells of the one before (the point at which _read_row
+    stops reading a row), as in a two-column table."""
+    records: List[List[str]] = [[]]
+    started = False
+    for token in tokens:
+        kind = _token_kind(token)
+        if kind == 'other':
+            if started and not _FLAG_TOKEN.match(token) and _RECORD_START.match(token):
+                records.append([])
+                started = False
+        elif kind in ('value', 'status'):
+            started = True
+        records[-1].append(token)
+    return [r for r in records if r]
+
+
+def _is_spaced_letters(name_tokens: List[str]) -> bool:
+    """Whether a name is letters printed one by one, where pdfplumber has
+    interleaved the characters of rows that sit close together ("A I M P N
+    I Z Y P ..."): three or more one-character tokens, or one letter alone
+    (no analyte is named by a single letter)."""
+    singles = sum(1 for t in name_tokens if len(t) == 1)
+    return singles >= 3 or (len(name_tokens) == 1 and singles == 1)
+
+
+def _is_interleaved(tokens: List[str]) -> bool:
+    """Whether a line is the interleaved characters of several rows (most
+    tokens one character long): none of its records can be trusted."""
+    singles = sum(1 for t in tokens if len(t) == 1)
+    return singles >= 6 and singles * 2 >= len(tokens)
+
+
+def _is_title_line(line: str) -> bool:
+    """Whether a line is a section's title and status ("Vitamin E Acetate
+    PASSED", or "PASSED" alone above a title): it prints a section's
+    status (PASSED, FAILED or TESTED; a row prints PASS or FAIL) and no
+    result."""
+    tokens = _tokenize(line)
+    return any(t in _TITLE_STATUS for t in tokens) and \
+        not any(_token_kind(t) == 'value' for t in tokens)
+
+
+def _page_text(page: Any) -> str:
+    """A page's text. pdfplumber's default line tolerance (3 points)
+    interleaves the characters of table rows set closer together than
+    that (some Albany pesticide tables), so a page whose text has such a
+    line is read again at _TIGHT_Y_TOLERANCE, which keeps the rows apart;
+    the tighter text is used when it has no interleaved line."""
+    text = (page.extract_text() or '').replace('\x00', '')
+    if not any(_is_interleaved(_tokenize(line)) for line in text.split('\n')):
+        return text
+    try:
+        tight = (page.extract_text(y_tolerance=_TIGHT_Y_TOLERANCE) or '').replace('\x00', '')
+    except Exception:  # pragma: no cover - pdfplumber raises little here
+        return text
+    if tight and not any(_is_interleaved(_tokenize(line)) for line in tight.split('\n')):
+        return tight
+    return text
+
+
+def _column_of(title_line: str, section_name: str) -> Tuple[str, Optional[re.Pattern]]:
+    """Whether a section shares its title line with another printed beside
+    it ("Microbial PASSED Mycotoxins PASSED"): ('left', split) or
+    ('right', split), with the pattern at which the right-hand section's
+    records start on a shared line when its analytes are known (else None);
+    ('', None) when the section has its title line to itself."""
+    at = title_line.find(section_name)
+    if at < 0:
+        return '', None
+    others = [(title_line.find(t), t) for t in _SECTION_TITLES
+              if t in title_line and t not in section_name and section_name not in t]
+    left = [t for pos, t in others if pos < at]
+    right = sorted((pos, t) for pos, t in others if pos > at)
+    if right and not left:
+        return 'left', _RIGHT_RECORD_STARTS.get(right[0][1])
+    if left and not right:
+        own = next((t for t in _RIGHT_RECORD_STARTS if t in section_name), None)
+        return 'right', _RIGHT_RECORD_STARTS.get(own) if own else None
+    return '', None
+
+
+def _section_records(line: str, column: str = '',
+                     split: Optional[re.Pattern] = None) -> List[Tuple[List[str], List[str]]]:
+    """The (name tokens, cells) of each record on a row line that belongs to
+    the section: every record when the section has its title line to
+    itself; when two sections are printed side by side, the left column's
+    records (before ``split``) or the right column's (from it). Without a
+    known split, the left column reads the line's first record and the
+    right column the records after it: a line with one record is taken to
+    be the left column's, so a right-hand section misses any rows printed
+    below the end of the left column. (Before 1.3.0 every section read
+    the line's first record, the right-hand one included.)"""
+    if _is_interleaved(_tokenize(line.strip())):
+        return []
+    if column and split is not None:
+        m = split.search(line)
+        if column == 'left':
+            parts = [line[:m.start()] if m else line]
+        else:
+            parts = [line[m.start():]] if m else []
+        records = [r for part in parts for r in _split_records(_tokenize(part.strip()))]
+    else:
+        records = _split_records(_tokenize(line.strip()))
+        if column == 'left':
+            records = records[:1]
+        elif column == 'right':
+            records = records[1:]
+    out = []
+    for record in records:
+        name_tokens, cells = _split_name(record)
+        if name_tokens and not _is_spaced_letters(name_tokens):
+            out.append((name_tokens, cells))
+    return out
 
 def _token_kind(token: str) -> str:
     """Classify a token: 'value', 'unit', 'status' or 'other'."""
@@ -1484,16 +1660,23 @@ def _parse_pesticides_tabular(page_text: str, location: str = '') -> List[Dict]:
     The result is the cell after the status (see _read_row). Until
     10/13/2026 it was the row's last number, so every AZ non-detect
     was reported as its action limit (acephate 0.4 ppm).
+
+    The table ends at the next section's title (_is_title_line). Since
+    1.3.0 it goes on below the method notes, which a two-column table
+    prints beside its left column's last rows; there a row must print
+    its status. A row named for another analysis' analyte is never read.
     """
     results = []
     detection = _detection_for(location, 'loq')
     lines = page_text.split('\n')
     in_pesticides = False
+    paused = False
     layout = None
 
     for line in lines:
         if 'Pesticide' in line and ('PASSED' in line or 'FAILED' in line):
             in_pesticides = True
+            paused = False
             layout = None        # a header read before is another table's
             continue
         if line.startswith('ANALYTES'):
@@ -1501,8 +1684,15 @@ def _parse_pesticides_tabular(page_text: str, location: str = '') -> List[Dict]:
             continue
         if not in_pesticides:
             continue
+        if _is_title_line(line) or (
+                any(t in line for t in _SECTION_TITLES if t != 'Pesticide') and
+                any(x in line for x in _TITLE_STATUS)):
+            in_pesticides = False    # the next section's title
+            continue
         if 'Analyzed' in line or 'Analysis Method' in line or 'Weight:' in line:
-            in_pesticides = False
+            # The method notes: in a two-column table they print beside the
+            # left column's last rows, so the table may go on below them.
+            paused = True
             continue
         header = _parse_header(line)
         if header:
@@ -1516,17 +1706,26 @@ def _parse_pesticides_tabular(page_text: str, location: str = '') -> List[Dict]:
         if len(parts) < 4:
             continue
 
-        # Find analyte name.
-        name_tokens, cells = _split_name(_tokenize(line_clean))
-        name = ' '.join(name_tokens)
-        if not name:
-            continue
-        if name.upper() in SKIP_KEYWORDS:
-            continue
-        row = _read_row(cells, layout=layout, detection=detection)
-        if row is None:
-            continue
-        results.append(_result_record('pesticides', name, row, units=row['units'] or 'ppm'))
+        # Every record on the line: tables print two pesticides per line.
+        for name_tokens, cells in _section_records(line_clean):
+            name = ' '.join(name_tokens)
+            if name.upper() in SKIP_KEYWORDS:
+                continue
+            # Another analysis' analyte (SALMONELLA, ARSENIC) is a row of a
+            # section printed below the table, not a pesticide.
+            if analysis_for_analyte(name) not in (None, 'pesticides'):
+                continue
+            row = _read_row(cells, layout=layout, detection=detection)
+            if row is None:
+                continue
+            # A pesticide's name is printed in capitals; the page's notes and
+            # footer ("... thresholds based on 9 New York Codes ... Part 130",
+            # "ISO 17025") are not rows. Below the method notes, a row must
+            # also print its status.
+            if not _is_strict_name(name_tokens) or not (row['status'] or row['units']) \
+                    or (paused and not row['status']):
+                continue
+            results.append(_result_record('pesticides', name, row, units=row['units'] or 'ppm'))
 
     return results
 
@@ -1557,12 +1756,14 @@ def _parse_section_fl(page_text: str, section_name: str, analysis: str,
     lines = page_text.split('\n')
     in_section = False
     layout = None
+    column, split = '', None
 
     for line in lines:
         # Section detection (exact match to avoid Summary contamination).
         if section_name in line and any(x in line for x in ['PASSED', 'FAILED', 'TESTED']):
             in_section = True
             layout = None
+            column, split = _column_of(line, section_name)
             continue
         if not in_section:
             continue
@@ -1586,35 +1787,33 @@ def _parse_section_fl(page_text: str, section_name: str, analysis: str,
         if not line_clean or not (line_clean[0].isalpha() or _LOCANT_NAME.match(line_clean)):
             continue
 
-        name_tokens, cells = _split_name(_tokenize(line_clean))
-        name = ' '.join(name_tokens)
-        if not name:
-            continue
-        word = _read_word_row(cells, layout=layout, detection=detection)
-        if word:
-            # "NAME Not Present PASS": a non-detect passes unless the
-            # row says FAIL; "NAME Present FAIL" keeps its failure.
-            row, assumed = word
+        for name_tokens, cells in _section_records(line_clean, column, split):
+            name = ' '.join(name_tokens)
+            word = _read_word_row(cells, layout=layout, detection=detection)
+            if word:
+                # "NAME Not Present PASS": a non-detect passes unless the
+                # row says FAIL; "NAME Present FAIL" keeps its failure.
+                row, assumed = word
+                results.append(_result_record(
+                    analysis, name, row, units=default_units,
+                    status=row['status'] or assumed or None,
+                ))
+                continue
+            if not _is_strict_name(name_tokens):
+                continue
+            row = _read_row(cells, layout=layout, detection=detection)
+            if row is None:
+                continue
+            # A data row has at least two cells (a detection limit and the
+            # result), or a single word result with a status ("ND PASS"),
+            # and prints a status or units (not "DILUTION 10 20").
+            if row['n_values'] < 2 and not (row['status'] and row['qualifier']):
+                continue
+            if not (row['status'] or row['units']):
+                continue
             results.append(_result_record(
-                analysis, name, row, units=default_units,
-                status=row['status'] or assumed or None,
+                analysis, name, row, units=row['units'] or default_units.lower(),
             ))
-            continue
-        if not _is_strict_name(name_tokens):
-            continue
-        row = _read_row(cells, layout=layout, detection=detection)
-        if row is None:
-            continue
-        # A data row has at least two cells (a detection limit and the
-        # result), or a single word result with a status ("ND PASS"),
-        # and prints a status or units (not "DILUTION 10 20").
-        if row['n_values'] < 2 and not (row['status'] and row['qualifier']):
-            continue
-        if not (row['status'] or row['units']):
-            continue
-        results.append(_result_record(
-            analysis, name, row, units=row['units'] or default_units.lower(),
-        ))
 
     return results
 
@@ -1636,11 +1835,13 @@ def _parse_section_tabular(page_text: str, section_name: str,
     lines = page_text.split('\n')
     in_section = False
     layout = None
+    column, split = '', None
 
     for line in lines:
         if section_name in line and any(x in line for x in ['PASSED', 'FAILED', 'TESTED']):
             in_section = True
             layout = None
+            column, split = _column_of(line, section_name)
             continue
         if line.startswith('ANALYTES'):
             layout = _parse_header(line)
@@ -1659,27 +1860,25 @@ def _parse_section_tabular(page_text: str, section_name: str,
         if not line_clean or not (line_clean[0].isalpha() or _LOCANT_NAME.match(line_clean)):
             continue
 
-        name_tokens, cells = _split_name(_tokenize(line_clean))
-        name = ' '.join(name_tokens)
-        if not name:
-            continue
-        word = _read_word_row(cells, layout=layout, detection=detection)
-        if word:
-            # Handle "Not Present" / "Not Detected" (and "Present").
-            row, assumed = word
+        for name_tokens, cells in _section_records(line_clean, column, split):
+            name = ' '.join(name_tokens)
+            word = _read_word_row(cells, layout=layout, detection=detection)
+            if word:
+                # Handle "Not Present" / "Not Detected" (and "Present").
+                row, assumed = word
+                results.append(_result_record(
+                    analysis, name, row, units=default_units,
+                    status=row['status'] or assumed or None,
+                ))
+                continue
+            if len(name_tokens) + len(cells) < 3:
+                continue
+            row = _read_row(cells, layout=layout, detection=detection)
+            if row is None:
+                continue
             results.append(_result_record(
-                analysis, name, row, units=default_units,
-                status=row['status'] or assumed or None,
+                analysis, name, row, units=row['units'] or default_units,
             ))
-            continue
-        if len(line_clean.split()) < 3:
-            continue
-        row = _read_row(cells, layout=layout, detection=detection)
-        if row is None:
-            continue
-        results.append(_result_record(
-            analysis, name, row, units=row['units'] or default_units,
-        ))
 
     return results
 
@@ -1750,8 +1949,7 @@ def parse_kaycha_pdf(
         # ── Phase 5: Parse remaining pages ────────────────────
         for page_idx in range(1, len(pdf.pages)):
             try:
-                page_text = pdf.pages[page_idx].extract_text() or ''
-                page_text = page_text.replace('\x00', '')
+                page_text = _page_text(pdf.pages[page_idx])
             except Exception:
                 continue
 

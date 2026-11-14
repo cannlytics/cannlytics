@@ -270,9 +270,12 @@ def test_fl_section_skips_lines_that_are_not_rows():
         'Analyzed by: 1\n'
     )
     rows = kaycha._parse_section_fl(page, 'Heavy Metal', 'heavy_metals', 'ppm')
-    assert [r['key'] for r in rows] == ['arsenic']
-    # The merged MERCURY record does not supply arsenic's result.
+    # The merged MERCURY record does not supply arsenic's result. Since
+    # 1.3.0 (R15) it is read as a record of its own, as a two-column table's
+    # right-hand row is.
+    assert [r['key'] for r in rows] == ['arsenic', 'mercury']
     assert rows[0]['value'] is None and rows[0]['limit'] == 0.2
+    assert (rows[1]['value'], rows[1]['limit'], rows[1]['status']) == (0.03, 0.2, 'pass')
 
 
 def test_failing_pathogen_is_kept():

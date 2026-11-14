@@ -95,7 +95,7 @@ LAB_REGISTRY: Dict[str, Dict[str, Any]] = {
         'text_patterns': ['Kaycha Labs', 'Kaycha Laboratory'],
         'module': 'kaycha',
         'algorithm': 'parse_kaycha_coa',
-        'version': '1.2.0',
+        'version': '1.3.0',  # R15: Albany heavy metals, mycotoxins, two-column tables
         'states': ['az', 'fl', 'ny', 'oh', 'nj'],
         'tier': 3,
         'lims': False,

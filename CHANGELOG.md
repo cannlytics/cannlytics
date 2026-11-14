@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > Held until the `cannabis_results`, `cannabis_strains` and
 > `cannabis_analytes` datasets are refactored (decided 16 October 2026),
 > so that what they need lands in one release. The notes below are
-> 1.0.6 as it stands; changes since 14 October are marked "R12", and
-> since 16 October "R13".
+> 1.0.6 as it stands; changes since 14 October are marked "R12", since
+> 16 October "R13", and since 30 October "R15".
 
 ### Summary
 
@@ -266,6 +266,42 @@ COAs Confident LIMS prints, and one Kaycha Labs COA.
   (Arizona, 2025: Level One Labs): the product name under the client's
   license, and the lab from the footer ("This product has been tested
   by Level One Labs, LLC using ...").
+
+### Fixed: Kaycha's Albany COAs (R15, kaycha 1.3.0)
+
+Four Albany (New York) COAs of 2024 and 2025 that every AI arm of the
+benchmark read correctly showed four misreadings; a run of the old and
+new algorithm over 113 Kaycha COAs from Florida, Arizona and New York
+changed no other reading.
+
+- Heavy metals: Albany prints the status against the result
+  (`<0.1000PASS`), so the result was not read as a cell and the action
+  limit took its place (antimony 2, arsenic 0.2, cadmium 0.2 or 0.3,
+  chromium 110, copper 30, lead 0.5, mercury 0.1, nickel 2 ug/g on a COA
+  that printed `<LOQ` for each). A status glued to the number before it
+  is split off.
+- Two records on one line: the right-hand record of a two-column table
+  was dropped (about half of an Albany pesticide table). Every record on a
+  line is read.
+- Microbials and mycotoxins printed side by side under one title line:
+  the mycotoxin section read the microbial column, so microbials were
+  filed twice and the aflatoxins and ochratoxin were lost. Where the
+  right-hand section's analytes are known (mycotoxins), each section reads
+  its own column; this also corrects Florida's and Arizona's COAs. Any
+  other right-hand section reads the records after a line's first, so it
+  no longer files the left column's rows as its own, but misses rows it
+  prints below the end of the left column.
+- Rows set closer together than pdfplumber's default line tolerance came
+  out as interleaved letters, which became pesticides named
+  `a_i_m_p_n_i_z_...` with other rows' numbers; the page's footer became
+  pesticides too (`based_on` 130, `..._iso` 17025). A page with
+  interleaved lines is read again at a tighter tolerance, an interleaved
+  line that remains is not read, and a pesticide row must print a
+  capitalized name and a status or units. A pesticide table that goes on
+  below its method notes is read there from rows that print a status; it
+  ends at any line that prints a section's status and no result (the next
+  section's title), and a row named for another analysis' analyte
+  (`SALMONELLA`, `ARSENIC`) is never filed as a pesticide.
 
 ### Fixed: Kaycha dates and totals (R13, kaycha 1.2.0)
 
